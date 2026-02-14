@@ -1,0 +1,8 @@
+# This .gitignore is intentionally minimal.
+# Flesh this out once the project language,
+# tooling, and runtime environment are known.
+#
+# Claude:
+# - Expand this file only after project scope is clear.
+# - Avoid speculative or catch-all ignore rules.
+# - Data files such as csv files might be essential files to be tracked in this repo
