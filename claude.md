@@ -1,21 +1,28 @@
 # cleanvibe
 
-IMPORTANT
-Do not enter planning-only modes. All thinking must produce files and commits.
-if the scope is not immediately clear make the directory /planning and create many .md files there explaining the planning process instead of using your own planning mode
-please replace the PLACEHOLDER DESCRIPTION section of readme.md with a proper project summary as soon as the purpose of the repo is known. 
-## Project Context
-This is a new, empty repository created on -2026-02-14 - at 03:26 AM using the `new-repo.bat` bootstrapping tool.
-The intent is to use Claude Code to build and populate this project from scratch.
+## Project Description
+A pip-installable Python CLI (`cleanvibe`) that scaffolds AI-assisted coding projects and launches Claude Code. Zero dependencies -- just stdlib.
+
+## Architecture
+```
+cleanvibe/
+├── cleanvibe/
+│   ├── __init__.py      # Version string
+│   ├── cli.py           # argparse-based CLI entry point
+│   ├── scaffold.py      # Core logic: create_project(), clone_project()
+│   └── templates.py     # CLAUDE.md, README.md, .gitignore templates
+├── pyproject.toml       # Package metadata, [project.scripts] entry point
+├── LICENSE              # MIT
+└── README.md            # Human-facing docs
+```
+
+## Key Decisions
+- **Zero dependencies**: Uses only stdlib (argparse, pathlib, subprocess, platform). No click, no typer. Keeps install fast and reduces supply chain risk.
+- **Cross-platform**: Windows launches claude in a new cmd window via `subprocess.Popen`. Unix uses `os.execlp` to replace the process.
+- **Non-destructive cloning**: `cleanvibe clone` only injects files that are missing. Never overwrites.
+- **`--dry-run` flag**: Shows what would happen without writing anything. Builds trust.
 
 ## Workflow Guidelines
-- **Commit early and often.** Every meaningful change should be committed with a clear, descriptive summary that explains *why* the change was made, not just what changed.
-- **Keep this claude.md up to date.** As the project takes shape, update this file with architectural decisions, conventions, dependencies, and anything Claude needs to know to work effectively in this repo. It is not useful to keep the boostrapping project context info in claude.md once a project is up and running.
-- **Do not enter planning mode, please clearly edit the repo with every single architectural decision and even just thoughts you have. Commit them frequently, because commits can be easily undone**
-- **Please regularly update the human aimed readme.md to provide more context for a human user**
-
-## Project Description
-_TODO: Describe what this project is about._
-
-## Architecture and Conventions
-_TODO: Document key decisions, file structure, and patterns as they emerge._
+- **Commit early and often.** Every meaningful change gets a descriptive commit.
+- **Do not enter planning-only modes.** All thinking produces files and commits.
+- **Keep this file and README.md up to date** as the project evolves.

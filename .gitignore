@@ -1,8 +1,27 @@
-# This .gitignore is intentionally minimal.
-# Flesh this out once the project language,
-# tooling, and runtime environment are known.
-#
-# Claude:
-# - Expand this file only after project scope is clear.
-# - Avoid speculative or catch-all ignore rules.
-# - Data files such as csv files might be essential files to be tracked in this repo
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.env.local
