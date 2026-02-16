@@ -8,7 +8,11 @@
       "Bash(gh release create:*)",
       "Bash(git rm:*)",
       "Bash(gh run list:*)",
-      "Bash(gh run:*)"
+      "Bash(gh run:*)",
+      "Bash(cleanvibe --version:*)",
+      "Bash(cleanvibe --help:*)",
+      "Bash(cleanvibe new:*)",
+      "Bash(cleanvibe clone:*)"
     ]
   }
 }
