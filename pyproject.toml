@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cleanvibe"
-version = "0.1.2"
+version = "0.1.3"
 description = "A workflow accelerator that scaffolds AI-assisted coding projects with opinionated documentation and launches Claude Code."
 readme = "README.md"
 license = "MIT"

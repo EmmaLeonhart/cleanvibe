@@ -102,8 +102,10 @@ def _launch_claude(path: Path) -> None:
     system = platform.system()
     try:
         if system == "Windows":
+            subprocess.Popen(["explorer", str(path)])
             subprocess.Popen(
-                ["cmd", "/k", f'cd /d "{path}" && claude'],
+                ["cmd", "/k", "claude"],
+                cwd=str(path),
                 creationflags=subprocess.CREATE_NEW_CONSOLE,
             )
         else:
