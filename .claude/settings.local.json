@@ -12,7 +12,8 @@
       "Bash(cleanvibe --version:*)",
       "Bash(cleanvibe --help:*)",
       "Bash(cleanvibe new:*)",
-      "Bash(cleanvibe clone:*)"
+      "Bash(cleanvibe clone:*)",
+      "Bash(pip show:*)"
     ]
   }
 }
