@@ -17,11 +17,15 @@ def create_project(path: Path, dry_run: bool = False, no_claude: bool = False) -
     """Create a new project directory with opinionated scaffolding."""
     project_name = path.name
 
+    is_windows = platform.system() == "Windows"
+
     if dry_run:
         print(f"[dry-run] Would create directory: {path}")
         print(f"[dry-run] Would write: {path / 'CLAUDE.md'}")
         print(f"[dry-run] Would write: {path / 'README.md'}")
         print(f"[dry-run] Would write: {path / '.gitignore'}")
+        if is_windows:
+            print(f"[dry-run] Would write: {path / 'runclaude.bat'}")
         print(f"[dry-run] Would run: git init")
         print(f"[dry-run] Would run: git add . && git commit")
         if not no_claude:
@@ -34,6 +38,9 @@ def create_project(path: Path, dry_run: bool = False, no_claude: bool = False) -
     _write(path / "README.md", templates.readme_md(project_name))
     _write(path / ".gitignore", templates.GITIGNORE)
 
+    if is_windows:
+        _write(path / "runclaude.bat", templates.RUNCLAUDE_BAT)
+
     _git_init(path)
 
     if not no_claude:
@@ -42,9 +49,13 @@ def create_project(path: Path, dry_run: bool = False, no_claude: bool = False) -
 
 def clone_project(repo: str, path: Path, dry_run: bool = False, no_claude: bool = False) -> None:
     """Clone a repo and inject scaffolding if missing."""
+    is_windows = platform.system() == "Windows"
+
     if dry_run:
         print(f"[dry-run] Would run: git clone {repo} {path}")
         print(f"[dry-run] Would check for missing CLAUDE.md / README.md / .gitignore")
+        if is_windows:
+            print(f"[dry-run] Would check for missing runclaude.bat")
         print(f"[dry-run] Would inject any missing files")
         if not no_claude:
             print(f"[dry-run] Would launch: claude")
@@ -72,6 +83,12 @@ def clone_project(repo: str, path: Path, dry_run: bool = False, no_claude: bool 
     if not gitignore.exists():
         _write(gitignore, templates.GITIGNORE)
         print(f"  Injected .gitignore (was missing)")
+
+    if is_windows:
+        runclaude = path / "runclaude.bat"
+        if not runclaude.exists():
+            _write(runclaude, templates.RUNCLAUDE_BAT)
+            print(f"  Injected runclaude.bat (was missing)")
 
     if not no_claude:
         _launch_claude(path)

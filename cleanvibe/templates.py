@@ -18,6 +18,11 @@ def claude_md(project_name: str) -> str:
 - **Keep this file up to date.** As the project takes shape, record architectural decisions, conventions, and anything needed to work effectively in this repo.
 - **Update README.md regularly.** It should always reflect the current state of the project for human readers.
 
+## Testing
+- **Write unit tests early.** As soon as there is testable logic, create a test file. Use `pytest` for Python projects or the appropriate test framework for the language in use.
+- **Set up CI as soon as tests exist.** Create a `.github/workflows/ci.yml` GitHub Actions workflow that runs the test suite on push and pull request. Keep the workflow simple — install dependencies and run tests.
+- **Keep tests passing.** Do not commit code that breaks existing tests. If a change requires updating tests, update them in the same commit.
+
 ## Project Description
 _TODO: Describe what this project is about._
 
@@ -47,6 +52,12 @@ with AI-assisted coding via Claude Code.
 cd {project_name}
 claude
 ```
+"""
+
+
+RUNCLAUDE_BAT = """@echo off
+cd /d "%~dp0"
+claude
 """
 
 
