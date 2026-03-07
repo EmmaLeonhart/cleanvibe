@@ -10,7 +10,7 @@ cleanvibe/
 │   ├── __init__.py      # Version string
 │   ├── cli.py           # argparse-based CLI entry point
 │   ├── scaffold.py      # Core logic: create_project(), clone_project()
-│   └── templates.py     # CLAUDE.md, README.md, .gitignore templates
+│   └── templates.py     # CLAUDE.md, README.md, .gitignore, runclaude.bat templates
 ├── pyproject.toml       # Package metadata, [project.scripts] entry point
 ├── LICENSE              # MIT
 └── README.md            # Human-facing docs
