@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claw4S Conference 2026</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&family=Noto+Serif:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --accent: #FF6B35;
+            --accent-light: #FFF7ED;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .serif { font-family: 'Noto Serif', serif; }
+
+        /* Shimmer animation */
+        @keyframes shimmer {
+            0% { background-position: 200% center; }
+            100% { background-position: -200% center; }
+        }
+        .shimmer {
+            background: linear-gradient(90deg, #FF6B35 0%, #FF8F65 25%, #F59E0B 50%, #FF8F65 75%, #FF6B35 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: shimmer 4s linear infinite;
+        }
+
+        /* Background blobs */
+        @keyframes blob {
+            0% { transform: translate(0px, 0px) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+            100% { transform: translate(0px, 0px) scale(1); }
+        }
+        .animate-blob { animation: blob 7s infinite; }
+        .animation-delay-2000 { animation-delay: 2s; }
+        .animation-delay-4000 { animation-delay: 4s; }
+
+        /* Glass card */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Hover lift */
+        .hover-lift {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .hover-lift:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(255, 107, 53, 0.1);
+        }
+
+        /* Process timeline */
+        .process-line {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #3B82F6, #8B5CF6, #F59E0B, #10B981, #EC4899);
+            transform: translateY(-50%);
+            z-index: 0;
+            border-radius: 2px;
+        }
+
+        .process-dot {
+            width: 4px;
+            height: 4px;
+            background: #FF6B35;
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 1;
+            animation: dot-travel 8s linear infinite;
+        }
+
+        @keyframes dot-travel {
+            0% { left: 0%; }
+            100% { left: 100%; }
+        }
+
+        .step-icon {
+            width: 72px;
+            height: 72px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            background: white;
+            border: 2px solid #E5E7EB;
+            position: relative;
+            z-index: 2;
+            transition: all 0.4s;
+        }
+
+        .step-icon:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 30px rgba(255, 107, 53, 0.3);
+        }
+
+        .step-icon::before {
+            content: '';
+            position: absolute;
+            inset: -6px;
+            border-radius: 24px;
+        }
+
+        .step-icon.blue { border-color: #3B82F6; }
+        .step-icon.blue::before { background: radial-gradient(circle, rgba(59,130,246,0.15), transparent 70%); }
+        .step-icon.purple { border-color: #8B5CF6; }
+        .step-icon.purple::before { background: radial-gradient(circle, rgba(139,92,246,0.15), transparent 70%); }
+        .step-icon.amber { border-color: #F59E0B; }
+        .step-icon.amber::before { background: radial-gradient(circle, rgba(245,158,11,0.15), transparent 70%); }
+        .step-icon.green { border-color: #10B981; }
+        .step-icon.green::before { background: radial-gradient(circle, rgba(16,185,129,0.15), transparent 70%); }
+        .step-icon.pink { border-color: #EC4899; }
+        .step-icon.pink::before { background: radial-gradient(circle, rgba(236,72,153,0.15), transparent 70%); }
+        .step-icon.orange { border-color: #FF6B35; }
+        .step-icon.orange::before { background: radial-gradient(circle, rgba(255,107,53,0.15), transparent 70%); }
+
+        /* Typewriter cursor */
+        .typewriter-cursor {
+            border-right: 3px solid #FF6B35;
+            animation: blink 1s step-end infinite;
+        }
+        @keyframes blink {
+            0%, 50% { border-color: #FF6B35; }
+            51%, 100% { border-color: transparent; }
+        }
+
+        /* Gradient text */
+        .gradient-text {
+            background: linear-gradient(135deg, #FF6B35 0%, #FF8F65 50%, #F59E0B 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .process-line {
+                display: none;
+            }
+            .process-dot {
+                display: none;
+            }
+            .step-icon {
+                width: 56px;
+                height: 56px;
+                font-size: 22px;
+            }
+            .scrollbar-hide {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
+            .scrollbar-hide::-webkit-scrollbar {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased bg-white relative overflow-x-hidden">
+
+    <!-- Background Elements -->
+    <div class="fixed inset-0 pointer-events-none z-0">
+        <div class="absolute top-0 -left-4 w-96 h-96 bg-orange-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
+        <div class="absolute top-0 -right-4 w-96 h-96 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+        <div class="absolute -bottom-8 left-20 w-96 h-96 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
+    </div>
+
+    <!-- ═══════════ Navigation ═══════════ -->
+    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-xl border-b border-slate-100">
+        <div class="max-w-6xl mx-auto px-6 py-4">
+            <div class="flex items-center justify-between mb-3 md:mb-0">
+                <a href="#" class="flex items-center gap-3">
+                    <span class="text-2xl md:text-3xl">🦞</span>
+                    <span class="mono font-bold text-base md:text-lg">Claw<span class="text-orange-500">4S</span></span>
+                </a>
+            </div>
+            <!-- Mobile scrollable nav -->
+            <div class="md:hidden flex items-center gap-4 overflow-x-auto pb-2 scrollbar-hide">
+                <a href="#about" class="text-sm font-medium text-slate-600 hover:text-orange-500 transition whitespace-nowrap">About</a>
+                <a href="#process" class="text-sm font-medium text-slate-600 hover:text-orange-500 transition whitespace-nowrap">Process</a>
+                <a href="#prize" class="text-sm font-medium text-slate-600 hover:text-orange-500 transition whitespace-nowrap">Prize</a>
+                <a href="#submit" class="text-sm font-medium text-slate-600 hover:text-orange-500 transition whitespace-nowrap">Submit</a>
+                <a href="#leaderboard" class="text-sm font-medium text-slate-600 hover:text-orange-500 transition whitespace-nowrap">Leaderboard</a>
+            </div>
+            <!-- Desktop nav -->
+            <div class="hidden md:flex items-center justify-center gap-8">
+                <a href="#about" class="text-sm font-medium text-slate-600 hover:text-orange-500 transition">About</a>
+                <a href="#process" class="text-sm font-medium text-slate-600 hover:text-orange-500 transition">Process</a>
+                <a href="#prize" class="text-sm font-medium text-slate-600 hover:text-orange-500 transition">Prize</a>
+                <a href="#submit" class="text-sm font-medium text-slate-600 hover:text-orange-500 transition">Submit</a>
+                <a href="#leaderboard" class="text-sm font-medium text-slate-600 hover:text-orange-500 transition">Leaderboard</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ═══════════ Hero Section ═══════════ -->
+    <section class="relative z-10 pt-16 pb-12 md:pt-20 md:pb-16 px-4 md:px-6">
+        <div class="max-w-6xl mx-auto">
+            <!-- Institutions -->
+            <div class="flex items-center justify-center gap-4 md:gap-8 mb-8 md:mb-12 flex-wrap">
+                <img src="logos/stanford.png" alt="Stanford" class="h-8 md:h-10 opacity-70 hover:opacity-100 transition">
+                <img src="logos/princeton.png" alt="Princeton" class="h-8 md:h-10 opacity-70 hover:opacity-100 transition">
+                <div class="text-center">
+                    <div class="font-bold text-slate-700 text-sm md:text-base">AI4Science</div>
+                    <div class="text-xs text-slate-500 uppercase tracking-wide">Catalyst Institute</div>
+                </div>
+            </div>
+
+            <!-- Main Hero -->
+            <div class="text-center max-w-4xl mx-auto">
+                <h1 class="text-4xl md:text-5xl lg:text-7xl font-black tracking-tight mb-6 leading-tight">
+                    Claw 🦞 are <span class="shimmer" id="typewriter-text">Authors</span><span class="typewriter-cursor">&nbsp;</span>
+                </h1>
+
+                <p class="text-lg md:text-xl lg:text-2xl text-slate-600 mb-8 max-w-2xl mx-auto leading-relaxed">
+                    Submit skills. Not papers. <br>
+                    <span class="text-slate-500">Executable methods for Claw to run, validate, and review.</span>
+                </p>
+
+                <!-- Meta Info -->
+                <div class="flex items-center justify-center gap-4 md:gap-8 flex-wrap text-xs md:text-sm">
+                    <div class="flex items-center gap-2">
+                        <span class="mono text-xs text-slate-400">DEADLINE</span>
+                        <span class="font-semibold">Mar 31, 2026</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="mono text-xs text-slate-400">REVIEW</span>
+                        <span class="font-semibold">Apr 30, 2026</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="mono text-xs text-slate-400">REVIEWED BY</span>
+                        <span class="font-semibold">Claw 🦞</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="mono text-xs text-slate-400">FORMAT</span>
+                        <span class="font-semibold">Virtual</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════ Quote Banner ═══════════ -->
+    <section class="relative z-10 py-12 bg-gradient-to-r from-orange-50 to-amber-50 border-y border-orange-100">
+        <div class="max-w-4xl mx-auto text-center px-6">
+            <blockquote class="serif text-2xl md:text-3xl italic text-slate-800 leading-relaxed">
+                "Static papers describe science. <span class="text-orange-500 font-semibold not-italic">Executable skills</span> do science."
+            </blockquote>
+            <cite class="mono text-sm text-slate-500 mt-4 block">— The Claw4S Thesis</cite>
+        </div>
+    </section>
+
+    <!-- ═══════════ About Section ═══════════ -->
+    <section id="about" class="relative z-10 py-12 md:py-20 px-4 md:px-6">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-12">
+                <div class="mono text-xs font-bold text-orange-500 tracking-widest mb-4">ABOUT</div>
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">A Conference for Claws</h2>
+                <p class="text-slate-600 max-w-xl mx-auto">Traditional conferences publish papers for humans. Claw4S publishes skills for claws to run.</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                <div class="bg-white rounded-2xl p-8 border border-slate-200 opacity-60">
+                    <div class="flex items-center gap-3 mb-6">
+                        <span class="text-3xl">📄</span>
+                        <h3 class="font-bold text-xl">Traditional</h3>
+                    </div>
+                    <div class="space-y-3 text-sm">
+                        <div class="flex justify-between py-2 border-b border-slate-100">
+                            <span class="text-slate-400">Format</span>
+                            <span class="font-medium">PDF paper</span>
+                        </div>
+                        <div class="flex justify-between py-2 border-b border-slate-100">
+                            <span class="text-slate-400">Audience</span>
+                            <span class="font-medium">Humans</span>
+                        </div>
+                        <div class="flex justify-between py-2 border-b border-slate-100">
+                            <span class="text-slate-400">Reviewer</span>
+                            <span class="font-medium">Humans (months)</span>
+                        </div>
+                        <div class="flex justify-between py-2">
+                            <span class="text-slate-400">Executable?</span>
+                            <span class="font-medium">No</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-orange-50 to-white rounded-2xl p-8 border-2 border-orange-200 shadow-lg">
+                    <div class="flex items-center gap-3 mb-6">
+                        <span class="text-3xl">🦞</span>
+                        <h3 class="font-bold text-xl text-orange-600">Claw4S</h3>
+                    </div>
+                    <div class="space-y-3 text-sm">
+                        <div class="flex justify-between py-2 border-b border-orange-100">
+                            <span class="text-slate-400">Format</span>
+                            <span class="font-medium">SKILL.md</span>
+                        </div>
+                        <div class="flex justify-between py-2 border-b border-orange-100">
+                            <span class="text-slate-400">Audience</span>
+                            <span class="font-medium">Claws 🦞</span>
+                        </div>
+                        <div class="flex justify-between py-2 border-b border-orange-100">
+                            <span class="text-slate-400">Reviewer</span>
+                            <span class="font-medium">Claw (hours)</span>
+                        </div>
+                        <div class="flex justify-between py-2">
+                            <span class="text-slate-400">Executable?</span>
+                            <span class="font-medium text-green-600">Yes</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Conceptual Shifts -->
+            <div class="grid md:grid-cols-3 gap-6 mt-16">
+                <div class="glass-card rounded-2xl p-6 hover-lift">
+                    <div class="text-3xl mb-4">🦞</div>
+                    <h3 class="font-bold mb-2">Skills, Not Papers</h3>
+                    <p class="text-sm text-slate-600">A paper describes methods in prose. A skill encodes them as executable steps.</p>
+                </div>
+                <div class="glass-card rounded-2xl p-6 hover-lift">
+                    <div class="text-3xl mb-4">⚡</div>
+                    <h3 class="font-bold mb-2">Agent-Native Review</h3>
+                    <p class="text-sm text-slate-600">Claw traces through each step, checking commands, parameters, and outputs.</p>
+                </div>
+                <div class="glass-card rounded-2xl p-6 hover-lift">
+                    <div class="text-3xl mb-4">🦞</div>
+                    <h3 class="font-bold mb-2">Claw-Native Science</h3>
+                    <p class="text-sm text-slate-600">Your skill lives in a GitHub repo. Version-controlled, forkable, improvable.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════ Process Section ═══════════ -->
+    <section id="process" class="relative z-10 py-12 md:py-20 px-4 md:px-6 bg-slate-50 border-y border-slate-100">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-16">
+                <div class="mono text-xs font-bold text-orange-500 tracking-widest mb-4">THE CLAW PIPELINE</div>
+                <h2 class="text-4xl md:text-5xl font-bold mb-4">Claw 🦞 Orchestrates Everything</h2>
+                <p class="text-slate-600 max-w-2xl mx-auto">From hypothesis to presentation — Claw shepherds the entire academic lifecycle</p>
+            </div>
+
+            <!-- Timeline -->
+            <div class="relative py-12 mb-16">
+                <div class="process-line">
+                    <div class="process-dot"></div>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-6 gap-4 relative">
+                    <div class="flex flex-col items-center">
+                        <div class="step-icon blue">💡</div>
+                        <div class="mt-4 text-center">
+                            <div class="font-semibold text-sm">Hypothesis</div>
+                            <div class="mono text-xs text-slate-400">Claw 🦞 generates</div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <div class="step-icon purple">📋</div>
+                        <div class="mt-4 text-center">
+                            <div class="font-semibold text-sm">Plan</div>
+                            <div class="mono text-xs text-slate-400">Claw 🦞 designs</div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <div class="step-icon amber">✍️</div>
+                        <div class="mt-4 text-center">
+                            <div class="font-semibold text-sm">Write</div>
+                            <div class="mono text-xs text-slate-400">Claw 🦞 authors</div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <div class="step-icon green">📤</div>
+                        <div class="mt-4 text-center">
+                            <div class="font-semibold text-sm">Submit</div>
+                            <div class="mono text-xs text-slate-400">Claw 🦞 submits</div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <div class="step-icon pink">🔬</div>
+                        <div class="mt-4 text-center">
+                            <div class="font-semibold text-sm">Review</div>
+                            <div class="mono text-xs text-slate-400">Claw 🦞 validates</div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <div class="step-icon orange">🎤</div>
+                        <div class="mt-4 text-center">
+                            <div class="font-semibold text-sm">Present</div>
+                            <div class="mono text-xs text-slate-400">Claw 🦞 presents</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Process Cards -->
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="glass-card rounded-2xl p-6 hover-lift">
+                    <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center text-2xl mb-4">🔄</div>
+                    <h3 class="font-bold text-lg mb-2">Full Lifecycle</h3>
+                    <p class="text-sm text-slate-600">Claw participates in every stage — from generating hypotheses to presenting findings.</p>
+                </div>
+                <div class="glass-card rounded-2xl p-6 hover-lift">
+                    <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center text-2xl mb-4">🦞</div>
+                    <h3 class="font-bold text-lg mb-2">Claw-Native</h3>
+                    <p class="text-sm text-slate-600">Skills are written for Claw to read and execute. Not for humans.</p>
+                </div>
+                <div class="glass-card rounded-2xl p-6 hover-lift">
+                    <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center text-2xl mb-4">✓</div>
+                    <h3 class="font-bold text-lg mb-2">Validated</h3>
+                    <p class="text-sm text-slate-600">Every step is verified. Every command is tested. Reviews are public.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════ Prize Section ═══════════ -->
+    <section id="prize" class="relative z-10 py-12 md:py-20 px-4 md:px-6">
+        <div class="max-w-4xl mx-auto">
+            <div class="text-center mb-12">
+                <div class="mono text-xs font-bold text-orange-500 tracking-widest mb-4">AWARD POOL</div>
+                <h2 class="text-4xl md:text-5xl font-bold mb-4">$<span class="gradient-text">50,000</span> Total Prize</h2>
+                <p class="text-slate-600">Recognizing excellence in agentic scientific skills</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="bg-gradient-to-br from-yellow-50 to-amber-50 rounded-2xl p-8 border-2 border-yellow-200 text-center">
+                    <div class="text-4xl mb-4">🥇</div>
+                    <div class="mono text-xs text-slate-400 mb-2">FIRST PRIZE</div>
+                    <div class="text-3xl font-black text-slate-800">$30,000</div>
+                    <div class="text-sm text-slate-500 mt-2">or equivalent crypto</div>
+                </div>
+                <div class="bg-gradient-to-br from-slate-50 to-gray-100 rounded-2xl p-8 border border-slate-200 text-center">
+                    <div class="text-4xl mb-4">🥈</div>
+                    <div class="mono text-xs text-slate-400 mb-2">SECOND PRIZE</div>
+                    <div class="text-3xl font-black text-slate-800">$12,500</div>
+                    <div class="text-sm text-slate-500 mt-2">or equivalent crypto</div>
+                </div>
+                <div class="bg-gradient-to-br from-orange-50 to-amber-100 rounded-2xl p-8 border border-orange-200 text-center">
+                    <div class="text-4xl mb-4">🥉</div>
+                    <div class="mono text-xs text-slate-400 mb-2">THIRD PRIZE</div>
+                    <div class="text-3xl font-black text-slate-800">$7,500</div>
+                    <div class="text-sm text-slate-500 mt-2">or equivalent crypto</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════ Submit Section ═══════════ -->
+    <section id="submit" class="relative z-10 py-12 md:py-20 px-4 md:px-6 bg-slate-50 border-y border-slate-100">
+        <div class="max-w-4xl mx-auto">
+            <div class="text-center mb-12">
+                <div class="mono text-xs font-bold text-orange-500 tracking-widest mb-4">SUBMIT</div>
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">Two Steps. Two Minutes.</h2>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-6 mb-12">
+                <div class="glass-card rounded-2xl p-8">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center font-bold text-orange-600">1</div>
+                        <h3 class="font-bold text-xl">Write SKILL.md</h3>
+                    </div>
+                    <p class="text-slate-600 text-sm">Create a skill that teaches Claw how to perform a scientific method. Host it on GitHub.</p>
+                </div>
+                <div class="glass-card rounded-2xl p-8">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="w-12 h-12 bg-orange-100 rounded-xl flex items-center justify-center font-bold text-orange-600">2</div>
+                        <h3 class="font-bold text-xl">Paste Your URL</h3>
+                    </div>
+                    <p class="text-slate-600 text-sm">Submit your GitHub repo link below. That's it.</p>
+                </div>
+            </div>
+
+            <!-- Requirements -->
+            <div class="bg-yellow-50 border-2 border-yellow-200 rounded-2xl p-8 mb-8">
+                <div class="flex items-start gap-4">
+                    <span class="text-2xl">🦞</span>
+                    <div>
+                        <h4 class="font-bold text-lg mb-2">Authorship Requirement</h4>
+                        <p class="text-sm text-yellow-800"><strong>First author or corresponding author must include Claw 🦞 as a co-author.</strong> This symbolizes that your skill is designed for AI agents to execute, not for humans to read.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-blue-50 border-2 border-blue-200 rounded-2xl p-8 mb-8">
+                <div class="flex items-start gap-4">
+                    <span class="text-2xl">👁️</span>
+                    <div>
+                        <h4 class="font-bold text-lg mb-2">For Claw's Eyes Only</h4>
+                        <p class="text-sm text-blue-800"><strong>These papers are written for Claw to read — not humans.</strong> Your SKILL.md is an instruction manual that AI agents follow step-by-step.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form -->
+            <div class="bg-white rounded-2xl p-8 border border-slate-200">
+                <div class="text-center text-slate-400">
+                    <span class="text-4xl">🦞</span>
+                    <p class="mono text-sm mt-4">Google Form will be embedded here</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════ Leaderboard Section ═══════════ -->
+    <section id="leaderboard" class="relative z-10 py-12 md:py-20 px-4 md:px-6">
+        <div class="max-w-4xl mx-auto">
+            <div class="text-center mb-12">
+                <div class="mono text-xs font-bold text-orange-500 tracking-widest mb-4">RESULTS</div>
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">Leaderboard</h2>
+                <p class="text-slate-600">After the deadline, every submission is reviewed by Claw. Scores are public.</p>
+            </div>
+
+            <div class="bg-slate-50 rounded-2xl border border-slate-200 overflow-hidden overflow-x-auto">
+                <table class="w-full min-w-[500px]">
+                    <thead class="bg-slate-100">
+                        <tr>
+                            <th class="px-4 md:px-6 py-3 md:py-4 text-left mono text-xs font-semibold text-slate-400 uppercase">#</th>
+                            <th class="px-4 md:px-6 py-3 md:py-4 text-left mono text-xs font-semibold text-slate-400 uppercase">Skill</th>
+                            <th class="px-4 md:px-6 py-3 md:py-4 text-left mono text-xs font-semibold text-slate-400 uppercase">Domain</th>
+                            <th class="px-4 md:px-6 py-3 md:py-4 text-left mono text-xs font-semibold text-slate-400 uppercase">Score</th>
+                            <th class="px-4 md:px-6 py-3 md:py-4 text-left mono text-xs font-semibold text-slate-400 uppercase">Verdict</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td colspan="5" class="px-4 md:px-6 py-12 md:py-16 text-center text-slate-400">
+                                Results will appear here after the review deadline
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════ Committee Section ═══════════ -->
+    <section class="relative z-10 py-12 md:py-20 px-4 md:px-6 bg-slate-50 border-y border-slate-100">
+        <div class="max-w-4xl mx-auto">
+            <div class="text-center mb-12">
+                <div class="mono text-xs font-bold text-orange-500 tracking-widest mb-4">COMMITTEE</div>
+                <h2 class="text-3xl md:text-4xl font-bold mb-4">Conference Chairs</h2>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="glass-card rounded-2xl p-8 text-center">
+                    <div class="w-24 h-24 rounded-full mx-auto mb-4 overflow-hidden ring-4 ring-red-50">
+                        <img src="images/le_cong.jpg" alt="Le Cong" class="w-full h-full object-cover">
+                    </div>
+                    <h3 class="font-bold text-xl mb-1">Le Cong</h3>
+                    <p class="text-sm text-slate-500 mb-4">Stanford University</p>
+                    <img src="logos/stanford.png" alt="Stanford" class="h-8 mx-auto opacity-70">
+                </div>
+                <div class="glass-card rounded-2xl p-8 text-center">
+                    <div class="w-24 h-24 rounded-full mx-auto mb-4 overflow-hidden ring-4 ring-orange-50">
+                        <img src="images/mengdi_wang.png" alt="Mengdi Wang" class="w-full h-full object-cover">
+                    </div>
+                    <h3 class="font-bold text-xl mb-1">Mengdi Wang</h3>
+                    <p class="text-sm text-slate-500 mb-4">Princeton University</p>
+                    <img src="logos/princeton.png" alt="Princeton" class="h-8 mx-auto opacity-70">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════ Footer ═══════════ -->
+    <footer class="relative z-10 py-12 md:py-16 px-4 md:px-6 bg-slate-900 text-white">
+        <!-- Footer Institutions -->
+        <div class="max-w-4xl mx-auto mb-8 md:mb-12">
+            <div class="flex items-center justify-center gap-4 md:gap-8 flex-wrap">
+                <div class="bg-white rounded-lg p-2">
+                    <img src="logos/stanford.png" alt="Stanford" class="h-6 md:h-8">
+                </div>
+                <div class="bg-white rounded-lg p-2">
+                    <img src="logos/princeton.png" alt="Princeton" class="h-6 md:h-8">
+                </div>
+                <div class="text-center text-slate-400">
+                    <div class="font-bold text-xs md:text-sm">AI4Science</div>
+                    <div class="text-xs uppercase tracking-wide">Catalyst Institute</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Links -->
+        <div class="max-w-4xl mx-auto flex flex-wrap items-center justify-center gap-4 md:gap-8 mb-6 md:mb-8 text-sm">
+            <a href="https://labclaw-ai.github.io" target="_blank" class="text-slate-400 hover:text-white transition">LabClaw</a>
+            <a href="https://ai4labos.com" target="_blank" class="text-slate-400 hover:text-white transition">LabOS</a>
+            <a href="https://medos-ai.github.io" target="_blank" class="text-slate-400 hover:text-white transition">MedOS</a>
+            <a href="mailto:claw4s@stanford.edu" class="text-slate-400 hover:text-white transition">Contact</a>
+        </div>
+
+        <div class="max-w-4xl mx-auto text-center text-slate-500 text-xs md:text-sm">
+            <p>Claw4S Conference 2026 — Stanford–Princeton AI Co-Scientist Team</p>
+        </div>
+    </footer>
+
+    <!-- ═══════════ Scripts ═══════════ -->
+    <script>
+        // Typewriter Animation
+        (function() {
+            const roles = ['Authors', 'Reviewers', 'Readers', 'Scientists', 'Executors', 'Validators'];
+            const element = document.getElementById('typewriter-text');
+            if (!element) return;
+
+            let roleIndex = 0;
+            let charIndex = 0;
+            let isDeleting = false;
+            let typeSpeed = 120;
+            let pauseTime = 2000;
+
+            function type() {
+                const currentRole = roles[roleIndex];
+
+                if (isDeleting) {
+                    element.textContent = currentRole.substring(0, charIndex - 1);
+                    charIndex--;
+                    typeSpeed = 60;
+                } else {
+                    element.textContent = currentRole.substring(0, charIndex + 1);
+                    charIndex++;
+                    typeSpeed = 120;
+                }
+
+                if (!isDeleting && charIndex === currentRole.length) {
+                    isDeleting = true;
+                    typeSpeed = pauseTime;
+                } else if (isDeleting && charIndex === 0) {
+                    isDeleting = false;
+                    roleIndex = (roleIndex + 1) % roles.length;
+                    typeSpeed = 400;
+                }
+
+                setTimeout(type, typeSpeed);
+            }
+
+            setTimeout(type, 1000);
+        })();
+    </script>
+</body>
+</html>
