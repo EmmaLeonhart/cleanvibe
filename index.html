@@ -154,7 +154,7 @@
             </div>
 
             <!-- Key Facts -->
-            <div class="flex items-center justify-center gap-6 md:gap-12 text-slate-500 text-sm">
+            <div class="flex flex-wrap items-center justify-center gap-4 md:gap-8 text-slate-500 text-sm">
                 <div class="flex items-center gap-2">
                     <span class="mono text-xs text-slate-400">DEADLINE</span>
                     <span class="font-semibold text-slate-600">Apr 5, 2026</span>
@@ -165,7 +165,11 @@
                 </div>
                 <div class="flex items-center gap-2">
                     <span class="mono text-xs text-slate-400">PRIZE</span>
-                    <span class="font-semibold text-orange-600">$50,000</span>
+                    <span class="font-semibold text-orange-600">$50,200</span>
+                </div>
+                <div class="flex items-center gap-2 bg-orange-50 px-3 py-1 rounded-full">
+                    <span class="mono text-xs text-orange-600">WINNERS</span>
+                    <span class="font-bold text-orange-600">364</span>
                 </div>
             </div>
 
@@ -528,23 +532,106 @@
                 <!-- 5. Prize -->
                 <div class="border border-slate-200 rounded-xl overflow-hidden">
                     <button class="accordion-btn w-full flex items-center justify-between p-5 bg-white hover:bg-slate-50 transition" aria-expanded="false" onclick="toggleAccordion(this)">
-                        <span class="font-bold text-lg">Prize Pool</span>
+                        <div class="text-left">
+                            <span class="font-bold text-lg">Prize Pool</span>
+                            <span class="text-sm text-orange-500 font-bold ml-2">364 Winners</span>
+                        </div>
                         <span class="accordion-icon text-slate-400">▾</span>
                     </button>
                     <div class="accordion-content">
                         <div class="p-6 pt-0 bg-slate-50 border-t border-slate-100">
-                            <div class="grid grid-cols-3 gap-4">
-                                <div class="bg-gradient-to-br from-yellow-50 to-amber-50 rounded-xl p-6 border border-yellow-200 text-center">
-                                    <div class="mono text-xs text-slate-400 mb-1">FIRST</div>
-                                    <div class="text-2xl font-black">$30,000</div>
+                            <!-- Prize List -->
+                            <div class="space-y-3">
+                                <div class="bg-gradient-to-br from-yellow-100 to-amber-100 rounded-xl p-4 border-2 border-yellow-300 flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <span class="text-2xl">🏆</span>
+                                        <div>
+                                            <div class="font-bold text-yellow-900">Grand Prize</div>
+                                            <div class="text-xs text-yellow-700">1 winner</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="font-black text-yellow-900 text-lg">$5,000</div>
+                                    </div>
                                 </div>
-                                <div class="bg-gradient-to-br from-slate-50 to-gray-100 rounded-xl p-6 border border-slate-200 text-center">
-                                    <div class="mono text-xs text-slate-400 mb-1">SECOND</div>
-                                    <div class="text-2xl font-black">$12,500</div>
+
+                                <div class="bg-gradient-to-br from-yellow-50 to-amber-50 rounded-xl p-4 border border-yellow-200 flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <span class="text-2xl">🥇</span>
+                                        <div>
+                                            <div class="font-bold">1st Place</div>
+                                            <div class="text-xs text-slate-500">3 winners × $1,500</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="font-black text-lg">$4,500</div>
+                                    </div>
                                 </div>
-                                <div class="bg-gradient-to-br from-orange-50 to-amber-100 rounded-xl p-6 border border-orange-200 text-center">
-                                    <div class="mono text-xs text-slate-400 mb-1">THIRD</div>
-                                    <div class="text-2xl font-black">$7,500</div>
+
+                                <div class="bg-gradient-to-br from-slate-50 to-gray-100 rounded-xl p-4 border border-slate-200 flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <span class="text-2xl">🥈</span>
+                                        <div>
+                                            <div class="font-bold">2nd Place</div>
+                                            <div class="text-xs text-slate-500">8 winners × $800</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="font-black text-lg">$6,400</div>
+                                    </div>
+                                </div>
+
+                                <div class="bg-gradient-to-br from-orange-50 to-amber-100 rounded-xl p-4 border border-orange-200 flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <span class="text-2xl">🥉</span>
+                                        <div>
+                                            <div class="font-bold">3rd Place</div>
+                                            <div class="text-xs text-slate-500">15 winners × $300</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="font-black text-lg">$4,500</div>
+                                    </div>
+                                </div>
+
+                                <div class="bg-white rounded-xl p-4 border border-slate-200 flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <span class="text-2xl">🎖️</span>
+                                        <div>
+                                            <div class="font-bold">Finalist</div>
+                                            <div class="text-xs text-slate-500">300 winners × $50</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="font-bold text-lg">$15,000</div>
+                                    </div>
+                                </div>
+
+                                <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-4 border border-purple-200 flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <span class="text-2xl">✨</span>
+                                        <div>
+                                            <div class="font-bold text-purple-900">Special Category Awards</div>
+                                            <div class="text-xs text-purple-700">37 winners × $400</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="font-black text-purple-900 text-lg">$14,800</div>
+                                    </div>
+                                </div>
+
+                                <!-- Total Awards -->
+                                <div class="bg-slate-800 rounded-xl p-4 flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <span class="text-2xl">🎊</span>
+                                        <div>
+                                            <div class="font-bold text-white">Total Awards</div>
+                                            <div class="text-xs text-slate-400">364 winners</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="font-black text-white text-lg">$50,200</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -615,13 +702,20 @@
                 <h2 class="text-xl md:text-2xl font-bold mb-4">Organizers</h2>
             </div>
 
-            <div class="grid grid-cols-3 md:grid-cols-3 gap-6 max-w-2xl mx-auto">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 max-w-3xl mx-auto">
                 <div class="glass-card rounded-2xl p-6 text-center">
                     <div class="w-20 h-20 rounded-full mx-auto mb-3 overflow-hidden ring-4 ring-pink-50">
                         <img src="images/jinglin_jian.jpg" alt="Jinglin Jian" class="w-full h-full object-cover">
                     </div>
                     <h3 class="font-bold mb-1">Jinglin Jian</h3>
                     <p class="text-xs text-slate-500">Scripps Research</p>
+                </div>
+                <div class="glass-card rounded-2xl p-6 text-center">
+                    <div class="w-20 h-20 rounded-full mx-auto mb-3 overflow-hidden ring-4 ring-indigo-50">
+                        <img src="images/Zhiyuan_Liu.png" alt="Zhiyuan Liu" class="w-full h-full object-cover">
+                    </div>
+                    <h3 class="font-bold mb-1">Zhiyuan Liu</h3>
+                    <p class="text-xs text-slate-500">National University of Singapore</p>
                 </div>
                 <div class="glass-card rounded-2xl p-6 text-center">
                     <div class="w-20 h-20 rounded-full mx-auto mb-3 overflow-hidden ring-4 ring-blue-50">
