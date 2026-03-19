@@ -67,31 +67,99 @@ def clone_project(repo: str, path: Path, dry_run: bool = False, no_claude: bool 
         sys.exit(1)
 
     project_name = path.name
+    _inject_scaffold(path, project_name, is_windows)
 
-    # Only inject files that are missing - don't overwrite existing ones
+    if not no_claude:
+        _launch_claude(path)
+
+
+def convert_project(path: Path, dry_run: bool = False, no_claude: bool = False) -> None:
+    """Convert an existing directory into a cleanvibe project.
+
+    If the directory is not a git repo, initializes git and makes two commits:
+      1. All existing files as-is
+      2. The injected cleanvibe scaffold files
+
+    If it's already a git repo, just injects missing scaffold files without committing.
+    """
+    is_windows = platform.system() == "Windows"
+    project_name = path.name
+    is_git_repo = (path / ".git").is_dir()
+
+    if dry_run:
+        if not is_git_repo:
+            print(f"[dry-run] Would run: git init")
+            print(f"[dry-run] Would commit all existing files (commit 1)")
+        print(f"[dry-run] Would check for missing CLAUDE.md / README.md / .gitignore")
+        if is_windows:
+            print(f"[dry-run] Would check for missing runclaude.bat")
+        if not is_git_repo:
+            print(f"[dry-run] Would commit scaffold files (commit 2)")
+        if not no_claude:
+            print(f"[dry-run] Would launch: claude")
+        return
+
+    if not is_git_repo:
+        # Commit 1: all existing files
+        subprocess.run(["git", "init"], cwd=path, capture_output=True)
+        subprocess.run(["git", "add", "."], cwd=path, capture_output=True)
+        subprocess.run(
+            ["git", "commit", "-m", "Initial commit: existing project files"],
+            cwd=path,
+            capture_output=True,
+        )
+        print(f"  Initialized git repo and committed existing files")
+
+    # Inject missing scaffold files
+    injected = _inject_scaffold(path, project_name, is_windows)
+
+    if not is_git_repo and injected:
+        # Commit 2: scaffold files
+        subprocess.run(["git", "add", "."], cwd=path, capture_output=True)
+        subprocess.run(
+            ["git", "commit", "-m", "Add cleanvibe scaffold files"],
+            cwd=path,
+            capture_output=True,
+        )
+        print(f"  Committed scaffold files")
+
+    if not no_claude:
+        _launch_claude(path)
+
+
+def _inject_scaffold(path: Path, project_name: str, is_windows: bool) -> bool:
+    """Inject missing scaffold files into a directory. Returns True if any were injected."""
+    injected = False
+
     claude_md = path / "CLAUDE.md"
     if not claude_md.exists():
         _write(claude_md, templates.claude_md(project_name))
         print(f"  Injected CLAUDE.md (was missing)")
+        injected = True
 
     readme = path / "README.md"
     if not readme.exists():
         _write(readme, templates.readme_md(project_name))
         print(f"  Injected README.md (was missing)")
+        injected = True
 
     gitignore = path / ".gitignore"
     if not gitignore.exists():
         _write(gitignore, templates.GITIGNORE)
         print(f"  Injected .gitignore (was missing)")
+        injected = True
 
     if is_windows:
         runclaude = path / "runclaude.bat"
         if not runclaude.exists():
             _write(runclaude, templates.RUNCLAUDE_BAT)
             print(f"  Injected runclaude.bat (was missing)")
+            injected = True
 
-    if not no_claude:
-        _launch_claude(path)
+    if not injected:
+        print(f"  All scaffold files already present, nothing to inject")
+
+    return injected
 
 
 def _write(filepath: Path, content: str) -> None:
