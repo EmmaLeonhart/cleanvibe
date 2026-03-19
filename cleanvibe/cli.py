@@ -3,6 +3,7 @@
 Usage:
     cleanvibe new PATH          Create a new scaffolded project
     cleanvibe clone REPO [PATH] Clone a repo and inject scaffolding
+    cleanvibe convert [PATH]    Convert an existing directory into a cleanvibe project
     cleanvibe --version         Show version
 
 Zero dependencies. Just Python stdlib.
@@ -13,7 +14,7 @@ import sys
 from pathlib import Path
 
 from . import __version__
-from .scaffold import clone_project, create_project
+from .scaffold import clone_project, convert_project, create_project
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -54,6 +55,21 @@ def main(argv: list[str] | None = None) -> None:
         "--no-claude", action="store_true", help="Skip launching Claude Code after cloning"
     )
 
+    # cleanvibe convert [PATH]
+    convert_parser = subparsers.add_parser(
+        "convert", help="Convert an existing directory into a cleanvibe project"
+    )
+    convert_parser.add_argument(
+        "path", nargs="?", type=Path, default=Path("."),
+        help="Directory to convert (defaults to current directory)"
+    )
+    convert_parser.add_argument(
+        "--dry-run", action="store_true", help="Show what would be done without writing anything"
+    )
+    convert_parser.add_argument(
+        "--no-claude", action="store_true", help="Skip launching Claude Code after converting"
+    )
+
     args = parser.parse_args(argv)
 
     if args.command is None:
@@ -66,6 +82,16 @@ def main(argv: list[str] | None = None) -> None:
             sys.exit(1)
         print(f"Creating project: {args.path}")
         create_project(args.path, dry_run=args.dry_run, no_claude=args.no_claude)
+
+    elif args.command == "convert":
+        if not args.path.exists():
+            print(f"Error: {args.path} does not exist.", file=sys.stderr)
+            sys.exit(1)
+        if not args.path.is_dir():
+            print(f"Error: {args.path} is not a directory.", file=sys.stderr)
+            sys.exit(1)
+        print(f"Converting existing directory: {args.path}")
+        convert_project(args.path, dry_run=args.dry_run, no_claude=args.no_claude)
 
     elif args.command == "clone":
         if args.path is None:
