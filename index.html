@@ -110,6 +110,28 @@
         .accordion-btn[aria-expanded="true"] .accordion-icon {
             transform: rotate(180deg);
         }
+
+        /* Keep the page's top-right corner clean white without flattening the rest of the background */
+        .top-right-white-wash {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: min(34rem, 42vw);
+            height: min(24rem, 34vw);
+            background: radial-gradient(circle at top right,
+                rgba(255, 255, 255, 1) 0%,
+                rgba(255, 255, 255, 1) 22%,
+                rgba(255, 255, 255, 0.96) 40%,
+                rgba(255, 255, 255, 0.82) 54%,
+                rgba(255, 255, 255, 0) 78%);
+        }
+
+        @media (max-width: 768px) {
+            .top-right-white-wash {
+                width: 16rem;
+                height: 12rem;
+            }
+        }
     </style>
 </head>
 <body class="text-slate-800 antialiased bg-white relative overflow-x-hidden">
@@ -119,6 +141,7 @@
         <div class="absolute top-0 -left-4 w-96 h-96 bg-orange-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
         <div class="absolute top-0 -right-4 w-96 h-96 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
         <div class="absolute -bottom-8 left-20 w-96 h-96 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
+        <div class="top-right-white-wash"></div>
     </div>
 
     <!-- ═══════════ LAYER 1: Landing Message ═══════════ -->
@@ -132,8 +155,12 @@
             <div class="flex items-center gap-3 md:gap-4">
                 <img src="logos/stanford.png" alt="Stanford" class="h-5 md:h-6 opacity-50">
                 <img src="logos/princeton.png" alt="Princeton" class="h-5 md:h-6 opacity-50">
-                <img src="logos/autobio.jpg" alt="autobio" class="h-5 md:h-6 opacity-70">
-                <span class="text-xs text-slate-400 hidden md:inline">AI4Science Catalyst Institute</span>
+                <a href="https://auto-bio.ai" target="_blank" rel="noopener noreferrer" aria-label="autobio">
+                    <img src="logos/autobio.jpg" alt="autobio" class="h-5 md:h-6 opacity-70">
+                </a>
+                <a href="https://ai4s-catalyst.com" target="_blank" rel="noopener noreferrer" class="hidden md:inline-block" aria-label="AI4Science Catalyst Institute">
+                    <img src="images/ai4sciencecata-white.png" alt="AI4Science Catalyst Institute" class="h-5 md:h-6 w-auto object-contain">
+                </a>
             </div>
         </div>
 
@@ -674,14 +701,14 @@
                     <p class="text-xs text-slate-500 mb-2">Princeton University</p>
                     <img src="logos/princeton.png" alt="Princeton" class="h-5 mx-auto opacity-70">
                 </div>
-                <div class="glass-card rounded-2xl p-6 text-center">
+                <a href="https://wu-yc.github.io" target="_blank" rel="noopener noreferrer" class="glass-card rounded-2xl p-6 text-center block">
                     <div class="w-20 h-20 rounded-full mx-auto mb-3 overflow-hidden ring-4 ring-blue-50">
                         <img src="images/yingcheng_wu.jpeg" alt="Yingcheng Wu" class="w-full h-full object-cover">
                     </div>
                     <h3 class="font-bold mb-1">Yingcheng (Charles) Wu</h3>
                     <p class="text-xs text-slate-500 mb-2">Stanford University</p>
                     <img src="logos/stanford.png" alt="Stanford" class="h-5 mx-auto opacity-70">
-                </div>
+                </a>
             </div>
 
             <!-- Chairs Grid Row 2 -->
@@ -737,6 +764,13 @@
                     <h3 class="font-bold mb-1">Max</h3>
                     <p class="text-xs text-slate-500">BioTender</p>
                 </div>
+                <a href="https://www.linkedin.com/in/jiachen-amber-liu-872506169/" target="_blank" rel="noopener noreferrer" class="glass-card rounded-2xl p-6 text-center w-[140px] block">
+                    <div class="w-20 h-20 rounded-full mx-auto mb-3 overflow-hidden ring-4 ring-cyan-50">
+                        <img src="images/jiachen_liu.jpg" alt="Jiachen (Amber) Liu" class="w-full h-full object-cover">
+                    </div>
+                    <h3 class="font-bold mb-1">Jiachen (Amber) Liu</h3>
+                    <p class="text-xs text-slate-500">Orchestra Research</p>
+                </a>
                 <div class="glass-card rounded-2xl p-6 text-center w-[140px]">
                     <div class="w-20 h-20 rounded-full mx-auto mb-3 overflow-hidden ring-4 ring-blue-50">
                         <img src="images/kejun_ying.jpg" alt="Kejun Ying" class="w-full h-full object-cover">
@@ -759,11 +793,11 @@
             </div>
 
             <div class="flex justify-center items-end gap-4 md:gap-6">
-                <div class="glass-card rounded-2xl p-4 md:p-6 text-center min-w-[110px] md:min-w-[130px]">
+                <a href="https://auto-bio.ai" target="_blank" rel="noopener noreferrer" class="glass-card rounded-2xl p-4 md:p-6 text-center min-w-[110px] md:min-w-[130px] block" aria-label="autobio">
                     <div class="h-10 md:h-12 flex items-center justify-center">
                         <img src="logos/autobio.jpg" alt="autobio" class="h-9 md:h-11 w-auto object-contain">
                     </div>
-                </div>
+                </a>
                 <div class="glass-card rounded-2xl p-4 md:p-6 text-center min-w-[110px] md:min-w-[130px]">
                     <div class="h-10 md:h-12 flex items-center justify-center">
                         <img src="logos/autox.jpg" alt="AutoX" class="h-9 md:h-11 w-auto object-contain">
@@ -786,18 +820,18 @@
     <!-- ═══════════ Footer ═══════════ -->
     <footer class="relative z-10 py-10 md:py-12 px-4 md:px-6 bg-slate-900 text-white">
         <div class="max-w-4xl mx-auto flex flex-wrap items-center justify-center gap-2 md:gap-6 mb-4 md:mb-6">
-            <div class="bg-white rounded-lg p-1.5 md:p-2">
-                <img src="logos/stanford.png" alt="Stanford" class="h-5 md:h-7">
+            <div class="bg-white rounded-lg w-[74px] h-9 md:w-[92px] md:h-11 flex items-center justify-center shrink-0">
+                <img src="logos/stanford.png" alt="Stanford" class="h-5 md:h-7 w-auto object-contain">
             </div>
-            <div class="bg-white rounded-lg p-1.5 md:p-2">
-                <img src="logos/princeton.png" alt="Princeton" class="h-5 md:h-7">
+            <div class="bg-white rounded-lg w-[74px] h-9 md:w-[92px] md:h-11 flex items-center justify-center shrink-0">
+                <img src="logos/princeton.png" alt="Princeton" class="h-5 md:h-7 w-auto object-contain">
             </div>
-            <div class="bg-white rounded-lg p-1.5 md:p-2">
-                <img src="logos/autobio.jpg" alt="autobio" class="h-6 md:h-8">
-            </div>
-            <div class="bg-white rounded-lg px-2 md:px-4 py-1.5 md:py-2">
-                <span class="text-xs md:text-sm text-slate-700 font-medium">AI4Science Catalyst Institute</span>
-            </div>
+            <a href="https://auto-bio.ai" target="_blank" rel="noopener noreferrer" class="bg-white rounded-lg w-[74px] h-9 md:w-[92px] md:h-11 flex items-center justify-center shrink-0" aria-label="autobio">
+                <img src="logos/autobio.jpg" alt="autobio" class="h-6 md:h-8 w-auto object-contain">
+            </a>
+            <a href="https://ai4s-catalyst.com" target="_blank" rel="noopener noreferrer" class="bg-white rounded-lg w-[74px] h-9 md:w-[92px] md:h-11 flex items-center justify-center shrink-0" aria-label="AI4Science Catalyst Institute">
+                <img src="images/ai4sciencecata-white.png" alt="AI4Science Catalyst Institute" class="h-5 md:h-7 w-auto object-contain">
+            </a>
         </div>
 
         <div class="max-w-4xl mx-auto flex flex-wrap items-center justify-center gap-3 md:gap-8 mb-3 md:mb-4 text-xs md:text-sm">
