@@ -2,7 +2,7 @@
 
 The CLAUDE.md template is the core of cleanvibe. It shapes how Claude Code
 behaves inside a repo by enforcing documentation discipline, meaningful commits,
-and iterative file-based thinking over planning-only modes.
+and thoughtful planning before major changes.
 """
 
 from datetime import datetime
@@ -14,7 +14,7 @@ def claude_md(project_name: str) -> str:
 
 ## Workflow Rules
 - **Commit early and often.** Every meaningful change gets a commit with a clear message explaining *why*, not just what.
-- **Do not enter planning-only modes.** All thinking must produce files and commits. If scope is unclear, create a `planning/` directory and write `.md` files there instead of using an internal planning mode.
+- **Use planning mode before major changes.** Think through architecture and approach before diving into implementation.
 - **Keep this file up to date.** As the project takes shape, record architectural decisions, conventions, and anything needed to work effectively in this repo.
 - **Update README.md regularly.** It should always reflect the current state of the project for human readers.
 
