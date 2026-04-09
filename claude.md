@@ -24,5 +24,5 @@ cleanvibe/
 
 ## Workflow Guidelines
 - **Commit early and often.** Every meaningful change gets a descriptive commit.
-- **Do not enter planning-only modes.** All thinking produces files and commits.
+- **Use planning mode before major changes.** Think through architecture and approach before diving into implementation.
 - **Keep this file and README.md up to date** as the project evolves.
