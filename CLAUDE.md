@@ -12,10 +12,28 @@
 - **Keep tests passing.** Do not commit code that breaks existing tests. If a change requires updating tests, update them in the same commit.
 
 ## Project Description
-_TODO: Describe what this project is about._
+
+`replication-skill` is a CLI + library that scaffolds a directory for
+replicating an arXiv paper. The scaffold includes a SKILL.md that encodes the
+replication plan so an agent (or human) can execute it end-to-end, a
+`download_paper.py` that fetches the PDF into a gitignored `paper/` directory,
+and a `paper.json` with frozen metadata. Installable as `replicate` on the PATH.
+
+The three-layer vision (see `notes/replication_framing.md`): every replication
+ships working code, a legibility layer (findings page), and a reusable agent
+skill file. The skill files are the compounding artifact.
 
 ## Architecture and Conventions
-_TODO: Document key decisions, file structure, and patterns as they emerge._
+
+- Package layout: `src/replication_skill/` (src layout, hatchling build).
+- Templates under `src/replication_skill/templates/` are `string.Template`s;
+  substitute with keys matching `ArxivPaper` fields.
+- arXiv access: Atom API via `requests`, no auth. Respect the API by keeping
+  queries single-paper and sending a descriptive User-Agent.
+- Scaffolded paper PDFs are gitignored per-scaffold, never in the library's
+  root `.gitignore`. Each replication directory is meant to be split off into
+  its own repo eventually.
+- Python 3.9+ supported; CI tests 3.10 and 3.12.
 
 # currentDate
 Today's date is 2026-04-18.
