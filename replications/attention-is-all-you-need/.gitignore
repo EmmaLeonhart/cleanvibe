@@ -1,0 +1,14 @@
+paper/*.pdf
+paper/*.tar.gz
+paper/*.html
+!paper/.gitkeep
+
+# replication outputs
+results/
+checkpoints/
+*.ckpt
+*.pt
+*.pth
+wandb/
+__pycache__/
+.venv/
