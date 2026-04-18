@@ -21,10 +21,13 @@ The one thing to watch
 So net: don't worry about it looking bad. Just make sure the artifacts are public, well-documented, and ideally you've written
 something
 (even a README or a short post) about what you learned in the gap between the paper and the working code.
+
+## User
+
 I guess I'll explain how I actually do it. I have a Python library. You give the command in the command line, and then you give an arXiv link in the command line. What it does is it goes through the process of creating a git repository. It basically creates a skill file for downloading; it downloads the paper, makes the directory based off of the title of the paper, sets up a public GitHub repository with a GitHub Pages template on what you are doing to replicate it. It creates a script that downloads the files from arXiv, but it git ignores the directory of the files. The skill file says, "If this directory is empty, then do this," and the skill file goes through the way of guiding the agent through the paper so that it can make or import whatever code that is used for the paper and then run a replication of it. It sets it up via CI/CD to make a page that explains your findings, a PDF for those who want a PDF, a thing to download it and replicate, and a skill file that it made so that you can replicate it yourself. If it is not very compute intensive, it automatically replicates itself constantly by the CI/CD.
 Show more
 
-## User
+## Assistant
 
 This is a genuinely impressive piece of tooling. Let me reflect back what you've built because there are a few distinct things happening here that are worth naming clearly:
 What it actually is
@@ -41,6 +44,9 @@ A few things worth thinking about as you develop this further:
 The skill file format is interesting — is it specific to a particular agent/framework, or have you designed it to be relatively portable? That choice has implications for how broadly useful it is.
 The GitHub Pages output that explains findings is the part that could make this genuinely publishable as a tool paper, not just a portfolio project. If you've essentially built an automated "living replication report" generator, that's a contribution to the reproducibility infrastructure conversation that ML venues are increasingly receptive to.
 Have you used it on any papers yet that produced interesting findings in the gap between what the paper claims and what the replication shows?
+
+## User
+
 I'm still working on it. I'll say it'll probably take, like, I'm still working on it. I have a lot of this stuff done. The basic thing that I'll say is that I have the basic stuff done, but it requires a bit of work on seeing how it works with different stuff.
 
 ## Assistant
@@ -48,12 +54,15 @@ I'm still working on it. I'll say it'll probably take, like, I'm still working o
 That makes sense — the scaffolding being solid is actually the hard part. The "does it generalize across different papers with different codebases, different dependency situations, different levels of implementation detail" is where the real friction will be, and that's basically just mileage. You'll find out where the skill file assumptions break down, where the CI/CD chokes on compute constraints, where the GitHub Pages template doesn't fit a particular type of output.
 The good news is that each paper you run through it is both a test case and a portfolio artifact simultaneously, so the debugging process is also the content generation process.
 When it's more settled, it might be worth writing a short post about the design philosophy — particularly the skill file approach — even before it's fully polished. The idea of encoding "how to replicate this class of paper" as an agent-readable artifact is interesting enough to stand on its own as a concept, separate from whether the tooling is production-ready.
+
+## User
+
 Yeah, the idea, my idea of it, is that every single replication made with this tool does two things:
 It creates clear evidence of replicating research that somebody else can do. That's an important thing.
 It produces a much more legible output.
 For somebody actually trying to implement it in production systems, you'll still need to use an agent for implementing it in production systems. The GitHub Pages repo stuff gives a tool for it. Also, it gives a meta tool of making it so that there's my replication, but my replication comes with a skill file that explicitly explains how to do the replication for a later person.
 
-## User
+## Assistant
 
 Right, so there are actually three layers of artifact being produced simultaneously:
 The replication itself
