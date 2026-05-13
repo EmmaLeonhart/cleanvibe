@@ -39,7 +39,30 @@ class TestCreateProject(unittest.TestCase):
                 create_project(proj, no_claude=True)
             self.assertTrue((proj / "CLAUDE.md").is_file())
             self.assertTrue((proj / "README.md").is_file())
+            self.assertTrue((proj / "queue.md").is_file())
             self.assertTrue((proj / ".gitignore").is_file())
+
+    def test_queue_md_explains_purpose(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            proj = Path(tmp) / "myproj"
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                create_project(proj, no_claude=True)
+            content = (proj / "queue.md").read_text(encoding="utf-8")
+            # The queue.md must explain it is a queue, and reference planning + the task tool
+            self.assertIn("queue, not a state snapshot", content)
+            self.assertIn("plan", content.lower())
+
+    def test_claude_md_references_queue(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            proj = Path(tmp) / "myproj"
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                create_project(proj, no_claude=True)
+            content = (proj / "CLAUDE.md").read_text(encoding="utf-8")
+            # CLAUDE.md must enforce the queue-first planning rule
+            self.assertIn("queue.md", content)
+            self.assertIn("planning", content.lower())
 
     def test_runclaude_bat_only_on_windows(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -123,8 +146,9 @@ class TestConvert(unittest.TestCase):
 
             # CLAUDE.md must not be overwritten
             self.assertEqual((proj / "CLAUDE.md").read_text(encoding="utf-8"), custom)
-            # README and .gitignore should still be injected
+            # README, queue.md, and .gitignore should still be injected
             self.assertTrue((proj / "README.md").is_file())
+            self.assertTrue((proj / "queue.md").is_file())
             self.assertTrue((proj / ".gitignore").is_file())
 
 
