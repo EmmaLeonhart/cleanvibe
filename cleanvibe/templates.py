@@ -74,9 +74,32 @@ See `CLAUDE.md` § "Workflow Rules" for how this file, planning mode, and the ta
 
 ---
 
-## Active
+## Active — First-session bootstrap
 
-_(empty — add the first concrete task here when work begins)_
+These items are the default opening sequence for a new cleanvibe project. Work them top to bottom. Delete each item from this file in the same commit that completes it. When this whole section is gone, the project has finished bootstrap and the queue is ready to be repopulated with real product work (see the final item).
+
+1. **Triage user-supplied files into `data_lake/`.** Look at everything in the repo that isn't part of the cleanvibe scaffold (i.e. anything the user dropped in: notes, exports, spec PDFs, sample data, mockups, etc.).
+   - Create a `data_lake/` directory and move all such files into it so the project root stays clean. Only the scaffold (`CLAUDE.md`, `README.md`, `queue.md`, `.gitignore`, `LICENSE`, and any source/config files you have explicitly chosen to keep at the root) should live at the top level.
+   - If any of these files are `.zip` archives, extract them into `data_lake/` alongside the originals, then add the `.zip` files to `.gitignore` (we keep the extracted contents in git, not the archives).
+   - For any file that looks big enough to need Git LFS (rough rule of thumb: >50 MB, or large binary like video/audio/large datasets), STOP and ask the user before doing anything — do not silently commit it, do not silently `git lfs track` it.
+   - Commit. Commit message should describe what got moved/extracted and why.
+
+2. **Read the data lake to infer what this project is.** Skim every file in `data_lake/` (text files, READMEs from extracted zips, design notes, spec docs, sample data shapes). Build up a working hypothesis: what is the user trying to build? What domain? What constraints or instructions are stated explicitly?
+   - Update `README.md` to reflect this hypothesis: project description, any explicit instructions you found, anything load-bearing for future sessions.
+   - Update `CLAUDE.md`'s "Project Description" and "Architecture and Conventions" sections to capture the same context for future Claude sessions.
+   - Do NOT touch `queue.md` in this commit — the real queue gets written later, after talking to the user.
+   - Commit. Commit message should briefly explain how the inferred description was derived (e.g. "Inferred project scope from data_lake/spec.md and data_lake/notes/").
+
+3. **Interview the user about what they actually want to build.** Your inferred picture from the data lake is a starting point, not the spec. Ask the user direct, specific questions to fill in the gaps: what is the goal of the first usable version? What's in scope vs. out of scope for this session? Are there constraints (language, framework, deployment target, must-integrate-with-X)? What does "done" look like for them today?
+   - As answers come in, fold them into `README.md` and `CLAUDE.md` so future sessions inherit the context.
+   - Commit once the picture is concrete enough to plan against.
+
+4. **Replace this bootstrap queue with the real project queue.** Based on README + CLAUDE.md + the interview, write a concrete, ordered list of implementation tasks into the `## Active` section of this file (deleting this bootstrap section entirely as part of the same edit). Each task should be small enough to finish and commit on its own.
+   - Commit the new queue.
+
+5. **Create a private GitHub repo and push.** Use whatever GitHub tooling is available (e.g. `gh repo create --private --source=. --push`) to create a private remote and push the current branch. Confirm CI (`.github/workflows/`) is wired up so pushes run tests.
+
+6. **Work the queue until empty.** Pull the top item, do it, delete it from `queue.md` in the same commit as the work, push, let CI run. Repeat. New ideas that surface mid-work go to the bottom of the queue (or to `todo.md` if they're longer-horizon), not into the currently-in-flight task. The first session ends when the queue is empty and the final push is green.
 
 ---
 
