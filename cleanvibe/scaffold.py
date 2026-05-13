@@ -23,6 +23,7 @@ def create_project(path: Path, dry_run: bool = False, no_claude: bool = False) -
         print(f"[dry-run] Would create directory: {path}")
         print(f"[dry-run] Would write: {path / 'CLAUDE.md'}")
         print(f"[dry-run] Would write: {path / 'README.md'}")
+        print(f"[dry-run] Would write: {path / 'queue.md'}")
         print(f"[dry-run] Would write: {path / '.gitignore'}")
         if is_windows:
             print(f"[dry-run] Would write: {path / 'runclaude.bat'}")
@@ -36,6 +37,7 @@ def create_project(path: Path, dry_run: bool = False, no_claude: bool = False) -
 
     _write(path / "CLAUDE.md", templates.claude_md(project_name))
     _write(path / "README.md", templates.readme_md(project_name))
+    _write(path / "queue.md", templates.queue_md(project_name))
     _write(path / ".gitignore", templates.GITIGNORE)
 
     if is_windows:
@@ -53,7 +55,7 @@ def clone_project(repo: str, path: Path, dry_run: bool = False, no_claude: bool 
 
     if dry_run:
         print(f"[dry-run] Would run: git clone {repo} {path}")
-        print(f"[dry-run] Would check for missing CLAUDE.md / README.md / .gitignore")
+        print(f"[dry-run] Would check for missing CLAUDE.md / README.md / queue.md / .gitignore")
         if is_windows:
             print(f"[dry-run] Would check for missing runclaude.bat")
         print(f"[dry-run] Would inject any missing files")
@@ -90,7 +92,7 @@ def convert_project(path: Path, dry_run: bool = False, no_claude: bool = False) 
         if not is_git_repo:
             print(f"[dry-run] Would run: git init")
             print(f"[dry-run] Would commit all existing files (commit 1)")
-        print(f"[dry-run] Would check for missing CLAUDE.md / README.md / .gitignore")
+        print(f"[dry-run] Would check for missing CLAUDE.md / README.md / queue.md / .gitignore")
         if is_windows:
             print(f"[dry-run] Would check for missing runclaude.bat")
         if not is_git_repo:
@@ -141,6 +143,12 @@ def _inject_scaffold(path: Path, project_name: str, is_windows: bool) -> bool:
     if not readme.exists():
         _write(readme, templates.readme_md(project_name))
         print(f"  Injected README.md (was missing)")
+        injected = True
+
+    queue = path / "queue.md"
+    if not queue.exists():
+        _write(queue, templates.queue_md(project_name))
+        print(f"  Injected queue.md (was missing)")
         injected = True
 
     gitignore = path / ".gitignore"

@@ -9,8 +9,12 @@ cleanvibe/
 ├── cleanvibe/
 │   ├── __init__.py      # Version string
 │   ├── cli.py           # argparse-based CLI entry point
-│   ├── scaffold.py      # Core logic: create_project(), clone_project()
-│   └── templates.py     # CLAUDE.md, README.md, .gitignore, runclaude.bat templates
+│   ├── scaffold.py      # Core logic: create_project(), clone_project(), convert_project()
+│   └── templates.py     # CLAUDE.md, README.md, queue.md, .gitignore, runclaude.bat templates
+├── tests/               # stdlib unittest, run by CI on win/mac/linux
+├── .github/workflows/
+│   ├── ci.yml           # 3-OS x 2-py-version matrix
+│   └── publish.yml      # PyPI publish on release
 ├── pyproject.toml       # Package metadata, [project.scripts] entry point
 ├── LICENSE              # MIT
 └── README.md            # Human-facing docs
@@ -21,8 +25,10 @@ cleanvibe/
 - **Cross-platform**: Windows launches claude in a new cmd window via `subprocess.Popen`. Unix uses `os.execlp` to replace the process.
 - **Non-destructive cloning**: `cleanvibe clone` only injects files that are missing. Never overwrites.
 - **`--dry-run` flag**: Shows what would happen without writing anything. Builds trust.
+- **queue.md is part of the scaffold**: Every project gets a `queue.md` and a CLAUDE.md that enforces planning into queue.md before executing, mirroring it into the task tool, and updating it in the same commit as the work. See the reference repos at `../Sutra/`, `../SutraDB/`, `../shintowiki-scripts/` for the established convention.
 
-## Workflow Guidelines
+## Workflow Rules
 - **Commit early and often.** Every meaningful change gets a descriptive commit.
-- **Use planning mode before major changes.** Think through architecture and approach before diving into implementation.
+- **Plan into `queue.md` first, then execute.** Writing the plan into queue.md before doing the work means an interrupted session can resume. Mirror items into the task tool.
+- **Update `queue.md` in the same commit as the work.** Delete completed items; do not leave checkmarks.
 - **Keep this file and README.md up to date** as the project evolves.
