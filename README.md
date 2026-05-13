@@ -22,9 +22,10 @@ This will:
 1. Create the directory `my-project/`
 2. Write `CLAUDE.md` (workflow rules for AI-assisted development)
 3. Write `README.md` (starter documentation)
-4. Write `.gitignore` (sensible Python defaults)
-5. Initialize a git repo with an initial commit
-6. Launch Claude Code inside the project
+4. Write `queue.md` (active work queue, pre-seeded with a first-session bootstrap sequence that walks Claude through triaging dropped-in files, inferring the project, interviewing the user, creating `todo.md`, populating the real queue, and pushing to a private GitHub repo)
+5. Write `.gitignore` (sensible Python defaults)
+6. Initialize a git repo with an initial commit
+7. Launch Claude Code inside the project
 
 ### Clone an existing repo
 

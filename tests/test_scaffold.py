@@ -13,7 +13,7 @@ import unittest
 from contextlib import redirect_stdout
 from pathlib import Path
 
-from cleanvibe import __version__
+from cleanvibe import __version__, templates
 from cleanvibe.cli import main
 from cleanvibe.scaffold import convert_project, create_project
 
@@ -50,7 +50,7 @@ class TestCreateProject(unittest.TestCase):
                 create_project(proj, no_claude=True)
             content = (proj / "queue.md").read_text(encoding="utf-8")
             # The queue.md must explain it is a queue, and reference planning + the task tool
-            self.assertIn("queue, not a state snapshot", content)
+            self.assertIn("not a state snapshot", content)
             self.assertIn("plan", content.lower())
 
     def test_queue_md_contains_bootstrap_sequence(self):
@@ -73,6 +73,53 @@ class TestCreateProject(unittest.TestCase):
             self.assertTrue("interview" in lower or "ask the user" in lower)
             self.assertIn("private", lower)
             self.assertIn("github", lower)
+
+    def test_bootstrap_creates_todo_md_before_real_queue(self):
+        # The bootstrap sequence must instruct Claude to create todo.md
+        # (the long-horizon backlog) BEFORE writing the real concrete queue.
+        # Flow: triage -> infer docs -> interview -> todo.md -> real queue -> github -> work.
+        with tempfile.TemporaryDirectory() as tmp:
+            proj = Path(tmp) / "myproj"
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                create_project(proj, no_claude=True)
+            content = (proj / "queue.md").read_text(encoding="utf-8")
+            lower = content.lower()
+            # The bootstrap explicitly mentions creating todo.md as its own step
+            self.assertIn("todo.md", content)
+            self.assertIn("long-horizon", lower)
+            # The todo.md step comes before the "real queue" replacement step
+            todo_idx = lower.find("create `todo.md`")
+            real_queue_idx = lower.find("replace this bootstrap queue")
+            self.assertGreater(todo_idx, 0, "bootstrap must include a 'Create todo.md' step")
+            self.assertGreater(real_queue_idx, todo_idx,
+                "Create todo.md must precede 'Replace this bootstrap queue'")
+
+    def test_claude_md_describes_todo_to_queue_flow(self):
+        # CLAUDE.md must explain that todo.md is the long-term horizon and the
+        # basis for queue.md (items flow todo.md -> queue.md -> done).
+        with tempfile.TemporaryDirectory() as tmp:
+            proj = Path(tmp) / "myproj"
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                create_project(proj, no_claude=True)
+            content = (proj / "CLAUDE.md").read_text(encoding="utf-8")
+            lower = content.lower()
+            self.assertIn("todo.md", content)
+            self.assertIn("long-term horizon", lower)
+            # The flow direction must be documented
+            self.assertIn("todo.md", content)
+            self.assertIn("queue.md", content)
+
+    def test_todo_md_template_exists_and_describes_flow(self):
+        # The todo_md() builder must produce a file that explains its role
+        # (long-horizon, abstract) and its relationship to queue.md.
+        content = templates.todo_md("myproj")
+        self.assertIn("myproj", content)
+        lower = content.lower()
+        self.assertIn("long-term horizon", lower)
+        self.assertIn("queue.md", lower)
+        self.assertIn("abstract", lower)
 
     def test_claude_md_references_queue(self):
         with tempfile.TemporaryDirectory() as tmp:

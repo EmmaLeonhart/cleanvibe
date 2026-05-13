@@ -22,7 +22,9 @@ def claude_md(project_name: str) -> str:
 
 ## Queue and longer-horizon work
 - **`queue.md`** — what's being worked on right now. Items get deleted on completion; do not leave checkmarks or status indicators behind. If it's not in `queue.md`, it's not in scope for the current session.
-- **`todo.md`** — longer-horizon work that isn't ready for the active queue. Items migrate `todo.md` → `queue.md` → deleted on completion. Create `todo.md` when you have multi-session work to track.
+- **`todo.md`** — the **long-term horizon** of the project. Multi-session goals, architectural ambitions, future capabilities, "things we want to do eventually." Items in `todo.md` are *abstract*: they describe a destination, not a step. `todo.md` is the *basis for* `queue.md`: when work begins, an item is pulled from `todo.md`, decomposed into concrete executable steps in `queue.md`, mirrored into the task tool, and executed. As `queue.md` drains, refill it by pulling and decomposing the next `todo.md` item.
+- **Flow:** `todo.md` (abstract horizons) → `queue.md` (concrete steps) → task tool (in-flight work) → `git log` (history). Items only ever flow forward; do not leave done items behind in `todo.md` or `queue.md`.
+- **Session end condition:** the project's first session ends when `queue.md` is empty, the only items left in `todo.md` are still too abstract to break down further, and the repository is online with green CI. At that point, stop and hand back to the user.
 
 ## Testing
 - **Write unit tests early.** As soon as there is testable logic, create a test file. Use `pytest` for Python projects or the appropriate test framework for the language in use.
@@ -61,10 +63,39 @@ claude
 """
 
 
+def todo_md(project_name: str) -> str:
+    return f"""# {project_name} — Long-Horizon Backlog
+
+**This file is the long-term horizon of the project, not the current session.** `todo.md` holds multi-session goals, architectural ambitions, future capabilities — things we want to get to *eventually*. Items here are *abstract*: they describe a destination, not a step. Concrete, executable steps live in `queue.md`.
+
+**Flow:**
+
+```
+todo.md  (abstract horizons)
+   ↓  pick an item, decompose it
+queue.md  (concrete executable steps)
+   ↓  mirror into task tool, execute
+git log  (done)
+```
+
+When work begins, the typical move is: pull an item from `todo.md`, break it into a small ordered set of concrete steps in `queue.md`, mirror those into the task tool, and execute. When the queue items are completed, delete the original `todo.md` item too (or replace it with a more specific follow-up that surfaced during the work).
+
+**Session end condition:** the first session ends when `queue.md` is empty, the items remaining in `todo.md` are still too abstract to break down further, and the repository is online with green CI. At that point, stop and hand back.
+
+See `CLAUDE.md` § "Queue and longer-horizon work" for how `todo.md`, `queue.md`, and the task tool stay in sync.
+
+---
+
+## Backlog
+
+_(Populated during bootstrap from the user interview and the inferred project picture. Each item should be a sentence or short paragraph describing a goal or capability — not a checklist, not a step.)_
+"""
+
+
 def queue_md(project_name: str) -> str:
     return f"""# {project_name} — Work Queue
 
-**This file is a queue, not a state snapshot.** It lists what is being worked on right now. Finished work lives in `git log`; longer-horizon work lives in `todo.md`. When an item is done, delete it — do not add checkmarks, "done" markers, or status indicators. If an item is still here, it is not done.
+**This file is a queue of *concrete, executable steps*, not a state snapshot.** It lists what is being worked on right now. Finished work lives in `git log`; longer-horizon, *abstract* work lives in `todo.md` and gets decomposed into items here when it's ready to execute. When an item is done, delete it — do not add checkmarks, "done" markers, or status indicators. If an item is still here, it is not done.
 
 **Why this file exists:** when a planning step (formal planning mode or just "think before doing") produces a plan, that plan is written here BEFORE execution starts. That way an interrupted session can pick up from the queue rather than from chat context that may be gone.
 
@@ -90,22 +121,28 @@ These items are the default opening sequence for a new cleanvibe project. Work t
    - Do NOT touch `queue.md` in this commit — the real queue gets written later, after talking to the user.
    - Commit. Commit message should briefly explain how the inferred description was derived (e.g. "Inferred project scope from data_lake/spec.md and data_lake/notes/").
 
-3. **Interview the user about what they actually want to build.** Your inferred picture from the data lake is a starting point, not the spec. Ask the user direct, specific questions to fill in the gaps: what is the goal of the first usable version? What's in scope vs. out of scope for this session? Are there constraints (language, framework, deployment target, must-integrate-with-X)? What does "done" look like for them today?
+3. **Interview the user about what they actually want to build.** Your inferred picture from the data lake is a starting point, not the spec. Ask the user direct, specific questions to fill in the gaps: what is the goal of the first usable version? What's the longer-term vision (capabilities, integrations, audience) beyond v1? What's in scope vs. out of scope for this session? Are there constraints (language, framework, deployment target, must-integrate-with-X)? What does "done" look like for them today?
    - As answers come in, fold them into `README.md` and `CLAUDE.md` so future sessions inherit the context.
+   - Capture both **near-term** answers (what to build now) AND **long-horizon** answers (what's wanted eventually). The long-horizon material is what feeds `todo.md` in the next step.
    - Commit once the picture is concrete enough to plan against.
 
-4. **Replace this bootstrap queue with the real project queue.** Based on README + CLAUDE.md + the interview, write a concrete, ordered list of implementation tasks into the `## Active` section of this file (deleting this bootstrap section entirely as part of the same edit). Each task should be small enough to finish and commit on its own.
+4. **Create `todo.md` — the long-horizon backlog.** This is the step before any concrete queue gets written. Based on the interview and inferred picture, write `todo.md` as the project's long-term horizon: every multi-session goal, architectural ambition, capability, integration, or future direction the user described. Items here are *abstract destinations*, not steps — they will be decomposed into concrete tasks in `queue.md` later, one at a time, as the work unfolds. `todo.md` is the *basis for* `queue.md`: work flows `todo.md` → `queue.md` → executed → deleted from both.
+   - Use the convention described in `CLAUDE.md` § "Queue and longer-horizon work" for the file format.
+   - Do NOT touch `queue.md` in this commit — populating the real queue is the *next* step.
+   - Commit `todo.md` on its own so the long-horizon picture is a reviewable artifact, not buried inside a larger change.
+
+5. **Replace this bootstrap queue with the real project queue.** Pull the first item (or first few items) from `todo.md` and decompose them into a concrete, ordered list of implementation tasks. Write those into the `## Active` section of this file (deleting this bootstrap section entirely as part of the same edit). Each task should be small enough to finish and commit on its own. Mirror the queue into the task tool. As you drain queue items, refill by pulling and decomposing more from `todo.md`.
    - Commit the new queue.
 
-5. **Create a private GitHub repo and push.** Use whatever GitHub tooling is available (e.g. `gh repo create --private --source=. --push`) to create a private remote and push the current branch. Confirm CI (`.github/workflows/`) is wired up so pushes run tests.
+6. **Create a private GitHub repo and push.** Use whatever GitHub tooling is available (e.g. `gh repo create --private --source=. --push`) to create a private remote and push the current branch. Confirm CI (`.github/workflows/`) is wired up so pushes run tests.
 
-6. **Work the queue until empty.** Pull the top item, do it, delete it from `queue.md` in the same commit as the work, push, let CI run. Repeat. New ideas that surface mid-work go to the bottom of the queue (or to `todo.md` if they're longer-horizon), not into the currently-in-flight task. The first session ends when the queue is empty and the final push is green.
+7. **Work the queue until the stop condition.** Pull the top item, do it, delete it from `queue.md` in the same commit as the work, push, let CI run. When `queue.md` empties, refill from `todo.md` by decomposing the next item. New ideas that surface mid-work go to the bottom of the queue (or to `todo.md` if they're longer-horizon), not into the currently-in-flight task. **Stop** when: `queue.md` is empty, the items still in `todo.md` are too abstract to break down further without more user input, and the repository is online with green CI. At that point, hand back to the user.
 
 ---
 
 ## Pointers
 
-- Longer-horizon agenda: `todo.md` (create this file when multi-session work appears).
+- Long-horizon backlog (abstract goals, source of future queue items): `todo.md`.
 - Narrative history: `git log`.
 """
 
