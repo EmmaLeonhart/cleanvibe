@@ -53,6 +53,27 @@ class TestCreateProject(unittest.TestCase):
             self.assertIn("queue, not a state snapshot", content)
             self.assertIn("plan", content.lower())
 
+    def test_queue_md_contains_bootstrap_sequence(self):
+        # New projects should ship with a default first-session bootstrap queue,
+        # not an empty Active section. The bootstrap walks Claude through:
+        # data_lake triage -> infer project from files -> interview user ->
+        # write the real queue -> create private GitHub repo -> work the queue.
+        with tempfile.TemporaryDirectory() as tmp:
+            proj = Path(tmp) / "myproj"
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                create_project(proj, no_claude=True)
+            content = (proj / "queue.md").read_text(encoding="utf-8")
+            lower = content.lower()
+            self.assertIn("data_lake", content)
+            self.assertIn(".zip", lower)
+            self.assertIn("lfs", lower)
+            self.assertIn("readme.md", lower)
+            self.assertIn("claude.md", lower)
+            self.assertTrue("interview" in lower or "ask the user" in lower)
+            self.assertIn("private", lower)
+            self.assertIn("github", lower)
+
     def test_claude_md_references_queue(self):
         with tempfile.TemporaryDirectory() as tmp:
             proj = Path(tmp) / "myproj"
