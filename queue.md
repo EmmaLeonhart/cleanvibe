@@ -12,11 +12,9 @@ See `CLAUDE.md` § "Workflow Rules" for how this file, planning mode, and the ta
 
 Decisions locked: standalone replication *project* per paper; land the refined *structure* working this session (deep extractor/report/site programs → `todo.md`); absorb code into the `cleanvibe` package, keep example outputs + framing notes under `docs/`. arXiv **and alphaxiv** links; stdlib only (zero-dep); unittest tests; templates as inline `string.Template` constants. Paper lives at `replication_target/paper.pdf` (gitignored, **not** in `data_lake/`); `data_lake/` still present for other downloaded material. Default dir `replicating-<slug>` with `-2/-3` collision suffix (auto-named — user supplies no title).
 
-1. **Add `tests/test_replicate.py`** — monkeypatched paper (no network): expected tree incl. `data_lake/.gitkeep`, `replication_target/.gitkeep`, paper NOT under data_lake; `replicating-<slug>` naming + collision suffix; dry-run writes nothing. Full `unittest discover` green. Commit.
+1. **Disposition of merged tree.** Move `replication_skill/replications/` → `docs/replication-examples/`; `replication_skill/notes/replication_framing.md` → `docs/replication_framing.md`; `replication_skill/{papers.json,download_all.py}` → `docs/replication-examples/`. Delete the now-consumed remainder of `replication_skill/` (its standalone CLAUDE.md/.github/.claude/pyproject/runclaude.bat/.gitignore/src/tests). Subtree history stays in `git log`. Commit.
 
-2. **Disposition of merged tree.** Move `replication_skill/replications/` → `docs/replication-examples/`; `replication_skill/notes/replication_framing.md` → `docs/replication_framing.md`; `replication_skill/{papers.json,download_all.py}` → `docs/replication-examples/`. Delete the now-consumed remainder of `replication_skill/` (its standalone CLAUDE.md/.github/.claude/pyproject/runclaude.bat/.gitignore/src/tests). Subtree history stays in `git log`. Commit.
-
-3. **Docs + version.** Update root `CLAUDE.md` (architecture, key decision: replicate sibling subcommand, stdlib arxiv, examples in docs/) and `README.md` (`cleanvibe replicate` usage). Bump `0.6.0` → `0.7.0` (`cleanvibe/__init__.py`, `pyproject.toml`). Full test run + `cleanvibe --version` + dry-run smoke. Commit.
+2. **Docs + version.** Update root `CLAUDE.md` (architecture, key decision: replicate sibling subcommand, stdlib arxiv, examples in docs/) and `README.md` (`cleanvibe replicate` usage). Bump `0.6.0` → `0.7.0` (`cleanvibe/__init__.py`, `pyproject.toml`). Full test run + `cleanvibe --version` + dry-run smoke. Commit.
 
 ---
 
