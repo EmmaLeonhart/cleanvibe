@@ -39,13 +39,38 @@ This will:
 3. Inject any missing files without overwriting existing ones
 4. Launch Claude Code inside the project
 
+### Replicate a paper
+
+```
+cleanvibe replicate https://arxiv.org/abs/1706.03762
+```
+
+Accepts an arXiv **or alphaxiv** id / abs URL / pdf URL. This will:
+1. Fetch the paper's metadata from the arXiv API
+2. Create `replicating-<paper-slug>/` (silently `-2`/`-3` if it already exists)
+3. Scaffold a standalone replication project: cleanvibe conventions
+   (`CLAUDE.md`, `queue.md`, `data_lake/`) **plus** the replication structure —
+   `SKILL.md` (the agent-executable replication plan), `download_paper.py`,
+   `replication_target/` (the paper itself lives here, gitignored — never in
+   `data_lake/`; the authors' code is cloned here as a git submodule),
+   `paper.json`, and `.github/workflows/` that build a GitHub Pages findings
+   site, a transportable PDF report, and a downloadable ZIP replication package
+4. Initialize a git repo with an initial commit
+5. Launch Claude Code inside the project
+
+Every replication produces three compounding artifacts: the runnable
+replication, a published findings report, and the reusable `SKILL.md`
+methodology. See `docs/replication_framing.md` for the full vision.
+
 ### Options
 
 ```
-cleanvibe new my-project --dry-run     # Preview what would be created
-cleanvibe new my-project --no-claude   # Skip launching Claude Code
-cleanvibe clone REPO path --dry-run    # Preview what would be done
-cleanvibe --version                    # Show version
+cleanvibe new my-project --dry-run        # Preview what would be created
+cleanvibe new my-project --no-claude      # Skip launching Claude Code
+cleanvibe clone REPO path --dry-run       # Preview what would be done
+cleanvibe replicate URL --dry-run         # Preview the replication scaffold
+cleanvibe replicate URL --no-claude       # Scaffold without launching Claude
+cleanvibe --version                       # Show version
 ```
 
 ## Why?
