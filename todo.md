@@ -29,3 +29,15 @@ See `CLAUDE.md` § "Workflow Rules" for how `todo.md`, `queue.md`, and the task 
 - **Publish 0.x → 1.0 stabilization.** Decide what the 1.0 contract is: which files are guaranteed to be injected, which template sections are stable, what `convert` promises never to overwrite, semver policy for template changes. Write it down in the README under "Stability" before tagging 1.0.
 
 - **Add a feedback loop from real first-sessions back into the template.** As more projects are bootstrapped, the bootstrap queue should evolve based on what consistently goes well or poorly in step 1–7. Figure out a lightweight way to capture that (a "what bit you?" prompt at session end? a curated `BOOTSTRAP_LEARNINGS.md` in this repo?) without making the tool itself heavyweight.
+
+### Replication infrastructure (merged-in from `replication_skill`)
+
+The `replicate` subcommand absorbs the now-sunset `replication_skill` project. A working standalone `cleanvibe replicate <arxiv-url>` is the near-term goal (decomposed in `queue.md`). The horizons below are the larger "replication infrastructure" vision from `docs/replication_framing.md` — every replication should produce three compounding artifacts: the runnable replication, a legibility layer (findings page), and a reusable agent SKILL.md.
+
+- **Living findings report on GitHub Pages.** Each replication project auto-publishes `FINDINGS.md` (reproduced vs. reported numbers, gaps filled) as a GitHub Pages site, plus a downloadable PDF and the runnable artifact.
+- **CI/CD auto-replication for low-compute papers.** If a paper's compute envelope is small (CPU-feasible / ≲ a few GPU-hours), the project's CI re-runs the replication on a schedule so the repo is living evidence and silent regressions surface.
+- **SKILL.md corpus as the compounding artifact.** Accumulate the per-paper SKILL.md files into a browsable library/index of operationalized replication methodology — the part that compounds over time, separate from any single replication.
+- **Remote repo + Pages provisioning.** Optionally `gh repo create` a public repo and enable Pages automatically as part of `cleanvibe replicate`, so the artifact is public from minute one.
+- **Generalization hardening.** Handle the real friction: papers with official code (fork-and-verify) vs. clean reimplementation; heterogeneous dependency/compute situations; papers that don't fit the SKILL.md plan's assumptions.
+- **Batch replication from a corpus.** Port the `docs/replication-examples/download_all.py` + `papers.json` idea into a `cleanvibe replicate --batch <papers.json>` flow for standing up many replications at once.
+- **Unify the two scaffolds.** Factor a single shared base-scaffold core that both `cleanvibe new` and `cleanvibe replicate` build on, so conventions (queue/todo/data_lake/CLAUDE) stay in lockstep across project types.
