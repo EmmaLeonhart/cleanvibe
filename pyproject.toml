@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cleanvibe"
-version = "1.0.0"
+version = "1.1.0"
 description = "A workflow accelerator that scaffolds AI-assisted coding projects with opinionated documentation and launches Claude Code."
 readme = "README.md"
 license = "MIT"
@@ -34,3 +34,10 @@ cleanvibe = "cleanvibe.cli:main"
 [project.urls]
 Homepage = "https://github.com/Immanuelle/cleanvibe"
 Issues = "https://github.com/Immanuelle/cleanvibe/issues"
+
+# Explicit package list — without this, setuptools' flat-layout auto-discovery
+# also picks up sibling directories like `site/` and `pages/` (the static
+# website + apex landing) as candidate "packages" and refuses to build with
+# "Multiple top-level packages discovered". Only `cleanvibe` is the package.
+[tool.setuptools]
+packages = ["cleanvibe"]

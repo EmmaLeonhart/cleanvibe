@@ -8,6 +8,7 @@ queue-driven planning, and thoughtful work tracking.
 from datetime import datetime
 from string import Template
 
+from . import __version__
 from .arxiv import ArxivPaper
 
 
@@ -26,7 +27,8 @@ def claude_md(project_name: str) -> str:
 ## Queue and longer-horizon work
 - **`queue.md`** — what's being worked on right now. Items get deleted on completion; do not leave checkmarks or status indicators behind. If it's not in `queue.md`, it's not in scope for the current session.
 - **`todo.md`** — the **long-term horizon** of the project. Multi-session goals, architectural ambitions, future capabilities, "things we want to do eventually." Items in `todo.md` are *abstract*: they describe a destination, not a step. `todo.md` is the *basis for* `queue.md`: when work begins, an item is pulled from `todo.md`, decomposed into concrete executable steps in `queue.md`, mirrored into the task tool, and executed. As `queue.md` drains, refill it by pulling and decomposing the next `todo.md` item.
-- **Flow:** `todo.md` (abstract horizons) → `queue.md` (concrete steps) → task tool (in-flight work) → `git log` (history). Items only ever flow forward; do not leave done items behind in `todo.md` or `queue.md`.
+- **`devlog.md`** — where **"done" lives**. Every queue item that is finished gets deleted from `queue.md` and appended as a dated entry here, in the same commit as the work. Releases (tag + one-line note) and notable milestones also go here. `devlog.md` exists so `queue.md` can stay strictly delete-only without losing the historical trail.
+- **Flow:** `todo.md` (abstract horizons) → `queue.md` (concrete steps) → task tool (in-flight work) → `devlog.md` + `git log` (history). Items only ever flow forward; do not leave done items behind in `todo.md` or `queue.md`.
 - **Session end condition:** the project's first session ends when `queue.md` is empty, the only items left in `todo.md` are still too abstract to break down further, and the repository is online with green CI. At that point, stop and hand back to the user.
 
 ## Testing
@@ -78,10 +80,12 @@ todo.md  (abstract horizons)
    ↓  pick an item, decompose it
 queue.md  (concrete executable steps)
    ↓  mirror into task tool, execute
-git log  (done)
+devlog.md  (dated entries — "done" lives here)
+   +
+git log  (narrative history)
 ```
 
-When work begins, the typical move is: pull an item from `todo.md`, break it into a small ordered set of concrete steps in `queue.md`, mirror those into the task tool, and execute. When the queue items are completed, delete the original `todo.md` item too (or replace it with a more specific follow-up that surfaced during the work).
+When work begins, the typical move is: pull an item from `todo.md`, break it into a small ordered set of concrete steps in `queue.md`, mirror those into the task tool, and execute. When a queue item is finished, **delete it from `queue.md` and append a dated entry to `devlog.md` in the same commit**. When all the queue items decomposed from a `todo.md` entry are done, delete the original `todo.md` item too (or replace it with a more specific follow-up that surfaced during the work).
 
 **Session end condition:** the first session ends when `queue.md` is empty, the items remaining in `todo.md` are still too abstract to break down further, and the repository is online with green CI. At that point, stop and hand back.
 
@@ -95,10 +99,54 @@ _(Populated during bootstrap from the user interview and the inferred project pi
 """
 
 
+def devlog_md(project_name: str, clone: bool = False) -> str:
+    """The devlog — where "done" lives, so `queue.md` can stay delete-only.
+
+    `clone=True` produces the variant injected by `cleanvibe clone` for an
+    *existing* repo: the first entry tells the agent to backfill the rest of
+    the devlog from `git log` / existing release history.
+    """
+    date = datetime.now().strftime("%Y-%m-%d")
+    if clone:
+        first_entry = f"""## {date} — cleanvibe onboarding started
+
+Onboarded with `cleanvibe clone` (cleanvibe v{__version__}). This is an
+**existing repository**, so the very first onboarding task is to **backfill
+the rest of this devlog from `git log`** (tagged releases, milestone
+commits, merged feature branches). After that, every finished queue item
+appends a new dated entry here.
+"""
+    else:
+        first_entry = f"""## {date} — Project scaffolded
+
+Scaffolded with `cleanvibe new` (cleanvibe v{__version__}). Future entries
+land here as queue items get deleted.
+"""
+    return f"""# {project_name} — Devlog
+
+**This file is where "done" lives.** `queue.md` is delete-only: when a queue
+item is finished, the item is **deleted from `queue.md`** and a dated entry
+is **appended here**, in the same commit as the work, then pushed. Never
+tick a box in place — a checked box left in `queue.md` is the failure mode
+this file exists to prevent.
+
+Also record releases (tag + a one-line note), notable milestones, and
+anything else worth a chronological trail. Newest entries at the bottom.
+
+This is the **same convention as the cleanvibe repo's own `devlog.md`** —
+every cleanvibe-scaffolded project gets one for the same reason.
+
+See `CLAUDE.md` § "Workflow Rules" and `queue.md`'s preamble.
+
+---
+
+{first_entry}"""
+
+
 def queue_md(project_name: str) -> str:
     return f"""# {project_name} — Work Queue
 
-**This file is a queue of *concrete, executable steps*, not a state snapshot.** It lists what is being worked on right now. Finished work lives in `git log`; longer-horizon, *abstract* work lives in `todo.md` and gets decomposed into items here when it's ready to execute. When an item is done, delete it — do not add checkmarks, "done" markers, or status indicators. If an item is still here, it is not done.
+**This file is a queue of *concrete, executable steps*, not a state snapshot.** It lists what is being worked on right now. Finished work lives in `devlog.md` (a dated entry) and `git log`; longer-horizon, *abstract* work lives in `todo.md` and gets decomposed into items here when it's ready to execute. **When an item is done, delete it from this file AND append a dated entry to `devlog.md` in the same commit, then push.** Do not add checkmarks, "done" markers, or status indicators in place. If an item is still here, it is not done.
 
 **Why this file exists:** when a planning step (formal planning mode or just "think before doing") produces a plan, that plan is written here BEFORE execution starts. That way an interrupted session can pick up from the queue rather than from chat context that may be gone.
 
@@ -110,7 +158,7 @@ See `CLAUDE.md` § "Workflow Rules" for how this file, planning mode, and the ta
 
 ## Active — First-session bootstrap
 
-These items are the default opening sequence for a new cleanvibe project. Work them top to bottom. Delete each item from this file in the same commit that completes it. When this whole section is gone, the project has finished bootstrap and the queue is ready to be repopulated with real product work (see the final item).
+These items are the default opening sequence for a new cleanvibe project. Work them top to bottom. **Delete each item from this file in the same commit that completes it, and append a dated entry to `devlog.md` recording the step.** Push after every step. When this whole section is gone, the project has finished bootstrap and the queue is ready to be repopulated with real product work (see the final item).
 
 1. **Triage user-supplied files into `data_lake/`.** Look at everything in the repo that isn't part of the cleanvibe scaffold (i.e. anything the user dropped in: notes, exports, spec PDFs, sample data, mockups, etc.).
    - `data_lake/` already exists — the scaffold created it with a `.gitkeep` (so a user could drop files straight into it before this session). Move all such files into `data_lake/` so the project root stays clean. Only the scaffold (`CLAUDE.md`, `README.md`, `queue.md`, `.gitignore`, `LICENSE`, and any source/config files you have explicitly chosen to keep at the root) should live at the top level. Leave the `.gitkeep` in place.
@@ -139,13 +187,14 @@ These items are the default opening sequence for a new cleanvibe project. Work t
 
 6. **Create a private GitHub repo and push.** Use whatever GitHub tooling is available (e.g. `gh repo create --private --source=. --push`) to create a private remote and push the current branch. Confirm CI (`.github/workflows/`) is wired up so pushes run tests.
 
-7. **Work the queue until the stop condition.** Pull the top item, do it, delete it from `queue.md` in the same commit as the work, push, let CI run. When `queue.md` empties, refill from `todo.md` by decomposing the next item. New ideas that surface mid-work go to the bottom of the queue (or to `todo.md` if they're longer-horizon), not into the currently-in-flight task. **Stop** when: `queue.md` is empty, the items still in `todo.md` are too abstract to break down further without more user input, and the repository is online with green CI. At that point, hand back to the user.
+7. **Work the queue until the stop condition.** Pull the top item, do it, **delete it from `queue.md` AND append a dated entry to `devlog.md`** in the same commit as the work, push, let CI run. When `queue.md` empties, refill from `todo.md` by decomposing the next item. New ideas that surface mid-work go to the bottom of the queue (or to `todo.md` if they're longer-horizon), not into the currently-in-flight task. **Stop** when: `queue.md` is empty, the items still in `todo.md` are too abstract to break down further without more user input, and the repository is online with green CI. At that point, hand back to the user.
 
 ---
 
 ## Pointers
 
 - Long-horizon backlog (abstract goals, source of future queue items): `todo.md`.
+- Completed work (chronological, with releases): `devlog.md`.
 - Narrative history: `git log`.
 """
 
@@ -178,8 +227,13 @@ def clone_claude_md(project_name: str) -> str:
 
 ## Workflow Rules (until replaced by the repo's real ones)
 
-- Plan into `queue.md` before executing; update it in the same commit as the
-  work; delete finished items (no checkmarks).
+- Plan into `queue.md` before executing; **delete finished items from
+  `queue.md` AND append a dated entry to `devlog.md` in the same commit as
+  the work**, then push. Never tick boxes in place.
+- `devlog.md` is where "done" lives — it also records releases and
+  milestones. cleanvibe injected a starter `devlog.md` whose first
+  onboarding task is to **backfill it from `git log`** so the chronological
+  trail is honest before normal onboarding begins.
 - Keep documentation truthful as you go — that is the whole point of this
   onboarding pass.
 """
@@ -190,7 +244,9 @@ def clone_queue_md(project_name: str) -> str:
 
 **This file is a queue, not a state snapshot.** It is the short onboarding
 sequence `cleanvibe clone` injects for an *existing* codebase. Finished work
-lives in `git log`. When an item is done, delete it — no checkmarks.
+lives in `devlog.md` (dated entries) and `git log`. **When an item is done,
+delete it from this file AND append a dated entry to `devlog.md` in the
+same commit, then push.** No checkmarks.
 
 See `CLAUDE.md` for how to work in this onboarding branch. Note: there is no
 `data_lake/` here — this is a real repository, not dropped-in files.
@@ -200,31 +256,41 @@ See `CLAUDE.md` for how to work in this onboarding branch. Note: there is no
 ## Active — Onboarding
 
 `cleanvibe clone` already did step 0: cloned the repo, created and checked
-out the `cleanvibe-onboarding` branch, and committed these onboarding files.
-Work the rest top to bottom; delete each item in the commit that completes it.
+out the `cleanvibe-onboarding` branch, and committed these onboarding files
+(including a starter `devlog.md`). Work the rest top to bottom; delete each
+item AND append a `devlog.md` entry in the commit that completes it.
 
-1. **Read the whole repository.** Build an accurate mental map: directory
+1. **Backfill `devlog.md` from existing history.** cleanvibe wrote a starter
+   `devlog.md` whose first entry only says "onboarding started". Before
+   anything else, walk `git log` (and any existing release tags / GitHub
+   Releases / CHANGELOG) and backfill chronological milestone entries:
+   tagged releases (date + one-line note), major feature merges, big
+   refactors, incidents worth remembering. From this point on, every
+   finished queue item also gets a dated `devlog.md` entry. Commit.
+
+2. **Read the whole repository.** Build an accurate mental map: directory
    layout, entry points, how to build/run it, how to test it, dependencies,
    CI, and the project's apparent conventions. Capture this understanding as
    you go (it feeds the next two steps).
 
-2. **Make the documentation honest.** If the repo has docs (`README`, `docs/`,
+3. **Make the documentation honest.** If the repo has docs (`README`, `docs/`,
    wiki) that are stale or thin, correct and extend them to match what the
    code actually does. If documentation is missing, write concise docs
    covering setup, usage, and architecture.
 
-3. **Rewrite `CLAUDE.md` to the repo's real practices.** Replace the
+4. **Rewrite `CLAUDE.md` to the repo's real practices.** Replace the
    provisional onboarding text with the project's actual development
    contract: language/framework, test runner, build, commit and branch
    conventions, CI, review norms. This is the durable artifact future
-   sessions inherit.
+   sessions inherit. **Keep the devlog rule** (delete from queue + append
+   dated entry to `devlog.md` in the same commit; never tick boxes).
 
-4. **Tests & CI.** If tests are sparse or absent, add a baseline suite for
+5. **Tests & CI.** If tests are sparse or absent, add a baseline suite for
    the core paths using the project's existing/most-appropriate framework.
    If there is no CI, add a minimal workflow that runs the tests. Keep any
    existing tests passing.
 
-5. **Synthesize planning artifacts and hand off.** If the repo already has a
+6. **Synthesize planning artifacts and hand off.** If the repo already has a
    `todo.md` / `queue.md` / `ROADMAP` / `BACKLOG`, merge their intent into the
    repo's own `todo.md` (its real backlog). Then stop driving from THIS
    onboarding queue and start working the repo's own `todo.md`.
@@ -238,6 +304,7 @@ current marching orders and reconcile it with the content preserved below it.
 ## Pointers
 
 - The repo's own backlog (work this once onboarding is done): `todo.md`.
+- Completed work + releases (chronological): `devlog.md`.
 - Narrative history: `git log`.
 """
 
@@ -352,8 +419,11 @@ reusable, agent-executable replication methodology.
 - **Commit early and often.** Every meaningful change gets a descriptive commit.
 - **Plan into `queue.md` first, then execute.** The replication plan already
   lives in `queue.md` (derived from `SKILL.md`). Work it top to bottom.
-- **Update `queue.md` in the same commit as the work.** Delete completed
-  items; no checkmarks.
+- **Finishing a queue item = delete from `queue.md` + append dated entry to
+  `devlog.md`**, in the same commit as the work, then push. Never tick
+  boxes in place. `devlog.md` is also where you record the replication's
+  releases/milestones (paper downloaded, environment pinned, first
+  reproduced number, FINDINGS published, Pages live).
 - **Keep `SKILL.md` truthful.** It is the compounding artifact. If you
   deviated from its plan, edit the plan to match what you actually did.
 - **Keep this file and `README.md` current** as the replication takes shape.
@@ -365,8 +435,10 @@ _REPLICATION_QUEUE_TMPL = Template(
     """# replicating-$slug - Work Queue
 
 **This file is a queue of concrete, executable steps, not a state snapshot.**
-Finished work lives in `git log`; longer-horizon items live in `todo.md`.
-When an item is done, delete it — no checkmarks, no status indicators.
+Finished work lives in `devlog.md` (dated entries) and `git log`;
+longer-horizon items live in `todo.md`. **When an item is done, delete it
+from this file AND append a dated entry to `devlog.md` in the same commit,
+then push.** No checkmarks, no status indicators in place.
 
 **Why this file exists:** the replication plan is written here BEFORE
 execution so an interrupted session resumes from the queue, not from chat.
@@ -425,6 +497,7 @@ Work top to bottom. Delete each item in the same commit that completes it.
 
 - Methodology / definition of done: `SKILL.md`.
 - Long-horizon items: `todo.md`.
+- Completed work + replication milestones (chronological): `devlog.md`.
 - Narrative history: `git log`.
 """
 )

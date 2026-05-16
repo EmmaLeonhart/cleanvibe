@@ -22,7 +22,10 @@ cleanvibe/
 │   └── publish.yml      # PyPI publish on release
 ├── pyproject.toml       # Package metadata, [project.scripts] entry point
 ├── LICENSE              # MIT
-└── README.md            # Human-facing docs
+├── README.md            # Human-facing docs
+├── queue.md             # Active, delete-only work queue
+├── todo.md              # Long-horizon backlog (abstract)
+└── devlog.md            # Where "done" lives: dated entries + releases
 ```
 
 ## Key Decisions
@@ -36,10 +39,12 @@ cleanvibe/
 - **`clone` is codebase onboarding, not bootstrapping**: `cleanvibe clone` clones an existing repo, creates a dedicated `cleanvibe-onboarding` branch (default branch untouched), and commits a *small* onboarding `queue.md` + `CLAUDE.md` there — **no `data_lake/`** (nothing was dropped in) and **no README overwrite**. CLAUDE.md/queue.md are *prepended* if they already exist (`_prepend_or_write`, newest-on-top), so re-running just layers a fresh block. The onboarding queue's job is to document the repo, make its docs honest, rewrite the onboarding CLAUDE.md into the repo's *real* practices, add tests/CI if sparse, then hand off to the repo's own `todo.md`. This is intentionally distinct from `new` (fresh project) and `convert` (in-place, missing-only injection).
 - **Project website**: a dependency-free static site under `site/` (vanilla HTML/CSS/JS, tabs for what-is / new / clone / replicate) deployed by `.github/workflows/pages.yml`. Pages Source on the repo is set to "GitHub Actions".
 - **`cleanvibe replicate` (sibling subcommand)**: `cleanvibe replicate <arxiv-or-alphaxiv-url>` scaffolds a *standalone* replication project for one paper (absorbed from the now-sunset `replication_skill` project). It is a sibling of `new`/`clone`/`convert`. Structure: the paper lives at `replication_target/paper.pdf` (gitignored, **never** in `data_lake/`); `data_lake/` still exists for other downloaded material; the authors' code is cloned as a git submodule under `replication_target/`; the deliverables (a GitHub Pages site, a transportable PDF report, and a downloadable ZIP replication package) are built by GitHub Actions, not committed. The default directory is `replicating-<paper-slug>`, **silently** auto-suffixed `-2`/`-3` on collision (the user supplied no name) — deliberately asymmetric with `cleanvibe new`, which prompts. arXiv access is stdlib `urllib` only (preserves the zero-dependency guarantee); replication templates are inline `string.Template` constants (no package data). Long-horizon replication-infrastructure work is tracked in `todo.md`; the framing/vision lives in `docs/replication_framing.md` with a reference corpus under `docs/replication-examples/`.
+- **`devlog.md` — "done" lives here, so `queue.md` can stay delete-only.** Every cleanvibe-scaffolded project (and this repo) ships a `devlog.md`. Finishing a queue item = delete the item from `queue.md` AND append a dated entry to `devlog.md` in the same commit, then push. Never tick boxes in place — a checked box left in `queue.md` is the failure mode this file exists to prevent. Releases (tag + one-line note) and notable milestones also live in `devlog.md`. `cleanvibe new` and `cleanvibe replicate` write a starter entry; `cleanvibe clone` and `cleanvibe convert` inject a "backfill from `git log`" variant whose first onboarding task is to catch the existing repo's devlog up to present before normal work resumes. Flow: `todo.md` (abstract) → `queue.md` (concrete steps) → task tool (in-flight) → `devlog.md` + `git log` (history).
+- **PyPI packaging**: `pyproject.toml` declares `[tool.setuptools] packages = ["cleanvibe"]` explicitly. Without this, setuptools' flat-layout auto-discovery also picks up sibling directories like `site/` and `pages/` as candidate "packages" and refuses to build (caused the v1.0.0 PyPI publish to fail; fixed in v1.1.0).
 
 ## Workflow Rules
 - **Commit early and often.** Every meaningful change gets a descriptive commit.
 - **Plan into `queue.md` first, then execute.** Writing the plan into queue.md before doing the work means an interrupted session can resume. Mirror items into the task tool.
 - **`todo.md` is the basis for `queue.md`.** Long-horizon items live in `todo.md`; they get decomposed into concrete steps in `queue.md` when work begins on them. Delete from both when done.
-- **Update `queue.md` in the same commit as the work.** Delete completed items; do not leave checkmarks.
-- **Keep this file and README.md up to date** as the project evolves.
+- **Finishing a queue item = delete from `queue.md` + append a dated entry to `devlog.md`**, in the same commit as the work, then push. NEVER tick boxes in place. `queue.md` only ever holds not-yet-done work; `devlog.md` is the chronological record of what has been done (and what was released).
+- **Keep this file, README.md, and devlog.md up to date** as the project evolves.
