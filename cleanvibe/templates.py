@@ -184,3 +184,469 @@ Thumbs.db
 .env
 .env.local
 """
+
+
+# ---------------------------------------------------------------------------
+# Replication project templates (`cleanvibe replicate`)
+#
+# A replication project is a standalone cleanvibe project dedicated to one
+# paper. Structure: the paper itself lives at `replication_target/paper.pdf`
+# (gitignored — NOT in data_lake/); `data_lake/` still exists for other
+# downloaded material; the authors' code, if any, is cloned as a git
+# submodule under `replication_target/`; the deliverables (a GitHub Pages
+# site, a transportable PDF report, and a downloadable ZIP replication
+# package) are built by GitHub Actions, never committed as directories.
+#
+# All text templates below are string.Template (stdlib) — no package data,
+# no third-party deps. The workflow YAMLs are static constants (they contain
+# GitHub `${{ }}` expressions and must NOT pass through Template).
+# ---------------------------------------------------------------------------
+
+
+def _replication_subs(paper: ArxivPaper) -> dict:
+    return {
+        "title": paper.title,
+        "arxiv_id": paper.arxiv_id,
+        "slug": paper.slug,
+        "authors": ", ".join(paper.authors) if paper.authors else "unknown",
+        "published": paper.published,
+        "pdf_url": paper.pdf_url,
+        "summary": paper.summary,
+        "html_url": f"https://arxiv.org/html/{paper.arxiv_id}",
+    }
+
+
+_REPLICATION_CLAUDE_TMPL = Template(
+    """# replicating-$slug
+
+## Project Description
+
+This is a **paper replication** project (scaffolded by `cleanvibe replicate`).
+The goal is to reproduce the headline results of:
+
+> **$title**
+> arXiv:$arxiv_id - $authors - $published
+> PDF: $pdf_url - HTML: $html_url
+
+It produces three compounding artifacts (see `docs/replication_framing.md`
+in the cleanvibe repo for the full framing): the runnable replication, a
+legibility layer (the published findings report), and `SKILL.md` — the
+reusable, agent-executable replication methodology.
+
+## Architecture and Conventions
+
+- **`replication_target/`** holds the paper and everything pulled *about* it:
+  - `replication_target/paper.pdf` — the downloaded paper (gitignored; run
+    `python download_paper.py`). The paper does NOT go in `data_lake/`.
+  - `replication_target/paper.md` — a Markdown extraction of the paper's
+    arXiv HTML, for working from structured text. (Extract it during the
+    replication; an automated extractor is a cleanvibe horizon, not built yet.)
+  - the authors' code, if any, cloned as a **git submodule** in here
+    (`git submodule add <repo> replication_target/<name>`).
+- **`data_lake/`** — other downloaded/supplied material (datasets, notes,
+  exports). Same cleanvibe convention as every project. The paper is NOT here.
+- **`src/`** — your reimplementation. **`scripts/run.py`** — the entry point
+  CI invokes. **`results/`** — metrics JSON (gitignored). **`FINDINGS.md`** —
+  the report (reproduced vs. reported, gaps, divergences).
+- **Deliverables are built by GitHub Actions, not committed.**
+  `.github/workflows/pages.yml` publishes the GitHub Pages site + PDF report;
+  `.github/workflows/package.yml` builds the downloadable ZIP replication
+  package. You must make the repo public and enable Pages (Settings -> Pages
+  -> Source: GitHub Actions) — the workflows carry TODO markers for this.
+  Vision for the site shape: http://sutra.emmaleonhart.com/
+
+## Workflow Rules
+
+- **Commit early and often.** Every meaningful change gets a descriptive commit.
+- **Plan into `queue.md` first, then execute.** The replication plan already
+  lives in `queue.md` (derived from `SKILL.md`). Work it top to bottom.
+- **Update `queue.md` in the same commit as the work.** Delete completed
+  items; no checkmarks.
+- **Keep `SKILL.md` truthful.** It is the compounding artifact. If you
+  deviated from its plan, edit the plan to match what you actually did.
+- **Keep this file and `README.md` current** as the replication takes shape.
+"""
+)
+
+
+_REPLICATION_QUEUE_TMPL = Template(
+    """# replicating-$slug - Work Queue
+
+**This file is a queue of concrete, executable steps, not a state snapshot.**
+Finished work lives in `git log`; longer-horizon items live in `todo.md`.
+When an item is done, delete it — no checkmarks, no status indicators.
+
+**Why this file exists:** the replication plan is written here BEFORE
+execution so an interrupted session resumes from the queue, not from chat.
+The canonical methodology is `SKILL.md`; this queue is its executable form.
+
+---
+
+## Active — Replicate "$title" (arXiv:$arxiv_id)
+
+Work top to bottom. Delete each item in the same commit that completes it.
+
+1. **Download the paper.** Run `python download_paper.py` — it writes
+   `replication_target/paper.pdf` (gitignored). Do not proceed if it is empty.
+   Also save a Markdown extraction of the arXiv HTML ($html_url) to
+   `replication_target/paper.md` so later steps work from structured text.
+
+2. **Read the paper; record `notes/claims.md`:** headline claim(s); datasets
+   (version/hash, where they live); models/methods in enough detail to
+   re-implement; evaluation metrics and the exact reported numbers; compute
+   envelope (GPU type, hours, memory) — used to decide if CI can auto-run it.
+   Commit.
+
+3. **Find the authors' code.** Check the arXiv "Code" link, paperswithcode,
+   GitHub (title + first-author). If official code exists, add it as a git
+   submodule under `replication_target/` and record the decision in
+   `notes/sources.md` (fork-and-verify vs. independent reimplementation).
+   Commit.
+
+4. **Set up the environment.** `requirements.txt` / `environment.yml` pinned
+   to versions that work; minimum set needed for the headline claim. Commit.
+
+5. **Reimplement the method** under `src/` — scope to the headline claim,
+   not every ablation. Commit as you go.
+
+6. **Run the replication.** Script it as `scripts/run.py` so CI can invoke
+   it; capture metrics as JSON into `results/`. Commit.
+
+7. **Write `FINDINGS.md`:** reproduced vs. reported numbers (table); gaps you
+   had to fill (hyperparameters, preprocessing, omitted architecture details);
+   where and why it diverged. Commit.
+
+8. **Publish the deliverables.** Confirm `.github/workflows/pages.yml` builds
+   the GitHub Pages site + PDF report and `.github/workflows/package.yml`
+   builds the ZIP replication package. Make the repo public; enable Pages
+   (Settings -> Pages -> Source: GitHub Actions). Update `SKILL.md` so it
+   reflects how you actually did this. Commit.
+
+9. **Stop / hand back** when `FINDINGS.md` reports at least one headline
+   number with its reproduced value, `scripts/run.py` runs end-to-end from a
+   clean clone (or documents the un-automatable data step), and the Pages
+   deployment is green.
+
+---
+
+## Pointers
+
+- Methodology / definition of done: `SKILL.md`.
+- Long-horizon items: `todo.md`.
+- Narrative history: `git log`.
+"""
+)
+
+
+_REPLICATION_SKILL_TMPL = Template(
+    """---
+name: replicate-$slug
+description: Replicate the methods of "$title" (arXiv:$arxiv_id) and produce a runnable artifact, a published findings report, and a downloadable replication package.
+---
+
+# Replicate: $title
+
+arXiv:$arxiv_id - $authors - $published
+PDF: $pdf_url - HTML: $html_url
+
+## Prerequisite
+
+If `replication_target/paper.pdf` is missing, run `python download_paper.py`
+first. Don't proceed without the paper. Prefer working from
+`replication_target/paper.md` (a Markdown extraction of the arXiv HTML) when
+it is present.
+
+## Plan
+
+1. **Acquire the paper.** PDF -> `replication_target/paper.pdf` (gitignored).
+   Extract the arXiv HTML to `replication_target/paper.md` for structured text.
+
+2. **Read the paper.** Record in `notes/claims.md`: headline claim(s);
+   datasets (version/hash, location); models/methods in re-implementable
+   detail; evaluation metrics and the exact reported numbers; compute
+   envelope (used to decide if CI can auto-run this).
+
+3. **Find the authors' code.** arXiv "Code" link, paperswithcode, GitHub
+   (title + first-author). If official code exists, add it as a **git
+   submodule** under `replication_target/` and record in `notes/sources.md`
+   whether you fork-and-verify or independently reimplement.
+
+4. **Set up the environment.** `environment.yml` / `requirements.txt` pinned
+   to working versions; minimum dependency set for the headline claim.
+
+5. **Reimplement the method.** Code under `src/`. Scope to the headline
+   claim, not every ablation.
+
+6. **Run the replication.** `scripts/run.py` so CI can invoke it. Capture
+   metrics as JSON into `results/`.
+
+7. **Write the findings.** `FINDINGS.md`: reproduced vs. reported numbers
+   (table); gaps you filled; where it diverged and why.
+
+8. **Publish.** GitHub Pages deploys the findings + a transportable PDF
+   report (`.github/workflows/pages.yml`); a ZIP replication package is built
+   and offered for download (`.github/workflows/package.yml`). The repo must
+   be public with Pages enabled.
+
+## Budget guardrails
+
+- If the paper's reported compute is more than ~4 GPU-hours on a single
+  consumer GPU, mark this replication **not CI-runnable** in `paper.json` and
+  document the reduced-scale variant instead.
+- Prefer deterministic seeds and logged hashes so reruns are comparable.
+
+## Definition of done
+
+- `FINDINGS.md` exists and reports at least one headline number from the
+  paper, with the reproduced value next to it.
+- `scripts/run.py` runs end-to-end from a clean clone (or documents the data
+  step that can't be automated).
+- The GitHub Pages site and the ZIP package build green in Actions.
+- This file still reflects how you actually did it — if you deviated, edit
+  the plan above.
+"""
+)
+
+
+_REPLICATION_README_TMPL = Template(
+    """# Replicating: $title
+
+**arXiv:** [$arxiv_id]($pdf_url) - **HTML:** [$arxiv_id]($html_url)
+**Authors:** $authors
+**Published:** $published
+
+## Abstract
+
+$summary
+
+## Replication status
+
+Not started. The agent-executable plan is in [`SKILL.md`](./SKILL.md);
+the concrete step queue is in [`queue.md`](./queue.md).
+
+## What this repo produces
+
+Three compounding artifacts:
+
+1. **The replication** — runnable code under `src/` + `scripts/run.py`.
+2. **The legibility layer** — `FINDINGS.md`, published as a GitHub Pages
+   site with a transportable PDF report (built by GitHub Actions).
+3. **`SKILL.md`** — a reusable, agent-executable replication methodology.
+
+## Layout
+
+- `replication_target/` — the paper and everything pulled about it:
+  - `paper.pdf` — downloaded PDF (gitignored; `python download_paper.py`).
+  - `paper.md` — Markdown extraction of the arXiv HTML (for structured text).
+  - the authors' code, if any, as a git **submodule**.
+- `data_lake/` — other downloaded/supplied material (NOT the paper).
+- `src/` — your reimplementation. `scripts/run.py` — CI entry point.
+- `results/` — metrics JSON (gitignored). `FINDINGS.md` — the report.
+- `paper.json` — frozen metadata pulled from the arXiv API.
+- `.github/workflows/` — `pages.yml` (site + PDF), `package.yml` (ZIP).
+
+## Deliverables (GitHub Actions)
+
+To publish, **make this repo public** and set **Settings -> Pages -> Source:
+GitHub Actions**. Then `pages.yml` deploys the findings site + PDF report and
+`package.yml` builds a downloadable ZIP replication package. Site shape
+inspiration: http://sutra.emmaleonhart.com/
+"""
+)
+
+
+_REPLICATION_DOWNLOAD_TMPL = Template(
+    '''"""Download the PDF for arXiv:$arxiv_id into replication_target/paper.pdf."""
+
+from __future__ import annotations
+
+import sys
+import urllib.request
+from pathlib import Path
+
+PDF_URL = "$pdf_url"
+ARXIV_ID = "$arxiv_id"
+
+
+def main() -> int:
+    out = Path(__file__).parent / "replication_target" / "paper.pdf"
+    out.parent.mkdir(parents=True, exist_ok=True)
+    if out.exists() and out.stat().st_size > 0:
+        print(f"already present: {out}")
+        return 0
+    print(f"downloading {PDF_URL} -> {out}")
+    req = urllib.request.Request(PDF_URL, headers={"User-Agent": "cleanvibe-replicate"})
+    with urllib.request.urlopen(req) as resp, open(out, "wb") as f:
+        f.write(resp.read())
+    print(f"wrote {out.stat().st_size} bytes")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+'''
+)
+
+
+REPLICATION_GITIGNORE = """# The paper itself — downloaded, never committed
+replication_target/*.pdf
+replication_target/*.html
+!replication_target/.gitkeep
+
+# Replication outputs
+results/
+checkpoints/
+*.ckpt
+*.pt
+*.pth
+wandb/
+
+# Build / deliverables (produced by GitHub Actions, not committed)
+site/
+*.zip
+report.pdf
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE / OS / env
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+.env
+.env.local
+"""
+
+
+# GitHub Actions: build the findings Pages site + transportable PDF report.
+# Static constant — contains ${{ }} expressions; never run through Template.
+REPLICATION_PAGES_YML = """# Publishes FINDINGS.md as a GitHub Pages site + a transportable PDF report.
+#
+# TODO (one-time, by the repo owner):
+#   1. Make this repository public.
+#   2. Settings -> Pages -> Source: "GitHub Actions".
+# Until then this workflow will run but the deploy step has nothing to serve.
+
+name: pages
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Install pandoc
+        run: sudo apt-get update && sudo apt-get install -y pandoc
+      - name: Build site + PDF report
+        run: |
+          mkdir -p site
+          # Findings page (falls back to README if FINDINGS.md not written yet)
+          SRC=FINDINGS.md
+          [ -f "$SRC" ] || SRC=README.md
+          pandoc "$SRC" -s -o site/index.html --metadata title="Replication report"
+          pandoc "$SRC" -o site/report.pdf || echo "PDF render skipped"
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
+"""
+
+
+# GitHub Actions: assemble the downloadable ZIP replication package.
+# Static constant — contains ${{ }} expressions; never run through Template.
+REPLICATION_PACKAGE_YML = """# Builds a downloadable ZIP "replication package": the replication code plus
+# the necessary code from the paper's repo (the submodule), excluding the
+# gitignored paper binary and git internals. Uploaded as a build artifact and,
+# on a published release, attached as a release asset.
+
+name: package
+
+on:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Build replication package zip
+        run: |
+          NAME="replication-package"
+          git ls-files --recurse-submodules > /tmp/files.txt
+          # Drop the (gitignored anyway) paper binaries if present
+          grep -v -E 'replication_target/.*\\.(pdf|html)$' /tmp/files.txt > /tmp/keep.txt
+          zip -q "$NAME.zip" -@ < /tmp/keep.txt
+          echo "built $NAME.zip ($(du -h "$NAME.zip" | cut -f1))"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: replication-package
+          path: replication-package.zip
+      - name: Attach to release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: replication-package.zip
+"""
+
+
+def replication_claude_md(paper: ArxivPaper) -> str:
+    return _REPLICATION_CLAUDE_TMPL.substitute(_replication_subs(paper))
+
+
+def replication_queue_md(paper: ArxivPaper) -> str:
+    return _REPLICATION_QUEUE_TMPL.substitute(_replication_subs(paper))
+
+
+def replication_skill_md(paper: ArxivPaper) -> str:
+    return _REPLICATION_SKILL_TMPL.substitute(_replication_subs(paper))
+
+
+def replication_readme_md(paper: ArxivPaper) -> str:
+    return _REPLICATION_README_TMPL.substitute(_replication_subs(paper))
+
+
+def replication_download_paper_py(paper: ArxivPaper) -> str:
+    return _REPLICATION_DOWNLOAD_TMPL.substitute(_replication_subs(paper))
