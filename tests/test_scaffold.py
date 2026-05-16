@@ -66,6 +66,7 @@ class TestCreateProject(unittest.TestCase):
             content = (proj / "queue.md").read_text(encoding="utf-8")
             lower = content.lower()
             self.assertIn("data_lake", content)
+            self.assertIn(".gitkeep", lower)
             self.assertIn(".zip", lower)
             self.assertIn("lfs", lower)
             self.assertIn("readme.md", lower)

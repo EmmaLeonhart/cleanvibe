@@ -27,6 +27,7 @@ cleanvibe/
 - **`--dry-run` flag**: Shows what would happen without writing anything. Builds trust.
 - **queue.md is part of the scaffold**: Every project gets a `queue.md` and a CLAUDE.md that enforces planning into queue.md before executing, mirroring it into the task tool, and updating it in the same commit as the work. See the reference repos at `../Sutra/`, `../SutraDB/`, `../shintowiki-scripts/` for the established convention.
 - **todo.md as long-horizon backlog**: `todo.md` holds the project's abstract long-term horizons; `queue.md` holds the concrete executable steps. Items flow `todo.md` → `queue.md` → done. The bootstrap sequence creates `todo.md` between "write documentation" and "write the real queue" so the long-horizon picture exists *before* anything concrete is queued.
+- **`data_lake/.gitkeep`**: The Python scaffold never creates `data_lake/` (there is nothing to triage at `create` time). The directory is created by Claude during the first bootstrap session (queue.md step 1), and that step also drops a `data_lake/.gitkeep` so the directory stays tracked by git even when empty.
 
 ## Workflow Rules
 - **Commit early and often.** Every meaningful change gets a descriptive commit.
