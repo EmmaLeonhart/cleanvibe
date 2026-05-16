@@ -169,4 +169,23 @@ that bootstrapped itself. `pyproject.toml` build backend is corrected
   v1.1.0 reaching PyPI.
 - This repo's own `devlog.md` (this file) backfilled from `git log` —
   dogfooding the same convention every scaffolded project now ships with.
-- **v1.1.0**.
+- **v1.1.0** tagged and pushed (`c0a57e9`).
+
+## 2026-05-16 — v1.1.1: default branch is `main`, Python 3.9 CI fixed
+
+Two follow-on bugs surfaced immediately after v1.1.0:
+
+- **CI was red on Python 3.9** (all three OSes; 3.13 green). Root cause:
+  `cleanvibe/cli.py` used `argv: list[str] | None` at function definition
+  time without `from __future__ import annotations`. PEP 604 union (`X | None`)
+  and PEP 585 generics (`list[str]`) are evaluated immediately on 3.9.
+  Fix: add `from __future__ import annotations` to cli.py so annotations
+  become strings. (`templates.py` and `arxiv.py` already had it.)
+- **Scaffolded repos came up on `master`** because `git init` honours the
+  user's `init.defaultBranch` config, which is still `master` on many
+  installs. This was breaking downstream tooling that assumed `main`.
+  Fix: `_git_init` and `convert_project`'s git-init call now pass
+  `-b main` explicitly (requires git ≥ 2.28). New tests assert the
+  initial branch is `main` for both `cleanvibe new` and `cleanvibe convert`.
+- 32/32 tests green locally. v1.1.0 tag stays in place (immutable); this
+  ships as **v1.1.1**.

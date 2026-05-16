@@ -10,6 +10,8 @@ Usage:
 Zero dependencies. Just Python stdlib.
 """
 
+from __future__ import annotations  # noqa: I001 - keep at top for 3.9 compat
+
 import argparse
 import sys
 from pathlib import Path
