@@ -111,6 +111,7 @@ These items are the default opening sequence for a new cleanvibe project. Work t
 
 1. **Triage user-supplied files into `data_lake/`.** Look at everything in the repo that isn't part of the cleanvibe scaffold (i.e. anything the user dropped in: notes, exports, spec PDFs, sample data, mockups, etc.).
    - Create a `data_lake/` directory and move all such files into it so the project root stays clean. Only the scaffold (`CLAUDE.md`, `README.md`, `queue.md`, `.gitignore`, `LICENSE`, and any source/config files you have explicitly chosen to keep at the root) should live at the top level.
+   - Add an empty `data_lake/.gitkeep` so the directory is tracked by git even when it ends up empty (git does not track empty directories; future sessions must be able to rely on `data_lake/` existing).
    - If any of these files are `.zip` archives, extract them into `data_lake/` alongside the originals, then add the `.zip` files to `.gitignore` (we keep the extracted contents in git, not the archives).
    - For any file that looks big enough to need Git LFS (rough rule of thumb: >50 MB, or large binary like video/audio/large datasets), STOP and ask the user before doing anything — do not silently commit it, do not silently `git lfs track` it.
    - Commit. Commit message should describe what got moved/extracted and why.
