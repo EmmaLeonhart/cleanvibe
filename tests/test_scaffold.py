@@ -41,6 +41,9 @@ class TestCreateProject(unittest.TestCase):
             self.assertTrue((proj / "README.md").is_file())
             self.assertTrue((proj / "queue.md").is_file())
             self.assertTrue((proj / ".gitignore").is_file())
+            # data_lake exists from the first commit so users can drop
+            # files in before the bootstrap session runs.
+            self.assertTrue((proj / "data_lake" / ".gitkeep").is_file())
 
     def test_queue_md_explains_purpose(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -219,6 +222,7 @@ class TestConvert(unittest.TestCase):
             self.assertTrue((proj / "README.md").is_file())
             self.assertTrue((proj / "queue.md").is_file())
             self.assertTrue((proj / ".gitignore").is_file())
+            self.assertTrue((proj / "data_lake" / ".gitkeep").is_file())
 
 
 if __name__ == "__main__":

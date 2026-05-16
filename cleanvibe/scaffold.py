@@ -25,6 +25,7 @@ def create_project(path: Path, dry_run: bool = False, no_claude: bool = False) -
         print(f"[dry-run] Would write: {path / 'README.md'}")
         print(f"[dry-run] Would write: {path / 'queue.md'}")
         print(f"[dry-run] Would write: {path / '.gitignore'}")
+        print(f"[dry-run] Would write: {path / 'data_lake' / '.gitkeep'}")
         if is_windows:
             print(f"[dry-run] Would write: {path / 'runclaude.bat'}")
         print(f"[dry-run] Would run: git init")
@@ -39,6 +40,7 @@ def create_project(path: Path, dry_run: bool = False, no_claude: bool = False) -
     _write(path / "README.md", templates.readme_md(project_name))
     _write(path / "queue.md", templates.queue_md(project_name))
     _write(path / ".gitignore", templates.GITIGNORE)
+    _write_gitkeep(path / "data_lake")
 
     if is_windows:
         _write(path / "runclaude.bat", templates.RUNCLAUDE_BAT)
@@ -163,6 +165,12 @@ def _inject_scaffold(path: Path, project_name: str, is_windows: bool) -> bool:
         print(f"  Injected .gitignore (was missing)")
         injected = True
 
+    gitkeep = path / "data_lake" / ".gitkeep"
+    if not gitkeep.exists():
+        _write_gitkeep(path / "data_lake")
+        print(f"  Injected data_lake/.gitkeep (was missing)")
+        injected = True
+
     if is_windows:
         runclaude = path / "runclaude.bat"
         if not runclaude.exists():
@@ -179,6 +187,19 @@ def _inject_scaffold(path: Path, project_name: str, is_windows: bool) -> bool:
 def _write(filepath: Path, content: str) -> None:
     filepath.write_text(content, encoding="utf-8")
     print(f"  Created {filepath.name}")
+
+
+def _write_gitkeep(directory: Path) -> None:
+    """Create ``directory`` and an empty ``.gitkeep`` so git tracks it when empty.
+
+    The data lake exists from the first commit so a user can drop files
+    straight into it before the bootstrap session ever runs; git does not
+    track empty directories without the placeholder.
+    """
+    directory.mkdir(parents=True, exist_ok=True)
+    keep = directory / ".gitkeep"
+    keep.write_text("", encoding="utf-8")
+    print(f"  Created {directory.name}/.gitkeep")
 
 
 def _git_init(path: Path) -> None:
