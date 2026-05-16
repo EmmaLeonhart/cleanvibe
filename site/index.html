@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>cleanvibe — scaffold AI-assisted projects, then let Claude work</title>
+<meta name="description" content="cleanvibe is a zero-dependency CLI that scaffolds AI-assisted coding projects, onboards existing repos, and turns arXiv papers into structured replication projects.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <h1>clean<span>vibe</span></h1>
+    <p class="tag">A zero-dependency CLI that drops Claude Code into a well-structured project — every time.</p>
+    <p class="sub">cleanvibe is not a coding tool. It is a <strong>state initializer</strong>: it removes the friction between "I want to build something" and "Claude is working inside a disciplined, documented environment." The real payload is the <code>CLAUDE.md</code> behavior contract it injects — plan-into-queue-first, commit early and often, keep docs honest.</p>
+    <pre class="install"><code>pip install cleanvibe</code></pre>
+  </div>
+</header>
+
+<nav class="tabs wrap" role="tablist" aria-label="cleanvibe sections">
+  <button class="tab is-active" role="tab" aria-selected="true" data-tab="what">What is cleanvibe</button>
+  <button class="tab" role="tab" aria-selected="false" data-tab="new">New project</button>
+  <button class="tab" role="tab" aria-selected="false" data-tab="clone">Clone (onboarding)</button>
+  <button class="tab" role="tab" aria-selected="false" data-tab="replicate">Replicate a paper</button>
+</nav>
+
+<main class="wrap">
+
+  <section id="what" class="panel is-active" role="tabpanel">
+    <h2>What is cleanvibe, and why use it?</h2>
+    <p>Most projects start with blank-repo paralysis, drift into poor commit hygiene, and host an AI assistant that rambles without producing durable artifacts. cleanvibe fixes the <em>starting conditions</em>:</p>
+    <ul>
+      <li><strong>An opinionated <code>CLAUDE.md</code> contract</strong> — plan into <code>queue.md</code> before executing; update the queue in the same commit as the work; commit early and often; keep documentation truthful.</li>
+      <li><strong><code>queue.md</code> + <code>todo.md</code></strong> — concrete executable steps vs. long-horizon backlog. Work flows <code>todo.md → queue.md → git log</code>. An interrupted session resumes from the queue, not lost chat context.</li>
+      <li><strong>A <code>data_lake/</code></strong> (for <code>new</code>) created from the first commit, so you can drop specs, exports, and sample data straight in.</li>
+      <li><strong>Zero dependencies</strong> — pure Python stdlib. Fast install, no supply chain. Works on Windows, macOS, Linux (Python 3.9+).</li>
+    </ul>
+    <p>Three subcommands cover three situations. Pick a tab above:</p>
+    <div class="cards">
+      <a class="card" href="#" data-goto="new"><b>cleanvibe new</b><span>Start a brand-new project from nothing.</span></a>
+      <a class="card" href="#" data-goto="clone"><b>cleanvibe clone</b><span>Onboard an existing codebase.</span></a>
+      <a class="card" href="#" data-goto="replicate"><b>cleanvibe replicate</b><span>Turn an arXiv/alphaxiv paper into a replication project.</span></a>
+    </div>
+  </section>
+
+  <section id="new" class="panel" role="tabpanel">
+    <h2>Creating a new project</h2>
+    <pre><code>cleanvibe new my-project</code></pre>
+    <p>What happens:</p>
+    <ol>
+      <li>Creates <code>my-project/</code>.</li>
+      <li>Writes <code>CLAUDE.md</code> — the AI-development workflow contract.</li>
+      <li>Writes <code>README.md</code> — starter documentation.</li>
+      <li>Writes <code>queue.md</code> — pre-seeded with a first-session bootstrap sequence that walks Claude through triaging dropped-in files, inferring the project, interviewing you, creating <code>todo.md</code>, populating the real queue, and pushing to a private GitHub repo.</li>
+      <li>Writes <code>.gitignore</code> (sensible Python defaults).</li>
+      <li>Creates <code>data_lake/.gitkeep</code> — the data lake exists from commit&nbsp;1, so you can drop files in <em>before</em> the first session.</li>
+      <li>Initializes a git repo with an informative initial commit.</li>
+      <li>Launches Claude Code inside the project.</li>
+    </ol>
+    <p class="note">Options: <code>--dry-run</code> previews everything without writing; <code>--no-claude</code> skips launching Claude.</p>
+  </section>
+
+  <section id="clone" class="panel" role="tabpanel">
+    <h2>Cloning a project — codebase onboarding</h2>
+    <pre><code>cleanvibe clone https://github.com/user/repo</code></pre>
+    <p><code>clone</code> is deliberately different from <code>new</code>: it is for <strong>onboarding an existing codebase</strong>, not bootstrapping a blank one.</p>
+    <ol>
+      <li><code>git clone</code> the repository.</li>
+      <li>Create and check out a dedicated <code>cleanvibe-onboarding</code> branch — <strong>the default branch is left untouched</strong>.</li>
+      <li><em>Prepend-or-write</em> an onboarding <code>CLAUDE.md</code> and <code>queue.md</code>: if the repo already has them, the fresh block goes on top (newest first) and the original content is preserved below — re-running just layers another block.</li>
+      <li>Inject <code>.gitignore</code> only if missing. <strong>No <code>data_lake/</code></strong> (nothing was dropped in — it is a real codebase) and <strong>no README overwrite</strong>.</li>
+      <li>Commit the onboarding scaffold on the branch.</li>
+      <li>Launch Claude Code.</li>
+    </ol>
+    <p>The onboarding <code>queue.md</code> is small and focused: read &amp; document the repo, make existing docs honest, <strong>rewrite <code>CLAUDE.md</code> to the repo's real development practices</strong>, add tests/CI if sparse, then synthesize any existing planning artifacts and hand off to the repo's own <code>todo.md</code>.</p>
+  </section>
+
+  <section id="replicate" class="panel" role="tabpanel">
+    <h2>Replicating a paper</h2>
+    <pre><code>cleanvibe replicate https://arxiv.org/abs/2201.02177</code></pre>
+    <p>Accepts an <strong>arXiv or alphaxiv</strong> id / abs URL / pdf URL. It scaffolds a standalone replication project named <code>replicating-&lt;paper-slug&gt;</code> (silently suffixed <code>-2</code>/<code>-3</code> on collision — you supplied no name, so it never errors and never prompts; deliberately asymmetric with <code>new</code>).</p>
+    <p>Every replication produces <strong>three compounding artifacts</strong>:</p>
+    <ul>
+      <li><strong>The runnable replication</strong> — code under <code>src/</code> driven by <code>SKILL.md</code>, the agent-executable replication plan.</li>
+      <li><strong>A legibility layer</strong> — a published findings report (GitHub Pages site + transportable PDF), built by GitHub Actions.</li>
+      <li><strong>The reusable <code>SKILL.md</code></strong> — operationalized replication methodology that compounds across papers.</li>
+    </ul>
+    <p>Structure highlights: the paper lives at <code>replication_target/paper.pdf</code> (gitignored — <strong>never</strong> in <code>data_lake/</code>); the authors' code is cloned as a git submodule under <code>replication_target/</code>; a downloadable ZIP replication package and the Pages site are produced by Actions, not committed. See <code>docs/replication_framing.md</code> for the full "replication infrastructure" vision.</p>
+  </section>
+
+</main>
+
+<footer class="wrap">
+  <p>cleanvibe is MIT-licensed. <a href="https://github.com/Immanuelle/cleanvibe">Source on GitHub</a>.</p>
+</footer>
+
+<script src="tabs.js"></script>
+</body>
+</html>
