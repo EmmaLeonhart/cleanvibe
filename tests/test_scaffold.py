@@ -191,6 +191,21 @@ class TestCreateProject(unittest.TestCase):
                 create_project(proj, no_claude=True)
             self.assertTrue((proj / ".git").is_dir(), "git repo should be initialized")
 
+    def test_initial_branch_is_main_not_master(self):
+        # cleanvibe must initialize new repos on `main`, regardless of the
+        # user's `init.defaultBranch` git config. master causes downstream
+        # tooling glitches (default-branch protection, CI assumptions).
+        with tempfile.TemporaryDirectory() as tmp:
+            proj = Path(tmp) / "myproj"
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                create_project(proj, no_claude=True)
+            branch = subprocess.run(
+                ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+                cwd=proj, capture_output=True, text=True,
+            ).stdout.strip()
+            self.assertEqual(branch, "main")
+
     def test_claude_md_contains_project_name(self):
         with tempfile.TemporaryDirectory() as tmp:
             proj = Path(tmp) / "uniqueprojectname"
@@ -239,6 +254,20 @@ class TestConvert(unittest.TestCase):
             self.assertEqual(result.returncode, 0)
             commits = [ln for ln in result.stdout.strip().splitlines() if ln.strip()]
             self.assertEqual(len(commits), 2, f"Expected 2 commits, got: {commits}")
+
+    def test_convert_initial_branch_is_main(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            proj = Path(tmp) / "existing"
+            proj.mkdir()
+            (proj / "x.txt").write_text("hi", encoding="utf-8")
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                convert_project(proj, no_claude=True)
+            branch = subprocess.run(
+                ["git", "rev-parse", "--abbrev-ref", "HEAD"],
+                cwd=proj, capture_output=True, text=True,
+            ).stdout.strip()
+            self.assertEqual(branch, "main")
 
     def test_convert_skips_existing_scaffold_files(self):
         with tempfile.TemporaryDirectory() as tmp:

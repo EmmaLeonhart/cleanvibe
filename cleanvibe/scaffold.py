@@ -164,7 +164,9 @@ def convert_project(path: Path, dry_run: bool = False, no_claude: bool = False) 
 
     if not is_git_repo:
         # Commit 1: all existing files
-        subprocess.run(["git", "init"], cwd=path, capture_output=True)
+        subprocess.run(
+            ["git", "init", "-b", DEFAULT_BRANCH], cwd=path, capture_output=True
+        )
         subprocess.run(["git", "add", "."], cwd=path, capture_output=True)
         subprocess.run(
             ["git", "commit", "-m", "Initial commit: existing project files"],
@@ -291,8 +293,15 @@ def _prepend_or_write(filepath: Path, block: str) -> None:
         print(f"  Created {filepath.name}")
 
 
+DEFAULT_BRANCH = "main"
+
+
 def _git_init(path: Path, message=None) -> None:
-    subprocess.run(["git", "init"], cwd=path, capture_output=True)
+    # `-b main` pins the initial branch regardless of the user's git config.
+    # Without this, `git init` honours `init.defaultBranch` (still `master` on
+    # many installs), and downstream tooling that assumes `main` breaks. Needs
+    # git >= 2.28 (mid-2020).
+    subprocess.run(["git", "init", "-b", DEFAULT_BRANCH], cwd=path, capture_output=True)
     subprocess.run(["git", "add", "."], cwd=path, capture_output=True)
     if message is None:
         message = (
