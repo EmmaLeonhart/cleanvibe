@@ -4,6 +4,7 @@ Usage:
     cleanvibe new PATH          Create a new scaffolded project
     cleanvibe clone REPO [PATH] Clone a repo and inject scaffolding
     cleanvibe convert [PATH]    Convert an existing directory into a cleanvibe project
+    cleanvibe replicate URL     Scaffold a replication project for an arXiv/alphaxiv paper
     cleanvibe --version         Show version
 
 Zero dependencies. Just Python stdlib.
@@ -14,6 +15,7 @@ import sys
 from pathlib import Path
 
 from . import __version__
+from .replicate import replicate_project
 from .scaffold import clone_project, convert_project, create_project
 
 
@@ -70,6 +72,26 @@ def main(argv: list[str] | None = None) -> None:
         "--no-claude", action="store_true", help="Skip launching Claude Code after converting"
     )
 
+    # cleanvibe replicate URL [PATH]
+    replicate_parser = subparsers.add_parser(
+        "replicate",
+        help="Scaffold a standalone replication project for an arXiv/alphaxiv paper",
+    )
+    replicate_parser.add_argument(
+        "arxiv", help="arXiv or alphaxiv id / abs URL / pdf URL"
+    )
+    replicate_parser.add_argument(
+        "path", nargs="?", type=Path, default=None,
+        help="Target directory (defaults to replicating-<paper-slug>, "
+        "auto-suffixed -2/-3 if it exists)",
+    )
+    replicate_parser.add_argument(
+        "--dry-run", action="store_true", help="Show what would be created without writing anything"
+    )
+    replicate_parser.add_argument(
+        "--no-claude", action="store_true", help="Skip launching Claude Code after scaffolding"
+    )
+
     args = parser.parse_args(argv)
 
     if args.command is None:
@@ -102,6 +124,12 @@ def main(argv: list[str] | None = None) -> None:
             args.path = Path(repo_name)
         print(f"Cloning {args.repo} -> {args.path}")
         clone_project(args.repo, args.path, dry_run=args.dry_run, no_claude=args.no_claude)
+
+    elif args.command == "replicate":
+        print(f"Scaffolding replication project for: {args.arxiv}")
+        replicate_project(
+            args.arxiv, args.path, dry_run=args.dry_run, no_claude=args.no_claude
+        )
 
 
 if __name__ == "__main__":
