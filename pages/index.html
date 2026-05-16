@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="cleanvibe">
+  <meta property="og:description" content="A tiny zero-dependency Python CLI that scaffolds AI-assisted coding projects and launches Claude Code inside a well-structured environment. new · clone · convert · replicate.">
+  <meta property="og:url" content="https://cleanvibe.emmaleonhart.com/">
+  <meta property="og:site_name" content="cleanvibe">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="cleanvibe">
+  <meta name="twitter:description" content="State initializer for AI-assisted coding: scaffolds the project and the CLAUDE.md behavior contract, then launches Claude Code.">
+  <meta name="description" content="cleanvibe is a tiny, zero-dependency Python CLI that scaffolds AI-assisted coding projects with an opinionated CLAUDE.md contract and launches Claude Code.">
+  <title>cleanvibe</title>
+
+  <script>(function(){try{var t=localStorage.getItem('theme');if(t!=='light'&&t!=='dark')t='dark';document.documentElement.setAttribute('data-theme',t);}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();</script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <!-- The ONE shared identity. Same file as emmaleonhart.com/identity.css. -->
+  <link rel="stylesheet" href="/identity.css">
+
+  <style>
+    /* identity.css owns palette, .btn, .theme-toggle, .eyebrow, .card,
+       .aurora, type. Page-specific layout + the shared kit components
+       (compact search, verbatim Material GitHub widget, aurora-box +
+       emoji cards) per emmaleonhart.com/branding. */
+    html { scroll-behavior: smooth; scroll-padding-top: 88px; }
+    body { display: flex; justify-content: center; padding: 104px 24px 130px; position: relative; overflow-x: hidden; }
+    .container { max-width: 820px; width: 100%; position: relative; z-index: 2; }
+
+    .site-nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+      display: flex; align-items: center; gap: 16px; padding: 13px 24px;
+      background: color-mix(in srgb, var(--bg) 72%, transparent);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .site-nav .brand { font-family: var(--mono); font-size: 0.82rem; font-weight: 600; color: var(--text-strong); text-decoration: none; white-space: nowrap; }
+    .site-nav .brand:hover { color: var(--accent-bright); }
+    .nav-spacer { flex: 1; }
+    .site-nav .nav-right { display: flex; align-items: center; gap: 10px; }
+    .site-nav .theme-toggle { position: static; top: auto; right: auto; }
+
+    .search {
+      display: inline-flex; align-items: center; gap: 7px;
+      padding: 7px 12px; border-radius: 8px;
+      background: var(--bg-card); border: 1px solid var(--border);
+      transition: border-color 0.2s, background 0.2s, width 0.25s ease; width: 152px;
+    }
+    .search:focus-within { border-color: var(--accent); background: var(--bg-elevated); width: 232px; }
+    .search svg { width: 14px; height: 14px; fill: var(--text-mute); flex: none; }
+    .search input { border: none; outline: none; background: transparent; width: 100%; font-family: var(--sans); font-size: 0.82rem; color: var(--text); }
+    .search input::placeholder { color: var(--text-faint); }
+    @media (max-width: 680px) { .search { width: 116px; } .search:focus-within { width: 150px; } .site-nav .brand { font-size: 0.74rem; } }
+
+    .repo-widget {
+      display: inline-flex; align-items: center; gap: 11px;
+      padding: 8px 15px; border-radius: 8px; text-decoration: none;
+      background: var(--accent-soft); border: 1px solid var(--border-hover);
+      color: var(--text-strong);
+      transition: border-color 0.2s, background 0.2s, transform 0.2s;
+    }
+    .repo-widget:hover { border-color: var(--accent); transform: translateY(-1px); color: var(--text-strong); }
+    .repo-widget .rw-icon { display: flex; flex: none; }
+    .repo-widget .rw-icon svg { width: 23px; height: 23px; fill: var(--accent); }
+    .repo-widget .rw-body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+    .repo-widget .rw-repo { font-family: var(--sans); font-size: 0.8rem; font-weight: 700; line-height: 1.2; color: var(--text-strong); white-space: nowrap; }
+    .repo-widget .rw-facts { display: flex; align-items: center; gap: 11px; font-family: var(--sans); font-size: 0.66rem; color: var(--text-mute); }
+    .repo-widget .rw-fact { display: inline-flex; align-items: center; gap: 4px; font-variant-numeric: tabular-nums; }
+    .repo-widget .rw-fact svg { width: 12px; height: 12px; fill: currentColor; flex: none; }
+    .repo-widget .rw-fact.is-empty { display: none; }
+    @media (max-width: 680px) { .repo-widget .rw-facts { display: none; } }
+
+    .hero { margin-bottom: 56px; }
+    h1 {
+      font-size: clamp(2.4rem, 6vw, 3.6rem); font-weight: 700; margin: 20px 0;
+      letter-spacing: -1.2px; line-height: 1.04;
+      background: linear-gradient(120deg, var(--text-strong) 0%, var(--accent-bright) 58%, var(--sutra) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    h1 .serif { font-family: var(--serif); font-style: italic; font-weight: 400; }
+    .tagline { font-size: 1.16rem; color: var(--text-mute); line-height: 1.65; max-width: 620px; }
+    .tagline strong { color: var(--text-strong); font-weight: 600; }
+    .tagline .em { font-family: var(--serif); font-style: italic; font-size: 1.1em; color: var(--text); }
+    .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 28px; align-items: center; }
+    .install {
+      font-family: var(--mono); font-size: 0.9rem; color: var(--accent-bright);
+      background: var(--accent-soft); border: 1px solid var(--border-hover);
+      padding: 12px 18px; border-radius: 8px;
+    }
+    .install::before { content: '$ '; color: var(--text-faint); }
+
+    h2 {
+      display: flex; align-items: center; gap: 14px; font-family: var(--mono);
+      font-size: 0.72rem; font-weight: 500; text-transform: uppercase;
+      letter-spacing: 2px; color: var(--text-mute); margin-bottom: 26px;
+    }
+    h2 .num { color: var(--accent); }
+    h2::after { content: ''; flex: 1; height: 1px; background: linear-gradient(to right, var(--border-strong), transparent); }
+    .section { margin-bottom: 64px; }
+    .lead { font-size: 1.04rem; line-height: 1.8; color: var(--text); max-width: 660px; }
+    .lead strong { color: var(--text-strong); font-weight: 600; }
+    .lead code { font-family: var(--mono); font-size: 0.88em; color: var(--accent-bright); background: var(--accent-soft); padding: 2px 7px; border-radius: 4px; }
+
+    /* Aurora-box + emoji cards (the confirmed shared convention). */
+    .cmds { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; }
+    .cmd {
+      position: relative; overflow: hidden;
+      display: flex; flex-direction: column; gap: 10px;
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 14px; padding: 26px 28px;
+      --k: var(--accent); --k-soft: rgba(139,155,255,0.12); --k-glow: rgba(139,155,255,0.32);
+      transition: transform 0.28s cubic-bezier(0.2,0.8,0.2,1), border-color 0.28s, box-shadow 0.28s;
+    }
+    .cmd::before { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(135deg, var(--k-soft) 0%, transparent 52%); opacity: 0.55; transition: opacity 0.28s; }
+    .cmd::after { content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%; background: linear-gradient(180deg, var(--k) 0%, transparent 100%); opacity: 0.7; }
+    .cmd:hover { transform: translateY(-3px); border-color: var(--k); box-shadow: 0 22px 50px -28px var(--k-glow); }
+    .cmd:hover::before { opacity: 1; }
+    .cmd > * { position: relative; z-index: 1; }
+    .cmd .c-name { font-family: var(--mono); font-size: 0.95rem; font-weight: 600; color: var(--k); }
+    .cmd .c-emoji { font-size: 1.5rem; line-height: 1; }
+    .cmd .c-desc { font-size: 0.92rem; color: var(--text-mute); line-height: 1.62; }
+    .cmd .c-desc code { font-family: var(--mono); font-size: 0.86em; color: var(--text); background: rgba(255,255,255,0.04); padding: 1px 5px; border-radius: 4px; }
+    .cmd-a { --k: var(--accent); --k-soft: rgba(139,155,255,0.12); --k-glow: rgba(139,155,255,0.32); }
+    .cmd-b { --k: #67e8f9; --k-soft: rgba(103,232,249,0.12); --k-glow: rgba(103,232,249,0.30); }
+    .cmd-c { --k: #fb7185; --k-soft: rgba(251,113,133,0.12); --k-glow: rgba(251,113,133,0.30); }
+    .cmd-d { --k: var(--sutra); --k-soft: rgba(212,167,106,0.12); --k-glow: rgba(212,167,106,0.30); }
+
+    .sig { margin-top: 64px; display: flex; align-items: center; gap: 14px; color: var(--text-faint); font-family: var(--mono); font-size: 0.72rem; letter-spacing: 1px; }
+    .sig::before { content: ''; width: 24px; height: 1px; background: var(--border-strong); }
+    @media (max-width: 600px) { body { padding: 88px 16px 90px; } .section { margin-bottom: 48px; } }
+  </style>
+</head>
+<body>
+  <nav class="site-nav" aria-label="Primary">
+    <a class="brand" href="/">cleanvibe</a>
+    <div class="nav-spacer"></div>
+    <label class="search" title="Search cleanvibe">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z"></path></svg>
+      <input id="kit-search" type="search" placeholder="Search" aria-label="Search cleanvibe" autocomplete="off">
+    </label>
+    <div class="nav-right">
+      <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle light and dark theme" title="Toggle light / dark">
+        <svg class="icon-sun" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,2L14.39,5.42C13.65,5.15 12.84,5 12,5C11.16,5 10.35,5.15 9.61,5.42L12,2M3.34,7L7.5,6.65C6.9,7.16 6.36,7.78 5.94,8.5C5.5,9.24 5.25,10 5.11,10.79L3.34,7M3.36,17L5.12,13.23C5.26,14 5.53,14.78 5.95,15.5C6.37,16.24 6.91,16.86 7.5,17.37L3.36,17M20.65,7L18.88,10.79C18.74,10 18.47,9.23 18.05,8.5C17.63,7.78 17.1,7.15 16.5,6.64L20.65,7M20.64,17L16.5,17.36C17.09,16.85 17.62,16.22 18.04,15.5C18.46,14.77 18.73,14 18.87,13.21L20.64,17M12,22L9.59,18.56C10.33,18.83 11.14,19 12,19C12.82,19 13.63,18.86 14.37,18.59L12,22Z"></path></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.75,4.09L15.22,6.03L16.13,9.09L13.5,7.28L10.87,9.09L11.78,6.03L9.25,4.09L12.44,4L13.5,1L14.56,4L17.75,4.09M21.25,11L19.61,12.25L20.2,14.23L18.5,13.06L16.8,14.23L17.39,12.25L15.75,11L17.81,10.95L18.5,9L19.19,10.95L21.25,11M18.97,15.95C19.8,15.87 20.69,17.05 20.16,17.8C19.84,18.25 19.5,18.67 19.08,19.07C15.17,23 8.84,23 4.94,19.07C1.03,15.17 1.03,8.83 4.94,4.93C5.34,4.53 5.76,4.17 6.21,3.85C6.96,3.32 8.14,4.21 8.06,5.04C7.79,7.9 8.75,10.87 10.95,13.06C13.14,15.26 16.1,16.22 18.97,15.95M17.33,17.97C14.5,17.81 11.7,16.64 9.53,14.5C7.36,12.31 6.2,9.5 6.04,6.68C3.23,9.82 3.34,14.4 6.35,17.41C9.37,20.43 14,20.54 17.33,17.97Z"></path></svg>
+      </button>
+      <a class="repo-widget" href="https://github.com/EmmaLeonhart/cleanvibe">
+        <span class="rw-icon"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg></span>
+        <span class="rw-body">
+          <span class="rw-repo">EmmaLeonhart/cleanvibe</span>
+          <span class="rw-facts">
+            <span class="rw-fact rw-version-wrap is-empty"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5,7A1.5,1.5 0 0,1 4,5.5A1.5,1.5 0 0,1 5.5,4A1.5,1.5 0 0,1 7,5.5A1.5,1.5 0 0,1 5.5,7M21.41,11.58L12.41,2.58C12.05,2.22 11.55,2 11,2H4C2.89,2 2,2.89 2,4V11C2,11.55 2.22,12.05 2.59,12.41L11.58,21.41C11.95,21.78 12.45,22 13,22C13.55,22 14.05,21.78 14.41,21.41L21.41,14.41C21.78,14.05 22,13.55 22,13C22,12.44 21.77,11.94 21.41,11.58Z"/></svg><span class="rw-version"></span></span>
+            <span class="rw-fact"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12,17.27L18.18,21L16.54,13.97L22,9.24L14.81,8.62L12,2L9.19,8.62L2,9.24L7.45,13.97L5.82,21L12,17.27Z"/></svg><span class="rw-stars">&middot;</span></span>
+            <span class="rw-fact"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6,2A3,3 0 0,1 9,5C9,6.28 8.19,7.38 7,7.82V11H11V7.82C9.81,7.38 9,6.28 9,5A3,3 0 0,1 12,2A3,3 0 0,1 15,5C15,6.28 14.19,7.38 13,7.82V11H17A2,2 0 0,1 19,13V16.18C20.19,16.62 21,17.72 21,19A3,3 0 0,1 18,22A3,3 0 0,1 15,19C15,17.72 15.81,16.62 17,16.18V13H7V16.18C8.19,16.62 9,17.72 9,19A3,3 0 0,1 6,22A3,3 0 0,1 3,19C3,17.72 3.81,16.62 5,16.18V13A2,2 0 0,1 7,11"/></svg><span class="rw-forks">&middot;</span></span>
+          </span>
+        </span>
+      </a>
+    </div>
+  </nav>
+
+  <div class="aurora" aria-hidden="true"></div>
+
+  <div class="container">
+    <header class="hero">
+      <span class="eyebrow">Project scaffolding</span>
+      <h1>cleanvibe, <span class="serif">a state initializer</span></h1>
+      <p class="tagline">A tiny, zero-dependency Python CLI that removes the friction between <span class="em">&ldquo;I want to build something&rdquo;</span> and <span class="em">&ldquo;Claude is working inside a well-structured environment.&rdquo;</span> It scaffolds the project, injects an opinionated <strong>CLAUDE.md</strong> behavior contract, and launches Claude Code.</p>
+      <div class="hero-actions">
+        <span class="install">pip install cleanvibe</span>
+        <a class="btn btn-secondary" href="https://github.com/EmmaLeonhart/cleanvibe">GitHub</a>
+      </div>
+    </header>
+
+    <section class="section">
+      <h2><span class="num">01 &mdash;</span> What it is</h2>
+      <div class="lead">
+        <p>cleanvibe is not a coding tool &mdash; it is a state initializer. The real value lives in the <code>CLAUDE.md</code> it injects: a behavior contract that enforces documentation discipline, meaningful commits, and iterative file-based thinking, plus a <code>queue.md</code> pre-seeded with a first-session bootstrap sequence. Every project starts disciplined instead of as a blank-repo scramble. Zero runtime dependencies; works on Windows, Linux, and macOS; Python 3.9+.</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2><span class="num">02 &mdash;</span> The subcommands</h2>
+      <div class="cmds" id="cmds">
+        <div class="cmd cmd-a" data-cmd="new fresh project scaffold bootstrap">
+          <span class="c-emoji">&#127793;</span>
+          <span class="c-name">cleanvibe new</span>
+          <p class="c-desc">Scaffold a fresh project: <code>CLAUDE.md</code>, <code>README.md</code>, <code>queue.md</code> (pre-seeded bootstrap), <code>.gitignore</code>, an initial git commit, then launch Claude Code inside it.</p>
+        </div>
+        <div class="cmd cmd-b" data-cmd="clone onboard existing codebase branch">
+          <span class="c-emoji">&#128279;</span>
+          <span class="c-name">cleanvibe clone</span>
+          <p class="c-desc">Onboard an existing repo. Works on a dedicated <code>cleanvibe-onboarding</code> branch &mdash; the default branch is untouched. Prepends scaffold if files exist; never overwrites.</p>
+        </div>
+        <div class="cmd cmd-c" data-cmd="convert in-place inject missing">
+          <span class="c-emoji">&#9851;</span>
+          <span class="c-name">cleanvibe convert</span>
+          <p class="c-desc">In-place onboarding for a project you are already in: injects only the scaffold files that are missing. Non-destructive by contract.</p>
+        </div>
+        <div class="cmd cmd-d" data-cmd="replicate paper arxiv alphaxiv reproduction">
+          <span class="c-emoji">&#128218;</span>
+          <span class="c-name">cleanvibe replicate</span>
+          <p class="c-desc">Point it at an arXiv or alphaxiv URL and it scaffolds a standalone paper-replication project: <code>SKILL.md</code> plan, the paper as a submodule target, and CI that builds a findings site, a PDF report, and a ZIP package.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2><span class="num">03 &mdash;</span> Stable since v1.0.0</h2>
+      <div class="lead">
+        <p>Semantic versioning from here on. <code>new</code>, <code>clone</code>, <code>convert</code>, and <code>replicate</code> are stable within the 1.x line; the guaranteed set of injected files is fixed; <code>clone</code>/<code>convert</code> never overwrite and <code>replicate</code> never errors on a name collision; zero runtime dependencies is a hard guarantee. Preview anything with <code>--dry-run</code>.</p>
+      </div>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="https://github.com/EmmaLeonhart/cleanvibe">Read on GitHub &rarr;</a>
+        <a class="btn btn-secondary" href="https://emmaleonhart.com">Emma Leonhart</a>
+      </div>
+    </section>
+
+    <div class="sig">cleanvibe.emmaleonhart.com</div>
+  </div>
+
+  <script>
+    (function(){
+      var b=document.getElementById('theme-toggle');
+      if(b)b.addEventListener('click',function(){var c=document.documentElement.getAttribute('data-theme')==='light'?'light':'dark';var n=c==='light'?'dark':'light';document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('theme',n);}catch(e){}});
+      var q=document.getElementById('kit-search');
+      if(q)q.addEventListener('input',function(){
+        var v=q.value.trim().toLowerCase();
+        document.querySelectorAll('#cmds .cmd').forEach(function(c){
+          var hay=((c.getAttribute('data-cmd')||'')+' '+c.textContent).toLowerCase();
+          c.style.display = (v.length>0 && hay.indexOf(v)===-1) ? 'none' : '';
+        });
+      });
+      function setAll(s,v){document.querySelectorAll(s).forEach(function(e){e.textContent=v;});}
+      fetch('https://api.github.com/repos/EmmaLeonhart/cleanvibe')
+        .then(function(r){return r.ok?r.json():null;})
+        .then(function(d){ if(!d)return;
+          if(typeof d.stargazers_count==='number')setAll('.rw-stars',d.stargazers_count);
+          if(typeof d.forks_count==='number')setAll('.rw-forks',d.forks_count);
+        }).catch(function(){});
+      fetch('https://api.github.com/repos/EmmaLeonhart/cleanvibe/releases/latest')
+        .then(function(r){return r.ok?r.json():null;})
+        .then(function(d){ if(d&&d.tag_name){ setAll('.rw-version',d.tag_name);
+          document.querySelectorAll('.rw-version-wrap').forEach(function(e){e.classList.remove('is-empty');}); } }).catch(function(){});
+    })();
+  </script>
+</body>
+</html>
