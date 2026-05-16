@@ -150,6 +150,98 @@ These items are the default opening sequence for a new cleanvibe project. Work t
 """
 
 
+def clone_claude_md(project_name: str) -> str:
+    date = datetime.now().strftime("%Y-%m-%d")
+    return f"""# {project_name} — cleanvibe onboarding
+
+> This repository was **cloned and is being onboarded** by `cleanvibe clone`
+> on {date}. cleanvibe checked out a dedicated `cleanvibe-onboarding` branch
+> and committed this file plus `queue.md` onto it — the default branch is
+> untouched. This is an *existing codebase*, not a fresh project: there is no
+> `data_lake/` because nothing was dropped in to triage.
+
+## How to work here
+
+- **Work `queue.md` top to bottom.** It is a small onboarding sequence:
+  understand the repo, get its documentation honest, make `CLAUDE.md` reflect
+  the repo's real practices, ensure tests/CI exist, then hand off to the
+  repo's own backlog.
+- **This file is provisional.** Do not impose cleanvibe conventions on a repo
+  that already has its own. As you learn how this project actually works
+  (language, framework, test runner, build, commit/branch conventions, CI,
+  review norms), **rewrite this `CLAUDE.md`** to capture *those* practices so
+  future sessions inherit the real contract — not this placeholder.
+- **Commit early and often on the `cleanvibe-onboarding` branch.** Keep
+  existing tests green. Don't fight the project's established style.
+- If the repo already has planning artifacts (`todo.md`, `queue.md`,
+  `ROADMAP`, `BACKLOG`), synthesize their intent rather than overwriting them.
+
+## Workflow Rules (until replaced by the repo's real ones)
+
+- Plan into `queue.md` before executing; update it in the same commit as the
+  work; delete finished items (no checkmarks).
+- Keep documentation truthful as you go — that is the whole point of this
+  onboarding pass.
+"""
+
+
+def clone_queue_md(project_name: str) -> str:
+    return f"""# {project_name} — Onboarding Queue
+
+**This file is a queue, not a state snapshot.** It is the short onboarding
+sequence `cleanvibe clone` injects for an *existing* codebase. Finished work
+lives in `git log`. When an item is done, delete it — no checkmarks.
+
+See `CLAUDE.md` for how to work in this onboarding branch. Note: there is no
+`data_lake/` here — this is a real repository, not dropped-in files.
+
+---
+
+## Active — Onboarding
+
+`cleanvibe clone` already did step 0: cloned the repo, created and checked
+out the `cleanvibe-onboarding` branch, and committed these onboarding files.
+Work the rest top to bottom; delete each item in the commit that completes it.
+
+1. **Read the whole repository.** Build an accurate mental map: directory
+   layout, entry points, how to build/run it, how to test it, dependencies,
+   CI, and the project's apparent conventions. Capture this understanding as
+   you go (it feeds the next two steps).
+
+2. **Make the documentation honest.** If the repo has docs (`README`, `docs/`,
+   wiki) that are stale or thin, correct and extend them to match what the
+   code actually does. If documentation is missing, write concise docs
+   covering setup, usage, and architecture.
+
+3. **Rewrite `CLAUDE.md` to the repo's real practices.** Replace the
+   provisional onboarding text with the project's actual development
+   contract: language/framework, test runner, build, commit and branch
+   conventions, CI, review norms. This is the durable artifact future
+   sessions inherit.
+
+4. **Tests & CI.** If tests are sparse or absent, add a baseline suite for
+   the core paths using the project's existing/most-appropriate framework.
+   If there is no CI, add a minimal workflow that runs the tests. Keep any
+   existing tests passing.
+
+5. **Synthesize planning artifacts and hand off.** If the repo already has a
+   `todo.md` / `queue.md` / `ROADMAP` / `BACKLOG`, merge their intent into the
+   repo's own `todo.md` (its real backlog). Then stop driving from THIS
+   onboarding queue and start working the repo's own `todo.md`.
+
+If `cleanvibe clone` is run again later, it prepends a fresh onboarding block
+to the top of `CLAUDE.md` and `queue.md`. Treat the top-most block as the
+current marching orders and reconcile it with the content preserved below it.
+
+---
+
+## Pointers
+
+- The repo's own backlog (work this once onboarding is done): `todo.md`.
+- Narrative history: `git log`.
+"""
+
+
 RUNCLAUDE_BAT = """@echo off
 cd /d "%~dp0"
 claude
