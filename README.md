@@ -27,17 +27,30 @@ This will:
 6. Initialize a git repo with an initial commit
 7. Launch Claude Code inside the project
 
-### Clone an existing repo
+### Clone an existing repo — codebase onboarding
 
 ```
 cleanvibe clone https://github.com/user/repo
 ```
 
-This will:
+`clone` is for **onboarding an existing codebase**, not bootstrapping a blank
+one. It is deliberately different from `new`:
+
 1. `git clone` the repository
-2. Check for missing `CLAUDE.md`, `README.md`, `.gitignore`
-3. Inject any missing files without overwriting existing ones
-4. Launch Claude Code inside the project
+2. Create and check out a dedicated `cleanvibe-onboarding` branch — **the
+   default branch is left untouched**
+3. *Prepend-or-write* an onboarding `CLAUDE.md` and `queue.md`: if the repo
+   already has them, the fresh block goes on top (newest first) and the
+   original content is preserved below — re-running just layers another block
+4. Inject `.gitignore` only if missing. **No `data_lake/`** (it is a real
+   codebase, nothing was dropped in) and **no README overwrite**
+5. Commit the onboarding scaffold on the branch
+6. Launch Claude Code inside the project
+
+The onboarding `queue.md` is small and focused: read & document the repo,
+make existing docs honest, **rewrite `CLAUDE.md` to the repo's real
+development practices**, add tests/CI if sparse, then synthesize any existing
+planning artifacts and hand off to the repo's own `todo.md`.
 
 ### Replicate a paper
 
@@ -86,6 +99,30 @@ The `CLAUDE.md` template enforces:
 ## Cross-platform
 
 Works on Windows, Linux, and macOS. Zero dependencies beyond Python 3.9+.
+
+## Website
+
+Full walkthrough — what cleanvibe is and what each subcommand does — at the
+project site (built from `site/` and deployed by GitHub Actions):
+**https://immanuelle.github.io/cleanvibe/**
+
+## Stability
+
+As of **v1.0.0**, cleanvibe commits to the following contract (semantic
+versioning from here on):
+
+- **Subcommands** `new`, `clone`, `convert`, and `replicate` are stable. Their
+  core behavior will not change incompatibly within the 1.x line.
+- **Injected files**: `new` guarantees `CLAUDE.md`, `README.md`, `queue.md`,
+  `.gitignore`, and `data_lake/.gitkeep`. `replicate` additionally guarantees
+  `SKILL.md`, `paper.json`, `download_paper.py`, and `replication_target/`.
+- **Non-destructive by contract**: `clone` and `convert` never overwrite
+  existing files — `clone` prepends; `convert` only injects what is missing.
+  `replicate` never errors on a name collision (silent `-2`/`-3` suffix).
+- **Template wording** may evolve (improvements to the workflow contract are
+  not breaking); the *set* of guaranteed files and the subcommand contracts
+  above are what 1.x holds stable.
+- **Zero runtime dependencies** remains a hard guarantee for the 1.x line.
 
 ## License
 
