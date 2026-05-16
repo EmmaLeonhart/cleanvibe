@@ -34,6 +34,11 @@ class TestParseArxivId(unittest.TestCase):
         self.assertEqual(parse_arxiv_id("ARXIV.ORG/abs/1706.03762"), "1706.03762")
         self.assertEqual(parse_arxiv_id("cs.CL/0001001"), "cs.CL/0001001")
 
+    def test_accepts_alphaxiv_links(self):
+        self.assertEqual(parse_arxiv_id("https://www.alphaxiv.org/abs/2604.06425"), "2604.06425")
+        self.assertEqual(parse_arxiv_id("https://alphaxiv.org/pdf/1706.03762v5.pdf"), "1706.03762")
+        self.assertEqual(parse_arxiv_id("ALPHAXIV.ORG/abs/1706.03762"), "1706.03762")
+
     def test_rejects_garbage(self):
         with self.assertRaises(ValueError):
             parse_arxiv_id("not-an-id")

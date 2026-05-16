@@ -41,7 +41,12 @@ def parse_arxiv_id(value: str) -> str:
     Raises ValueError if the input isn't recognisably arXiv.
     """
     value = value.strip()
-    m = re.search(r"arxiv\.org/(?:abs|pdf|html)/([^\s?#]+)", value, flags=re.IGNORECASE)
+    # Accept arxiv.org and alphaxiv.org (which mirrors arXiv ids) abs/pdf/html URLs.
+    m = re.search(
+        r"(?:arxiv|alphaxiv)\.org/(?:abs|pdf|html)/([^\s?#]+)",
+        value,
+        flags=re.IGNORECASE,
+    )
     if m:
         value = m.group(1)
     if value.endswith(".pdf"):

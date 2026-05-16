@@ -6,6 +6,9 @@ queue-driven planning, and thoughtful work tracking.
 """
 
 from datetime import datetime
+from string import Template
+
+from .arxiv import ArxivPaper
 
 
 def claude_md(project_name: str) -> str:
