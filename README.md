@@ -103,8 +103,8 @@ Works on Windows, Linux, and macOS. Zero dependencies beyond Python 3.9+.
 ## Website
 
 Full walkthrough — what cleanvibe is and what each subcommand does — at the
-project site (built from `site/` and deployed by GitHub Actions):
-**https://immanuelle.github.io/cleanvibe/**
+project site (built from `pages/` and deployed by GitHub Actions):
+**https://cleanvibe.emmaleonhart.com/**
 
 ## Stability
 

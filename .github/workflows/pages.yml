@@ -1,4 +1,5 @@
-# Deploys the static cleanvibe site (site/) to GitHub Pages via Actions.
+# Deploys the cleanvibe site (pages/) to GitHub Pages via Actions.
+# Custom domain cleanvibe.emmaleonhart.com is pinned by pages/CNAME.
 # Pages Source is already configured as "GitHub Actions" on this repo.
 
 name: pages
@@ -7,7 +8,7 @@ on:
   push:
     branches: [master]
     paths:
-      - "site/**"
+      - "pages/**"
       - ".github/workflows/pages.yml"
   workflow_dispatch:
 
@@ -31,6 +32,6 @@ jobs:
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: site
+          path: pages
       - id: deployment
         uses: actions/deploy-pages@v4
