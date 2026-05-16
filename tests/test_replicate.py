@@ -59,6 +59,7 @@ class TestReplicateScaffold(unittest.TestCase):
             for rel in (
                 "CLAUDE.md",
                 "queue.md",
+                "devlog.md",
                 "README.md",
                 "SKILL.md",
                 "paper.json",
@@ -71,6 +72,11 @@ class TestReplicateScaffold(unittest.TestCase):
             ):
                 self.assertTrue((target / rel).is_file(), f"missing {rel}")
             self.assertTrue((target / ".git").is_dir(), "git repo not initialized")
+            # devlog.md and queue.md both reference the devlog workflow
+            devlog = (target / "devlog.md").read_text(encoding="utf-8")
+            self.assertIn(f"replicating-{SLUG}", devlog)
+            self.assertIn("queue.md", devlog)
+            self.assertIn("devlog.md", (target / "queue.md").read_text(encoding="utf-8"))
 
             meta = json.loads((target / "paper.json").read_text(encoding="utf-8"))
             self.assertEqual(meta["arxiv_id"], "1706.03762")

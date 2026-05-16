@@ -1,0 +1,172 @@
+# cleanvibe — Devlog
+
+**This file is where "done" lives.** `queue.md` is delete-only: when a queue
+item is finished, the item is **deleted from `queue.md`** and a dated entry
+is **appended here**, in the same commit as the work, then pushed. Never
+tick a box in place — a checked box left in `queue.md` is the failure mode
+this file exists to prevent.
+
+Releases (tag + a one-line note) and notable milestones also live here, so
+this is the chronological narrative of the project, complementary to (but
+denser than) `git log`. Newest entries at the bottom.
+
+**Every cleanvibe-scaffolded project gets the same `devlog.md` convention.**
+`cleanvibe new` writes one with a starter "project scaffolded" entry;
+`cleanvibe convert` and `cleanvibe clone` inject one with a "backfill from
+`git log`" instruction so existing repos catch their own devlog up to
+present before normal work resumes; `cleanvibe replicate` writes one for
+the replication project. This repo's devlog is dogfooding the convention.
+
+See `CLAUDE.md` § "Workflow Rules" and `queue.md`'s preamble.
+
+---
+
+## 2026-02-14 — Bootstrap
+
+`cleanvibe` repo is born. Initial commit (`49f30c5`) drops a bootstrap
+`CLAUDE.md`; the package itself (`0382812`) lands the same day — the repo
+that bootstrapped itself. `pyproject.toml` build backend is corrected
+(`bca9202`) so `pip install -e .` works.
+
+## 2026-02-15 — v0.1.x line: PyPI publishing + Windows fixes
+
+- **v0.1.0** (`c05c038`) — GitHub Actions workflow for PyPI trusted publishing.
+- **v0.1.1** (`b53eb5e`) — drop obsolete notes file.
+- **v0.1.2** (`1cedec1`) — remove legacy `new-repo.bat` (`cleanvibe` is the
+  single entry point now).
+
+## 2026-02-21 — v0.1.3: Windows launch fix
+
+- **v0.1.3** (`e998e25`) — Windows launch uses `cwd=` instead of `cd /d`,
+  and opens Explorer on `cleanvibe new` so the user sees their new project
+  immediately.
+
+## 2026-03-06 — v0.1.4: Windows `runclaude.bat` + testing guidance
+
+- **v0.1.4** (`b96e463`) — every Windows-scaffolded project gets a
+  `runclaude.bat` (double-click to launch Claude in the project), and
+  CLAUDE.md template gains testing guidance.
+
+## 2026-03-19 — v0.2.0: `cleanvibe convert`
+
+- New `cleanvibe convert` subcommand turns an existing directory into a
+  cleanvibe project in-place (two commits: existing files, then injected
+  scaffold). Missing-only injection — never overwrites.
+- **v0.2.0** (`10c8275`).
+
+## 2026-04-09 — v0.2.1: planning rule flipped to *pro*-planning
+
+- The CLAUDE.md template originally discouraged elaborate planning; reality
+  showed the opposite — agents need a written plan to survive context
+  resets. Replaced anti-planning guidance with pro-planning guidance.
+- **v0.2.1** (`283cfbb`).
+
+## 2026-04-18 — Replication-skill v0.1 (separate project, soon to be absorbed)
+
+- A sibling project `replication_skill` lands here as Claude-chat artifacts
+  and a v0.1 arXiv paper scaffolder (`8e87146`), plus a `papers.json` index
+  and bulk downloader (`3945ba1`). This work will later be absorbed into
+  cleanvibe as the `replicate` subcommand.
+
+## 2026-05-13 — v0.3.0–v0.4.0: queue.md + bootstrap queue
+
+- **v0.3.0** (`18a12fb`) — `queue.md` ships in the scaffold; CLAUDE.md gains
+  the "plan-into-queue first, then execute" workflow rule. CI workflow
+  added with cross-platform test matrix (`57ef168`).
+- **v0.3.1** (`c37e351`) — informative initial commit message; the repo
+  starts dogfooding its own `queue.md`.
+- **v0.4.0** (`955f5e9`) — every new project ships with a default
+  first-session bootstrap queue (triage data_lake → infer project →
+  interview user → write real queue → push to GitHub → work).
+
+## 2026-05-13 — v0.5.0: `todo.md` long-horizon backlog
+
+- **v0.5.0** (`eda1e42`) — inserts a `todo.md` step into the bootstrap
+  sequence so the long-horizon picture exists before the concrete queue is
+  written. Items flow `todo.md` → `queue.md` → done. Repo dogfoods its own
+  `todo.md`.
+- First PR merged (`46ffd47`, #1).
+
+## 2026-05-16 — v0.6.0: `data_lake/.gitkeep` from commit 1
+
+- **v0.6.0** (`293733f`) — the scaffold eagerly creates `data_lake/.gitkeep`
+  (in `create_project` and convert/clone injection) so the directory exists
+  from the first commit. A user can drop files into `data_lake/` *before*
+  the bootstrap session ever runs.
+
+## 2026-05-16 — Subtree-merge `replication_skill` into cleanvibe
+
+- `replication_skill` is sunset as a standalone project and subtree-merged
+  into cleanvibe (`df3979d`) so the replication work and the scaffold work
+  share a codebase.
+
+## 2026-05-16 — v0.7.0: `cleanvibe replicate` subcommand
+
+- arXiv fetch ported into `cleanvibe/arxiv.py` using stdlib `urllib` only
+  (`0af851e`) — preserves the zero-dependency guarantee.
+- Accepts `alphaxiv.org` links too (`9e7dee5`).
+- Replication-project templates land as inline `string.Template` constants
+  (`7f9014b`); no package data.
+- `cleanvibe/replicate.py` (`5b8d549`) + CLI wiring (`4240b41`); tests
+  (`e451b59`) monkeypatch `fetch_paper` so no network is needed.
+- Disposition note kept (`54199c9`): absorb replication_skill into
+  cleanvibe; keep the reference corpus under `docs/replication-examples/`.
+- **v0.7.0** (`82eba7e`) — documents `cleanvibe replicate`; finishes the
+  replication integration.
+
+## 2026-05-16 — v1.0.0: clone reworked, GitHub Pages site, Stability contract
+
+- `cleanvibe clone` is reworked into *codebase onboarding* (`008275c`):
+  dedicated `cleanvibe-onboarding` branch, default branch untouched,
+  clone-specific templates (`6c59ad5`), CLAUDE.md/queue.md *prepended*
+  (never overwritten), no `data_lake/`, no README injection.
+- Tests cover clone end-to-end with a local-temp-repo source — no network
+  (`8244b80`).
+- Static GitHub Pages site lands under `site/` with an Actions deploy
+  workflow (`15dec28`).
+- **v1.0.0** (`fd8fd48`) — clone onboarding docs, Stability contract, site
+  link. First 1.x release.
+
+## 2026-05-16 — Grokking worked example + apex landing page
+
+- The first end-to-end replication worked example: Grokking (arXiv:2201.02177)
+  is locked as the target (`7269199`) and a real replication is produced
+  via `cleanvibe replicate` (`e903f9a`). The site links the Grokking
+  example from the Replicate tab (`646fdbc`).
+- `cleanvibe.emmaleonhart.com` subdomain site added (`0b31c39`), sharing
+  the visual identity used across the constellation of projects.
+
+## 2026-05-16 — devlog.md feature planned
+
+- Failure mode observed: agents kept *ticking off* `queue.md` items in
+  place (`[x]`, "DONE") instead of deleting them, so the queue rotted into
+  a half state-snapshot. Fix specced into `queue.md`: introduce `devlog.md`
+  as the canonical home for completed work. Finishing a queue item =
+  delete from `queue.md` + append a dated entry to `devlog.md` + commit +
+  push. Spec lands as `c57c79f` and is then made fully resumable with
+  explicit DONE/TODO markers (`273b46c`) so a fresh session can pick it up
+  with no chat context.
+
+## 2026-05-16 — v1.1.0: devlog.md ships across all scaffolds + PyPI build fix
+
+- `devlog_md()` template added (`cleanvibe/templates.py`); `queue_md`,
+  `claude_md`, `todo_md`, the clone templates, and the replication
+  templates all reference the devlog rule.
+- `create_project`, `_inject_scaffold` (convert), `clone_project`, and
+  `replicate_project` now all write `devlog.md` (clone/convert get the
+  "backfill from git log" variant; new/replicate get the fresh starter
+  entry).
+- Tests extended in `test_scaffold.py`, `test_clone.py`, `test_replicate.py`
+  — devlog presence, content, and the "backfill" instruction for the
+  existing-repo variant. 30/30 green locally.
+- **PyPI publish build fix**: the v1.0.0 release's Publish-to-PyPI job
+  failed at "Build package". Reproduced locally — setuptools flat-layout
+  auto-discovery was picking up sibling directories `site/` and `pages/`
+  as candidate packages, refusing to build with "Multiple top-level
+  packages discovered". Fixed in `pyproject.toml` with an explicit
+  `[tool.setuptools] packages = ["cleanvibe"]`. Local
+  `python -m build` now produces both sdist and wheel cleanly. This unblocks
+  v1.1.0 reaching PyPI.
+- This repo's own `devlog.md` (this file) backfilled from `git log` —
+  dogfooding the same convention every scaffolded project now ships with.
+- **v1.1.0**.

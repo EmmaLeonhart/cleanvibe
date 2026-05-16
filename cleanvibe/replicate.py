@@ -65,6 +65,7 @@ def replicate_project(arxiv, path=None, dry_run: bool = False, no_claude: bool =
         for rel in (
             "CLAUDE.md",
             "queue.md",
+            "devlog.md",
             "README.md",
             "SKILL.md",
             "paper.json",
@@ -89,6 +90,7 @@ def replicate_project(arxiv, path=None, dry_run: bool = False, no_claude: bool =
 
     _write(target / "CLAUDE.md", templates.replication_claude_md(paper))
     _write(target / "queue.md", templates.replication_queue_md(paper))
+    _write(target / "devlog.md", templates.devlog_md(f"replicating-{paper.slug}"))
     _write(target / "README.md", templates.replication_readme_md(paper))
     _write(target / "SKILL.md", templates.replication_skill_md(paper))
     _write(target / "download_paper.py", templates.replication_download_paper_py(paper))

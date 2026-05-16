@@ -40,6 +40,9 @@ class TestCreateProject(unittest.TestCase):
             self.assertTrue((proj / "CLAUDE.md").is_file())
             self.assertTrue((proj / "README.md").is_file())
             self.assertTrue((proj / "queue.md").is_file())
+            # devlog.md is the canonical home for "done" — every project gets one
+            # so queue.md can stay strictly delete-only.
+            self.assertTrue((proj / "devlog.md").is_file())
             self.assertTrue((proj / ".gitignore").is_file())
             # data_lake exists from the first commit so users can drop
             # files in before the bootstrap session runs.
@@ -114,6 +117,38 @@ class TestCreateProject(unittest.TestCase):
             # The flow direction must be documented
             self.assertIn("todo.md", content)
             self.assertIn("queue.md", content)
+
+    def test_devlog_md_template_describes_its_role(self):
+        # devlog_md() exists, names the project, and explains the "delete from
+        # queue + append dated entry here" rule (the whole point of the file).
+        content = templates.devlog_md("myproj")
+        self.assertIn("myproj", content)
+        lower = content.lower()
+        self.assertIn("devlog", lower)
+        self.assertIn("queue.md", content)
+        self.assertIn("delete", lower)
+        # The starter entry mentions scaffolding (so the file has at least one entry).
+        self.assertIn("Scaffolded", content)
+
+    def test_devlog_md_clone_variant_says_backfill(self):
+        # The clone-style starter must instruct the agent to backfill from git log.
+        content = templates.devlog_md("myproj", clone=True)
+        lower = content.lower()
+        self.assertIn("backfill", lower)
+        self.assertIn("git log", lower)
+
+    def test_bootstrap_queue_references_devlog(self):
+        # The bootstrap queue's preamble + step instructions must tell the
+        # agent that finishing an item = delete from queue + append to devlog.
+        with tempfile.TemporaryDirectory() as tmp:
+            proj = Path(tmp) / "myproj"
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                create_project(proj, no_claude=True)
+            queue_content = (proj / "queue.md").read_text(encoding="utf-8")
+            claude_content = (proj / "CLAUDE.md").read_text(encoding="utf-8")
+            self.assertIn("devlog.md", queue_content)
+            self.assertIn("devlog.md", claude_content)
 
     def test_todo_md_template_exists_and_describes_flow(self):
         # The todo_md() builder must produce a file that explains its role
@@ -218,9 +253,10 @@ class TestConvert(unittest.TestCase):
 
             # CLAUDE.md must not be overwritten
             self.assertEqual((proj / "CLAUDE.md").read_text(encoding="utf-8"), custom)
-            # README, queue.md, and .gitignore should still be injected
+            # README, queue.md, devlog.md, and .gitignore should still be injected
             self.assertTrue((proj / "README.md").is_file())
             self.assertTrue((proj / "queue.md").is_file())
+            self.assertTrue((proj / "devlog.md").is_file())
             self.assertTrue((proj / ".gitignore").is_file())
             self.assertTrue((proj / "data_lake" / ".gitkeep").is_file())
 

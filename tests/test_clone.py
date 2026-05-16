@@ -79,6 +79,15 @@ class TestCloneOnboarding(unittest.TestCase):
             self.assertIn("cleanvibe-onboarding", claude)
             self.assertIn("Onboarding", queue)
 
+            # devlog.md injected for existing repo, with backfill instruction.
+            self.assertTrue((dest / "devlog.md").is_file())
+            devlog = (dest / "devlog.md").read_text(encoding="utf-8")
+            self.assertIn("backfill", devlog.lower())
+            self.assertIn("git log", devlog.lower())
+            # Onboarding queue's first step also mentions backfilling devlog.
+            self.assertIn("devlog.md", queue)
+            self.assertIn("Backfill", queue)
+
             # No data_lake/, and cleanvibe did NOT inject a README.
             self.assertFalse((dest / "data_lake").exists())
             self.assertFalse((dest / "README.md").exists())
