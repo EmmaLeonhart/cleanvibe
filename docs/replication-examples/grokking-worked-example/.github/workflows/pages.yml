@@ -1,0 +1,53 @@
+# Publishes FINDINGS.md as a GitHub Pages site + a transportable PDF report.
+#
+# TODO (one-time, by the repo owner):
+#   1. Make this repository public.
+#   2. Settings -> Pages -> Source: "GitHub Actions".
+# Until then this workflow will run but the deploy step has nothing to serve.
+
+name: pages
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Install pandoc
+        run: sudo apt-get update && sudo apt-get install -y pandoc
+      - name: Build site + PDF report
+        run: |
+          mkdir -p site
+          # Findings page (falls back to README if FINDINGS.md not written yet)
+          SRC=FINDINGS.md
+          [ -f "$SRC" ] || SRC=README.md
+          pandoc "$SRC" -s -o site/index.html --metadata title="Replication report"
+          pandoc "$SRC" -o site/report.pdf || echo "PDF render skipped"
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
