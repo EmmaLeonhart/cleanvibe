@@ -230,3 +230,24 @@ Minor release bundling the prompt feature above. Version bumped
 `1.1.1` → `1.2.0` (`cleanvibe/__init__.py`, `pyproject.toml`); full suite
 green (36/36); pushed to `origin/master`. No tag/release here — release
 cutting is handled by the separate scheduled job.
+
+## 2026-05-16 — CI/CD repointed from `master` to `main`
+
+GitHub's default branch was switched to `main` (via `gh repo edit
+--default-branch main`; `origin/main` == old `origin/master`). The repo's
+workflows still triggered on `master`, so nothing would run on `main`:
+
+- `.github/workflows/ci.yml` — `push.branches` and `pull_request.branches`
+  `[master]` → `[main]`.
+- `.github/workflows/pages.yml` — `push.branches` `[master]` → `[main]`
+  (Pages deploy of `pages/` → cleanvibe.emmaleonhart.com).
+- `.github/workflows/publish.yml` — untouched: `on: release: [published]`,
+  no branch dependency, already correct.
+- Left intentionally: generated workflow templates (`templates.py`, the
+  Grokking example) already use `[main, master]` — they fire on `main`;
+  `master` is a harmless fallback for downstream scaffolded projects.
+  Historical/explanatory `master` mentions in `devlog.md`, `CLAUDE.md`, and
+  test names are records, not operational — left as-is.
+
+All three workflow YAMLs validate; suite green. `master` is now used for
+nothing in this repo's CI/CD.

@@ -6,7 +6,7 @@
 
 ## Active
 
-_(Empty — `cleanvibe new` non-empty-dir prompt shipped in v1.2.0. Pull the next item from `todo.md` and decompose it here when ready.)_
+_(Empty — CI/CD repointed from `master` to `main` in v1.2.0+. Pull the next item from `todo.md` and decompose it here when ready.)_
 
 ---
 
