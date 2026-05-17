@@ -203,3 +203,23 @@ Two follow-on bugs surfaced immediately after v1.1.0:
 - Left intentional: the `site/` references inside the *replication* templates
   and the Grokking worked-example workflow — that is the per-replication
   project's own site, a different context.
+
+## 2026-05-16 — `cleanvibe new` on a non-empty dir prompts (no longer errors)
+
+- Was: `cleanvibe new PATH` printed an error and `sys.exit(1)` if the target
+  existed and was non-empty. Now it prompts.
+- `cleanvibe/cli.py`: added a testable prompt seam — `_ask()` (wraps
+  `input()`), `_confirm()`, `_suggest_name()` (append `-2`, `-3`, … until
+  free, only ever *suggested*). The `new` handler, on a non-empty existing
+  dir: under `--dry-run` it never calls `input()` (prints the prompt it
+  would show + a `convert_project(dry_run=True)` preview); otherwise it asks
+  yes/no — **yes** = `convert_project()` in place (reuses convert: commit 1
+  existing files, commit 2 scaffold, then launch), **no** = ask for a
+  different name (suggested, blank accepts; falls back if the chosen name is
+  also non-empty), then `create_project()`.
+- Preserved the deliberate asymmetry: `replicate` silently auto-numbers
+  (user supplied no name); `new` only ever *prompts* (the user chose the
+  name on purpose) — it never silently renames.
+- `tests/test_cli_new_prompt.py` added: yes→2 commits like convert,
+  no→typed name, no+blank→suggested `-2`, and `--dry-run` provably never
+  blocks on input. 36/36 tests green locally.
