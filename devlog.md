@@ -223,3 +223,10 @@ Two follow-on bugs surfaced immediately after v1.1.0:
 - `tests/test_cli_new_prompt.py` added: yes→2 commits like convert,
   no→typed name, no+blank→suggested `-2`, and `--dry-run` provably never
   blocks on input. 36/36 tests green locally.
+
+## 2026-05-16 — v1.2.0: `cleanvibe new` non-empty-dir prompt
+
+Minor release bundling the prompt feature above. Version bumped
+`1.1.1` → `1.2.0` (`cleanvibe/__init__.py`, `pyproject.toml`); full suite
+green (36/36); pushed to `origin/master`. No tag/release here — release
+cutting is handled by the separate scheduled job.
