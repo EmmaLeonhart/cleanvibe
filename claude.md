@@ -15,10 +15,10 @@ cleanvibe/
 │   └── templates.py     # scaffold + replication-project templates
 ├── tests/               # stdlib unittest, run by CI on win/mac/linux
 ├── docs/                # replication_framing.md (vision) + replication-examples/ (reference corpus)
-├── site/                # static GitHub Pages site (index.html/style.css/tabs.js)
+├── pages/                # static GitHub Pages site (index.html/identity.css/CNAME → cleanvibe.emmaleonhart.com)
 ├── .github/workflows/
 │   ├── ci.yml           # 3-OS x 2-py-version matrix
-│   ├── pages.yml        # deploy site/ to GitHub Pages
+│   ├── pages.yml        # deploy pages/ to GitHub Pages
 │   └── publish.yml      # PyPI publish on release
 ├── pyproject.toml       # Package metadata, [project.scripts] entry point
 ├── LICENSE              # MIT
