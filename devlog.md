@@ -189,3 +189,17 @@ Two follow-on bugs surfaced immediately after v1.1.0:
   initial branch is `main` for both `cleanvibe new` and `cleanvibe convert`.
 - 32/32 tests green locally. v1.1.0 tag stays in place (immutable); this
   ships as **v1.1.1**.
+
+## 2026-05-16 — Consolidated the GitHub Pages site (removed stale `site/`)
+
+- The repo briefly had two site directories: a stale top-level `site/`
+  (`index.html`/`style.css`/`tabs.js`, the original draft) and the canonical
+  `pages/` (`index.html`/`identity.css`/`CNAME` → cleanvibe.emmaleonhart.com,
+  the only one `.github/workflows/pages.yml` deploys, carrying the shared
+  visual identity). Removed the stale `site/` so there is exactly one clear,
+  good Pages site.
+- Fixed the root `CLAUDE.md` architecture block, which still pointed at the
+  old `site/` path, to reference `pages/`.
+- Left intentional: the `site/` references inside the *replication* templates
+  and the Grokking worked-example workflow — that is the per-replication
+  project's own site, a different context.
