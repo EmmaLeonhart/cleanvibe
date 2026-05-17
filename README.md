@@ -1,5 +1,7 @@
 # cleanvibe
 
+**Website · [cleanvibe.emmaleonhart.com](https://cleanvibe.emmaleonhart.com)**
+
 A tiny Python CLI that scaffolds AI-assisted coding projects and launches Claude Code.
 
 `cleanvibe` is not a coding tool. It's a **state initializer** -- it removes the friction between "I want to build something" and "Claude is working inside a well-structured environment." The real value lives in the `CLAUDE.md` it injects: an opinionated behavior contract that enforces documentation discipline, meaningful commits, and iterative file-based thinking.
