@@ -177,7 +177,7 @@
     <section class="section">
       <h2><span class="num">01 &mdash;</span> What it is</h2>
       <div class="lead">
-        <p>cleanvibe is not a coding tool &mdash; it is a state initializer. The real value lives in the <code>CLAUDE.md</code> it injects: a behavior contract that enforces documentation discipline, meaningful commits, and iterative file-based thinking, plus a <code>queue.md</code> pre-seeded with a first-session bootstrap sequence. Every project starts disciplined instead of as a blank-repo scramble. Zero runtime dependencies; works on Windows, Linux, and macOS; Python 3.9+.</p>
+        <p>cleanvibe is not a coding tool &mdash; it is a state initializer. The real value lives in the <code>CLAUDE.md</code> it injects: a behavior contract that enforces documentation discipline, meaningful commits, and iterative file-based thinking. Alongside it every project gets a pre-seeded <code>queue.md</code> (concrete steps, delete-only), a <code>todo.md</code> (the abstract long horizon), and a <code>devlog.md</code> &mdash; finishing a queue item means deleting it <em>and</em> appending a dated devlog entry in the same commit, so <code>queue.md</code> can never rot into a status journal. Every project starts disciplined instead of as a blank-repo scramble. Zero runtime dependencies; Windows, Linux, macOS; Python 3.9+.</p>
       </div>
     </section>
 
@@ -187,7 +187,7 @@
         <div class="cmd cmd-a" data-cmd="new fresh project scaffold bootstrap">
           <span class="c-emoji">&#127793;</span>
           <span class="c-name">cleanvibe new</span>
-          <p class="c-desc">Scaffold a fresh project: <code>CLAUDE.md</code>, <code>README.md</code>, <code>queue.md</code> (pre-seeded bootstrap), <code>.gitignore</code>, an initial git commit, then launch Claude Code inside it.</p>
+          <p class="c-desc">Scaffold a fresh project: <code>CLAUDE.md</code>, <code>README.md</code>, <code>queue.md</code> (pre-seeded bootstrap), <code>todo.md</code>, <code>devlog.md</code>, <code>.gitignore</code> &mdash; an initial commit on a <code>main</code> branch, then launch Claude Code. Run in a non-empty directory and it prompts instead of erroring.</p>
         </div>
         <div class="cmd cmd-b" data-cmd="clone onboard existing codebase branch">
           <span class="c-emoji">&#128279;</span>
@@ -208,9 +208,9 @@
     </section>
 
     <section class="section">
-      <h2><span class="num">03 &mdash;</span> Stable since v1.0.0</h2>
+      <h2><span class="num">03 &mdash;</span> Stable, v1.x</h2>
       <div class="lead">
-        <p>Semantic versioning from here on. <code>new</code>, <code>clone</code>, <code>convert</code>, and <code>replicate</code> are stable within the 1.x line; the guaranteed set of injected files is fixed; <code>clone</code>/<code>convert</code> never overwrite and <code>replicate</code> never errors on a name collision; zero runtime dependencies is a hard guarantee. Preview anything with <code>--dry-run</code>.</p>
+        <p>Semantic versioning since v1.0.0 (currently v1.2.0). <code>new</code>, <code>clone</code>, <code>convert</code>, and <code>replicate</code> are stable within the 1.x line; the guaranteed injected set &mdash; <code>CLAUDE.md</code>, <code>README.md</code>, <code>queue.md</code>, <code>todo.md</code>, <code>devlog.md</code>, <code>.gitignore</code> &mdash; is fixed; new repos initialize on <code>main</code>; <code>clone</code>/<code>convert</code> never overwrite and <code>replicate</code> never errors on a name collision; zero runtime dependencies is a hard guarantee. Preview anything with <code>--dry-run</code>.</p>
       </div>
       <div class="hero-actions">
         <a class="btn btn-primary" href="https://github.com/EmmaLeonhart/cleanvibe">Read on GitHub &rarr;</a>
