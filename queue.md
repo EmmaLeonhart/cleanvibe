@@ -4,11 +4,9 @@
 
 ---
 
-## Active — `cleanvibe new` on a non-empty dir should prompt, not error
+## Active
 
-Pulled from `todo.md`. Today `cleanvibe new PATH` errors+exits if the target exists and is non-empty. Make it prompt instead. Preserve the asymmetry: `new` PROMPTS (the user chose that name on purpose); only `replicate` silently auto-numbers.
-
-1. **Version + ship.** Bump `1.1.1` → `1.2.0` (`cleanvibe/__init__.py`, `pyproject.toml`); drain this queue section + append a `devlog.md` entry; `git push origin master` (rebase first if it moved; no release — a later job handles releases). Commit.
+_(Empty — `cleanvibe new` non-empty-dir prompt shipped in v1.2.0. Pull the next item from `todo.md` and decompose it here when ready.)_
 
 ---
 
@@ -16,4 +14,4 @@ Pulled from `todo.md`. Today `cleanvibe new PATH` errors+exits if the target exi
 
 - Completed work (chronological, with releases): `devlog.md`. Long-horizon backlog: `todo.md`.
 - Vision / framing: `docs/replication_framing.md`; reference corpus: `docs/replication-examples/`.
-- Narrative history: `git log`. Current version: `1.1.0`.
+- Narrative history: `git log`. Current version: `1.2.0`.
