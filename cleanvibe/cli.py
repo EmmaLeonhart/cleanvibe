@@ -21,6 +21,30 @@ from .replicate import replicate_project
 from .scaffold import clone_project, convert_project, create_project
 
 
+def _ask(prompt: str) -> str:
+    """Thin wrapper around input() so tests can monkeypatch the prompt seam."""
+    return input(prompt)
+
+
+def _confirm(question: str) -> bool:
+    return _ask(f"{question} [y/N] ").strip().lower() in ("y", "yes")
+
+
+def _suggest_name(path: Path) -> Path:
+    """Suggest a free sibling name by appending -2, -3, … (never silently used).
+
+    Unlike `replicate`, which auto-numbers because the user supplied no name,
+    `new` only ever *suggests* this — the user explicitly chose their name, so
+    a silent rename would be surprising.
+    """
+    n = 2
+    while True:
+        candidate = path.with_name(f"{path.name}-{n}")
+        if not candidate.exists():
+            return candidate
+        n += 1
+
+
 def main(argv: list[str] | None = None) -> None:
     parser = argparse.ArgumentParser(
         prog="cleanvibe",
@@ -102,8 +126,34 @@ def main(argv: list[str] | None = None) -> None:
 
     if args.command == "new":
         if args.path.exists() and any(args.path.iterdir()):
-            print(f"Error: {args.path} already exists and is not empty.", file=sys.stderr)
-            sys.exit(1)
+            # Existing, non-empty directory: prompt instead of erroring.
+            if args.dry_run:
+                print(f"[dry-run] {args.path} exists and is not empty.")
+                print(f"[dry-run] Would prompt: convert it in place (like "
+                      f"`cleanvibe convert`), or create under a different name.")
+                print(f"[dry-run] In-place (convert) preview:")
+                convert_project(args.path, dry_run=True, no_claude=args.no_claude)
+                return
+            print(f"{args.path} already exists and is not empty.")
+            if _confirm("Turn this existing directory into a git repo with "
+                        "cleanvibe scaffolding and start work?"):
+                print(f"Converting existing directory in place: {args.path}")
+                convert_project(args.path, no_claude=args.no_claude)
+                return
+            # NO: offer a different name (suggest one; user may type their own).
+            suggestion = _suggest_name(args.path)
+            typed = _ask(
+                f"Create under a different name instead? "
+                f"[{suggestion}] (enter a name, or blank to accept): "
+            ).strip()
+            target = Path(typed) if typed else suggestion
+            if target.exists() and any(target.iterdir()):
+                fallback = _suggest_name(target)
+                print(f"{target} is also non-empty; using {fallback} instead.")
+                target = fallback
+            print(f"Creating project: {target}")
+            create_project(target, dry_run=args.dry_run, no_claude=args.no_claude)
+            return
         print(f"Creating project: {args.path}")
         create_project(args.path, dry_run=args.dry_run, no_claude=args.no_claude)
 
