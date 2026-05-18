@@ -36,6 +36,9 @@ def claude_md(project_name: str) -> str:
 - **Set up CI as soon as tests exist.** Create a `.github/workflows/ci.yml` GitHub Actions workflow that runs the test suite on push and pull request. Keep the workflow simple — install dependencies and run tests.
 - **Keep tests passing.** Do not commit code that breaks existing tests. If a change requires updating tests, update them in the same commit.
 
+## Writing
+- Do not use the word "honest", "honesty", or "honestly". It is aggressively overused. Choose a more precise word that says what you actually mean (e.g. "accurate", "frank", "plainly", "truly").
+
 ## Project Description
 _TODO: Describe what this project is about._
 
@@ -212,7 +215,7 @@ def clone_claude_md(project_name: str) -> str:
 ## How to work here
 
 - **Work `queue.md` top to bottom.** It is a small onboarding sequence:
-  understand the repo, get its documentation honest, make `CLAUDE.md` reflect
+  understand the repo, get its documentation accurate, make `CLAUDE.md` reflect
   the repo's real practices, ensure tests/CI exist, then hand off to the
   repo's own backlog.
 - **This file is provisional.** Do not impose cleanvibe conventions on a repo
@@ -233,9 +236,13 @@ def clone_claude_md(project_name: str) -> str:
 - `devlog.md` is where "done" lives — it also records releases and
   milestones. cleanvibe injected a starter `devlog.md` whose first
   onboarding task is to **backfill it from `git log`** so the chronological
-  trail is honest before normal onboarding begins.
+  trail is accurate before normal onboarding begins.
 - Keep documentation truthful as you go — that is the whole point of this
   onboarding pass.
+
+## Writing
+
+- Do not use the word "honest", "honesty", or "honestly". It is aggressively overused. Choose a more precise word that says what you actually mean (e.g. "accurate", "frank", "plainly", "truly").
 """
 
 
@@ -273,7 +280,7 @@ item AND append a `devlog.md` entry in the commit that completes it.
    CI, and the project's apparent conventions. Capture this understanding as
    you go (it feeds the next two steps).
 
-3. **Make the documentation honest.** If the repo has docs (`README`, `docs/`,
+3. **Make the documentation accurate.** If the repo has docs (`README`, `docs/`,
    wiki) that are stale or thin, correct and extend them to match what the
    code actually does. If documentation is missing, write concise docs
    covering setup, usage, and architecture.
@@ -427,6 +434,10 @@ reusable, agent-executable replication methodology.
 - **Keep `SKILL.md` truthful.** It is the compounding artifact. If you
   deviated from its plan, edit the plan to match what you actually did.
 - **Keep this file and `README.md` current** as the replication takes shape.
+
+## Writing
+
+- Do not use the word "honest", "honesty", or "honestly". It is aggressively overused. Choose a more precise word that says what you actually mean (e.g. "accurate", "frank", "plainly", "truly").
 """
 )
 

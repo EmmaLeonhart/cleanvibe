@@ -50,7 +50,7 @@ one. It is deliberately different from `new`:
 6. Launch Claude Code inside the project
 
 The onboarding `queue.md` is small and focused: read & document the repo,
-make existing docs honest, **rewrite `CLAUDE.md` to the repo's real
+make existing docs accurate, **rewrite `CLAUDE.md` to the repo's real
 development practices**, add tests/CI if sparse, then synthesize any existing
 planning artifacts and hand off to the repo's own `todo.md`.
 

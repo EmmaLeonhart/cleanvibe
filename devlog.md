@@ -251,3 +251,16 @@ workflows still triggered on `master`, so nothing would run on `main`:
 
 All three workflow YAMLs validate; suite green. `master` is now used for
 nothing in this repo's CI/CD.
+
+## 2026-05-18 — v1.2.1: anti-"honest" writing rule in scaffolded CLAUDE.md
+
+Patch release. Added a `## Writing` section to all three generated
+CLAUDE.md templates (`claude_md`, `clone_claude_md`,
+`replication_claude_md` in `templates.py`) plus this repo's own
+`CLAUDE.md`: *do not use "honest"/"honesty"/"honestly" — aggressively
+overused; pick a more precise word.* Also scrubbed the existing literal
+"honest" occurrences out of `templates.py` (clone onboarding + clone
+queue), `claude.md`, and `README.md` (→ "accurate") so the word stops
+propagating into every new project. Version `1.2.0` → `1.2.1`
+(`cleanvibe/__init__.py`, `pyproject.toml`); full suite green (36/36);
+tagged `v1.2.1` and GitHub release cut.
