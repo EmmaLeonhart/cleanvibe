@@ -264,3 +264,15 @@ queue), `claude.md`, and `README.md` (→ "accurate") so the word stops
 propagating into every new project. Version `1.2.0` → `1.2.1`
 (`cleanvibe/__init__.py`, `pyproject.toml`); full suite green (36/36);
 tagged `v1.2.1` and GitHub release cut.
+
+## 2026-05-19 — v1.2.2: strengthened anti-"honest" Writing rule
+
+Patch release. The scaffolded `## Writing` rule in all three generated
+CLAUDE.md templates (`claude_md`, `clone_claude_md`,
+`_REPLICATION_CLAUDE_TMPL`) and this repo's own `CLAUDE.md` now uses the
+strengthened wording: also bans the substitute coats
+("frank"/"frankly", "candid"/"candidly", "transparently") and requires
+naming a failure as a failure rather than haloing it. Supersedes the
+milder v1.2.1 wording that recommended "frank"/"candid". Version
+`1.2.1` -> `1.2.2` (`cleanvibe/__init__.py`, `pyproject.toml`); full
+suite green; tagged `v1.2.2` and GitHub release cut (PyPI publish).
