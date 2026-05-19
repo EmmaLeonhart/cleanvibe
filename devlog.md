@@ -326,3 +326,23 @@ PDF is present rather than invent a paper.
 - `tests/test_replicate.py`: manual tree (no arXiv artifacts),
   non-destructive injection, gitignored PDF, dry-run, and CLI dispatch
   both ways. Full suite 44/44 green.
+
+## 2026-05-19 — v1.3.0: robust replicate links + folder-drop mode
+
+Minor release bundling the two changes above (the user report: "the
+arXiv link replication thing is not really working, and the pipeline
+should also work from just a folder you dump PDFs into"):
+
+- **Fix:** `parse_arxiv_id` accepts any arxiv/alphaxiv URL path
+  (alphaxiv's primary `/overview/`, `/forum/`, versioned, slug/query) —
+  previously only `abs|pdf|html`, and the failure surfaced as a raw
+  traceback.
+- **Feature:** `cleanvibe replicate <folder>` manual drop-in mode — no
+  fetch, no `download_paper.py`/`paper.json`, non-destructive; the user
+  supplies the paper(s) by hand and the scaffold says so up front.
+- Docs updated: `README.md` (both replicate modes + corrected Stability
+  contract — `paper.json`/`download_paper.py` are arXiv-mode-only),
+  `CLAUDE.md` (dual-mode architecture decision), `todo.md` (landed note).
+- Version `1.2.2` -> `1.3.0` (`cleanvibe/__init__.py`,
+  `pyproject.toml`); full suite 44/44 green; tagged `v1.3.0` and GitHub
+  release cut (PyPI publish runs on release).

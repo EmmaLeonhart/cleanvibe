@@ -56,11 +56,19 @@ planning artifacts and hand off to the repo's own `todo.md`.
 
 ### Replicate a paper
 
+`cleanvibe replicate` takes **either** a paper reference **or** a folder name:
+
+**From an arXiv / alphaxiv paper:**
+
 ```
 cleanvibe replicate https://arxiv.org/abs/1706.03762
+cleanvibe replicate https://www.alphaxiv.org/overview/2201.02177
+cleanvibe replicate 1706.03762
 ```
 
-Accepts an arXiv **or alphaxiv** id / abs URL / pdf URL. This will:
+Any arXiv/alphaxiv id or URL is accepted — `/abs/`, `/pdf/`, `/html/`,
+alphaxiv's primary `/overview/`, `/forum/`, versioned ids, trailing slugs
+and query strings all resolve to the bare id. This will:
 1. Fetch the paper's metadata from the arXiv API
 2. Create `replicating-<paper-slug>/` (silently `-2`/`-3` if it already exists)
 3. Scaffold a standalone replication project: cleanvibe conventions
@@ -73,6 +81,23 @@ Accepts an arXiv **or alphaxiv** id / abs URL / pdf URL. This will:
 4. Initialize a git repo with an initial commit
 5. Launch Claude Code inside the project
 
+**From a folder you fill yourself (manual drop-in mode):**
+
+```
+cleanvibe replicate my-paper-replication
+```
+
+When the argument is **not** an arXiv/alphaxiv reference it is treated as a
+folder name and a *manual drop-in* project is scaffolded — no metadata
+fetch, no `download_paper.py`, no `paper.json`, no network. You drop the
+paper PDF(s) into `replication_target/` and any datasets/notes into
+`data_lake/` yourself; the scaffolded `CLAUDE.md` / `queue.md` / `SKILL.md`
+/ `README.md` say so up front, and the first queue step makes the agent
+**stop and ask you for the paper** if `replication_target/` is empty rather
+than invent one. Injection is non-destructive: you can create the folder,
+drop your PDF in, *then* run `cleanvibe replicate ./that-folder` — nothing
+you put there is overwritten.
+
 Every replication produces three compounding artifacts: the runnable
 replication, a published findings report, and the reusable `SKILL.md`
 methodology. See `docs/replication_framing.md` for the full vision.
@@ -83,7 +108,8 @@ methodology. See `docs/replication_framing.md` for the full vision.
 cleanvibe new my-project --dry-run        # Preview what would be created
 cleanvibe new my-project --no-claude      # Skip launching Claude Code
 cleanvibe clone REPO path --dry-run       # Preview what would be done
-cleanvibe replicate URL --dry-run         # Preview the replication scaffold
+cleanvibe replicate URL --dry-run         # Preview the arXiv replication scaffold
+cleanvibe replicate FOLDER --dry-run      # Preview the manual drop-in scaffold
 cleanvibe replicate URL --no-claude       # Scaffold without launching Claude
 cleanvibe --version                       # Show version
 ```
@@ -116,11 +142,16 @@ versioning from here on):
 - **Subcommands** `new`, `clone`, `convert`, and `replicate` are stable. Their
   core behavior will not change incompatibly within the 1.x line.
 - **Injected files**: `new` guarantees `CLAUDE.md`, `README.md`, `queue.md`,
-  `.gitignore`, and `data_lake/.gitkeep`. `replicate` additionally guarantees
-  `SKILL.md`, `paper.json`, `download_paper.py`, and `replication_target/`.
+  `.gitignore`, and `data_lake/.gitkeep`. `replicate` always guarantees
+  `SKILL.md`, `CLAUDE.md`, `queue.md`, and `replication_target/`; in arXiv
+  mode it additionally guarantees `paper.json` and `download_paper.py` (these
+  are absent by design in manual drop-in mode — there is no metadata to
+  fetch).
 - **Non-destructive by contract**: `clone` and `convert` never overwrite
   existing files — `clone` prepends; `convert` only injects what is missing.
-  `replicate` never errors on a name collision (silent `-2`/`-3` suffix).
+  `replicate` in arXiv mode never errors on a name collision (silent
+  `-2`/`-3` suffix); in folder mode it injects only what is missing so a
+  pre-dropped paper is never clobbered.
 - **Template wording** may evolve (improvements to the workflow contract are
   not breaking); the *set* of guaranteed files and the subcommand contracts
   above are what 1.x holds stable.

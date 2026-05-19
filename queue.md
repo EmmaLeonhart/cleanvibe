@@ -4,11 +4,9 @@
 
 ---
 
-## Active — `replicate`: fix arXiv links + add folder-drop mode (→ release)
+## Active
 
-Work top to bottom. Delete each item in the same commit that completes it and append a dated `devlog.md` entry.
-
-1. **Docs + release.** Update `README.md` (replicate section: folder mode + permissive links), root `CLAUDE.md` (architecture decision for the dual-mode `replicate`), `todo.md` (note the link-robustness + manual-mode work landed). Bump version `1.2.2` → `1.3.0` (`cleanvibe/__init__.py`, `pyproject.toml`). Run the full test suite green. Commit, push, tag `v1.3.0`, cut the GitHub release.
+_(Empty — `replicate` link-parsing fix + folder-drop mode shipped in v1.3.0. Pull the next item from `todo.md` and decompose it here when ready.)_
 
 ---
 
@@ -16,4 +14,4 @@ Work top to bottom. Delete each item in the same commit that completes it and ap
 
 - Completed work (chronological, with releases): `devlog.md`. Long-horizon backlog: `todo.md`.
 - Vision / framing: `docs/replication_framing.md`; reference corpus: `docs/replication-examples/`.
-- Narrative history: `git log`. Current version: `1.2.2`.
+- Narrative history: `git log`. Current version: `1.3.0`.
