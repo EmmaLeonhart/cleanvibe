@@ -7,7 +7,7 @@ and is covered indirectly via the monkeypatched replicate tests.
 
 import unittest
 
-from cleanvibe.arxiv import _parse_atom, parse_arxiv_id
+from cleanvibe.arxiv import _parse_atom, is_arxiv_ref, parse_arxiv_id
 
 
 SAMPLE_ATOM = """<?xml version="1.0" encoding="UTF-8"?>
@@ -39,9 +39,41 @@ class TestParseArxivId(unittest.TestCase):
         self.assertEqual(parse_arxiv_id("https://alphaxiv.org/pdf/1706.03762v5.pdf"), "1706.03762")
         self.assertEqual(parse_arxiv_id("ALPHAXIV.ORG/abs/1706.03762"), "1706.03762")
 
+    def test_accepts_non_abs_url_paths(self):
+        # The "not really working" bug: alphaxiv's primary URL form is
+        # /overview/<id>, plus arXiv /forum/, trailing slug, query string.
+        self.assertEqual(
+            parse_arxiv_id("https://www.alphaxiv.org/overview/2201.02177"), "2201.02177"
+        )
+        self.assertEqual(
+            parse_arxiv_id("https://www.alphaxiv.org/overview/2201.02177v1"), "2201.02177"
+        )
+        self.assertEqual(
+            parse_arxiv_id("https://arxiv.org/forum/2310.06825"), "2310.06825"
+        )
+        self.assertEqual(
+            parse_arxiv_id("https://arxiv.org/abs/1706.03762?utm=x#sec1"), "1706.03762"
+        )
+        self.assertEqual(
+            parse_arxiv_id("https://arxiv.org/abs/cs.LG/0701001"), "cs.LG/0701001"
+        )
+
     def test_rejects_garbage(self):
         with self.assertRaises(ValueError):
             parse_arxiv_id("not-an-id")
+        with self.assertRaises(ValueError):
+            parse_arxiv_id("https://arxiv.org/about")
+
+    def test_is_arxiv_ref_discriminates_folders(self):
+        # Paper references -> arXiv mode.
+        self.assertTrue(is_arxiv_ref("2201.02177"))
+        self.assertTrue(is_arxiv_ref("https://www.alphaxiv.org/overview/2201.02177"))
+        self.assertTrue(is_arxiv_ref("https://arxiv.org/abs/1706.03762v5"))
+        # Folder names -> manual drop-in mode.
+        self.assertFalse(is_arxiv_ref("my-paper"))
+        self.assertFalse(is_arxiv_ref("./papers/grokking"))
+        self.assertFalse(is_arxiv_ref("replicating-some-cool-paper"))
+        self.assertFalse(is_arxiv_ref(r"C:\papers\foo"))
 
 
 class TestParseAtom(unittest.TestCase):

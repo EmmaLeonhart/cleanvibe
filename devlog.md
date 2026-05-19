@@ -276,3 +276,22 @@ naming a failure as a failure rather than haloing it. Supersedes the
 milder v1.2.1 wording that recommended "frank"/"candid". Version
 `1.2.1` -> `1.2.2` (`cleanvibe/__init__.py`, `pyproject.toml`); full
 suite green; tagged `v1.2.2` and GitHub release cut (PyPI publish).
+
+## 2026-05-19 — `replicate` arXiv/alphaxiv link parsing made robust
+
+The "arXiv link replication isn't really working" report. Root cause:
+`parse_arxiv_id` only accepted `arxiv|alphaxiv.org/(abs|pdf|html)/<id>`.
+AlphaXiv's *primary* URL form is `/overview/<id>` (and arXiv also has
+`/forum/`, versioned ids, trailing slugs, query strings), all of which
+raised `ValueError` — which propagated as a raw traceback, not a usable
+error.
+
+- `cleanvibe/arxiv.py`: rewrote `parse_arxiv_id` — if the input is any
+  arxiv/alphaxiv URL, extract the first id-shaped token from anywhere in
+  it (path view no longer constrained); otherwise the strict bare-id path
+  is unchanged. Added `is_arxiv_ref()` so callers can cleanly distinguish a
+  paper reference from a folder name (used next by the folder-drop mode).
+- `tests/test_arxiv.py`: regression tests for alphaxiv `/overview/`
+  (plain + versioned), arXiv `/forum/`, query/fragment, old-style
+  `cs.LG/0701001` via abs URL, garbage rejection, and `is_arxiv_ref`
+  discriminating folder names from refs. Full suite 38/38 green.

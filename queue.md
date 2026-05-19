@@ -4,9 +4,13 @@
 
 ---
 
-## Active
+## Active — `replicate`: fix arXiv links + add folder-drop mode (→ release)
 
-_(Empty — CI/CD repointed from `master` to `main` in v1.2.0+. Pull the next item from `todo.md` and decompose it here when ready.)_
+Work top to bottom. Delete each item in the same commit that completes it and append a dated `devlog.md` entry.
+
+1. **Add a folder-drop replication mode.** `cleanvibe replicate <arg>` should dual-dispatch: if `<arg>` parses as an arxiv ref → existing arXiv flow; otherwise treat `<arg>` as a folder name and scaffold a *manual* replication project where the user drops the paper PDF(s) + supporting material into `replication_target/` / `data_lake/` themselves (no `download_paper.py`, no `paper.json`, no network). Manual templates in `templates.py` (CLAUDE/queue/SKILL/README) whose opening instructions say up front that the paper and materials are being placed in by hand; `replicate_manual_project()` in `replicate.py`; CLI dispatch in `cli.py`; tests in `tests/test_replicate.py`.
+
+2. **Docs + release.** Update `README.md` (replicate section: folder mode + permissive links), root `CLAUDE.md` (architecture decision for the dual-mode `replicate`), `todo.md` (note the link-robustness + manual-mode work landed). Bump version `1.2.2` → `1.3.0` (`cleanvibe/__init__.py`, `pyproject.toml`). Run the full test suite green. Commit, push, tag `v1.3.0`, cut the GitHub release.
 
 ---
 
@@ -14,4 +18,4 @@ _(Empty — CI/CD repointed from `master` to `main` in v1.2.0+. Pull the next it
 
 - Completed work (chronological, with releases): `devlog.md`. Long-horizon backlog: `todo.md`.
 - Vision / framing: `docs/replication_framing.md`; reference corpus: `docs/replication-examples/`.
-- Narrative history: `git log`. Current version: `1.2.0`.
+- Narrative history: `git log`. Current version: `1.2.2`.
