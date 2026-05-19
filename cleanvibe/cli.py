@@ -4,7 +4,7 @@ Usage:
     cleanvibe new PATH          Create a new scaffolded project
     cleanvibe clone REPO [PATH] Clone a repo and inject scaffolding
     cleanvibe convert [PATH]    Convert an existing directory into a cleanvibe project
-    cleanvibe replicate URL     Scaffold a replication project for an arXiv/alphaxiv paper
+    cleanvibe replicate REF     Scaffold a replication project: arXiv/alphaxiv ref, or a drop-in folder
     cleanvibe --version         Show version
 
 Zero dependencies. Just Python stdlib.
@@ -17,7 +17,8 @@ import sys
 from pathlib import Path
 
 from . import __version__
-from .replicate import replicate_project
+from .arxiv import is_arxiv_ref
+from .replicate import replicate_manual_project, replicate_project
 from .scaffold import clone_project, convert_project, create_project
 
 
@@ -98,18 +99,23 @@ def main(argv: list[str] | None = None) -> None:
         "--no-claude", action="store_true", help="Skip launching Claude Code after converting"
     )
 
-    # cleanvibe replicate URL [PATH]
+    # cleanvibe replicate (URL | FOLDER) [PATH]
     replicate_parser = subparsers.add_parser(
         "replicate",
-        help="Scaffold a standalone replication project for an arXiv/alphaxiv paper",
+        help="Scaffold a replication project — from an arXiv/alphaxiv paper, "
+        "or a folder you drop the paper(s) into yourself",
     )
     replicate_parser.add_argument(
-        "arxiv", help="arXiv or alphaxiv id / abs URL / pdf URL"
+        "target",
+        help="An arXiv/alphaxiv id or URL (fetches metadata), OR a folder "
+        "name (manual drop-in mode: you put the paper PDF(s) into "
+        "replication_target/ and material into data_lake/ yourself)",
     )
     replicate_parser.add_argument(
         "path", nargs="?", type=Path, default=None,
-        help="Target directory (defaults to replicating-<paper-slug>, "
-        "auto-suffixed -2/-3 if it exists)",
+        help="arXiv mode only: target directory (defaults to "
+        "replicating-<paper-slug>, auto-suffixed -2/-3 if it exists). "
+        "Ignored in folder mode — there the target IS the folder.",
     )
     replicate_parser.add_argument(
         "--dry-run", action="store_true", help="Show what would be created without writing anything"
@@ -178,10 +184,24 @@ def main(argv: list[str] | None = None) -> None:
         clone_project(args.repo, args.path, dry_run=args.dry_run, no_claude=args.no_claude)
 
     elif args.command == "replicate":
-        print(f"Scaffolding replication project for: {args.arxiv}")
-        replicate_project(
-            args.arxiv, args.path, dry_run=args.dry_run, no_claude=args.no_claude
-        )
+        if is_arxiv_ref(args.target):
+            print(f"Scaffolding replication project for: {args.target}")
+            replicate_project(
+                args.target, args.path, dry_run=args.dry_run, no_claude=args.no_claude
+            )
+        else:
+            # Not an arXiv/alphaxiv reference -> treat it as a folder name and
+            # scaffold a manual drop-in replication project there.
+            if args.path is not None:
+                print(
+                    f"Note: '{args.path}' ignored — in folder mode the target "
+                    f"folder is '{args.target}'.",
+                    file=sys.stderr,
+                )
+            print(f"Scaffolding manual (drop-in) replication project: {args.target}")
+            replicate_manual_project(
+                args.target, dry_run=args.dry_run, no_claude=args.no_claude
+            )
 
 
 if __name__ == "__main__":

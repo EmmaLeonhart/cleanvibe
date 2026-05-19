@@ -295,3 +295,34 @@ error.
   (plain + versioned), arXiv `/forum/`, query/fragment, old-style
   `cs.LG/0701001` via abs URL, garbage rejection, and `is_arxiv_ref`
   discriminating folder names from refs. Full suite 38/38 green.
+
+## 2026-05-19 — `cleanvibe replicate` folder-drop (manual) mode
+
+`cleanvibe replicate` now takes *either* an arXiv/alphaxiv reference *or* a
+folder name. If the argument doesn't parse as an arXiv ref
+(`is_arxiv_ref`), it is treated as a folder and a **manual drop-in**
+replication project is scaffolded — no metadata fetch, no
+`download_paper.py`, no `paper.json`, no network. The user drops the paper
+PDF(s) into `replication_target/` and supporting material into
+`data_lake/`; the scaffolded CLAUDE.md / queue.md / SKILL.md / README.md
+say this up front, and queue step 1 makes the agent **STOP and ask** if no
+PDF is present rather than invent a paper.
+
+- `cleanvibe/templates.py`: `replication_manual_claude_md`,
+  `replication_manual_queue_md`, `replication_manual_skill_md`,
+  `replication_manual_readme_md` (+ `_manual_name`). Reuses
+  `REPLICATION_GITIGNORE` (the dropped PDF stays gitignored — papers are
+  copyrighted, local input), the Pages/package workflow constants, and
+  `devlog_md`.
+- `cleanvibe/scaffold.py`: `_write_if_missing` — non-destructive injection
+  so running on a folder that already has the dropped paper / a custom
+  README never clobbers it.
+- `cleanvibe/replicate.py`: `replicate_manual_project()` — mkdir +
+  non-destructive scaffold; commits into an existing git repo or git-inits
+  a fresh one; dry-run support.
+- `cleanvibe/cli.py`: dual-dispatch on the single positional `target`
+  (renamed from `arxiv`); arXiv ref -> `replicate_project`, else
+  -> `replicate_manual_project`. Help text + module docstring updated.
+- `tests/test_replicate.py`: manual tree (no arXiv artifacts),
+  non-destructive injection, gitignored PDF, dry-run, and CLI dispatch
+  both ways. Full suite 44/44 green.

@@ -9,7 +9,7 @@ from datetime import datetime
 from string import Template
 
 from . import __version__
-from .arxiv import ArxivPaper
+from .arxiv import ArxivPaper, _slugify
 
 
 def claude_md(project_name: str) -> str:
@@ -826,3 +826,306 @@ def replication_readme_md(paper: ArxivPaper) -> str:
 
 def replication_download_paper_py(paper: ArxivPaper) -> str:
     return _REPLICATION_DOWNLOAD_TMPL.substitute(_replication_subs(paper))
+
+
+# ---------------------------------------------------------------------------
+# Manual / drop-in replication templates (`cleanvibe replicate <folder>`)
+#
+# When the argument to `cleanvibe replicate` is NOT an arXiv/alphaxiv
+# reference, it is treated as a folder name and we scaffold a replication
+# project with NO arXiv fetch: no `download_paper.py`, no `paper.json`, no
+# network. The user drops the paper PDF(s) into `replication_target/` and any
+# supporting material into `data_lake/` by hand. The scaffold's opening
+# instructions say this up front. Same downstream structure as the arXiv
+# flow (SKILL.md / FINDINGS.md / GitHub Actions deliverables), so the gitignore
+# and workflow constants above are reused as-is.
+# ---------------------------------------------------------------------------
+
+
+def _manual_name(folder: str) -> str:
+    """Display name for a manual replication project from its folder path."""
+    name = folder.replace("\\", "/").rstrip("/").rsplit("/", 1)[-1]
+    return name or "replication"
+
+
+def replication_manual_claude_md(folder: str) -> str:
+    name = _manual_name(folder)
+    return f"""# {name} — paper replication (manual drop-in)
+
+## Project Description
+
+This is a **paper-replication project** scaffolded by `cleanvibe replicate`
+in **manual drop-in mode**. Nothing was fetched from arXiv — **you supply the
+paper(s) and materials by hand.**
+
+> **The paper has to be here before anything useful can happen.**
+> Put the paper PDF(s) into `replication_target/` (name the primary one
+> `paper.pdf`). Put datasets, supplementary files, author-code exports,
+> notes, and screenshots into `data_lake/`. If `replication_target/` has no
+> PDF yet, the first `queue.md` item is to **stop and ask you for it** — the
+> agent must not invent a paper.
+
+The goal is the same as any cleanvibe replication: reproduce the paper's
+headline result(s) and produce three compounding artifacts — the runnable
+replication, a published findings report, and `SKILL.md` (the reusable,
+agent-executable replication methodology). See `docs/replication_framing.md`
+in the cleanvibe repo for the full framing.
+
+## Architecture and Conventions
+
+- **`replication_target/`** holds the paper and everything pulled *about* it:
+  - the paper PDF(s) you dropped in — **gitignored**: papers are often
+    copyrighted and are your local input, not committed. Convention:
+    `replication_target/paper.pdf` for the primary paper.
+  - `replication_target/paper.md` — a Markdown extraction of the paper's
+    text, made during the replication, so later steps work from structured
+    text rather than raw PDF.
+  - the authors' code, if any, cloned as a **git submodule** in here
+    (`git submodule add <repo> replication_target/<name>`).
+- **`data_lake/`** — other supplied/downloaded material (datasets, notes,
+  exports). Standard cleanvibe convention; this *is* committed. The paper is
+  NOT here.
+- **No `download_paper.py`, no `paper.json`.** This mode has no arXiv
+  metadata. The agent derives the paper's identity by *reading what you
+  dropped in* and records it in `notes/claims.md` and `README.md`.
+- **`src/`** — your reimplementation. **`scripts/run.py`** — the entry point
+  CI invokes. **`results/`** — metrics JSON (gitignored). **`FINDINGS.md`** —
+  the report (reproduced vs. reported, gaps, divergences).
+- **Deliverables are built by GitHub Actions, not committed.**
+  `.github/workflows/pages.yml` publishes the GitHub Pages site + PDF report;
+  `.github/workflows/package.yml` builds the downloadable ZIP replication
+  package. Make the repo public and set Settings -> Pages -> Source: GitHub
+  Actions. Vision for the site shape: http://sutra.emmaleonhart.com/
+
+## Workflow Rules
+
+- **Commit early and often.** Every meaningful change gets a descriptive commit.
+- **Plan into `queue.md` first, then execute.** The replication plan already
+  lives in `queue.md`. Work it top to bottom.
+- **Finishing a queue item = delete from `queue.md` + append dated entry to
+  `devlog.md`**, in the same commit as the work, then push. Never tick boxes
+  in place. `devlog.md` is also where you record the replication's
+  releases/milestones (paper identified, environment pinned, first reproduced
+  number, FINDINGS published, Pages live).
+- **Keep `SKILL.md` truthful.** It is the compounding artifact. If you
+  deviated from its plan, edit the plan to match what you actually did.
+- **Keep this file and `README.md` current** as the replication takes shape.
+
+## Writing
+
+- Do not use "honest", "honesty", or "honestly" — and do not swap in "frank", "frankly", "candid", "candidly", or "transparently", which are the same self-congratulatory move in a different coat. When something failed, name the failure: "it didn't work", "I got that wrong", "this failed" — flat, no qualifier. Tagging a report "honest" implies the rest aren't, and couching a failure as honesty asks for credit for the admission, which is worse than the failure itself. Use a precise positive word ("accurate", "plainly", "truly") only when that is genuinely the meaning — never as a halo on a bad outcome.
+"""
+
+
+def replication_manual_queue_md(folder: str) -> str:
+    name = _manual_name(folder)
+    return f"""# {name} — Work Queue
+
+**This file is a queue of concrete, executable steps, not a state snapshot.**
+Finished work lives in `devlog.md` (dated entries) and `git log`;
+longer-horizon items live in `todo.md`. **When an item is done, delete it
+from this file AND append a dated entry to `devlog.md` in the same commit,
+then push.** No checkmarks, no status indicators in place.
+
+**Why this file exists:** the replication plan is written here BEFORE
+execution so an interrupted session resumes from the queue, not from chat.
+The canonical methodology is `SKILL.md`; this queue is its executable form.
+
+This is **manual drop-in mode** — no paper was downloaded. The paper PDF(s)
+and supporting material are supplied by the user.
+
+---
+
+## Active — Manual paper replication
+
+Work top to bottom. Delete each item in the same commit that completes it.
+
+1. **Confirm the paper and materials are present, and triage them.**
+   Nothing was downloaded — this is manual drop-in mode.
+   - Look in `replication_target/` for the paper PDF(s), and in the repo
+     root / `data_lake/` for anything else the user dropped in.
+   - If the user left the paper at the repo root, move it into
+     `replication_target/` (name the primary paper `paper.pdf`).
+   - Move datasets / supplementary / exports / notes into `data_lake/`.
+   - **If `replication_target/` has no PDF, STOP and ask the user to drop
+     the paper in before continuing. Do not invent or fetch a paper.**
+   - Commit. (The dropped paper stays gitignored; `data_lake/` material is
+     committed per the cleanvibe convention.)
+
+2. **Identify the paper, then read it.** From the dropped PDF(s) determine
+   the title, authors, venue/year, and any arXiv id / DOI. Write that into
+   `README.md` and `notes/claims.md` (replacing the "unknown — fill from the
+   dropped paper" placeholders). Then in `notes/claims.md` record: the
+   headline claim(s); datasets (version/hash, where they live);
+   models/methods in enough detail to re-implement; evaluation metrics and
+   the exact reported numbers; the compute envelope (used to decide if CI
+   can auto-run it). Save a Markdown extraction of the paper to
+   `replication_target/paper.md`. Commit.
+
+3. **Find the authors' code.** Search the paper, paperswithcode, and GitHub
+   (title + first author). If official code exists, add it as a git
+   submodule under `replication_target/` and record the decision in
+   `notes/sources.md` (fork-and-verify vs. independent reimplementation).
+   Commit.
+
+4. **Set up the environment.** `requirements.txt` / `environment.yml` pinned
+   to versions that work; minimum set needed for the headline claim. Commit.
+
+5. **Reimplement the method** under `src/` — scope to the headline claim,
+   not every ablation. Commit as you go.
+
+6. **Run the replication.** Script it as `scripts/run.py` so CI can invoke
+   it; capture metrics as JSON into `results/`. Commit.
+
+7. **Write `FINDINGS.md`:** reproduced vs. reported numbers (table); gaps
+   you had to fill (hyperparameters, preprocessing, omitted architecture
+   details); where and why it diverged. Commit.
+
+8. **Publish the deliverables.** Confirm `.github/workflows/pages.yml`
+   builds the GitHub Pages site + PDF report and
+   `.github/workflows/package.yml` builds the ZIP replication package. Make
+   the repo public; enable Pages (Settings -> Pages -> Source: GitHub
+   Actions). Update `SKILL.md` so it reflects how you actually did this.
+   Commit.
+
+9. **Stop / hand back** when `FINDINGS.md` reports at least one headline
+   number with its reproduced value, `scripts/run.py` runs end-to-end from a
+   clean clone (or documents the un-automatable data step), and the Pages
+   deployment is green.
+
+---
+
+## Pointers
+
+- Methodology / definition of done: `SKILL.md`.
+- Long-horizon items: `todo.md`.
+- Completed work + replication milestones (chronological): `devlog.md`.
+- Narrative history: `git log`.
+"""
+
+
+def replication_manual_skill_md(folder: str) -> str:
+    name = _manual_name(folder)
+    slug = _slugify(name)
+    return f"""---
+name: replicate-{slug}
+description: Replicate a user-supplied paper (dropped into replication_target/) and produce a runnable artifact, a published findings report, and a downloadable replication package.
+---
+
+# Replicate (manual drop-in): {name}
+
+No arXiv metadata — the paper(s) are supplied by hand in
+`replication_target/`. Identify the paper by reading what was dropped in.
+
+## Prerequisite
+
+If `replication_target/` has no PDF, **stop and ask the user to drop the
+paper in**. Do not fetch or invent a paper. Once present, prefer working
+from `replication_target/paper.md` (a Markdown extraction) when available.
+
+## Plan
+
+1. **Triage the drop-in.** Move the paper PDF(s) into
+   `replication_target/` (primary -> `paper.pdf`) and any datasets /
+   supplementary / notes into `data_lake/`.
+
+2. **Identify + read the paper.** Record title/authors/venue/year (and
+   arXiv id / DOI if present) in `README.md` and `notes/claims.md`, then
+   the headline claim(s); datasets (version/hash, location); models/methods
+   in re-implementable detail; evaluation metrics and the exact reported
+   numbers; compute envelope. Extract the paper text to
+   `replication_target/paper.md`.
+
+3. **Find the authors' code.** paperswithcode, GitHub (title + first
+   author). If official code exists, add it as a **git submodule** under
+   `replication_target/` and record in `notes/sources.md` whether you
+   fork-and-verify or independently reimplement.
+
+4. **Set up the environment.** `environment.yml` / `requirements.txt`
+   pinned to working versions; minimum set for the headline claim.
+
+5. **Reimplement the method.** Code under `src/`. Scope to the headline
+   claim, not every ablation.
+
+6. **Run the replication.** `scripts/run.py` so CI can invoke it. Capture
+   metrics as JSON into `results/`.
+
+7. **Write the findings.** `FINDINGS.md`: reproduced vs. reported numbers
+   (table); gaps you filled; where it diverged and why.
+
+8. **Publish.** GitHub Pages deploys the findings + a transportable PDF
+   report (`.github/workflows/pages.yml`); a ZIP replication package is
+   built (`.github/workflows/package.yml`). The repo must be public with
+   Pages enabled.
+
+## Budget guardrails
+
+- If the paper's reported compute is more than ~4 GPU-hours on a single
+  consumer GPU, mark this replication **not CI-runnable** and document the
+  reduced-scale variant instead.
+- Prefer deterministic seeds and logged hashes so reruns are comparable.
+
+## Definition of done
+
+- `FINDINGS.md` exists and reports at least one headline number from the
+  paper, with the reproduced value next to it.
+- `scripts/run.py` runs end-to-end from a clean clone (or documents the
+  data step that can't be automated).
+- The GitHub Pages site and the ZIP package build green in Actions.
+- This file still reflects how you actually did it — if you deviated, edit
+  the plan above.
+"""
+
+
+def replication_manual_readme_md(folder: str) -> str:
+    name = _manual_name(folder)
+    return f"""# Replicating: _(paper supplied by hand — fill this in)_
+
+> Scaffolded with [cleanvibe](https://github.com/Immanuelle/cleanvibe)
+> `replicate` in **manual drop-in mode**. No arXiv metadata was fetched.
+
+**Paper:** _unknown — drop the PDF into `replication_target/`, then fill in
+title / authors / venue / year (and arXiv id or DOI if it has one) after
+reading it._
+
+## How to start
+
+1. Put the paper PDF(s) into `replication_target/` (primary -> `paper.pdf`).
+2. Put datasets / supplementary / notes into `data_lake/`.
+3. Open Claude Code here and work `queue.md` top to bottom.
+
+If `replication_target/` has no PDF, the agent will stop and ask you for it
+rather than guess.
+
+## Replication status
+
+Not started. The agent-executable plan is in [`SKILL.md`](./SKILL.md);
+the concrete step queue is in [`queue.md`](./queue.md).
+
+## What this repo produces
+
+Three compounding artifacts:
+
+1. **The replication** — runnable code under `src/` + `scripts/run.py`.
+2. **The legibility layer** — `FINDINGS.md`, published as a GitHub Pages
+   site with a transportable PDF report (built by GitHub Actions).
+3. **`SKILL.md`** — a reusable, agent-executable replication methodology.
+
+## Layout
+
+- `replication_target/` — the paper and everything about it:
+  - the paper PDF(s) you dropped in (gitignored — copyrighted, local input).
+  - `paper.md` — Markdown extraction of the paper text (for structured text).
+  - the authors' code, if any, as a git **submodule**.
+- `data_lake/` — other supplied material (NOT the paper).
+- `src/` — your reimplementation. `scripts/run.py` — CI entry point.
+- `results/` — metrics JSON (gitignored). `FINDINGS.md` — the report.
+- `.github/workflows/` — `pages.yml` (site + PDF), `package.yml` (ZIP).
+
+## Deliverables (GitHub Actions)
+
+To publish, **make this repo public** and set **Settings -> Pages -> Source:
+GitHub Actions**. Then `pages.yml` deploys the findings site + PDF report and
+`package.yml` builds a downloadable ZIP replication package. Site shape
+inspiration: http://sutra.emmaleonhart.com/
+"""

@@ -258,6 +258,21 @@ def _write(filepath: Path, content: str) -> None:
     print(f"  Created {filepath.name}")
 
 
+def _write_if_missing(filepath: Path, content: str) -> None:
+    """Write ``content`` only if ``filepath`` does not already exist.
+
+    Used by manual-mode ``replicate``: the user may run it on a folder they
+    already dropped a paper (or their own notes) into, so injection must be
+    non-destructive — never clobber what is already there.
+    """
+    if filepath.exists():
+        print(f"  Kept existing {filepath.name} (not overwritten)")
+        return
+    filepath.parent.mkdir(parents=True, exist_ok=True)
+    filepath.write_text(content, encoding="utf-8")
+    print(f"  Created {filepath.name}")
+
+
 def _write_gitkeep(directory: Path) -> None:
     """Create ``directory`` and an empty ``.gitkeep`` so git tracks it when empty.
 

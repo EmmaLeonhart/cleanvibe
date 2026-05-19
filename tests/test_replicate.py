@@ -12,8 +12,9 @@ from contextlib import contextmanager, redirect_stdout
 from pathlib import Path
 from unittest.mock import patch
 
+from cleanvibe import cli
 from cleanvibe.arxiv import ArxivPaper
-from cleanvibe.replicate import replicate_project
+from cleanvibe.replicate import replicate_manual_project, replicate_project
 
 
 def _paper() -> ArxivPaper:
@@ -122,6 +123,105 @@ class TestReplicateScaffold(unittest.TestCase):
             )
             self.assertIn("[dry-run]", out)
             self.assertIn("1706.03762", out)
+
+
+def _run_manual(folder="my-paper", **kwargs):
+    buf = io.StringIO()
+    with redirect_stdout(buf):
+        replicate_manual_project(folder, no_claude=True, **kwargs)
+    return buf.getvalue()
+
+
+class TestReplicateManual(unittest.TestCase):
+    def test_writes_expected_tree_without_arxiv_artifacts(self):
+        with _in_tmp_cwd():
+            _run_manual("my-paper")
+            target = Path("my-paper")
+            self.assertTrue(target.is_dir())
+            for rel in (
+                "CLAUDE.md",
+                "queue.md",
+                "devlog.md",
+                "README.md",
+                "SKILL.md",
+                ".gitignore",
+                "data_lake/.gitkeep",
+                "replication_target/.gitkeep",
+                ".github/workflows/pages.yml",
+                ".github/workflows/package.yml",
+            ):
+                self.assertTrue((target / rel).is_file(), f"missing {rel}")
+            self.assertTrue((target / ".git").is_dir(), "git repo not initialized")
+            # Manual mode has NO arXiv fetch artifacts.
+            self.assertFalse((target / "download_paper.py").exists())
+            self.assertFalse((target / "paper.json").exists())
+            # The scaffold says, up front, that the user supplies the paper.
+            claude = (target / "CLAUDE.md").read_text(encoding="utf-8")
+            self.assertIn("manual drop-in", claude.lower())
+            self.assertIn("replication_target/", claude)
+            queue = (target / "queue.md").read_text(encoding="utf-8")
+            self.assertIn("STOP and ask the user", queue)
+            skill = (target / "SKILL.md").read_text(encoding="utf-8")
+            self.assertIn("name: replicate-my-paper", skill)
+
+    def test_non_destructive_injection(self):
+        """A pre-existing folder with a dropped paper / custom file is kept."""
+        with _in_tmp_cwd():
+            target = Path("dropped")
+            (target / "replication_target").mkdir(parents=True)
+            (target / "replication_target" / "paper.pdf").write_bytes(b"%PDF-1.7 fake")
+            (target / "README.md").write_text("MY OWN README", encoding="utf-8")
+            _run_manual("dropped")
+            # The dropped paper survives.
+            self.assertEqual(
+                (target / "replication_target" / "paper.pdf").read_bytes(),
+                b"%PDF-1.7 fake",
+            )
+            # The user's own README is not overwritten.
+            self.assertEqual(
+                (target / "README.md").read_text(encoding="utf-8"), "MY OWN README"
+            )
+            # But the rest of the scaffold is still injected.
+            self.assertTrue((target / "SKILL.md").is_file())
+            self.assertTrue((target / "CLAUDE.md").is_file())
+
+    def test_paper_pattern_gitignored(self):
+        with _in_tmp_cwd():
+            _run_manual("p")
+            gi = (Path("p") / ".gitignore").read_text(encoding="utf-8")
+            self.assertIn("replication_target/*.pdf", gi)
+
+    def test_dry_run_writes_nothing(self):
+        with _in_tmp_cwd():
+            out = _run_manual("ghost", dry_run=True)
+            self.assertFalse(Path("ghost").exists())
+            self.assertIn("[dry-run]", out)
+            self.assertIn("manual", out.lower())
+
+
+class TestReplicateCliDispatch(unittest.TestCase):
+    """The single positional arg routes to arXiv mode or folder mode."""
+
+    def test_folder_name_routes_to_manual(self):
+        with _in_tmp_cwd():
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                cli.main(["replicate", "some-cool-paper", "--no-claude"])
+            self.assertTrue((Path("some-cool-paper") / "SKILL.md").is_file())
+            self.assertFalse((Path("some-cool-paper") / "paper.json").exists())
+
+    def test_arxiv_ref_routes_to_arxiv_mode(self):
+        with _in_tmp_cwd():
+            buf = io.StringIO()
+            with patch("cleanvibe.replicate.fetch_paper", return_value=_paper()):
+                with redirect_stdout(buf):
+                    cli.main(
+                        ["replicate", "https://www.alphaxiv.org/overview/1706.03762",
+                         "--no-claude"]
+                    )
+            target = Path(f"replicating-{SLUG}")
+            self.assertTrue((target / "paper.json").is_file())
+            self.assertTrue((target / "download_paper.py").is_file())
 
 
 if __name__ == "__main__":
