@@ -21,6 +21,7 @@ Absorbed from the now-sunset ``replication_skill`` project.
 import json
 import platform
 import subprocess
+import sys
 from pathlib import Path
 
 from . import __version__, templates
@@ -33,6 +34,62 @@ from .scaffold import (
     _write_gitkeep,
     _write_if_missing,
 )
+
+
+def _run_extraction_commit(target: Path) -> None:
+    """Commit 2 of the arXiv scaffold: download + extract the source, commit it.
+
+    This runs the just-written ``download_paper.py`` (which fetches the arXiv
+    e-print source, extracts it to ``replication_target/source/``, and saves the
+    PDF) and makes a second commit, **before Claude is launched** — so the agent
+    opens onto an already-extracted, already-committed paper source.
+
+    This is *data download + archive extraction by cleanvibe's own stdlib code*,
+    NOT execution of third-party code, so it needs no user consent. It is
+    best-effort: if the network is unavailable (or arXiv is down), it warns and
+    leaves ``download_paper.py`` for the agent to run later (the queue says so).
+    """
+    dl = target / "download_paper.py"
+    if not dl.exists():
+        return
+    print("  Extracting arXiv source (download_paper.py) for commit 2 ...")
+    try:
+        result = subprocess.run(
+            [sys.executable, "download_paper.py"],
+            cwd=target,
+            capture_output=True,
+            text=True,
+            timeout=300,
+        )
+    except Exception as e:  # network/timeout/python issues — non-fatal
+        print(f"  extraction skipped ({e}); the agent will run download_paper.py")
+        return
+    if result.returncode != 0:
+        print("  extraction did not complete; the agent will run download_paper.py")
+        return
+    subprocess.run(["git", "add", "-A"], cwd=target, capture_output=True)
+    status = subprocess.run(
+        ["git", "status", "--porcelain"], cwd=target, capture_output=True, text=True
+    )
+    if not status.stdout.strip():
+        return  # nothing new to commit (e.g. PDF-only, already gitignored)
+    subprocess.run(
+        [
+            "git",
+            "commit",
+            "-q",
+            "-m",
+            "Extract arXiv source (download_paper.py)\n\n"
+            "Commit 2 of the cleanvibe replicate scaffold: the e-print source is "
+            "downloaded and extracted to replication_target/source/ (committed); "
+            "the raw archive and PDF are gitignored. Data download + extraction "
+            "only — running the authors' recipe/code is gated on user consent "
+            "(see queue.md step 1).",
+        ],
+        cwd=target,
+        capture_output=True,
+    )
+    print("  Committed extracted source (commit 2)")
 
 
 def _resolve_target(base: Path) -> Path:
@@ -91,8 +148,17 @@ def _clawrxiv_paper_json(paper) -> str:
     )
 
 
-def replicate_project(arxiv, path=None, dry_run: bool = False, no_claude: bool = False) -> None:
-    """Scaffold a standalone replication project for an arXiv/alphaxiv paper."""
+def replicate_project(
+    arxiv, path=None, dry_run: bool = False, no_claude: bool = False,
+    extract: bool = True,
+) -> None:
+    """Scaffold a standalone replication project for an arXiv/alphaxiv paper.
+
+    After the framework commit (commit 1), unless ``extract=False``, the source
+    is downloaded + extracted and committed (commit 2) *before* Claude launches,
+    so the agent opens onto an already-extracted paper. ``extract=False`` keeps
+    the unit tests network-free.
+    """
     is_windows = platform.system() == "Windows"
     paper = fetch_paper(arxiv)
 
@@ -120,7 +186,10 @@ def replicate_project(arxiv, path=None, dry_run: bool = False, no_claude: bool =
         if is_windows:
             print(f"[dry-run] Would write: {target / '!runClaude.bat'}")
         print(f"[dry-run] Would run: git init")
-        print(f"[dry-run] Would run: git add . && git commit")
+        print(f"[dry-run] Would run: git add . && git commit  (commit 1: framework)")
+        if extract:
+            print(f"[dry-run] Would run: python download_paper.py + git commit  "
+                  f"(commit 2: extracted source)")
         if not no_claude:
             print(f"[dry-run] Would launch: claude")
         return
@@ -156,11 +225,17 @@ def replicate_project(arxiv, path=None, dry_run: bool = False, no_claude: bool =
         f'Replicating "{paper.title}"\n'
         f"Scaffolded by `cleanvibe replicate` "
         f"(https://github.com/Immanuelle/cleanvibe).\n"
-        f"Paper -> replication_target/paper.pdf (run `python download_paper.py`).\n"
+        f"Paper source -> replication_target/source/ (commit 2 extracts it).\n"
         f"Deliverables (GitHub Pages site + PDF report + ZIP package) build in "
         f"GitHub Actions."
     )
     _git_init(target, message=message)
+
+    # Commit 2 (before launch): download + extract the source so the agent opens
+    # onto an already-extracted, already-committed paper. Best-effort; data
+    # download only — running the authors' code stays gated on user consent.
+    if extract:
+        _run_extraction_commit(target)
 
     if not no_claude:
         _launch_claude(target)

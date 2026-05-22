@@ -119,7 +119,14 @@ The generated scaffold is built around the **efficient, recipe-first path**:
   `replication_target/source/`. The `.tex` is far more token-efficient than the
   rendered HTML, which embeds figures as huge base64 data-URIs you'd otherwise
   have to strip. The raw archive is gitignored; the extracted `source/` is
-  committed.
+  committed. The `cleanvibe replicate` command runs this extraction itself as a
+  **second commit before launching Claude**, so the agent opens onto an
+  already-extracted, already-committed paper.
+- **Consent before running code.** Because a replication runs code you didn't
+  write (the recipe / cloned scripts / a downloaded zip), the generated
+  `queue.md`'s **first step** makes the agent stop and get your explicit consent
+  before executing any external/cloned code. Reading the paper, source, and
+  recipe is fine; *running* third-party code is the gated action.
 - **Find the recipe FIRST.** Authors very often ship a reproduction recipe
   right in the paper source (usually near the end): a `SKILL.md`/`AGENTS.md`, a
   `reproduce.*`/`replicate.*`/`run.sh` script, a Makefile target, a Dockerfile,

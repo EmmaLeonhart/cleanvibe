@@ -585,3 +585,47 @@ Minor release bundling the two changes above. Version `1.5.0` -> `1.6.0`
 (`cleanvibe/__init__.py`, `pyproject.toml`); full suite 67/67 green; both live
 smoke tests passed. Pushed to `main`, tagged `v1.6.0`, and GitHub release cut —
 the Publish-to-PyPI workflow runs on release.
+
+## 2026-05-22 — consent gate + scaffolder-side source extraction (commit 2)
+
+User clarification on the replication flow: (1) the scaffolder's job isn't just
+the framework commit — it should also do the source extraction as a **second
+commit before launching Claude**, so the agent opens onto an already-extracted
+paper; and (2) because replication **runs code the user didn't write**, the
+generated `queue.md` must, as its first step, make the agent stop and get
+**explicit user consent** before executing any cloned/recipe code.
+
+- **`cleanvibe/replicate.py`**: `_run_extraction_commit(target)` runs the
+  just-written `download_paper.py` and commits the extracted source as commit 2,
+  **before** `_launch_claude`. Best-effort (network/arXiv failure → warns and
+  leaves it for the agent), gated by a new `extract` param on `replicate_project`
+  (`True` from the CLI; tests pass `False` to stay network-free). It's data
+  download + tarball extraction by our own stdlib code — not third-party
+  execution — so it is NOT consent-gated. The initial-commit message now points
+  at `replication_target/source/`.
+- **`cleanvibe/templates.py`**: a **consent gate** is now queue step 1 in both
+  the arXiv (`_REPLICATION_QUEUE_TMPL`) and clawRxiv (`_CLAWRXIV_QUEUE_TMPL`)
+  templates, and a prominent callout in the manual queue: STOP and get explicit
+  user consent before running ANY external/cloned code; reading the
+  paper/source/recipe is fine, *running* third-party code is gated. Reinforced
+  in both SKILL plans. The arXiv queue's source step now says the scaffolder
+  already extracted + committed it (with an offline fallback to
+  `download_paper.py`); steps renumbered.
+- **`todo.md`**: logged the future "automated safety scan of cloned/recipe code
+  before running" enhancement (the consent gate is the interim measure).
+- **Tests**: `_run` defaults `extract=False`; new tests assert the consent gate
+  is queue step 1 (arXiv + clawRxiv) and that `extract=True/False`
+  invokes/skips `_run_extraction_commit`; the arXiv dispatch test patches the
+  extractor so the CLI default doesn't hit the network. Full suite **70/70**
+  green.
+- **Live**: `cleanvibe replicate <Sutra>` now produces two commits ("Initial
+  commit: replication scaffold" + "Extract arXiv source (download_paper.py)")
+  with `replication_target/source/` committed, before launch.
+
+## 2026-05-22 — v1.6.1: consent gate + commit-2 source extraction
+
+Patch release bundling the two changes above (user framed it explicitly as a
+small v1.6.1, not a big release). Version `1.6.0` -> `1.6.1`
+(`cleanvibe/__init__.py`, `pyproject.toml`); full suite 70/70 green; live smoke
+test passed. Pushed to `main`, tagged `v1.6.1`, and GitHub release cut — the
+Publish-to-PyPI workflow runs on release.

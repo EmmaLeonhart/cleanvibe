@@ -43,7 +43,12 @@ def _in_tmp_cwd():
 
 
 def _run(**kwargs):
-    """Run replicate_project with fetch_paper patched, stdout captured."""
+    """Run replicate_project with fetch_paper patched, stdout captured.
+
+    extract defaults to False so the scaffold tests stay network-free (the
+    commit-2 source extraction runs download_paper.py, which hits arXiv).
+    """
+    kwargs.setdefault("extract", False)
     buf = io.StringIO()
     with patch("cleanvibe.replicate.fetch_paper", return_value=_paper()):
         with redirect_stdout(buf):
@@ -119,6 +124,35 @@ class TestReplicateScaffold(unittest.TestCase):
             self.assertIn("SRC_URL", src)
             self.assertIn("tarfile", src)
             self.assertIn("_extract_source", src)
+
+    def test_consent_gate_is_first_queue_step(self):
+        """Queue + SKILL gate running external/cloned code on user consent."""
+        with _in_tmp_cwd():
+            _run()
+            target = Path(f"replicating-{SLUG}")
+            queue = (target / "queue.md").read_text(encoding="utf-8")
+            skill = (target / "SKILL.md").read_text(encoding="utf-8")
+            self.assertIn("consent", queue.lower())
+            self.assertIn("external/cloned code", queue)
+            # The consent gate is step 1 (before the recipe runs).
+            self.assertIn("1. **STOP", queue)
+            self.assertIn("consent", skill.lower())
+
+    def test_extract_runs_commit_2_when_enabled(self):
+        """extract=True invokes the commit-2 extraction helper; False doesn't."""
+        with _in_tmp_cwd():
+            with patch("cleanvibe.replicate.fetch_paper", return_value=_paper()), \
+                    patch("cleanvibe.replicate._run_extraction_commit") as ex:
+                with redirect_stdout(io.StringIO()):
+                    replicate_project("1706.03762", no_claude=True, extract=True)
+            ex.assert_called_once()
+
+        with _in_tmp_cwd():
+            with patch("cleanvibe.replicate.fetch_paper", return_value=_paper()), \
+                    patch("cleanvibe.replicate._run_extraction_commit") as ex:
+                with redirect_stdout(io.StringIO()):
+                    replicate_project("1706.03762", no_claude=True, extract=False)
+            ex.assert_not_called()
 
     def test_paper_not_in_data_lake(self):
         with _in_tmp_cwd():
@@ -258,7 +292,10 @@ class TestReplicateCliDispatch(unittest.TestCase):
     def test_arxiv_ref_routes_to_arxiv_mode(self):
         with _in_tmp_cwd():
             buf = io.StringIO()
-            with patch("cleanvibe.replicate.fetch_paper", return_value=_paper()):
+            # Patch the commit-2 extraction so the CLI default (extract=True)
+            # doesn't hit the network in this dispatch test.
+            with patch("cleanvibe.replicate.fetch_paper", return_value=_paper()), \
+                    patch("cleanvibe.replicate._run_extraction_commit") as extract:
                 with redirect_stdout(buf):
                     cli.main(
                         ["replicate", "https://www.alphaxiv.org/overview/1706.03762",
@@ -267,6 +304,8 @@ class TestReplicateCliDispatch(unittest.TestCase):
             target = Path(f"replicating-{SLUG}")
             self.assertTrue((target / "paper.json").is_file())
             self.assertTrue((target / "download_paper.py").is_file())
+            # The CLI runs the (real) extraction step by default.
+            extract.assert_called_once()
 
 
 if __name__ == "__main__":

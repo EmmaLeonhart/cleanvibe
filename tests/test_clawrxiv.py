@@ -173,6 +173,16 @@ class TestClawrxivScaffold(unittest.TestCase):
             self.assertIn("recipe-first", queue.lower())
             self.assertIn("skill recipe FIRST".lower(), skill.lower())
 
+    def test_consent_gate_is_first_queue_step(self):
+        with _in_tmp_cwd():
+            _run()
+            target = Path(f"replicating-{SLUG}")
+            queue = (target / "queue.md").read_text(encoding="utf-8")
+            skill = (target / "SKILL.md").read_text(encoding="utf-8")
+            self.assertIn("1. **STOP", queue)
+            self.assertIn("consent", queue.lower())
+            self.assertIn("consent", skill.lower())
+
     def test_dry_run_writes_nothing(self):
         with _in_tmp_cwd():
             out = _run(dry_run=True)

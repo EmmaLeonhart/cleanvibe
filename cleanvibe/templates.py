@@ -481,30 +481,42 @@ The canonical methodology is `SKILL.md`; this queue is its executable form.
 
 ## Active — Replicate "$title" (arXiv:$arxiv_id)
 
-The scaffold already made commit 1 (the framework). The efficient path is:
-get the LaTeX source, **find and run the authors' reproduction recipe FIRST**,
-then verify its output against the paper and fill only the gaps. From-scratch
-reimplementation is the fallback, not the default. Work top to bottom; delete
-each item in the same commit that completes it (and append to `devlog.md`).
+The scaffold already made commit 1 (the framework) AND commit 2 (the extracted
+arXiv source). The efficient path is: read the source, **find and run the
+authors' reproduction recipe FIRST**, then verify its output against the paper
+and fill only the gaps. From-scratch reimplementation is the fallback, not the
+default. Work top to bottom; delete each item in the same commit that completes
+it (and append to `devlog.md`).
 
-1. **Get the LaTeX source and commit it.** Run `python download_paper.py`. It
-   downloads the arXiv **e-print source** ($src_url) — far cheaper to read than
-   the rendered HTML, which embeds figures as huge base64 blobs — extracts it to
-   `replication_target/source/`, and saves the PDF as a fallback record. The
-   archive and PDF are gitignored; the extracted `source/` is committed. Read
-   the paper straight from the `.tex` in `source/` — no HTML→markdown step. If
-   the paper is PDF-only (no source), fall back to the PDF. Commit the extracted
-   source.
+1. **STOP — get explicit user consent before running ANY external/cloned code.**
+   This is the first thing you do, before anything else. Replicating this paper
+   means executing code you did not write: the authors' reproduction recipe /
+   replication scripts, a cloned repo, a downloaded zip. Per harness safety
+   requirements, **ask the user for explicit consent to run such code and wait
+   for their answer before executing any of it.** Reading the paper, the
+   `source/`, and the recipe text is fine — *running* third-party code is the
+   gated action. (Downloading the arXiv source and extracting the tarball is
+   plain data handling, already done by the scaffolder, and is not gated.) An
+   automated security scan of the code before running is a future enhancement
+   (see `todo.md`); for now, only proceed if the user trusts the source.
 
-2. **Create the GitHub repo and push — now, not at the end.** Create a PUBLIC
+2. **Read the already-extracted source.** The scaffolder downloaded the arXiv
+   **e-print source** ($src_url) and committed it to `replication_target/source/`
+   (commit 2) — far cheaper to read than the rendered HTML, which embeds figures
+   as huge base64 blobs. Read the paper straight from the `.tex` in `source/` —
+   no HTML→markdown step. (If `source/` is empty — e.g. the scaffold ran offline,
+   or the paper is PDF-only — run `python download_paper.py` now and commit it;
+   that is a plain download, not third-party code, so it is not gated.)
+
+3. **Create the GitHub repo and push — now, not at the end.** Create a PUBLIC
    repo and push: `gh repo create --public --source=. --push` (public is
    required for free GitHub Pages). From here on every commit pushes, so CI and
    Pages build as you go. (This is the step the v1.4.0 flow missed — the
    replication ran entirely locally and never went live.)
 
-3. **FIRST, before any deep analysis: find the reproduction recipe in the
-   source.** This is the highest-leverage step and it comes before reading the
-   whole paper. Authors very often ship a recipe right in the e-print source —
+4. **Before any deep analysis: find the reproduction recipe in the source.**
+   This is the highest-leverage step and it comes before reading the whole
+   paper. Authors very often ship a recipe right in the e-print source —
    usually near the end of the paper: a `SKILL.md` / `AGENTS.md`, a
    `reproduce.*` / `replicate.*` / `run.sh` script, a `Makefile` reproduce
    target, a Dockerfile, or a **replication zip** referenced in the text.
@@ -520,39 +532,40 @@ each item in the same commit that completes it (and append to `devlog.md`).
    - Found nothing → note that in `notes/sources.md`; the rest of the queue is
      your from-scratch path.
 
-4. **If a recipe exists, RUN IT FIRST and let it drive the rest.** Set up just
-   enough environment to execute it, run it, and capture its output into
+5. **If a recipe exists, RUN IT FIRST and let it drive the rest.** (Only after
+   the user's consent from step 1.) Set up just enough environment to execute
+   it, run it, and capture its output into
    `results/`. Then read the paper and assess **how much of the headline claims
    the recipe's output actually reproduces** — which numbers/figures it covers
    and which it doesn't. Record this in `notes/sources.md`. With a working
    recipe, most of what follows is *verifying its output against the paper*, not
    reimplementing from scratch. Commit.
 
-5. **Check ALL references — always, recipe or not.** Walk the bibliography and
+6. **Check ALL references — always, recipe or not.** Walk the bibliography and
    confirm the key cited results / datasets / baselines the paper leans on
    actually say what the paper claims. This runs in every replication. Record
    anything load-bearing or surprising in `notes/claims.md`. Commit.
 
-6. **Record `notes/claims.md`** — scoped to whatever the recipe did NOT already
+7. **Record `notes/claims.md`** — scoped to whatever the recipe did NOT already
    cover: headline claim(s); datasets (version/hash, where they live);
    models/methods in re-implementable detail; evaluation metrics and the exact
    reported numbers; compute envelope (GPU type, hours, memory — decides if CI
    can auto-run it). If the recipe covered everything, this is a short
    confirmation. Commit.
 
-7. **Reimplement only the uncovered claims** under `src/` (skip anything the
+8. **Reimplement only the uncovered claims** under `src/` (skip anything the
    recipe already reproduced; scope to the headline claim, not every ablation).
    Pin the environment in `requirements.txt` / `environment.yml` to versions
    that work. Commit as you go.
 
-8. **Run the full replication** via `scripts/run.py` (the CI entry point);
+9. **Run the full replication** via `scripts/run.py` (the CI entry point);
    capture metrics as JSON into `results/`. Commit.
 
-9. **Write `FINDINGS.md`:** reproduced vs. reported numbers (table); what the
-   recipe covered vs. what you filled; gaps (hyperparameters, preprocessing,
-   omitted architecture details) and where/why it diverged. Commit and push.
+10. **Write `FINDINGS.md`:** reproduced vs. reported numbers (table); what the
+    recipe covered vs. what you filled; gaps (hyperparameters, preprocessing,
+    omitted architecture details) and where/why it diverged. Commit and push.
 
-10. **Publish and finish.** Confirm `.github/workflows/pages.yml` (site + PDF
+11. **Publish and finish.** Confirm `.github/workflows/pages.yml` (site + PDF
     report) and `.github/workflows/package.yml` (ZIP) run green; set
     Settings → Pages → Source: GitHub Actions. Keep `SKILL.md` (and
     `replication_skill.md`, if you found one) truthful to what you actually did.
@@ -599,9 +612,17 @@ The efficient path: get the source, **find the authors' reproduction recipe
 FIRST**, run it, then verify its output against the paper and fill only the
 gaps. Reimplementing from scratch is the fallback, not the default.
 
-1. **Acquire the LaTeX source.** `python download_paper.py` → extracts the
-   e-print source to `replication_target/source/` (committed) and saves the PDF
-   (gitignored). Read the `.tex` directly.
+> **Consent gate (do this before running anything):** replication runs code you
+> did not write (the recipe / cloned scripts / a downloaded zip). Per harness
+> safety requirements, ask the user for explicit consent before executing ANY
+> such code, and wait for their answer. Reading the paper/source/recipe is fine;
+> *running* third-party code is gated. (A future automated security scan is in
+> `todo.md`.)
+
+1. **Acquire the LaTeX source.** The scaffolder already downloaded + extracted
+   the e-print source to `replication_target/source/` (committed) and saved the
+   PDF (gitignored) — read the `.tex` directly. (If `source/` is empty, run
+   `python download_paper.py`; that is a plain download, not gated.)
 
 2. **Go live early.** Create a PUBLIC GitHub repo and push
    (`gh repo create --public --source=. --push`) so every later commit pushes
@@ -1220,6 +1241,15 @@ against the paper and fill only the gaps. Reimplementing from scratch is the
 fallback. Work top to bottom; delete each item in the same commit that
 completes it (and append to `devlog.md`).
 
+> **Consent gate — read before step 4.** This replication will run code you did
+> not write (the authors' reproduction recipe / replication scripts / cloned
+> repo). Per harness safety requirements, **before executing ANY such code
+> (step 4 onward), ask the user for explicit consent and wait for their
+> answer.** Reading the paper and the recipe text is fine; *running*
+> third-party code is the gated action. An automated security scan of the code
+> before running is a future enhancement (see `todo.md`); for now, only proceed
+> if the user trusts the source.
+
 1. **Confirm the paper and materials are present, and triage them.**
    Nothing was downloaded — this is manual drop-in mode.
    - Look in `replication_target/` for the paper PDF(s), and in the repo
@@ -1257,10 +1287,11 @@ completes it (and append to `devlog.md`).
      gitignored, contents committed).
    Commit what you found either way.
 
-4. **If a recipe exists, RUN IT FIRST.** Set up just enough environment to
-   execute it, run it, capture output to `results/`, and assess how much of the
-   paper's headline claims it reproduces. With a working recipe the rest is
-   verification, not from-scratch reimplementation. Commit.
+4. **If a recipe exists, RUN IT FIRST.** (Only after the user's consent — see
+   the consent gate above.) Set up just enough environment to execute it, run
+   it, capture output to `results/`, and assess how much of the paper's headline
+   claims it reproduces. With a working recipe the rest is verification, not
+   from-scratch reimplementation. Commit.
 
 5. **Check ALL references — always, recipe or not.** Walk the bibliography and
    confirm the key cited results / datasets / baselines the paper relies on say
@@ -1584,43 +1615,54 @@ is the purest recipe-first case — the recipe is already in the repo.
 Work top to bottom. Delete each item in the same commit that completes it
 (and append to `devlog.md`).
 
-1. **Create the GitHub repo and push — PUBLIC, early.** Create a public repo
+1. **STOP — get explicit user consent before running the skill recipe (or any
+   external/cloned code).** This is the first thing you do, before anything
+   else. The clawRxiv skill recipe is code you did not write; running it (and
+   any cloned scripts it pulls in) is gated. Per harness safety requirements,
+   **ask the user for explicit consent to run it and wait for their answer
+   before executing anything.** Reading the paper, the recipe text, and the
+   `source/` is fine — *running* it is the gated action. An automated security
+   scan of the code before running is a future enhancement (see `todo.md`); for
+   now, only proceed if the user trusts the source.
+
+2. **Create the GitHub repo and push — PUBLIC, early.** Create a public repo
    and push: `gh repo create --public --source=. --push` (public is required
    for free GitHub Pages). From here on every commit pushes, so CI and Pages
    build as you go.
 
-2. **Run the skill recipe FIRST.** $skill_location Set up just enough
-   environment to execute it, run it, and capture its output into `results/`.
-   This is the highest-leverage step and it comes before any deep analysis —
-   clawRxiv hands you an agent-runnable recipe, so use it. Commit.
+3. **Run the skill recipe FIRST.** (Only after the user's consent from step 1.)
+   $skill_location Set up just enough environment to execute it, run it, and
+   capture its output into `results/`. This is the highest-leverage step and it
+   comes before any deep analysis — clawRxiv hands you an agent-runnable recipe,
+   so use it. Commit.
 
-3. **Verify the skill's output against the paper.** Read
+4. **Verify the skill's output against the paper.** Read
    `replication_target/source/paper.md` and assess **how much of the paper's
    headline claims the recipe actually reproduces** — which results it covers
    and which it doesn't. Record this in `notes/sources.md`. Commit.
 
-4. **Check ALL references — always.** Walk the paper's references and confirm
+5. **Check ALL references — always.** Walk the paper's references and confirm
    the key cited results / datasets / baselines say what the paper claims.
    Record anything load-bearing in `notes/claims.md`. Commit.
 
-5. **Record `notes/claims.md`** — scoped to whatever the recipe did NOT already
+6. **Record `notes/claims.md`** — scoped to whatever the recipe did NOT already
    cover: the headline claim(s); datasets (version/hash, where they live);
    models/methods in re-implementable detail; evaluation metrics and the exact
    reported numbers; the compute envelope (decides if CI can auto-run it). If
    the recipe covered everything, this is a short confirmation. Commit.
 
-6. **Reimplement only the uncovered claims** under `src/` (skip anything the
+7. **Reimplement only the uncovered claims** under `src/` (skip anything the
    recipe already reproduced; scope to the headline claim, not every ablation).
    Pin the environment in `requirements.txt` / `environment.yml`. Commit.
 
-7. **Run the full replication** via `scripts/run.py` (the CI entry point);
+8. **Run the full replication** via `scripts/run.py` (the CI entry point);
    capture metrics as JSON into `results/`. Commit.
 
-8. **Write `FINDINGS.md`:** reproduced vs. reported numbers (table); what the
+9. **Write `FINDINGS.md`:** reproduced vs. reported numbers (table); what the
    recipe covered vs. what you filled; gaps and where/why it diverged. Commit
    and push.
 
-9. **Publish and finish.** Confirm `.github/workflows/pages.yml` (site + PDF)
+10. **Publish and finish.** Confirm `.github/workflows/pages.yml` (site + PDF)
    and `.github/workflows/package.yml` (ZIP) run green; set Settings → Pages →
    Source: GitHub Actions. Keep `SKILL.md` and `replication_skill.md` truthful.
    **Stop / hand back** when `FINDINGS.md` reports at least one headline number
@@ -1658,6 +1700,12 @@ The scaffold already fetched all three: content at
 ## Prerequisite
 
 $skill_location
+
+> **Consent gate (do this before running anything):** the skill recipe is code
+> you did not write. Per harness safety requirements, ask the user for explicit
+> consent before executing it (or any cloned scripts it pulls in), and wait for
+> their answer. Reading the paper and the recipe text is fine; *running* it is
+> gated. (A future automated security scan is in `todo.md`.)
 
 ## Plan
 
