@@ -472,5 +472,7 @@ authors' replication recipe first, and arXiv was returning constant 429s):
 - **Default paper + sandbox:** arXiv:2605.20919 ("Sutra") documented as the
   default replication target; `tests/scratch/` gitignored for live runs.
 - Version `1.3.0` -> `1.4.0` (`cleanvibe/__init__.py`, `pyproject.toml`);
-  full suite 53/53 green; live smoke test passed. (Tag/release cut
-  separately.)
+  full suite 53/53 green; live smoke test passed. Merged to `main`
+  (`6f0523c`), tagged `v1.4.0`, and GitHub release cut
+  (https://github.com/EmmaLeonhart/cleanvibe/releases/tag/v1.4.0) — the
+  Publish-to-PyPI workflow runs on release.
