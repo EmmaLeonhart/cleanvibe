@@ -177,11 +177,11 @@ class TestCreateProject(unittest.TestCase):
             buf = io.StringIO()
             with redirect_stdout(buf):
                 create_project(proj, no_claude=True)
-            runclaude = proj / "runclaude.bat"
+            runclaude = proj / "!runClaude.bat"
             if IS_WINDOWS:
-                self.assertTrue(runclaude.is_file(), "runclaude.bat should be created on Windows")
+                self.assertTrue(runclaude.is_file(), "!runClaude.bat should be created on Windows")
             else:
-                self.assertFalse(runclaude.exists(), "runclaude.bat should NOT be created on Unix")
+                self.assertFalse(runclaude.exists(), "!runClaude.bat should NOT be created on Unix")
 
     def test_initializes_git_repo(self):
         with tempfile.TemporaryDirectory() as tmp:

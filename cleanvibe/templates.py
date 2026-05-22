@@ -10,6 +10,7 @@ from string import Template
 
 from . import __version__
 from .arxiv import ArxivPaper, _slugify
+from .clawrxiv import ClawrxivPaper
 
 
 def claude_md(project_name: str) -> str:
@@ -1443,3 +1444,341 @@ GitHub Actions**. Then `pages.yml` deploys the findings site + PDF report and
 `package.yml` builds a downloadable ZIP replication package. Site shape
 inspiration: http://sutra.emmaleonhart.com/
 """
+
+
+# ---------------------------------------------------------------------------
+# clawRxiv replication templates (`cleanvibe replicate <clawrxiv-ref>`)
+#
+# clawRxiv (clawrxiv.io) publishes papers authored autonomously by AI agents
+# and serves them via a JSON API that *differentiates* the paper content, the
+# abstract, and a skill file (an agent-runnable replication recipe). The
+# scaffolder fetches all three up front: the content is written to
+# `replication_target/source/paper.md` (committed) and the skill recipe, when
+# clawRxiv ships one separately, to `replication_skill.md` at the root. This is
+# the purest recipe-first case, so the queue is **skill-first**: run the recipe
+# before any reimplementation. No `download_paper.py` (the API returns
+# everything in a single call); the replication gitignore + workflow constants
+# above are reused as-is.
+# ---------------------------------------------------------------------------
+
+
+def _clawrxiv_subs(paper: ClawrxivPaper) -> dict:
+    if paper.has_skill_file:
+        skill_location = (
+            "The skill recipe is **already at `replication_skill.md`** "
+            "(clawRxiv's `skillMd` field)."
+        )
+    else:
+        skill_location = (
+            "clawRxiv shipped no separate skill file for this paper, so the "
+            "agent-runnable recipe is **embedded in "
+            "`replication_target/source/paper.md`** — extract it into "
+            "`replication_skill.md` first, then run it."
+        )
+    return {
+        "title": paper.title,
+        "paper_id": paper.paper_id,
+        "slug": paper.slug,
+        "authors": ", ".join(paper.authors) if paper.authors else "unknown",
+        "claw_name": paper.claw_name or "unknown",
+        "abstract": paper.abstract or "_(no abstract provided)_",
+        "created_at": paper.created_at or "unknown",
+        "category": paper.category or "unknown",
+        "abs_url": paper.abs_url,
+        "api_url": paper.api_url,
+        "skill_location": skill_location,
+    }
+
+
+_CLAWRXIV_CLAUDE_TMPL = Template(
+    """# replicating-$slug
+
+## Project Description
+
+This is a **paper replication** project (scaffolded by `cleanvibe replicate`
+from **clawRxiv**). The goal is to reproduce the headline results of:
+
+> **$title**
+> clawrxiv:$paper_id - $authors - $created_at
+> Agent author (claw): $claw_name - category: $category
+> $abs_url
+
+clawRxiv publishes papers authored autonomously by AI agents and serves each as
+three *differentiated* parts — the **content** (body), the **abstract**, and a
+**skill file** (an agent-runnable replication recipe). The scaffold already
+fetched all three from the API ($api_url).
+
+It produces three compounding artifacts (see `docs/replication_framing.md` in
+the cleanvibe repo for the full framing): the runnable replication, a legibility
+layer (the published findings report), and `SKILL.md` — the reusable,
+agent-executable replication methodology.
+
+## Architecture and Conventions
+
+- **This is the purest recipe-first case — the recipe is already here.**
+  $skill_location Run it FIRST, then verify its output against the paper and
+  fill only the gaps. A from-scratch reimplementation is the fallback.
+- **`replication_target/source/paper.md`** — the clawRxiv paper **content**,
+  written at scaffold time (committed; no download step). Read it directly.
+- **`replication_skill.md`** (repo root) — the clawRxiv skill recipe, when one
+  was shipped separately; otherwise extract it from `paper.md` (see above).
+- **`paper.json`** — the frozen clawRxiv metadata (title, authors, claw name,
+  version, category, abstract, URLs).
+- **`data_lake/`** — other downloaded/supplied material. The paper is NOT here.
+- **`src/`** — your reimplementation (only the gaps the recipe didn't cover).
+  **`scripts/run.py`** — the entry point CI invokes. **`results/`** — metrics
+  JSON (gitignored). **`FINDINGS.md`** — the report (reproduced vs. reported,
+  what the recipe covered vs. what you filled, gaps, divergences).
+- **Go live early.** Create a PUBLIC GitHub repo and push near the start so
+  every commit pushes and CI/Pages build as you go — don't leave it local-only.
+- **Deliverables are built by GitHub Actions, not committed.**
+  `.github/workflows/pages.yml` publishes the GitHub Pages site + PDF report;
+  `.github/workflows/package.yml` builds the downloadable ZIP replication
+  package. Make the repo public and enable Pages (Settings -> Pages -> Source:
+  GitHub Actions). Vision for the site shape: http://sutra.emmaleonhart.com/
+
+## Workflow Rules
+
+- **Commit early and often.** Every meaningful change gets a descriptive commit.
+- **Plan into `queue.md` first, then execute.** The replication plan already
+  lives in `queue.md` (derived from `SKILL.md`). Work it top to bottom.
+- **Finishing a queue item = delete from `queue.md` + append dated entry to
+  `devlog.md`**, in the same commit as the work, then push. Never tick boxes in
+  place. `devlog.md` is also where you record the replication's
+  releases/milestones (skill run, first reproduced number, FINDINGS published,
+  Pages live).
+- **Keep `SKILL.md` truthful.** It is the compounding artifact. If you deviated
+  from its plan, edit the plan to match what you actually did.
+- **Keep this file and `README.md` current** as the replication takes shape.
+
+## Writing
+
+- Do not use "honest", "honesty", or "honestly" — and do not swap in "frank", "frankly", "candid", "candidly", or "transparently", which are the same self-congratulatory move in a different coat. When something failed, name the failure: "it didn't work", "I got that wrong", "this failed" — flat, no qualifier. Tagging a report "honest" implies the rest aren't, and couching a failure as honesty asks for credit for the admission, which is worse than the failure itself. Use a precise positive word ("accurate", "plainly", "truly") only when that is genuinely the meaning — never as a halo on a bad outcome.
+"""
+)
+
+
+_CLAWRXIV_QUEUE_TMPL = Template(
+    """# replicating-$slug - Work Queue
+
+**This file is a queue of concrete, executable steps, not a state snapshot.**
+Finished work lives in `devlog.md` (dated entries) and `git log`;
+longer-horizon items live in `todo.md`. **When an item is done, delete it
+from this file AND append a dated entry to `devlog.md` in the same commit,
+then push.** No checkmarks, no status indicators in place.
+
+**Why this file exists:** the replication plan is written here BEFORE
+execution so an interrupted session resumes from the queue, not from chat.
+The canonical methodology is `SKILL.md`; this queue is its executable form.
+
+This paper comes from **clawRxiv** (papers published autonomously by AI agents).
+clawRxiv differentiates the paper **content**, **abstract**, and **skill file**,
+and the scaffold already fetched all three: the content is at
+`replication_target/source/paper.md` and the skill recipe is handled below. This
+is the purest recipe-first case — the recipe is already in the repo.
+
+---
+
+## Active — Replicate "$title" (clawrxiv:$paper_id)
+
+Work top to bottom. Delete each item in the same commit that completes it
+(and append to `devlog.md`).
+
+1. **Create the GitHub repo and push — PUBLIC, early.** Create a public repo
+   and push: `gh repo create --public --source=. --push` (public is required
+   for free GitHub Pages). From here on every commit pushes, so CI and Pages
+   build as you go.
+
+2. **Run the skill recipe FIRST.** $skill_location Set up just enough
+   environment to execute it, run it, and capture its output into `results/`.
+   This is the highest-leverage step and it comes before any deep analysis —
+   clawRxiv hands you an agent-runnable recipe, so use it. Commit.
+
+3. **Verify the skill's output against the paper.** Read
+   `replication_target/source/paper.md` and assess **how much of the paper's
+   headline claims the recipe actually reproduces** — which results it covers
+   and which it doesn't. Record this in `notes/sources.md`. Commit.
+
+4. **Check ALL references — always.** Walk the paper's references and confirm
+   the key cited results / datasets / baselines say what the paper claims.
+   Record anything load-bearing in `notes/claims.md`. Commit.
+
+5. **Record `notes/claims.md`** — scoped to whatever the recipe did NOT already
+   cover: the headline claim(s); datasets (version/hash, where they live);
+   models/methods in re-implementable detail; evaluation metrics and the exact
+   reported numbers; the compute envelope (decides if CI can auto-run it). If
+   the recipe covered everything, this is a short confirmation. Commit.
+
+6. **Reimplement only the uncovered claims** under `src/` (skip anything the
+   recipe already reproduced; scope to the headline claim, not every ablation).
+   Pin the environment in `requirements.txt` / `environment.yml`. Commit.
+
+7. **Run the full replication** via `scripts/run.py` (the CI entry point);
+   capture metrics as JSON into `results/`. Commit.
+
+8. **Write `FINDINGS.md`:** reproduced vs. reported numbers (table); what the
+   recipe covered vs. what you filled; gaps and where/why it diverged. Commit
+   and push.
+
+9. **Publish and finish.** Confirm `.github/workflows/pages.yml` (site + PDF)
+   and `.github/workflows/package.yml` (ZIP) run green; set Settings → Pages →
+   Source: GitHub Actions. Keep `SKILL.md` and `replication_skill.md` truthful.
+   **Stop / hand back** when `FINDINGS.md` reports at least one headline number
+   with its reproduced value, `scripts/run.py` runs end-to-end from a clean
+   clone (or documents the un-automatable data step), the repo is public and
+   pushed, and the Pages deployment is green.
+
+---
+
+## Pointers
+
+- Methodology / definition of done: `SKILL.md`.
+- Long-horizon items: `todo.md`.
+- Completed work + replication milestones (chronological): `devlog.md`.
+- Narrative history: `git log`.
+"""
+)
+
+
+_CLAWRXIV_SKILL_TMPL = Template(
+    """---
+name: replicate-$slug
+description: Replicate the clawRxiv paper "$title" (clawrxiv:$paper_id) by running its shipped skill recipe first, then verifying against the paper and producing a runnable artifact, a findings report, and a downloadable package.
+---
+
+# Replicate (clawRxiv): $title
+
+clawrxiv:$paper_id - $authors - $created_at
+Agent author (claw): $claw_name - $abs_url
+
+clawRxiv differentiates the paper **content**, **abstract**, and **skill file**.
+The scaffold already fetched all three: content at
+`replication_target/source/paper.md`, and the skill recipe handled below.
+
+## Prerequisite
+
+$skill_location
+
+## Plan
+
+The efficient path: **run the shipped skill recipe FIRST**, then verify its
+output against the paper and fill only the gaps. Reimplementing from scratch is
+the fallback, not the default.
+
+1. **Go live early.** Create a PUBLIC GitHub repo and push
+   (`gh repo create --public --source=. --push`) so every later commit pushes
+   and Pages/CI build as you go.
+
+2. **Run the skill recipe first.** Execute `replication_skill.md` (or the recipe
+   embedded in `paper.md`), capturing output to `results/`. clawRxiv hands you
+   an agent-runnable recipe — this comes before any deep analysis.
+
+3. **Verify the recipe's output against the paper** (`paper.md`): how much of
+   the headline claims does it reproduce? Record in `notes/sources.md`.
+
+4. **Check ALL references** — confirm the key cited results/datasets/baselines
+   say what the paper claims.
+
+5. **Record `notes/claims.md`** — scoped to what the recipe didn't cover:
+   headline claim(s); datasets; methods; metrics and exact reported numbers;
+   compute envelope (decides if CI can auto-run this).
+
+6. **Reimplement only the gaps** under `src/`; pin `requirements.txt`.
+
+7. **Run the replication.** `scripts/run.py` so CI can invoke it; metrics →
+   `results/`.
+
+8. **Write the findings.** `FINDINGS.md`: reproduced vs. reported (table); what
+   the recipe covered vs. what you filled; gaps and divergences.
+
+9. **Publish.** GitHub Pages deploys the findings + a transportable PDF report
+   (`.github/workflows/pages.yml`); a ZIP replication package is built
+   (`.github/workflows/package.yml`). The repo must be public with Pages set to
+   Source: GitHub Actions.
+
+## Budget guardrails
+
+- If the paper's reported compute is more than ~4 GPU-hours on a single
+  consumer GPU, mark this replication **not CI-runnable** in `paper.json` and
+  document the reduced-scale variant instead.
+- Prefer deterministic seeds and logged hashes so reruns are comparable.
+
+## Definition of done
+
+- `FINDINGS.md` exists and reports at least one headline number from the paper,
+  with the reproduced value next to it.
+- `scripts/run.py` runs end-to-end from a clean clone (or documents the data
+  step that can't be automated).
+- The repo is public and pushed; the GitHub Pages site and the ZIP package
+  build green in Actions.
+- This file still reflects how you actually did it — if you deviated, edit the
+  plan above.
+"""
+)
+
+
+_CLAWRXIV_README_TMPL = Template(
+    """# Replicating: $title
+
+**clawRxiv:** [$paper_id]($abs_url)
+**Authors:** $authors
+**Agent author (claw):** $claw_name
+**Published:** $created_at - **Category:** $category
+
+## Abstract
+
+$abstract
+
+## Replication status
+
+Not started. The agent-executable plan is in [`SKILL.md`](./SKILL.md); the
+concrete step queue is in [`queue.md`](./queue.md). This paper is from
+**clawRxiv**, which ships an agent-runnable **skill recipe** alongside the paper
+— so the efficient path is **skill-first**: run the recipe, verify it against
+the paper, check all references, and only reimplement the gaps.
+
+## What this repo produces
+
+Three compounding artifacts:
+
+1. **The replication** — runnable code under `src/` + `scripts/run.py`.
+2. **The legibility layer** — `FINDINGS.md`, published as a GitHub Pages
+   site with a transportable PDF report (built by GitHub Actions).
+3. **`SKILL.md`** — a reusable, agent-executable replication methodology.
+
+## Layout
+
+- `replication_target/source/paper.md` — the clawRxiv paper content (committed;
+  fetched at scaffold time — read it directly).
+- `replication_skill.md` — the clawRxiv skill recipe (when shipped separately;
+  otherwise embedded in `paper.md`). **Run it first.**
+- `paper.json` — frozen clawRxiv metadata (from $api_url).
+- `data_lake/` — other downloaded/supplied material (NOT the paper).
+- `src/` — your reimplementation. `scripts/run.py` — CI entry point.
+- `results/` — metrics JSON (gitignored). `FINDINGS.md` — the report.
+- `.github/workflows/` — `pages.yml` (site + PDF), `package.yml` (ZIP).
+
+## Deliverables (GitHub Actions)
+
+To publish, **make this repo public** and set **Settings -> Pages -> Source:
+GitHub Actions**. Then `pages.yml` deploys the findings site + PDF report and
+`package.yml` builds a downloadable ZIP replication package. Site shape
+inspiration: http://sutra.emmaleonhart.com/
+"""
+)
+
+
+def clawrxiv_claude_md(paper: ClawrxivPaper) -> str:
+    return _CLAWRXIV_CLAUDE_TMPL.substitute(_clawrxiv_subs(paper))
+
+
+def clawrxiv_queue_md(paper: ClawrxivPaper) -> str:
+    return _CLAWRXIV_QUEUE_TMPL.substitute(_clawrxiv_subs(paper))
+
+
+def clawrxiv_skill_md(paper: ClawrxivPaper) -> str:
+    return _CLAWRXIV_SKILL_TMPL.substitute(_clawrxiv_subs(paper))
+
+
+def clawrxiv_readme_md(paper: ClawrxivPaper) -> str:
+    return _CLAWRXIV_README_TMPL.substitute(_clawrxiv_subs(paper))

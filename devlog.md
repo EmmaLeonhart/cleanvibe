@@ -529,3 +529,59 @@ Minor release bundling the architecture work above. Version `1.4.0` -> `1.5.0`
 smoke test passed. Pushed to `main` (`d545a91`), tagged `v1.5.0`, and GitHub
 release cut (https://github.com/EmmaLeonhart/cleanvibe/releases/tag/v1.5.0) —
 the Publish-to-PyPI workflow runs on release.
+
+## 2026-05-22 — clawRxiv as a first-class replication source
+
+User pointed at clawRxiv (clawrxiv.io) — a preprint repo for papers authored
+autonomously by AI agents — noting it "differentiates the paper content,
+abstract, and skill file" and "should have its own thing for a URL to it."
+Confirmed via the live API (`/api/abs/<id>`): the JSON has separate `content`,
+`abstract`, and `skillMd` fields. That separation is the purest recipe-first
+case, so clawRxiv got its own `replicate` mode.
+
+- **`cleanvibe/clawrxiv.py`** (new): `ClawrxivPaper` dataclass +
+  `is_clawrxiv_ref` / `parse_clawrxiv_id` / `fetch_clawrxiv_paper` (stdlib
+  `urllib`+`json`, light 429/503 retry — preserves the zero-dep guarantee).
+  Accepts `clawrxiv.io/{abs,api/abs}/<id>` (with/without `www.`) and
+  `clawrxiv:<id>`. clawRxiv ids are arXiv-shaped, so a **bare id stays arXiv**
+  — clawRxiv needs an explicit signal.
+- **`cleanvibe/templates.py`**: `clawrxiv_{claude,queue,skill,readme}_md` +
+  `_clawrxiv_subs`. The queue is **skill-first**: go live early, run the skill
+  recipe FIRST, verify it against the paper, check ALL references, fill only the
+  gaps. Reuses the replication gitignore + workflow constants.
+- **`cleanvibe/replicate.py`** `replicate_clawrxiv_project`: writes the paper
+  content to `replication_target/source/paper.md` (committed) and, when
+  clawRxiv ships a separate `skillMd`, the recipe to `replication_skill.md` at
+  the root (otherwise the queue tells the agent to extract the recipe embedded
+  in `paper.md`). `paper.json` records `source: "clawrxiv"` + `has_skill_file`.
+  **No `download_paper.py`** — the API returns everything in one call.
+- **`cleanvibe/cli.py`**: dispatch checks `is_clawrxiv_ref` **before**
+  `is_arxiv_ref`, then manual. Help text + module docstring updated.
+- **`tests/test_clawrxiv.py`** (new, network-free — monkeypatch
+  `fetch_clawrxiv_paper`): id parsing, ref discrimination (clawRxiv vs arXiv vs
+  folder), tree written, content→source/paper.md, skill present→
+  `replication_skill.md` / absent→embedded, paper.json fields, skill-first
+  queue, CLI dispatch both ref forms. Full suite **67/67** green.
+- **Live smoke test**: `cleanvibe replicate https://www.clawrxiv.io/abs/2605.02609`
+  scaffolded ROMO-CV — `paper.json` (`source: clawrxiv`, claw `DNAI-RomoCV-…`),
+  content (19 KB) committed to `source/paper.md`; `skillMd` was null so the
+  embedded-recipe path was exercised (no `replication_skill.md`, queue says
+  extract).
+
+## 2026-05-22 — Windows launcher renamed `runclaude.bat` → `!runClaude.bat`
+
+User request: the Windows launcher should be `!runClaude.bat` — the `!` floats
+it to the top of the file listing (easy to find) and camelCase reads cleanly.
+(They wrote `.md`; confirmed it stays an executable `.bat` so double-click still
+launches Claude — a `.md` can't.) Renamed at every write site in `scaffold.py`
+(new/convert/clone) and `replicate.py` (arXiv/clawRxiv/manual) and in
+`tests/test_scaffold.py`. Historical devlog entries keep the old name as a
+record. Verified live: `cleanvibe new` writes `!runClaude.bat` with the correct
+`@echo off / cd /d "%~dp0" / claude` body.
+
+## 2026-05-22 — v1.6.0: clawRxiv source + `!runClaude.bat`
+
+Minor release bundling the two changes above. Version `1.5.0` -> `1.6.0`
+(`cleanvibe/__init__.py`, `pyproject.toml`); full suite 67/67 green; both live
+smoke tests passed. Pushed to `main`, tagged `v1.6.0`, and GitHub release cut —
+the Publish-to-PyPI workflow runs on release.

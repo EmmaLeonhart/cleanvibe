@@ -28,7 +28,7 @@ def create_project(path: Path, dry_run: bool = False, no_claude: bool = False) -
         print(f"[dry-run] Would write: {path / '.gitignore'}")
         print(f"[dry-run] Would write: {path / 'data_lake' / '.gitkeep'}")
         if is_windows:
-            print(f"[dry-run] Would write: {path / 'runclaude.bat'}")
+            print(f"[dry-run] Would write: {path / '!runClaude.bat'}")
         print(f"[dry-run] Would run: git init")
         print(f"[dry-run] Would run: git add . && git commit")
         if not no_claude:
@@ -45,7 +45,7 @@ def create_project(path: Path, dry_run: bool = False, no_claude: bool = False) -
     _write_gitkeep(path / "data_lake")
 
     if is_windows:
-        _write(path / "runclaude.bat", templates.RUNCLAUDE_BAT)
+        _write(path / "!runClaude.bat", templates.RUNCLAUDE_BAT)
 
     _git_init(path)
 
@@ -75,7 +75,7 @@ def clone_project(repo: str, path: Path, dry_run: bool = False, no_claude: bool 
         print(f"[dry-run] Would prepend-or-write: CLAUDE.md (clone onboarding)")
         print(f"[dry-run] Would prepend-or-write: queue.md (clone onboarding)")
         print(f"[dry-run] Would write if missing: devlog.md (clone starter; backfilled by onboarding queue)")
-        injected = ".gitignore" + (", runclaude.bat" if is_windows else "")
+        injected = ".gitignore" + (", !runClaude.bat" if is_windows else "")
         print(f"[dry-run] Would inject if missing: {injected}")
         print(f"[dry-run] Would NOT create data_lake/ or inject README.md")
         print(f"[dry-run] Would run: git add -A && git commit (on {CLONE_BRANCH})")
@@ -113,10 +113,10 @@ def clone_project(repo: str, path: Path, dry_run: bool = False, no_claude: bool 
         print(f"  Injected .gitignore (was missing)")
 
     if is_windows:
-        runclaude = path / "runclaude.bat"
+        runclaude = path / "!runClaude.bat"
         if not runclaude.exists():
             _write(runclaude, templates.RUNCLAUDE_BAT)
-            print(f"  Injected runclaude.bat (was missing)")
+            print(f"  Injected !runClaude.bat (was missing)")
 
     subprocess.run(["git", "add", "-A"], cwd=path, capture_output=True)
     subprocess.run(
@@ -155,7 +155,7 @@ def convert_project(path: Path, dry_run: bool = False, no_claude: bool = False) 
             print(f"[dry-run] Would commit all existing files (commit 1)")
         print(f"[dry-run] Would check for missing CLAUDE.md / README.md / queue.md / devlog.md / .gitignore")
         if is_windows:
-            print(f"[dry-run] Would check for missing runclaude.bat")
+            print(f"[dry-run] Would check for missing !runClaude.bat")
         if not is_git_repo:
             print(f"[dry-run] Would commit scaffold files (commit 2)")
         if not no_claude:
@@ -241,10 +241,10 @@ def _inject_scaffold(path: Path, project_name: str, is_windows: bool) -> bool:
         injected = True
 
     if is_windows:
-        runclaude = path / "runclaude.bat"
+        runclaude = path / "!runClaude.bat"
         if not runclaude.exists():
             _write(runclaude, templates.RUNCLAUDE_BAT)
-            print(f"  Injected runclaude.bat (was missing)")
+            print(f"  Injected !runClaude.bat (was missing)")
             injected = True
 
     if not injected:

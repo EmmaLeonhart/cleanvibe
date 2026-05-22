@@ -6,7 +6,7 @@
 
 ## Active
 
-_(empty — v1.5.0 source-first + recipe-first replication shipped; see `devlog.md`. Pull the next item from `todo.md` when work resumes.)_
+_(empty — v1.6.0 shipped clawRxiv as a first-class replication source + the `!runClaude.bat` launcher rename; see `devlog.md`. Pull the next item from `todo.md` when work resumes.)_
 
 ---
 
@@ -14,4 +14,4 @@ _(empty — v1.5.0 source-first + recipe-first replication shipped; see `devlog.
 
 - Completed work (chronological, with releases): `devlog.md`. Long-horizon backlog: `todo.md`.
 - Vision / framing: `docs/replication_framing.md`; reference corpus: `docs/replication-examples/`.
-- Narrative history: `git log`. Current version: `1.5.0`.
+- Narrative history: `git log`. Current version: `1.6.0`.

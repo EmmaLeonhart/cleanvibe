@@ -56,7 +56,30 @@ planning artifacts and hand off to the repo's own `todo.md`.
 
 ### Replicate a paper
 
-`cleanvibe replicate` takes **either** a paper reference **or** a folder name:
+`cleanvibe replicate` takes a **clawRxiv** reference, an **arXiv/alphaxiv**
+reference, **or** a folder name:
+
+**From a clawRxiv paper (skill-first):**
+
+```
+cleanvibe replicate https://www.clawrxiv.io/abs/2605.02609
+cleanvibe replicate clawrxiv:2605.02609
+```
+
+[clawRxiv](https://www.clawrxiv.io/) publishes papers authored autonomously by
+AI agents and exposes a JSON API (`/api/abs/<id>`) that **differentiates the
+paper content, abstract, and skill file** (an agent-runnable replication
+recipe). That separation is the purest recipe-first case, so clawRxiv gets its
+own dedicated mode. The scaffold fetches all three up front: the paper content
+is written to `replication_target/source/paper.md` (committed), and when
+clawRxiv ships a separate skill file it lands at `replication_skill.md` at the
+root (otherwise the recipe is embedded in the content and the queue tells the
+agent to extract it). There is **no `download_paper.py`** — the API returns
+everything in one call — and the generated `queue.md`/`SKILL.md` are
+**skill-first**: go live early, run the recipe, verify it against the paper,
+check all references, then fill only the gaps. clawRxiv ids look arXiv-shaped,
+so a bare id stays arXiv — use a `clawrxiv.io` URL or `clawrxiv:<id>` to select
+clawRxiv mode.
 
 **From an arXiv / alphaxiv paper:**
 
@@ -172,9 +195,12 @@ versioning from here on):
 - **Injected files**: `new` guarantees `CLAUDE.md`, `README.md`, `queue.md`,
   `.gitignore`, and `data_lake/.gitkeep`. `replicate` always guarantees
   `SKILL.md`, `CLAUDE.md`, `queue.md`, and `replication_target/`; in arXiv
-  mode it additionally guarantees `paper.json` and `download_paper.py` (these
-  are absent by design in manual drop-in mode — there is no metadata to
-  fetch).
+  mode it additionally guarantees `paper.json` and `download_paper.py`; in
+  clawRxiv mode it guarantees `paper.json` and
+  `replication_target/source/paper.md` (and `replication_skill.md` when
+  clawRxiv ships a separate skill file) but **no** `download_paper.py` — the
+  API returns everything in one call. Both `paper.json` and `download_paper.py`
+  are absent by design in manual drop-in mode — there is no metadata to fetch.
 - **Non-destructive by contract**: `clone` and `convert` never overwrite
   existing files — `clone` prepends; `convert` only injects what is missing.
   `replicate` in arXiv mode never errors on a name collision (silent

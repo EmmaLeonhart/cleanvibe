@@ -4,7 +4,7 @@ Usage:
     cleanvibe new PATH          Create a new scaffolded project
     cleanvibe clone REPO [PATH] Clone a repo and inject scaffolding
     cleanvibe convert [PATH]    Convert an existing directory into a cleanvibe project
-    cleanvibe replicate REF     Scaffold a replication project: arXiv/alphaxiv ref, or a drop-in folder
+    cleanvibe replicate REF     Scaffold a replication project: clawRxiv ref, arXiv/alphaxiv ref, or a drop-in folder
     cleanvibe --version         Show version
 
 Zero dependencies. Just Python stdlib.
@@ -18,7 +18,12 @@ from pathlib import Path
 
 from . import __version__
 from .arxiv import is_arxiv_ref
-from .replicate import replicate_manual_project, replicate_project
+from .clawrxiv import is_clawrxiv_ref
+from .replicate import (
+    replicate_clawrxiv_project,
+    replicate_manual_project,
+    replicate_project,
+)
 from .scaffold import clone_project, convert_project, create_project
 
 
@@ -102,14 +107,15 @@ def main(argv: list[str] | None = None) -> None:
     # cleanvibe replicate (URL | FOLDER) [PATH]
     replicate_parser = subparsers.add_parser(
         "replicate",
-        help="Scaffold a replication project — from an arXiv/alphaxiv paper, "
-        "or a folder you drop the paper(s) into yourself",
+        help="Scaffold a replication project — from a clawRxiv paper, an "
+        "arXiv/alphaxiv paper, or a folder you drop the paper(s) into yourself",
     )
     replicate_parser.add_argument(
         "target",
-        help="An arXiv/alphaxiv id or URL (fetches metadata), OR a folder "
-        "name (manual drop-in mode: you put the paper PDF(s) into "
-        "replication_target/ and material into data_lake/ yourself)",
+        help="A clawRxiv ref (clawrxiv.io/abs/<id> or clawrxiv:<id> — fetches "
+        "content + skill recipe), an arXiv/alphaxiv id or URL (fetches "
+        "metadata), OR a folder name (manual drop-in mode: you put the paper "
+        "PDF(s) into replication_target/ and material into data_lake/ yourself)",
     )
     replicate_parser.add_argument(
         "path", nargs="?", type=Path, default=None,
@@ -184,7 +190,14 @@ def main(argv: list[str] | None = None) -> None:
         clone_project(args.repo, args.path, dry_run=args.dry_run, no_claude=args.no_claude)
 
     elif args.command == "replicate":
-        if is_arxiv_ref(args.target):
+        if is_clawrxiv_ref(args.target):
+            # Checked before arXiv so clawrxiv.io links / clawrxiv:<id> route to
+            # the dedicated clawRxiv mode (the API ships a skill recipe).
+            print(f"Scaffolding clawRxiv replication project for: {args.target}")
+            replicate_clawrxiv_project(
+                args.target, args.path, dry_run=args.dry_run, no_claude=args.no_claude
+            )
+        elif is_arxiv_ref(args.target):
             print(f"Scaffolding replication project for: {args.target}")
             replicate_project(
                 args.target, args.path, dry_run=args.dry_run, no_claude=args.no_claude
