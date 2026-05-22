@@ -433,3 +433,18 @@ the replicate queue should look for and follow that *before* reimplementing.
   in `tests/scratch/` and are never committed. `CLAUDE.md` documents the
   exact `python -m cleanvibe.cli replicate … tests/scratch/… --no-claude`
   invocation.
+
+## 2026-05-22 — live smoke test: `replicate` on Sutra, end-to-end
+
+Ran `python -m cleanvibe.cli replicate https://arxiv.org/abs/2605.20919
+tests/scratch/replicating-sutra --no-claude` against the real arXiv API.
+
+- Scaffolded a clean replication project; `paper.json` recorded
+  `version: 1` and `id_with_version: 2605.20919v1`; the generated `queue.md`
+  carries the recipe-first step 4.
+- Ran the generated `download_paper.py`: it fetched the arXiv **HTML**
+  first (`paper.html`, 359 KB) and then the **PDF** (`paper.pdf`, 515 KB)
+  into `replication_target/` — the HTML-first behaviour and live download
+  both work, no rate-limit hit this run.
+- Confirmed all reported link forms (DOI `10.48550/arXiv.<id>`, versioned
+  `…v1`, alphaxiv `/overview/`) route to arXiv mode, not folder mode.
