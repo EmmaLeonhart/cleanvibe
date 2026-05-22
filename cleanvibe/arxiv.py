@@ -8,15 +8,21 @@ Ported from the now-absorbed ``replication_skill`` project, which used
 from __future__ import annotations
 
 import re
+import time
+import urllib.error
 import urllib.parse
 import urllib.request
 import xml.etree.ElementTree as ET
 from dataclasses import dataclass
-from typing import Iterable
+from typing import Callable, Iterable
 
 from . import __version__
 
-ARXIV_API = "http://export.arxiv.org/api/query"
+ARXIV_API = "https://export.arxiv.org/api/query"
+# arXiv rate-limits aggressively (429, sometimes 503). It asks for ~3s
+# between requests; we use that as the base backoff and retry a few times.
+_MAX_RETRIES = 4
+_BASE_BACKOFF = 3.0
 ATOM_NS = {"atom": "http://www.w3.org/2005/Atom"}
 USER_AGENT = f"cleanvibe-replicate/{__version__} (+https://github.com/Immanuelle/cleanvibe)"
 
@@ -118,10 +124,58 @@ def is_arxiv_ref(value: str) -> bool:
         return False
 
 
-def _read_url(req: urllib.request.Request, *, timeout: float) -> bytes:
-    """Open ``req`` and return the body. (Retry/backoff is added in item 2.)"""
-    with urllib.request.urlopen(req, timeout=timeout) as resp:
-        return resp.read()
+def _retry_after_seconds(err: urllib.error.HTTPError) -> float | None:
+    """Parse a numeric ``Retry-After`` header (seconds). HTTP-date form -> None."""
+    val = err.headers.get("Retry-After") if err.headers else None
+    if not val:
+        return None
+    try:
+        return max(0.0, float(val))
+    except ValueError:
+        return None
+
+
+def _read_url(
+    req: urllib.request.Request,
+    *,
+    timeout: float,
+    retries: int = _MAX_RETRIES,
+    sleep: Callable[[float], None] = time.sleep,
+) -> bytes:
+    """GET ``req`` with retry/backoff for arXiv's rate limiting.
+
+    arXiv returns 429 (and sometimes 503) under load. We honour ``Retry-After``
+    when present and otherwise back off exponentially from a ~3s base (arXiv's
+    requested politeness interval); transient network errors get the same
+    treatment. After the last attempt a rate-limit failure is re-raised as a
+    ``RuntimeError`` with a clear message instead of a raw traceback.
+
+    ``sleep`` is injectable so tests exercise the backoff without waiting.
+    """
+    backoff = _BASE_BACKOFF
+    for attempt in range(retries):
+        last = attempt == retries - 1
+        try:
+            with urllib.request.urlopen(req, timeout=timeout) as resp:
+                return resp.read()
+        except urllib.error.HTTPError as e:
+            if e.code in (429, 503):
+                if last:
+                    raise RuntimeError(
+                        f"arXiv is rate-limiting (HTTP {e.code}) after "
+                        f"{retries} attempts — wait a minute and retry: "
+                        f"{req.full_url}"
+                    ) from e
+                sleep(_retry_after_seconds(e) or backoff)
+                backoff *= 2
+                continue
+            raise  # other HTTP errors (404 etc.) are not transient
+        except urllib.error.URLError:
+            if last:
+                raise
+            sleep(backoff)
+            backoff *= 2
+    raise AssertionError("unreachable")  # pragma: no cover
 
 
 def fetch_paper(arxiv_ref: str, *, timeout: float = 15.0) -> ArxivPaper:

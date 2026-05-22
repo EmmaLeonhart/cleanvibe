@@ -371,3 +371,27 @@ alphaxiv `/abs|overview|audio/...`, and versioned ids.
 - `tests/test_arxiv.py`: regression tests for the DOI form, `arXiv:`
   style, every URL form from the report, version preservation via
   `split_arxiv_ref`, and version resolved from the atom `<id>`. Suite green.
+
+## 2026-05-22 — replicate: arXiv 429 retry/backoff + HTML-first download
+
+The recurring failure in the user report: arXiv returns 429 (sometimes
+503) under load and `fetch_paper` did a single `urlopen` with no retry, so
+the user got raw tracebacks ("constant 429 errors").
+
+- `cleanvibe/arxiv.py`: `_read_url()` retries 429/503 with exponential
+  backoff from a ~3s base, honouring a numeric `Retry-After` header; it
+  also retries transient `URLError`s and, after exhausting retries on a
+  rate-limit, raises a clear `RuntimeError` instead of a traceback. The
+  `sleep` callable is injectable so tests don't wait. API base switched
+  `http://` -> `https://export.arxiv.org/api/query`.
+- `cleanvibe/templates.py`: the generated `download_paper.py` now fetches
+  the arXiv **HTML** first (`arxiv.org/html/<id>vN` ->
+  `replication_target/paper.html`) because it reads far better than the PDF
+  for structured-text work (per user preference), with the PDF kept as a
+  fallback/complete record. Both gitignored. Same Retry-After backoff; the
+  HTML fetch is optional (not every paper has HTML — a 404 is tolerated).
+- `tests/test_arxiv.py`: network-free `_read_url` tests — retries 429 then
+  succeeds (asserting it backed off), raises `RuntimeError` after
+  exhaustion, and does not retry a non-transient 404. Suite green.
+- Verified live: the DOI form now fetches over https (Sutra v1), and the
+  rendered `download_paper.py` compiles with an HTML-first plan.

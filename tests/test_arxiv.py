@@ -6,9 +6,13 @@ and is covered indirectly via the monkeypatched replicate tests.
 """
 
 import unittest
+import urllib.error
+import urllib.request
+from unittest.mock import patch
 
 from cleanvibe.arxiv import (
     _parse_atom,
+    _read_url,
     is_arxiv_ref,
     parse_arxiv_id,
     split_arxiv_ref,
@@ -147,6 +151,78 @@ class TestParseAtom(unittest.TestCase):
         # Version resolved from the canonical <id> when not pinned in the request.
         self.assertEqual(paper.version, "5")
         self.assertEqual(paper.id_with_version, "1706.03762v5")
+
+
+class _Resp:
+    """Minimal context-manager stand-in for an http response."""
+
+    def __init__(self, body: bytes):
+        self._body = body
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        return False
+
+    def read(self):
+        return self._body
+
+
+def _http_error(code, retry_after=None):
+    hdrs = {"Retry-After": retry_after} if retry_after is not None else {}
+    return urllib.error.HTTPError("http://x", code, "err", hdrs, None)
+
+
+class TestReadUrlRetry(unittest.TestCase):
+    """_read_url retries arXiv's 429/503 with backoff — no network, no sleeping."""
+
+    def test_retries_429_then_succeeds(self):
+        calls = {"n": 0}
+        slept = []
+
+        def fake_urlopen(req, timeout=None):
+            calls["n"] += 1
+            if calls["n"] < 3:
+                raise _http_error(429, retry_after="0")
+            return _Resp(b"OK")
+
+        with patch("urllib.request.urlopen", fake_urlopen):
+            body = _read_url(
+                urllib.request.Request("http://x"), timeout=1, sleep=slept.append
+            )
+        self.assertEqual(body, b"OK")
+        self.assertEqual(calls["n"], 3)
+        self.assertEqual(len(slept), 2)  # backed off before each retry
+
+    def test_runtimeerror_after_exhaustion(self):
+        def fake_urlopen(req, timeout=None):
+            raise _http_error(429)
+
+        with patch("urllib.request.urlopen", fake_urlopen):
+            with self.assertRaises(RuntimeError):
+                _read_url(
+                    urllib.request.Request("http://x"),
+                    timeout=1,
+                    retries=3,
+                    sleep=lambda s: None,
+                )
+
+    def test_non_transient_http_error_not_retried(self):
+        calls = {"n": 0}
+
+        def fake_urlopen(req, timeout=None):
+            calls["n"] += 1
+            raise _http_error(404)
+
+        with patch("urllib.request.urlopen", fake_urlopen):
+            with self.assertRaises(urllib.error.HTTPError):
+                _read_url(
+                    urllib.request.Request("http://x"),
+                    timeout=1,
+                    sleep=lambda s: None,
+                )
+        self.assertEqual(calls["n"], 1)  # 404 is not transient
 
 
 if __name__ == "__main__":

@@ -635,29 +635,90 @@ inspiration: http://sutra.emmaleonhart.com/
 
 
 _REPLICATION_DOWNLOAD_TMPL = Template(
-    '''"""Download the PDF for arXiv:$arxiv_id into replication_target/paper.pdf."""
+    '''"""Fetch arXiv:$id_with_version into replication_target/.
+
+Prefers the arXiv **HTML** (-> paper.html) because it reads far better than
+the PDF when working from structured text; the PDF (-> paper.pdf) is fetched
+as a fallback/complete record. Both are gitignored. Stdlib only.
+
+arXiv rate-limits (HTTP 429/503), so requests retry with backoff that honours
+the Retry-After header.
+"""
 
 from __future__ import annotations
 
 import sys
+import time
+import urllib.error
 import urllib.request
 from pathlib import Path
 
+HTML_URL = "$html_url"
 PDF_URL = "$pdf_url"
 ARXIV_ID = "$arxiv_id"
 
+_TARGET = Path(__file__).parent / "replication_target"
+_MAX_RETRIES = 4
+_BASE_BACKOFF = 3.0  # arXiv asks for ~3s between requests
 
-def main() -> int:
-    out = Path(__file__).parent / "replication_target" / "paper.pdf"
-    out.parent.mkdir(parents=True, exist_ok=True)
+
+def _retry_after(err):
+    val = err.headers.get("Retry-After") if err.headers else None
+    try:
+        return max(0.0, float(val)) if val else None
+    except ValueError:
+        return None
+
+
+def _get(url):
+    """GET url with retry/backoff for arXiv rate limiting; return bytes."""
+    backoff = _BASE_BACKOFF
+    for attempt in range(_MAX_RETRIES):
+        last = attempt == _MAX_RETRIES - 1
+        try:
+            req = urllib.request.Request(
+                url, headers={"User-Agent": "cleanvibe-replicate"}
+            )
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                return resp.read()
+        except urllib.error.HTTPError as e:
+            if e.code in (429, 503) and not last:
+                wait = _retry_after(e) or backoff
+                print(f"  rate-limited (HTTP {e.code}); retrying in {wait:.0f}s")
+                time.sleep(wait)
+                backoff *= 2
+                continue
+            raise
+        except urllib.error.URLError:
+            if last:
+                raise
+            time.sleep(backoff)
+            backoff *= 2
+    raise AssertionError("unreachable")
+
+
+def _save(url, out, *, optional=False):
     if out.exists() and out.stat().st_size > 0:
         print(f"already present: {out}")
-        return 0
-    print(f"downloading {PDF_URL} -> {out}")
-    req = urllib.request.Request(PDF_URL, headers={"User-Agent": "cleanvibe-replicate"})
-    with urllib.request.urlopen(req) as resp, open(out, "wb") as f:
-        f.write(resp.read())
-    print(f"wrote {out.stat().st_size} bytes")
+        return True
+    print(f"downloading {url} -> {out}")
+    try:
+        data = _get(url)
+    except urllib.error.HTTPError as e:
+        if optional:
+            print(f"  skipped ({e.code}); not all papers have HTML")
+            return False
+        raise
+    out.write_bytes(data)
+    print(f"  wrote {out.stat().st_size} bytes")
+    return True
+
+
+def main() -> int:
+    _TARGET.mkdir(parents=True, exist_ok=True)
+    # HTML first (preferred); PDF as fallback / complete record.
+    _save(HTML_URL, _TARGET / "paper.html", optional=True)
+    _save(PDF_URL, _TARGET / "paper.pdf")
     return 0
 
 
