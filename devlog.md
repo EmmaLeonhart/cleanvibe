@@ -521,3 +521,11 @@ the efficient path is the default.
   immediately surfaces the Reproducibility section: the authors' repo, a
   downloadable `sutra-replication-package.zip`, and a shipped `SKILL.md` — the
   exact recipe-first signal the new flow is built to catch up front.
+
+## 2026-05-22 — v1.5.0: source-first + recipe-first replication
+
+Minor release bundling the architecture work above. Version `1.4.0` -> `1.5.0`
+(`cleanvibe/__init__.py`, `pyproject.toml`); full suite 54/54 green; live Sutra
+smoke test passed. Pushed to `main` (`d545a91`), tagged `v1.5.0`, and GitHub
+release cut (https://github.com/EmmaLeonhart/cleanvibe/releases/tag/v1.5.0) —
+the Publish-to-PyPI workflow runs on release.
