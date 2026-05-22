@@ -346,3 +346,28 @@ should also work from just a folder you dump PDFs into"):
 - Version `1.2.2` -> `1.3.0` (`cleanvibe/__init__.py`,
   `pyproject.toml`); full suite 44/44 green; tagged `v1.3.0` and GitHub
   release cut (PyPI publish runs on release).
+
+## 2026-05-22 — replicate arXiv parsing: DOI form + version preservation
+
+User report: `cleanvibe replicate https://arxiv.org/abs/2605.20919` (their
+own paper, "Sutra") threw errors, and several link forms should work —
+including `doi.org/10.48550/arXiv.<id>`, `arxiv.org/{pdf,html,src}/...`,
+alphaxiv `/abs|overview|audio/...`, and versioned ids.
+
+- `cleanvibe/arxiv.py`: new `split_arxiv_ref()` returns `(bare_id,
+  version)`. Detection broadened from "host is arxiv/alphaxiv.org" to also
+  cover the arXiv DOI prefix (`10.48550/arXiv.<id>`, which `doi.org` links
+  use — they contain no `arxiv.org/`) and `arXiv:<id>` citation style. The
+  DOI form previously raised `ValueError` and was mis-routed to manual
+  folder mode. The `vN` version is no longer silently dropped: `ArxivPaper`
+  gains a `version` field and an `id_with_version` property; `fetch_paper`
+  queries the pinned version when given one and otherwise resolves it from
+  the response's canonical `<id>`. `parse_arxiv_id` stays version-agnostic
+  (still used for directory naming).
+- `cleanvibe/replicate.py`: `paper.json` now records `version` and
+  `id_with_version`.
+- `cleanvibe/templates.py`: replication `html_url` uses the exact version
+  (`arxiv.org/html/<id>vN`).
+- `tests/test_arxiv.py`: regression tests for the DOI form, `arXiv:`
+  style, every URL form from the report, version preservation via
+  `split_arxiv_ref`, and version resolved from the atom `<id>`. Suite green.

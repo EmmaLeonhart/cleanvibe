@@ -47,6 +47,8 @@ def _paper_json(paper) -> str:
     return json.dumps(
         {
             "arxiv_id": paper.arxiv_id,
+            "version": paper.version,
+            "id_with_version": paper.id_with_version,
             "title": paper.title,
             "authors": list(paper.authors),
             "published": paper.published,

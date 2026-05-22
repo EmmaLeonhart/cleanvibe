@@ -7,12 +7,18 @@ and is covered indirectly via the monkeypatched replicate tests.
 
 import unittest
 
-from cleanvibe.arxiv import _parse_atom, is_arxiv_ref, parse_arxiv_id
+from cleanvibe.arxiv import (
+    _parse_atom,
+    is_arxiv_ref,
+    parse_arxiv_id,
+    split_arxiv_ref,
+)
 
 
 SAMPLE_ATOM = """<?xml version="1.0" encoding="UTF-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
   <entry>
+    <id>http://arxiv.org/abs/1706.03762v5</id>
     <title>Attention Is All You Need</title>
     <summary>We propose a new simple network architecture, the Transformer,
     based solely on attention mechanisms.</summary>
@@ -58,6 +64,59 @@ class TestParseArxivId(unittest.TestCase):
             parse_arxiv_id("https://arxiv.org/abs/cs.LG/0701001"), "cs.LG/0701001"
         )
 
+    def test_accepts_doi_form(self):
+        # The arXiv DOI form (doi.org doesn't contain "arxiv.org/"): the user
+        # report's `https://doi.org/10.48550/arXiv.<id>` used to fall through
+        # to manual folder mode.
+        self.assertEqual(
+            parse_arxiv_id("https://doi.org/10.48550/arXiv.2605.20919"),
+            "2605.20919",
+        )
+        self.assertEqual(
+            parse_arxiv_id("10.48550/arXiv.1706.03762"), "1706.03762"
+        )
+        self.assertTrue(is_arxiv_ref("https://doi.org/10.48550/arXiv.2605.20919"))
+
+    def test_accepts_arxiv_citation_style(self):
+        self.assertEqual(parse_arxiv_id("arXiv:2605.20919"), "2605.20919")
+        self.assertEqual(parse_arxiv_id("arXiv:1706.03762v5"), "1706.03762")
+
+    def test_split_preserves_version(self):
+        # parse_arxiv_id stays version-agnostic (used for naming)...
+        self.assertEqual(parse_arxiv_id("2605.20919v3"), "2605.20919")
+        # ...but split_arxiv_ref hands back the version so it isn't lost.
+        self.assertEqual(split_arxiv_ref("2605.20919v3"), ("2605.20919", "3"))
+        self.assertEqual(split_arxiv_ref("2605.20919"), ("2605.20919", None))
+        self.assertEqual(
+            split_arxiv_ref("https://arxiv.org/abs/2605.20919v1"),
+            ("2605.20919", "1"),
+        )
+        self.assertEqual(
+            split_arxiv_ref("https://arxiv.org/html/2605.20919v2"),
+            ("2605.20919", "2"),
+        )
+        self.assertEqual(
+            split_arxiv_ref("https://www.alphaxiv.org/overview/2605.20919v4"),
+            ("2605.20919", "4"),
+        )
+
+    def test_accepts_all_reported_url_forms(self):
+        # Every form from the user report routes to arXiv mode and yields the id.
+        forms = [
+            "https://arxiv.org/abs/2605.20919",
+            "https://arxiv.org/abs/2605.20919v1",
+            "https://doi.org/10.48550/arXiv.2605.20919",
+            "https://arxiv.org/pdf/2605.20919",
+            "https://arxiv.org/html/2605.20919v1",
+            "https://arxiv.org/src/2605.20919",
+            "https://www.alphaxiv.org/abs/2605.20919",
+            "https://www.alphaxiv.org/overview/2605.20919",
+            "https://www.alphaxiv.org/audio/2605.20919",
+        ]
+        for f in forms:
+            self.assertTrue(is_arxiv_ref(f), f)
+            self.assertEqual(parse_arxiv_id(f), "2605.20919", f)
+
     def test_rejects_garbage(self):
         with self.assertRaises(ValueError):
             parse_arxiv_id("not-an-id")
@@ -85,6 +144,9 @@ class TestParseAtom(unittest.TestCase):
         self.assertIn("Transformer", paper.summary)
         self.assertTrue(paper.pdf_url.endswith("1706.03762v5"))
         self.assertEqual(paper.slug, "attention-is-all-you-need")
+        # Version resolved from the canonical <id> when not pinned in the request.
+        self.assertEqual(paper.version, "5")
+        self.assertEqual(paper.id_with_version, "1706.03762v5")
 
 
 if __name__ == "__main__":

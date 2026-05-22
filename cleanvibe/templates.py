@@ -373,12 +373,15 @@ def _replication_subs(paper: ArxivPaper) -> dict:
     return {
         "title": paper.title,
         "arxiv_id": paper.arxiv_id,
+        "id_with_version": paper.id_with_version,
         "slug": paper.slug,
         "authors": ", ".join(paper.authors) if paper.authors else "unknown",
         "published": paper.published,
         "pdf_url": paper.pdf_url,
         "summary": paper.summary,
-        "html_url": f"https://arxiv.org/html/{paper.arxiv_id}",
+        # Prefer the exact version when known; arXiv HTML reads far better than
+        # the PDF for working from structured text.
+        "html_url": f"https://arxiv.org/html/{paper.id_with_version}",
     }
 
 
