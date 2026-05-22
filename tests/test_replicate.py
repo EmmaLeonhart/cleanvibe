@@ -87,20 +87,38 @@ class TestReplicateScaffold(unittest.TestCase):
             self.assertIn("arXiv:1706.03762", skill)
             self.assertIn("Attention Is All You Need", skill)
 
-    def test_recipe_first_and_html_preference(self):
+    def test_recipe_first_and_source_preference(self):
         with _in_tmp_cwd():
             _run()
             target = Path(f"replicating-{SLUG}")
             queue = (target / "queue.md").read_text(encoding="utf-8")
             skill = (target / "SKILL.md").read_text(encoding="utf-8")
-            # The recipe-first step is present in both the queue and the skill.
-            self.assertIn("existing replication recipe", queue)
-            self.assertIn("follow it first", queue.lower())
-            self.assertIn("existing replication recipe", skill)
-            # HTML is preferred over the PDF for the downloaded source.
-            self.assertIn("paper.html", queue)
+            # The recipe-first principle is front-and-centre in queue + skill.
+            self.assertIn("reproduction recipe", queue)
+            self.assertIn("run it first", queue.lower())
+            self.assertIn("reproduction recipe", skill)
+            # The LaTeX/e-print source is the primary download, not the HTML.
+            self.assertIn("source", queue.lower())
+            self.assertIn("arxiv.org/src/", queue)
+            self.assertNotIn("paper.html", queue)
             download = (target / "download_paper.py").read_text(encoding="utf-8")
-            self.assertIn("paper.html", download)
+            self.assertIn("arxiv.org/src/", download)
+            self.assertIn("replication_target/source", download.replace("\\", "/"))
+            # The recipe gets copied to replication_skill.md at the root.
+            self.assertIn("replication_skill.md", queue)
+
+    def test_download_paper_compiles_and_targets_source(self):
+        """The generated download_paper.py is valid Python and source-first."""
+        import ast
+
+        with _in_tmp_cwd():
+            _run()
+            target = Path(f"replicating-{SLUG}")
+            src = (target / "download_paper.py").read_text(encoding="utf-8")
+            ast.parse(src)  # must be syntactically valid
+            self.assertIn("SRC_URL", src)
+            self.assertIn("tarfile", src)
+            self.assertIn("_extract_source", src)
 
     def test_paper_not_in_data_lake(self):
         with _in_tmp_cwd():
@@ -185,8 +203,11 @@ class TestReplicateManual(unittest.TestCase):
             target = Path("my-paper")
             queue = (target / "queue.md").read_text(encoding="utf-8")
             skill = (target / "SKILL.md").read_text(encoding="utf-8")
-            self.assertIn("existing replication recipe", queue)
-            self.assertIn("existing replication recipe", skill)
+            self.assertIn("replication recipe", queue)
+            self.assertIn("replication recipe", skill)
+            # Recipe-first is the framing, and the recipe is copied to the root.
+            self.assertIn("recipe-first", queue.lower())
+            self.assertIn("replication_skill.md", queue)
 
     def test_non_destructive_injection(self):
         """A pre-existing folder with a dropped paper / custom file is kept."""

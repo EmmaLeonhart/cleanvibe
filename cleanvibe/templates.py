@@ -379,8 +379,11 @@ def _replication_subs(paper: ArxivPaper) -> dict:
         "published": paper.published,
         "pdf_url": paper.pdf_url,
         "summary": paper.summary,
-        # Prefer the exact version when known; arXiv HTML reads far better than
-        # the PDF for working from structured text.
+        # Prefer the exact version when known. The LaTeX/e-print **source** is
+        # the primary download: it is far more token-efficient than the rendered
+        # HTML (no base64 figure blobs) and is where authors most often ship a
+        # reproduction recipe. HTML is kept available as a tertiary fallback.
+        "src_url": f"https://arxiv.org/src/{paper.id_with_version}",
         "html_url": f"https://arxiv.org/html/{paper.id_with_version}",
     }
 
@@ -404,22 +407,34 @@ reusable, agent-executable replication methodology.
 
 ## Architecture and Conventions
 
+- **The efficient path is recipe-first.** Authors very often ship a
+  reproduction recipe right in the paper's e-print source (usually near the
+  end). Find and run it FIRST, then verify its output against the paper and
+  fill only the gaps. A from-scratch reimplementation is the fallback, not the
+  default — it is what burned a huge amount of tokens before this convention.
 - **`replication_target/`** holds the paper and everything pulled *about* it:
-  - `replication_target/paper.html` — the arXiv HTML (gitignored; run
-    `python download_paper.py`). **Preferred** source: it reads far better
-    than the PDF for working from structured text.
+  - `replication_target/source/` — the extracted arXiv **LaTeX/e-print
+    source** (committed; run `python download_paper.py`). **Primary** source:
+    the `.tex` reads far more token-efficiently than the rendered HTML (no
+    base64 figure blobs) and is where the reproduction recipe usually lives.
+  - `replication_target/arxiv-source.tar.gz` — the raw source archive
+    (gitignored; the extracted `source/` is what's committed).
   - `replication_target/paper.pdf` — the PDF, as a fallback / complete record
     (gitignored, same downloader). The paper does NOT go in `data_lake/`.
-  - `replication_target/paper.md` — a Markdown extraction of the HTML, for
-    working from structured text. (Extract it during the replication; an
-    automated extractor is a cleanvibe horizon, not built yet.)
   - the authors' code, if any, cloned as a **git submodule** in here
     (`git submodule add <repo> replication_target/<name>`).
+- **`replication_skill.md`** (repo root) — if the source/paper ships a
+  reproduction recipe, copy it here and run it first. **`replication/`** — if a
+  replication zip is shipped/linked, extract it here (the zip is gitignored,
+  its contents committed).
 - **`data_lake/`** — other downloaded/supplied material (datasets, notes,
   exports). Same cleanvibe convention as every project. The paper is NOT here.
-- **`src/`** — your reimplementation. **`scripts/run.py`** — the entry point
-  CI invokes. **`results/`** — metrics JSON (gitignored). **`FINDINGS.md`** —
-  the report (reproduced vs. reported, gaps, divergences).
+- **`src/`** — your reimplementation (only the gaps the recipe didn't cover).
+  **`scripts/run.py`** — the entry point CI invokes. **`results/`** — metrics
+  JSON (gitignored). **`FINDINGS.md`** — the report (reproduced vs. reported,
+  what the recipe covered vs. what you filled, gaps, divergences).
+- **Go live early.** Create a PUBLIC GitHub repo and push near the start so
+  every commit pushes and CI/Pages build as you go — don't leave it local-only.
 - **Deliverables are built by GitHub Actions, not committed.**
   `.github/workflows/pages.yml` publishes the GitHub Pages site + PDF report;
   `.github/workflows/package.yml` builds the downloadable ZIP replication
@@ -435,8 +450,8 @@ reusable, agent-executable replication methodology.
 - **Finishing a queue item = delete from `queue.md` + append dated entry to
   `devlog.md`**, in the same commit as the work, then push. Never tick
   boxes in place. `devlog.md` is also where you record the replication's
-  releases/milestones (paper downloaded, environment pinned, first
-  reproduced number, FINDINGS published, Pages live).
+  releases/milestones (source acquired, recipe found/run, environment pinned,
+  first reproduced number, FINDINGS published, Pages live).
 - **Keep `SKILL.md` truthful.** It is the compounding artifact. If you
   deviated from its plan, edit the plan to match what you actually did.
 - **Keep this file and `README.md` current** as the replication takes shape.
@@ -465,67 +480,85 @@ The canonical methodology is `SKILL.md`; this queue is its executable form.
 
 ## Active — Replicate "$title" (arXiv:$arxiv_id)
 
-Work top to bottom. Delete each item in the same commit that completes it.
+The scaffold already made commit 1 (the framework). The efficient path is:
+get the LaTeX source, **find and run the authors' reproduction recipe FIRST**,
+then verify its output against the paper and fill only the gaps. From-scratch
+reimplementation is the fallback, not the default. Work top to bottom; delete
+each item in the same commit that completes it (and append to `devlog.md`).
 
-1. **Download the paper (HTML preferred).** Run `python download_paper.py` —
-   it writes `replication_target/paper.html` (the arXiv HTML, $html_url) and
-   `replication_target/paper.pdf` (both gitignored). Do not proceed if both
-   are empty. Convert the HTML to `replication_target/paper.md` so later
-   steps work from clean structured text rather than the PDF; only fall back
-   to the PDF when no HTML exists.
+1. **Get the LaTeX source and commit it.** Run `python download_paper.py`. It
+   downloads the arXiv **e-print source** ($src_url) — far cheaper to read than
+   the rendered HTML, which embeds figures as huge base64 blobs — extracts it to
+   `replication_target/source/`, and saves the PDF as a fallback record. The
+   archive and PDF are gitignored; the extracted `source/` is committed. Read
+   the paper straight from the `.tex` in `source/` — no HTML→markdown step. If
+   the paper is PDF-only (no source), fall back to the PDF. Commit the extracted
+   source.
 
-2. **Read the paper; record `notes/claims.md`:** headline claim(s); datasets
-   (version/hash, where they live); models/methods in enough detail to
-   re-implement; evaluation metrics and the exact reported numbers; compute
-   envelope (GPU type, hours, memory) — used to decide if CI can auto-run it.
-   Commit.
+2. **Create the GitHub repo and push — now, not at the end.** Create a PUBLIC
+   repo and push: `gh repo create --public --source=. --push` (public is
+   required for free GitHub Pages). From here on every commit pushes, so CI and
+   Pages build as you go. (This is the step the v1.4.0 flow missed — the
+   replication ran entirely locally and never went live.)
 
-3. **Find the authors' code.** Check the arXiv "Code" link, paperswithcode,
-   GitHub (title + first-author). If official code exists, add it as a git
-   submodule under `replication_target/` and record the decision in
-   `notes/sources.md` (fork-and-verify vs. independent reimplementation).
-   Commit.
+3. **FIRST, before any deep analysis: find the reproduction recipe in the
+   source.** This is the highest-leverage step and it comes before reading the
+   whole paper. Authors very often ship a recipe right in the e-print source —
+   usually near the end of the paper: a `SKILL.md` / `AGENTS.md`, a
+   `reproduce.*` / `replicate.*` / `run.sh` script, a `Makefile` reproduce
+   target, a Dockerfile, or a **replication zip** referenced in the text.
+   `download_paper.py` prints candidate files; also grep the `.tex` in `source/`
+   for "reproduc", "replicat", "skill", "github.com", and asset/zip URLs.
+   - Found a **skill/recipe file** → copy it to the repo root as
+     `replication_skill.md` and commit.
+   - Found a **replication zip** (in the source or linked in the paper) →
+     download/extract it into `replication/` (add the zip to `.gitignore`,
+     commit the extracted contents).
+   - Found the **authors' code repo** → add it as a git submodule under
+     `replication_target/` and record the decision in `notes/sources.md`.
+   - Found nothing → note that in `notes/sources.md`; the rest of the queue is
+     your from-scratch path.
 
-4. **Check for an existing replication recipe — and follow it first.** Before
-   writing any reimplementation code, look for a ready-made reproduction path
-   the authors (or others) already shipped — many recent papers have one:
-   - a reproduction doc/script in the authors' repo: `REPRODUCE*.md`,
-     `REPRODUCING*`, `reproduce.*` / `replicate.*` / `run.sh`, a `Makefile`
-     `reproduce`/`all` target, a Dockerfile / `Dockerfile.repro`, a Colab
-     notebook, or a "Reproducing the results" / "Getting started" README
-     section;
-   - an **agent recipe**: `SKILL.md`, `AGENTS.md`, `.claude/`, `.cursor/`,
-     or similar — follow it directly;
-   - artifact hubs: paperswithcode "Reproducibility", a Papers-with-Code
-     badge, a HuggingFace space, or release assets.
-   If you find one, **follow it first** (run it, record what worked in
-   `notes/sources.md`, and let it drive steps 5–7). Only fall through to an
-   independent reimplementation if there is no recipe, or it doesn't run /
-   doesn't reproduce the headline number. Commit what you found either way.
+4. **If a recipe exists, RUN IT FIRST and let it drive the rest.** Set up just
+   enough environment to execute it, run it, and capture its output into
+   `results/`. Then read the paper and assess **how much of the headline claims
+   the recipe's output actually reproduces** — which numbers/figures it covers
+   and which it doesn't. Record this in `notes/sources.md`. With a working
+   recipe, most of what follows is *verifying its output against the paper*, not
+   reimplementing from scratch. Commit.
 
-5. **Set up the environment.** `requirements.txt` / `environment.yml` pinned
-   to versions that work; minimum set needed for the headline claim. Commit.
+5. **Check ALL references — always, recipe or not.** Walk the bibliography and
+   confirm the key cited results / datasets / baselines the paper leans on
+   actually say what the paper claims. This runs in every replication. Record
+   anything load-bearing or surprising in `notes/claims.md`. Commit.
 
-6. **Reimplement the method** (or adapt the authors' code from step 4) under
-   `src/` — scope to the headline claim, not every ablation. Commit as you go.
+6. **Record `notes/claims.md`** — scoped to whatever the recipe did NOT already
+   cover: headline claim(s); datasets (version/hash, where they live);
+   models/methods in re-implementable detail; evaluation metrics and the exact
+   reported numbers; compute envelope (GPU type, hours, memory — decides if CI
+   can auto-run it). If the recipe covered everything, this is a short
+   confirmation. Commit.
 
-7. **Run the replication.** Script it as `scripts/run.py` so CI can invoke
-   it; capture metrics as JSON into `results/`. Commit.
+7. **Reimplement only the uncovered claims** under `src/` (skip anything the
+   recipe already reproduced; scope to the headline claim, not every ablation).
+   Pin the environment in `requirements.txt` / `environment.yml` to versions
+   that work. Commit as you go.
 
-8. **Write `FINDINGS.md`:** reproduced vs. reported numbers (table); gaps you
-   had to fill (hyperparameters, preprocessing, omitted architecture details);
-   where and why it diverged. Commit.
+8. **Run the full replication** via `scripts/run.py` (the CI entry point);
+   capture metrics as JSON into `results/`. Commit.
 
-9. **Publish the deliverables.** Confirm `.github/workflows/pages.yml` builds
-   the GitHub Pages site + PDF report and `.github/workflows/package.yml`
-   builds the ZIP replication package. Make the repo public; enable Pages
-   (Settings -> Pages -> Source: GitHub Actions). Update `SKILL.md` so it
-   reflects how you actually did this. Commit.
+9. **Write `FINDINGS.md`:** reproduced vs. reported numbers (table); what the
+   recipe covered vs. what you filled; gaps (hyperparameters, preprocessing,
+   omitted architecture details) and where/why it diverged. Commit and push.
 
-10. **Stop / hand back** when `FINDINGS.md` reports at least one headline
-    number with its reproduced value, `scripts/run.py` runs end-to-end from a
-    clean clone (or documents the un-automatable data step), and the Pages
-    deployment is green.
+10. **Publish and finish.** Confirm `.github/workflows/pages.yml` (site + PDF
+    report) and `.github/workflows/package.yml` (ZIP) run green; set
+    Settings → Pages → Source: GitHub Actions. Keep `SKILL.md` (and
+    `replication_skill.md`, if you found one) truthful to what you actually did.
+    **Stop / hand back** when `FINDINGS.md` reports at least one headline number
+    with its reproduced value, `scripts/run.py` runs end-to-end from a clean
+    clone (or documents the un-automatable data step), the repo is public and
+    pushed, and the Pages deployment is green.
 
 ---
 
@@ -552,56 +585,63 @@ PDF: $pdf_url - HTML: $html_url
 
 ## Prerequisite
 
-If `replication_target/` has no paper, run `python download_paper.py` first
-(it fetches the arXiv HTML and PDF). Don't proceed without the paper. Prefer
-working from `replication_target/paper.md` (a Markdown extraction of the
-arXiv HTML) — the HTML reads far better than the PDF; only fall back to the
-PDF when there is no HTML.
+If `replication_target/source/` is empty, run `python download_paper.py`
+first. It fetches the arXiv **LaTeX/e-print source** ($src_url), extracts it to
+`replication_target/source/`, and saves the PDF as a fallback. Read the `.tex`
+in `source/` directly — it is far more token-efficient than the rendered HTML
+(no base64 figure blobs) and is where the authors' reproduction recipe usually
+lives. Fall back to the PDF only for PDF-only submissions.
 
 ## Plan
 
-1. **Acquire the paper (HTML preferred).** `python download_paper.py` ->
-   `replication_target/paper.html` + `paper.pdf` (gitignored). Convert the
-   HTML to `replication_target/paper.md` for structured text; fall back to
-   the PDF only when no HTML exists.
+The efficient path: get the source, **find the authors' reproduction recipe
+FIRST**, run it, then verify its output against the paper and fill only the
+gaps. Reimplementing from scratch is the fallback, not the default.
 
-2. **Read the paper.** Record in `notes/claims.md`: headline claim(s);
-   datasets (version/hash, location); models/methods in re-implementable
-   detail; evaluation metrics and the exact reported numbers; compute
-   envelope (used to decide if CI can auto-run this).
+1. **Acquire the LaTeX source.** `python download_paper.py` → extracts the
+   e-print source to `replication_target/source/` (committed) and saves the PDF
+   (gitignored). Read the `.tex` directly.
 
-3. **Find the authors' code.** arXiv "Code" link, paperswithcode, GitHub
-   (title + first-author). If official code exists, add it as a **git
-   submodule** under `replication_target/` and record in `notes/sources.md`
-   whether you fork-and-verify or independently reimplement.
+2. **Go live early.** Create a PUBLIC GitHub repo and push
+   (`gh repo create --public --source=. --push`) so every later commit pushes
+   and Pages/CI build as you go — don't leave it local-only.
 
-4. **Check for an existing replication recipe — and follow it first.** Before
-   writing any reimplementation code, look for a ready-made path the authors
-   (or others) shipped: a `REPRODUCE*.md` / `reproduce.*` / `replicate.*` /
-   `run.sh` script, a `Makefile` reproduce target, a Dockerfile, a Colab
-   notebook, a "Reproducing the results" README section, or an **agent
-   recipe** (`SKILL.md`, `AGENTS.md`, `.claude/`, `.cursor/`) — also check
-   paperswithcode and release assets. If one exists, **run it first** and let
-   it drive steps 5–7, recording what worked in `notes/sources.md`. Only fall
-   through to an independent reimplementation if there is no recipe or it
-   fails to reproduce the headline number.
+3. **Find the reproduction recipe in the source — before reading the whole
+   paper.** Authors often ship one near the end of the paper: a `SKILL.md` /
+   `AGENTS.md`, a `reproduce.*` / `replicate.*` / `run.sh` script, a `Makefile`
+   target, a Dockerfile, or a **replication zip**. `download_paper.py` flags
+   candidates; also grep the `.tex` for "reproduc"/"replicat"/"skill"/
+   "github.com". Copy a recipe file to `replication_skill.md`; extract a
+   replication zip into `replication/`; add the authors' code repo as a **git
+   submodule** under `replication_target/`. Record findings in
+   `notes/sources.md`.
 
-5. **Set up the environment.** `environment.yml` / `requirements.txt` pinned
-   to working versions; minimum dependency set for the headline claim.
+4. **Run the recipe first** (if any): set up just enough to execute it, capture
+   output to `results/`, and assess how much of the paper's headline claims it
+   reproduces. With a working recipe the rest is verification, not from-scratch
+   reimplementation.
 
-6. **Reimplement the method** (or adapt the authors' code from step 4).
-   Code under `src/`. Scope to the headline claim, not every ablation.
+5. **Check ALL references** — every run, recipe or not. Confirm the key cited
+   results/datasets/baselines the paper relies on say what it claims.
 
-7. **Run the replication.** `scripts/run.py` so CI can invoke it. Capture
-   metrics as JSON into `results/`.
+6. **Record `notes/claims.md`** — scoped to what the recipe didn't cover:
+   headline claim(s); datasets (version/hash, location); models/methods in
+   re-implementable detail; metrics and exact reported numbers; compute envelope
+   (decides if CI can auto-run this).
 
-8. **Write the findings.** `FINDINGS.md`: reproduced vs. reported numbers
-   (table); gaps you filled; where it diverged and why.
+7. **Reimplement only the gaps** under `src/`; pin `requirements.txt` /
+   `environment.yml`. Scope to the headline claim, not every ablation.
 
-9. **Publish.** GitHub Pages deploys the findings + a transportable PDF
-   report (`.github/workflows/pages.yml`); a ZIP replication package is built
-   and offered for download (`.github/workflows/package.yml`). The repo must
-   be public with Pages enabled.
+8. **Run the replication.** `scripts/run.py` so CI can invoke it; metrics →
+   `results/`.
+
+9. **Write the findings.** `FINDINGS.md`: reproduced vs. reported (table);
+   what the recipe covered vs. what you filled; gaps and divergences.
+
+10. **Publish.** GitHub Pages deploys the findings + a transportable PDF report
+    (`.github/workflows/pages.yml`); a ZIP replication package is built
+    (`.github/workflows/package.yml`). The repo must be public with Pages set to
+    Source: GitHub Actions.
 
 ## Budget guardrails
 
@@ -616,7 +656,8 @@ PDF when there is no HTML.
   paper, with the reproduced value next to it.
 - `scripts/run.py` runs end-to-end from a clean clone (or documents the data
   step that can't be automated).
-- The GitHub Pages site and the ZIP package build green in Actions.
+- The repo is public and pushed; the GitHub Pages site and the ZIP package
+  build green in Actions.
 - This file still reflects how you actually did it — if you deviated, edit
   the plan above.
 """
@@ -637,7 +678,10 @@ $summary
 ## Replication status
 
 Not started. The agent-executable plan is in [`SKILL.md`](./SKILL.md);
-the concrete step queue is in [`queue.md`](./queue.md).
+the concrete step queue is in [`queue.md`](./queue.md). The efficient path is
+**recipe-first**: get the LaTeX source, find and run the authors' reproduction
+recipe (often shipped right in the paper), then verify it against the paper and
+fill only the gaps.
 
 ## What this repo produces
 
@@ -651,9 +695,12 @@ Three compounding artifacts:
 ## Layout
 
 - `replication_target/` — the paper and everything pulled about it:
-  - `paper.pdf` — downloaded PDF (gitignored; `python download_paper.py`).
-  - `paper.md` — Markdown extraction of the arXiv HTML (for structured text).
+  - `source/` — extracted arXiv LaTeX/e-print source (committed; the primary,
+    token-efficient text — read the `.tex` directly). Fetched by
+    `python download_paper.py`; the raw archive is gitignored.
+  - `paper.pdf` — downloaded PDF (gitignored; fallback / complete record).
   - the authors' code, if any, as a git **submodule**.
+- `replication_skill.md` — the authors' recipe, if one is shipped (run first).
 - `data_lake/` — other downloaded/supplied material (NOT the paper).
 - `src/` — your reimplementation. `scripts/run.py` — CI entry point.
 - `results/` — metrics JSON (gitignored). `FINDINGS.md` — the report.
@@ -673,29 +720,54 @@ inspiration: http://sutra.emmaleonhart.com/
 _REPLICATION_DOWNLOAD_TMPL = Template(
     '''"""Fetch arXiv:$id_with_version into replication_target/.
 
-Prefers the arXiv **HTML** (-> paper.html) because it reads far better than
-the PDF when working from structured text; the PDF (-> paper.pdf) is fetched
-as a fallback/complete record. Both are gitignored. Stdlib only.
+The **primary** download is the arXiv LaTeX / e-print **source**
+(arxiv.org/src/...). It is far more token-efficient to read than the rendered
+HTML (which embeds figures as huge base64 data-URIs you would otherwise have to
+strip) and the .tex files read cleanly. It is also where authors most often
+ship a reproduction recipe -- a SKILL.md / AGENTS.md, a reproduce/replicate/
+run.sh script, a Makefile target, a Dockerfile, or a link to a replication zip
+-- usually near the end of the paper.
+
+This script downloads the source archive, extracts it to
+``replication_target/source/`` (committed), saves the PDF as a fallback /
+complete record (gitignored), and prints any files that look like a
+reproduction recipe so the agent can find and run it FIRST.
+
+arXiv submissions come in a few shapes; all are handled:
+  * a gzip-compressed tar (the common case: many files)  -> extracted
+  * a single gzip-compressed .tex (single-file paper)    -> source/main.tex
+  * a PDF-only submission (no source available)          -> paper.pdf
 
 arXiv rate-limits (HTTP 429/503), so requests retry with backoff that honours
-the Retry-After header.
+the Retry-After header. Stdlib only.
 """
 
 from __future__ import annotations
 
+import gzip
+import io
 import sys
+import tarfile
 import time
 import urllib.error
 import urllib.request
 from pathlib import Path
 
-HTML_URL = "$html_url"
+SRC_URL = "$src_url"
 PDF_URL = "$pdf_url"
+HTML_URL = "$html_url"
 ARXIV_ID = "$arxiv_id"
 
 _TARGET = Path(__file__).parent / "replication_target"
+_SOURCE = _TARGET / "source"
 _MAX_RETRIES = 4
 _BASE_BACKOFF = 3.0  # arXiv asks for ~3s between requests
+
+# Filenames that suggest a ready-made reproduction recipe / replication asset.
+_RECIPE_HINTS = (
+    "skill", "agents", "reproduc", "replicat", "run.sh", "makefile",
+    "dockerfile", ".zip",
+)
 
 
 def _retry_after(err):
@@ -715,7 +787,7 @@ def _get(url):
             req = urllib.request.Request(
                 url, headers={"User-Agent": "cleanvibe-replicate"}
             )
-            with urllib.request.urlopen(req, timeout=30) as resp:
+            with urllib.request.urlopen(req, timeout=60) as resp:
                 return resp.read()
         except urllib.error.HTTPError as e:
             if e.code in (429, 503) and not last:
@@ -733,7 +805,76 @@ def _get(url):
     raise AssertionError("unreachable")
 
 
-def _save(url, out, *, optional=False):
+def _safe_extract(tar, dest):
+    """Extract ``tar`` into ``dest``, refusing any member that escapes it."""
+    dest = dest.resolve()
+    members = tar.getmembers()
+    for m in members:
+        target = (dest / m.name).resolve()
+        if dest != target and dest not in target.parents:
+            raise RuntimeError(f"unsafe path in archive: {m.name!r}")
+    try:
+        # Python 3.12+ : the hardened 'data' filter (also silences the 3.14
+        # deprecation warning). Older Pythons don't accept the kwarg.
+        tar.extractall(dest, filter="data")
+    except TypeError:
+        tar.extractall(dest)
+    return members
+
+
+def _extract_source(data):
+    """Turn raw /src bytes into files under source/. Returns list of rel paths.
+
+    Handles the three arXiv source shapes (gzip-tar, single gzip-tex, PDF-only).
+    """
+    # PDF-only submission: no source to extract; let the PDF fetch cover it.
+    if data[:5] == b"%PDF-":
+        print("  source is a PDF-only submission; no .tex source available")
+        return []
+
+    _SOURCE.mkdir(parents=True, exist_ok=True)
+
+    # Most submissions: a (gz/bz2/xz) tar of the project.
+    try:
+        with tarfile.open(fileobj=io.BytesIO(data), mode="r:*") as tar:
+            members = _safe_extract(tar, _SOURCE)
+        names = [m.name for m in members if m.isfile()]
+        print(f"  extracted {len(names)} file(s) to {_SOURCE}")
+        return names
+    except tarfile.ReadError:
+        pass
+
+    # Single-file submission: gzip of one .tex (no tar wrapper).
+    try:
+        tex = gzip.decompress(data)
+        out = _SOURCE / "main.tex"
+        out.write_bytes(tex)
+        print(f"  single-file source -> {out}")
+        return ["main.tex"]
+    except (OSError, EOFError):
+        pass
+
+    # Unknown container: save the raw archive so nothing is lost.
+    raw = _TARGET / "arxiv-source.bin"
+    raw.write_bytes(data)
+    print(f"  could not recognise source container; saved raw -> {raw}")
+    return []
+
+
+def _flag_recipes(names):
+    """Print source files whose names hint at a reproduction recipe."""
+    hits = [n for n in names if any(h in n.lower() for h in _RECIPE_HINTS)]
+    if hits:
+        print("\\n  *** candidate reproduction recipe(s) in the source — "
+              "look at these FIRST: ***")
+        for n in hits:
+            print(f"      {n}")
+    else:
+        print("\\n  no obvious recipe filenames in the source; grep the .tex "
+              "for 'reproduc'/'replicat'/'github.com' and check the paper's end")
+
+
+def _save_binary(url, out, *, optional=False):
     if out.exists() and out.stat().st_size > 0:
         print(f"already present: {out}")
         return True
@@ -742,19 +883,33 @@ def _save(url, out, *, optional=False):
         data = _get(url)
     except urllib.error.HTTPError as e:
         if optional:
-            print(f"  skipped ({e.code}); not all papers have HTML")
+            print(f"  skipped (HTTP {e.code})")
             return False
         raise
     out.write_bytes(data)
     print(f"  wrote {out.stat().st_size} bytes")
-    return True
+    return data
 
 
 def main() -> int:
     _TARGET.mkdir(parents=True, exist_ok=True)
-    # HTML first (preferred); PDF as fallback / complete record.
-    _save(HTML_URL, _TARGET / "paper.html", optional=True)
-    _save(PDF_URL, _TARGET / "paper.pdf")
+
+    # 1) The LaTeX/e-print source — primary, token-efficient, recipe-bearing.
+    if _SOURCE.exists() and any(_SOURCE.iterdir()):
+        print(f"source already extracted: {_SOURCE}")
+    else:
+        print(f"downloading source {SRC_URL}")
+        try:
+            data = _get(SRC_URL)
+            # Keep the raw archive too (gitignored) for provenance.
+            (_TARGET / "arxiv-source.tar.gz").write_bytes(data)
+            names = _extract_source(data)
+            _flag_recipes(names)
+        except urllib.error.HTTPError as e:
+            print(f"  source unavailable (HTTP {e.code}); relying on the PDF")
+
+    # 2) The PDF — fallback / complete visual record.
+    _save_binary(PDF_URL, _TARGET / "paper.pdf")
     return 0
 
 
@@ -767,6 +922,15 @@ if __name__ == "__main__":
 REPLICATION_GITIGNORE = """# The paper itself — downloaded, never committed
 replication_target/*.pdf
 replication_target/*.html
+# The raw arXiv source archive is gitignored; the EXTRACTED
+# replication_target/source/ tree IS committed (that is the readable paper text).
+replication_target/*.tar.gz
+replication_target/*.tar
+replication_target/*.tgz
+replication_target/arxiv-source.*
+# A downloaded replication zip is ignored; its extracted replication/ contents
+# are committed.
+replication/*.zip
 !replication_target/.gitkeep
 
 # Replication outputs
@@ -973,6 +1137,12 @@ in the cleanvibe repo for the full framing.
 
 ## Architecture and Conventions
 
+- **The efficient path is recipe-first.** Authors very often ship a
+  reproduction recipe in their code repo (a `SKILL.md`/`AGENTS.md`, a
+  reproduce/replicate/run.sh script, a Makefile target, a Dockerfile, or a
+  replication zip). Find and run it FIRST, then verify its output against the
+  paper and fill only the gaps. A from-scratch reimplementation is the
+  fallback, not the default.
 - **`replication_target/`** holds the paper and everything pulled *about* it:
   - the paper PDF(s) you dropped in — **gitignored**: papers are often
     copyrighted and are your local input, not committed. Convention:
@@ -982,12 +1152,17 @@ in the cleanvibe repo for the full framing.
     text rather than raw PDF.
   - the authors' code, if any, cloned as a **git submodule** in here
     (`git submodule add <repo> replication_target/<name>`).
+- **`replication_skill.md`** (repo root) — the authors' recipe, if one is
+  shipped (run first). **`replication/`** — an extracted replication zip (zip
+  gitignored, contents committed).
 - **`data_lake/`** — other supplied/downloaded material (datasets, notes,
   exports). Standard cleanvibe convention; this *is* committed. The paper is
   NOT here.
 - **No `download_paper.py`, no `paper.json`.** This mode has no arXiv
   metadata. The agent derives the paper's identity by *reading what you
   dropped in* and records it in `notes/claims.md` and `README.md`.
+- **Go live early.** Create a PUBLIC GitHub repo and push near the start so
+  every commit pushes and CI/Pages build as you go — don't leave it local-only.
 - **`src/`** — your reimplementation. **`scripts/run.py`** — the entry point
   CI invokes. **`results/`** — metrics JSON (gitignored). **`FINDINGS.md`** —
   the report (reproduced vs. reported, gaps, divergences).
@@ -1038,7 +1213,11 @@ and supporting material are supplied by the user.
 
 ## Active — Manual paper replication
 
-Work top to bottom. Delete each item in the same commit that completes it.
+The efficient path is **recipe-first**: identify the paper, find and run the
+authors' reproduction recipe (often shipped in their code repo), then verify it
+against the paper and fill only the gaps. Reimplementing from scratch is the
+fallback. Work top to bottom; delete each item in the same commit that
+completes it (and append to `devlog.md`).
 
 1. **Confirm the paper and materials are present, and triage them.**
    Nothing was downloaded — this is manual drop-in mode.
@@ -1052,58 +1231,64 @@ Work top to bottom. Delete each item in the same commit that completes it.
    - Commit. (The dropped paper stays gitignored; `data_lake/` material is
      committed per the cleanvibe convention.)
 
-2. **Identify the paper, then read it.** From the dropped PDF(s) determine
-   the title, authors, venue/year, and any arXiv id / DOI. Write that into
-   `README.md` and `notes/claims.md` (replacing the "unknown — fill from the
-   dropped paper" placeholders). Then in `notes/claims.md` record: the
-   headline claim(s); datasets (version/hash, where they live);
-   models/methods in enough detail to re-implement; evaluation metrics and
-   the exact reported numbers; the compute envelope (used to decide if CI
-   can auto-run it). Save a Markdown extraction of the paper to
-   `replication_target/paper.md`. Commit.
+2. **Identify the paper and go live early.** From the dropped PDF(s) determine
+   the title, authors, venue/year, and any arXiv id / DOI; write that into
+   `README.md` (replacing the "unknown" placeholders). Save a Markdown
+   extraction of the paper to `replication_target/paper.md`. Then create a
+   PUBLIC GitHub repo and push (`gh repo create --public --source=. --push`) so
+   every later commit pushes and Pages/CI build as you go. Commit.
 
-3. **Find the authors' code.** Search the paper, paperswithcode, and GitHub
-   (title + first author). If official code exists, add it as a git
-   submodule under `replication_target/` and record the decision in
-   `notes/sources.md` (fork-and-verify vs. independent reimplementation).
-   Commit.
+3. **FIRST, before deep analysis: find the authors' code and an existing
+   replication recipe — and follow it first.** This is the highest-leverage
+   step. Search the paper, paperswithcode, and GitHub (title + first author).
+   Look for a ready-made path the authors (or others) shipped — many recent
+   papers have one: a `REPRODUCE*.md` / `reproduce.*` / `replicate.*` /
+   `run.sh` script, a `Makefile` reproduce target, a Dockerfile, a Colab
+   notebook, a "Reproducing the results" README section, or an **agent recipe**
+   (`SKILL.md`, `AGENTS.md`, `.claude/`, `.cursor/`); also check paperswithcode
+   and release assets.
+   - Found the authors' code → add it as a git submodule under
+     `replication_target/` and record the decision in `notes/sources.md`
+     (fork-and-verify vs. independent reimplementation).
+   - Found a **skill/recipe file** → copy it to the repo root as
+     `replication_skill.md`.
+   - Found a **replication zip** → extract it into `replication/` (the zip
+     gitignored, contents committed).
+   Commit what you found either way.
 
-4. **Check for an existing replication recipe — and follow it first.** Before
-   writing any reimplementation code, look for a ready-made path the authors
-   (or others) shipped — many recent papers have one: a `REPRODUCE*.md` /
-   `reproduce.*` / `replicate.*` / `run.sh` script, a `Makefile` reproduce
-   target, a Dockerfile, a Colab notebook, a "Reproducing the results" README
-   section, or an **agent recipe** (`SKILL.md`, `AGENTS.md`, `.claude/`,
-   `.cursor/`); also check paperswithcode and release assets. If one exists,
-   **run it first** and let it drive steps 5–7, recording what worked in
-   `notes/sources.md`. Only fall through to an independent reimplementation if
-   there is no recipe or it fails to reproduce the headline number. Commit
-   what you found either way.
+4. **If a recipe exists, RUN IT FIRST.** Set up just enough environment to
+   execute it, run it, capture output to `results/`, and assess how much of the
+   paper's headline claims it reproduces. With a working recipe the rest is
+   verification, not from-scratch reimplementation. Commit.
 
-5. **Set up the environment.** `requirements.txt` / `environment.yml` pinned
-   to versions that work; minimum set needed for the headline claim. Commit.
+5. **Check ALL references — always, recipe or not.** Walk the bibliography and
+   confirm the key cited results / datasets / baselines the paper relies on say
+   what it claims. Record anything load-bearing in `notes/claims.md`. Commit.
 
-6. **Reimplement the method** (or adapt the authors' code from step 4) under
-   `src/` — scope to the headline claim, not every ablation. Commit as you go.
+6. **Record `notes/claims.md`** — scoped to what the recipe didn't cover:
+   the headline claim(s); datasets (version/hash, where they live);
+   models/methods in enough detail to re-implement; evaluation metrics and the
+   exact reported numbers; the compute envelope (used to decide if CI can
+   auto-run it). Commit.
 
-7. **Run the replication.** Script it as `scripts/run.py` so CI can invoke
+7. **Reimplement only the uncovered claims** under `src/` — scope to the
+   headline claim, not every ablation. Pin `requirements.txt` /
+   `environment.yml` to versions that work. Commit as you go.
+
+8. **Run the replication.** Script it as `scripts/run.py` so CI can invoke
    it; capture metrics as JSON into `results/`. Commit.
 
-8. **Write `FINDINGS.md`:** reproduced vs. reported numbers (table); gaps
-   you had to fill (hyperparameters, preprocessing, omitted architecture
-   details); where and why it diverged. Commit.
+9. **Write `FINDINGS.md`:** reproduced vs. reported numbers (table); what the
+   recipe covered vs. what you filled; gaps (hyperparameters, preprocessing,
+   omitted architecture details) and where/why it diverged. Commit and push.
 
-9. **Publish the deliverables.** Confirm `.github/workflows/pages.yml`
-   builds the GitHub Pages site + PDF report and
-   `.github/workflows/package.yml` builds the ZIP replication package. Make
-   the repo public; enable Pages (Settings -> Pages -> Source: GitHub
-   Actions). Update `SKILL.md` so it reflects how you actually did this.
-   Commit.
-
-10. **Stop / hand back** when `FINDINGS.md` reports at least one headline
-    number with its reproduced value, `scripts/run.py` runs end-to-end from a
-    clean clone (or documents the un-automatable data step), and the Pages
-    deployment is green.
+10. **Publish and finish.** Confirm `.github/workflows/pages.yml` (site + PDF)
+    and `.github/workflows/package.yml` (ZIP) run green; set Settings → Pages →
+    Source: GitHub Actions. Keep `SKILL.md` (and `replication_skill.md`, if
+    found) truthful. **Stop / hand back** when `FINDINGS.md` reports at least
+    one headline number with its reproduced value, `scripts/run.py` runs
+    end-to-end from a clean clone (or documents the un-automatable data step),
+    the repo is public and pushed, and the Pages deployment is green.
 
 ---
 
@@ -1137,47 +1322,54 @@ from `replication_target/paper.md` (a Markdown extraction) when available.
 
 ## Plan
 
+The efficient path: identify the paper, **find and run the authors'
+reproduction recipe FIRST**, then verify it against the paper and fill only the
+gaps. Reimplementing from scratch is the fallback.
+
 1. **Triage the drop-in.** Move the paper PDF(s) into
    `replication_target/` (primary -> `paper.pdf`) and any datasets /
    supplementary / notes into `data_lake/`.
 
-2. **Identify + read the paper.** Record title/authors/venue/year (and
-   arXiv id / DOI if present) in `README.md` and `notes/claims.md`, then
-   the headline claim(s); datasets (version/hash, location); models/methods
-   in re-implementable detail; evaluation metrics and the exact reported
-   numbers; compute envelope. Extract the paper text to
-   `replication_target/paper.md`.
+2. **Identify the paper + go live early.** Record title/authors/venue/year
+   (and arXiv id / DOI if present) in `README.md`; extract the paper text to
+   `replication_target/paper.md`. Create a PUBLIC GitHub repo and push
+   (`gh repo create --public --source=. --push`) so commits push and Pages/CI
+   build as you go.
 
-3. **Find the authors' code.** paperswithcode, GitHub (title + first
-   author). If official code exists, add it as a **git submodule** under
-   `replication_target/` and record in `notes/sources.md` whether you
-   fork-and-verify or independently reimplement.
+3. **Find the authors' code and an existing replication recipe — before deep
+   analysis.** paperswithcode, GitHub (title + first author). Look for a
+   ready-made path: a `REPRODUCE*.md` / `reproduce.*` / `replicate.*` /
+   `run.sh` script, a `Makefile` reproduce target, a Dockerfile, a Colab
+   notebook, a "Reproducing the results" README section, or an **agent recipe**
+   (`SKILL.md`, `AGENTS.md`, `.claude/`, `.cursor/`); also check paperswithcode
+   and release assets. Add the authors' code as a **git submodule** under
+   `replication_target/`; copy a recipe file to `replication_skill.md`; extract
+   a replication zip into `replication/`. Record findings in
+   `notes/sources.md`.
 
-4. **Check for an existing replication recipe — and follow it first.** Before
-   reimplementing, look for a ready-made path: a `REPRODUCE*.md` /
-   `reproduce.*` / `replicate.*` / `run.sh` script, a `Makefile` reproduce
-   target, a Dockerfile, a Colab notebook, a "Reproducing the results" README
-   section, or an **agent recipe** (`SKILL.md`, `AGENTS.md`, `.claude/`,
-   `.cursor/`); also check paperswithcode and release assets. If one exists,
-   run it first and let it drive steps 5–7. Only reimplement independently if
-   there is none or it fails to reproduce the headline number.
+4. **Run the recipe first** (if any): execute it, capture output to `results/`,
+   and assess how much of the headline claims it reproduces.
 
-5. **Set up the environment.** `environment.yml` / `requirements.txt`
-   pinned to working versions; minimum set for the headline claim.
+5. **Check ALL references** — every run, recipe or not.
 
-6. **Reimplement the method** (or adapt the authors' code from step 4).
-   Code under `src/`. Scope to the headline claim, not every ablation.
+6. **Record `notes/claims.md`** — scoped to what the recipe didn't cover:
+   headline claim(s); datasets (version/hash, location); models/methods in
+   re-implementable detail; evaluation metrics and the exact reported numbers;
+   compute envelope.
 
-7. **Run the replication.** `scripts/run.py` so CI can invoke it. Capture
+7. **Reimplement only the gaps** under `src/`; pin `requirements.txt` /
+   `environment.yml`. Scope to the headline claim, not every ablation.
+
+8. **Run the replication.** `scripts/run.py` so CI can invoke it. Capture
    metrics as JSON into `results/`.
 
-8. **Write the findings.** `FINDINGS.md`: reproduced vs. reported numbers
-   (table); gaps you filled; where it diverged and why.
+9. **Write the findings.** `FINDINGS.md`: reproduced vs. reported numbers
+   (table); what the recipe covered vs. what you filled; gaps and divergences.
 
-9. **Publish.** GitHub Pages deploys the findings + a transportable PDF
-   report (`.github/workflows/pages.yml`); a ZIP replication package is
-   built (`.github/workflows/package.yml`). The repo must be public with
-   Pages enabled.
+10. **Publish.** GitHub Pages deploys the findings + a transportable PDF
+    report (`.github/workflows/pages.yml`); a ZIP replication package is built
+    (`.github/workflows/package.yml`). The repo must be public with Pages
+    enabled.
 
 ## Budget guardrails
 
@@ -1192,7 +1384,8 @@ from `replication_target/paper.md` (a Markdown extraction) when available.
   paper, with the reproduced value next to it.
 - `scripts/run.py` runs end-to-end from a clean clone (or documents the
   data step that can't be automated).
-- The GitHub Pages site and the ZIP package build green in Actions.
+- The repo is public and pushed; the GitHub Pages site and the ZIP package
+  build green in Actions.
 - This file still reflects how you actually did it — if you deviated, edit
   the plan above.
 """

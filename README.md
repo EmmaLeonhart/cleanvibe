@@ -80,21 +80,34 @@ dropped. This will:
 3. Scaffold a standalone replication project: cleanvibe conventions
    (`CLAUDE.md`, `queue.md`, `data_lake/`) **plus** the replication structure —
    `SKILL.md` (the agent-executable replication plan), `download_paper.py`
-   (fetches the arXiv **HTML** first — it reads better than the PDF — then the
-   PDF as a fallback), `replication_target/` (the paper itself lives here,
-   gitignored — never in `data_lake/`; the authors' code is cloned here as a
-   git submodule), `paper.json`, and `.github/workflows/` that build a GitHub
-   Pages findings site, a transportable PDF report, and a downloadable ZIP
-   replication package
+   (fetches the arXiv **LaTeX/e-print source** and extracts it to
+   `replication_target/source/`, with the PDF as a fallback), the paper's home
+   `replication_target/` (gitignored — never in `data_lake/`; the authors' code
+   is cloned here as a git submodule), `paper.json`, and `.github/workflows/`
+   that build a GitHub Pages findings site, a transportable PDF report, and a
+   downloadable ZIP replication package
 4. Initialize a git repo with an initial commit
 5. Launch Claude Code inside the project
 
-The generated `queue.md`/`SKILL.md` tell the agent to **look for the
-authors' own replication recipe first** (a `REPRODUCE*.md`/`reproduce.*`
-script, a Makefile target, a Dockerfile, a "Reproducing the results" README
-section, or an agent recipe like `SKILL.md`/`AGENTS.md`/`.claude/`) and run
-that before attempting an independent reimplementation — many recent papers
-ship one.
+The generated scaffold is built around the **efficient, recipe-first path**:
+
+- **Source, not HTML.** `download_paper.py` downloads the arXiv **e-print
+  source** (`arxiv.org/src/<id>`) and extracts the `.tex` to
+  `replication_target/source/`. The `.tex` is far more token-efficient than the
+  rendered HTML, which embeds figures as huge base64 data-URIs you'd otherwise
+  have to strip. The raw archive is gitignored; the extracted `source/` is
+  committed.
+- **Find the recipe FIRST.** Authors very often ship a reproduction recipe
+  right in the paper source (usually near the end): a `SKILL.md`/`AGENTS.md`, a
+  `reproduce.*`/`replicate.*`/`run.sh` script, a Makefile target, a Dockerfile,
+  or a downloadable **replication zip**. The generated `queue.md`/`SKILL.md`
+  tell the agent to find it (copying a recipe to `replication_skill.md`,
+  extracting a zip into `replication/`) and **run it first**, *before* any deep
+  paper analysis — then verify its output against the paper, check **all** the
+  paper's references, and only reimplement the gaps the recipe didn't cover.
+- **Go live early.** The agent is told to create a PUBLIC GitHub repo and push
+  near the start, so every commit pushes and Pages/CI build as the work goes —
+  not left local-only.
 
 **From a folder you fill yourself (manual drop-in mode):**
 

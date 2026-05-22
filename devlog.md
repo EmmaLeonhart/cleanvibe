@@ -476,3 +476,48 @@ authors' replication recipe first, and arXiv was returning constant 429s):
   (`6f0523c`), tagged `v1.4.0`, and GitHub release cut
   (https://github.com/EmmaLeonhart/cleanvibe/releases/tag/v1.4.0) — the
   Publish-to-PyPI workflow runs on release.
+
+## 2026-05-22 — replicate: source-first downloader + recipe-first scaffold
+
+The v1.4.0 live Sutra replication *worked but was wasteful* (user report): it
+downloaded the HTML and had to hand-strip base64 figure blobs, reimplemented
+all five claims from scratch, only noticed the paper's own reproduction recipe
+late, and never pushed to a remote. Restructured the generated arXiv scaffold so
+the efficient path is the default.
+
+- **`cleanvibe/templates.py` `download_paper.py` template rewritten** to fetch
+  the arXiv **LaTeX/e-print source** (`arxiv.org/src/<id>`) instead of the HTML.
+  It saves the raw archive (`replication_target/arxiv-source.tar.gz`,
+  gitignored), extracts the `.tex` to `replication_target/source/` (committed),
+  and saves the PDF as a fallback. Handles all three arXiv source shapes
+  (gzip-tar / single-gzip-tex / PDF-only) with stdlib `tarfile`/`gzip`, a
+  path-traversal-safe `_safe_extract` (uses `filter="data"` on Python 3.12+,
+  falls back on older), and prints candidate reproduction-recipe filenames.
+  `_replication_subs` gained `src_url`; `REPLICATION_GITIGNORE` ignores the
+  source archive + a downloaded `replication/*.zip` while keeping the extracted
+  trees committed.
+- **arXiv-mode queue/SKILL/CLAUDE/README templates restructured to recipe-first.**
+  The highest-leverage step — find and run the authors' reproduction recipe
+  (usually shipped right in the paper source, near the end) — now comes FIRST,
+  before any deep paper analysis. A found recipe file is copied to
+  `replication_skill.md`; a referenced replication zip is extracted into
+  `replication/`. Then verify the recipe's output against the paper, **check
+  ALL references in every run**, record `notes/claims.md` scoped to the gaps,
+  and reimplement only what the recipe didn't cover. New early step: create a
+  PUBLIC GitHub repo and push (`gh repo create --public --source=. --push`) so
+  commits push and Pages/CI build as you go — the v1.4.0 run stayed local-only.
+- **Manual drop-in templates** got the same principles (recipe-first framing,
+  check ALL references, go-live-early, `replication_skill.md`/`replication/`).
+- **`tests/test_replicate.py`**: `test_recipe_first_and_html_preference` ->
+  `test_recipe_first_and_source_preference` (asserts source, not HTML, in the
+  queue + downloader; recipe → `replication_skill.md`); new
+  `test_download_paper_compiles_and_targets_source` (the generated downloader
+  parses as valid Python and is source-first); manual recipe-first assertion
+  loosened to the contiguous "replication recipe". Full suite **54/54** green.
+- **Live smoke test** (Sutra, arXiv:2605.20919): the generated `download_paper.py`
+  fetched and extracted the source (4 files; `paper.tex.body` 93 KB of clean
+  LaTeX vs the old 359 KB base64 HTML), gitignored the tarball + PDF, committed
+  `source/`, and was idempotent on rerun. Grepping the extracted `.tex`
+  immediately surfaces the Reproducibility section: the authors' repo, a
+  downloadable `sutra-replication-package.zip`, and a shipped `SKILL.md` — the
+  exact recipe-first signal the new flow is built to catch up front.
