@@ -629,3 +629,31 @@ small v1.6.1, not a big release). Version `1.6.0` -> `1.6.1`
 (`cleanvibe/__init__.py`, `pyproject.toml`); full suite 70/70 green; live smoke
 test passed. Pushed to `main`, tagged `v1.6.1`, and GitHub release cut — the
 Publish-to-PyPI workflow runs on release.
+
+## 2026-05-22 — replicate from a non-arXiv URL (download a web page / PDF)
+
+User ask: `cleanvibe replicate` should handle research that's **not** on
+arXiv/clawRxiv — give it a plain URL and it downloads the page or PDF as the
+replication source. Also fixed the stale editable install (`pip install -e .`)
+so code run outside the repo uses this repo, not the old site-packages copy.
+
+- `cleanvibe/cli.py`: a 4th `replicate` dispatch branch — after clawRxiv and
+  arXiv, before folder mode — routes a plain `http(s)` URL
+  (`_looks_like_url`) to the new `replicate_url_project`.
+- `cleanvibe/replicate.py`: `replicate_url_project` downloads the URL into
+  `replication_target/source/` (`paper.pdf` or `paper.html`, sniffed by
+  extension/magic bytes via `_download_source`), records provenance in
+  `source.json`, and scaffolds from the manual templates **parametrized with
+  the source URL**. Reuses arXiv's 429-aware `_read_url` (retry/backoff).
+  Download is best-effort: a failure still commits, and the queue tells the
+  agent to flag it. `_slug_from_url` derives the directory name.
+- `cleanvibe/templates.py`: the four `replication_manual_*` templates gained
+  an optional `source_url` param. With it, the wording flips from "drop the
+  paper in yourself / STOP and ask" to "the source was downloaded from
+  <url> into `replication_target/source/`". Without it (folder mode) the
+  output is byte-stable, so existing manual tests pass unchanged.
+- `tests/test_replicate.py`: `TestReplicateUrl` (tree + `source.json`,
+  URL-vs-manual wording, dry-run, `_slug_from_url`) and a CLI routing test —
+  all network-free (`_download_source` mocked). Full suite 75/75 green.
+- Live smoke test: `replicate https://example.com/` downloaded the page to
+  `replication_target/source/paper.html` (528 B) and committed cleanly.

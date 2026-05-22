@@ -4,7 +4,7 @@ Usage:
     cleanvibe new PATH          Create a new scaffolded project
     cleanvibe clone REPO [PATH] Clone a repo and inject scaffolding
     cleanvibe convert [PATH]    Convert an existing directory into a cleanvibe project
-    cleanvibe replicate REF     Scaffold a replication project: clawRxiv ref, arXiv/alphaxiv ref, or a drop-in folder
+    cleanvibe replicate REF     Scaffold a replication project: clawRxiv ref, arXiv/alphaxiv ref, a non-arXiv URL, or a drop-in folder
     cleanvibe --version         Show version
 
 Zero dependencies. Just Python stdlib.
@@ -23,6 +23,7 @@ from .replicate import (
     replicate_clawrxiv_project,
     replicate_manual_project,
     replicate_project,
+    replicate_url_project,
 )
 from .scaffold import clone_project, convert_project, create_project
 
@@ -34,6 +35,11 @@ def _ask(prompt: str) -> str:
 
 def _confirm(question: str) -> bool:
     return _ask(f"{question} [y/N] ").strip().lower() in ("y", "yes")
+
+
+def _looks_like_url(value: str) -> bool:
+    """True for a plain http(s) URL (used to route non-arXiv research downloads)."""
+    return value.strip().lower().startswith(("http://", "https://"))
 
 
 def _suggest_name(path: Path) -> Path:
@@ -114,8 +120,10 @@ def main(argv: list[str] | None = None) -> None:
         "target",
         help="A clawRxiv ref (clawrxiv.io/abs/<id> or clawrxiv:<id> — fetches "
         "content + skill recipe), an arXiv/alphaxiv id or URL (fetches "
-        "metadata), OR a folder name (manual drop-in mode: you put the paper "
-        "PDF(s) into replication_target/ and material into data_lake/ yourself)",
+        "metadata), a plain http(s) URL to non-arXiv research (downloads the "
+        "page/PDF as the source), OR a folder name (manual drop-in mode: you "
+        "put the paper PDF(s) into replication_target/ and material into "
+        "data_lake/ yourself)",
     )
     replicate_parser.add_argument(
         "path", nargs="?", type=Path, default=None,
@@ -202,8 +210,15 @@ def main(argv: list[str] | None = None) -> None:
             replicate_project(
                 args.target, args.path, dry_run=args.dry_run, no_claude=args.no_claude
             )
+        elif _looks_like_url(args.target):
+            # A plain http(s) URL that isn't arXiv/clawRxiv -> the research is
+            # hosted elsewhere; download the page/PDF as the replication source.
+            print(f"Scaffolding replication project from non-arXiv URL: {args.target}")
+            replicate_url_project(
+                args.target, args.path, dry_run=args.dry_run, no_claude=args.no_claude
+            )
         else:
-            # Not an arXiv/alphaxiv reference -> treat it as a folder name and
+            # Not a paper ref or URL -> treat it as a folder name and
             # scaffold a manual drop-in replication project there.
             if args.path is not None:
                 print(

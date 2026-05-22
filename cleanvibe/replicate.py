@@ -20,12 +20,15 @@ Absorbed from the now-sunset ``replication_skill`` project.
 
 import json
 import platform
+import re
 import subprocess
 import sys
+import urllib.parse
+import urllib.request
 from pathlib import Path
 
 from . import __version__, templates
-from .arxiv import fetch_paper
+from .arxiv import _read_url, _slugify, fetch_paper
 from .clawrxiv import fetch_clawrxiv_paper
 from .scaffold import (
     _git_init,
@@ -108,6 +111,44 @@ def _resolve_target(base: Path) -> Path:
         if not candidate.exists():
             return candidate
         n += 1
+
+
+def _slug_from_url(url: str) -> str:
+    """Derive a directory slug from a non-arXiv source URL.
+
+    Uses the last path segment (minus a doc extension), falling back to the
+    host. ``https://lab.org/papers/cool-thing.pdf`` -> ``cool-thing``;
+    ``https://example.com/`` -> ``example-com``.
+    """
+    parsed = urllib.parse.urlparse(url)
+    base = parsed.path.rstrip("/").rsplit("/", 1)[-1]
+    base = re.sub(r"\.(pdf|html?|tex|aspx?|php)$", "", base, flags=re.IGNORECASE)
+    return _slugify(base or parsed.netloc.replace("www.", ""))
+
+
+def _download_source(url: str, dest_dir: Path):
+    """Download ``url`` into ``dest_dir`` as paper.pdf/paper.html (sniffed).
+
+    Best-effort and 429-aware (reuses arXiv's ``_read_url`` retry/backoff).
+    Returns the saved filename, or ``None`` if the download failed — the
+    scaffold still commits and the queue tells the agent to flag the failure.
+    """
+    dest_dir.mkdir(parents=True, exist_ok=True)
+    print(f"  Downloading source: {url}")
+    try:
+        req = urllib.request.Request(
+            url, headers={"User-Agent": f"cleanvibe-replicate/{__version__}"}
+        )
+        data = _read_url(req, timeout=60)
+    except Exception as e:  # network/HTTP/timeout — non-fatal
+        print(f"  download failed ({e}); queue.md step 1 says to flag this")
+        return None
+    path_part = urllib.parse.urlparse(url).path.lower()
+    is_pdf = path_part.endswith(".pdf") or data[:5] == b"%PDF-"
+    fname = "paper.pdf" if is_pdf else "paper.html"
+    (dest_dir / fname).write_bytes(data)
+    print(f"  wrote replication_target/source/{fname} ({len(data)} bytes)")
+    return fname
 
 
 def _paper_json(paper) -> str:
@@ -444,6 +485,103 @@ def replicate_manual_project(folder, dry_run: bool = False, no_claude: bool = Fa
         f"  Next: drop the paper PDF(s) into {target / 'replication_target'} "
         f"(and other material into {target / 'data_lake'}), then work queue.md."
     )
+
+    if not no_claude:
+        _launch_claude(target)
+
+
+def replicate_url_project(
+    url, path=None, dry_run: bool = False, no_claude: bool = False
+) -> None:
+    """Scaffold a replication project for research that's NOT on arXiv/clawRxiv.
+
+    The positional argument is a plain http(s) URL (a web page or a PDF). The
+    source is **downloaded** into ``replication_target/source/`` (``paper.pdf``
+    or ``paper.html``, sniffed), provenance is recorded in ``source.json``, and
+    the project is scaffolded from the manual templates *parametrized with the
+    source URL* — so the wording reflects that the source is already present
+    (no "drop it in / stop and ask"). No ``download_paper.py`` / arXiv
+    ``paper.json``; everything is committed in one commit.
+    """
+    is_windows = platform.system() == "Windows"
+    slug = _slug_from_url(url)
+    base = Path(path) if path is not None else Path(f"replicating-{slug}")
+    target = _resolve_target(base)
+
+    if dry_run:
+        print(f"[dry-run] Non-arXiv URL replication: {url}")
+        print(f"[dry-run] Would create directory: {target}")
+        print(
+            f"[dry-run] Would download {url} -> "
+            f"{target / 'replication_target' / 'source' / 'paper.(pdf|html)'}"
+        )
+        for rel in (
+            "CLAUDE.md",
+            "queue.md",
+            "devlog.md",
+            "README.md",
+            "SKILL.md",
+            "source.json",
+            ".gitignore",
+            "data_lake/.gitkeep",
+            "replication_target/.gitkeep",
+            ".github/workflows/pages.yml",
+            ".github/workflows/package.yml",
+        ):
+            print(f"[dry-run] Would write: {target / rel}")
+        if is_windows:
+            print(f"[dry-run] Would write: {target / '!runClaude.bat'}")
+        print(f"[dry-run] NO download_paper.py / arXiv paper.json (URL mode)")
+        print(f"[dry-run] Would run: git init && git add . && git commit")
+        if not no_claude:
+            print(f"[dry-run] Would launch: claude")
+        return
+
+    target.mkdir(parents=True, exist_ok=True)
+    name = target.name
+    print(f"Replicating from URL (not arXiv/clawRxiv): {url} -> {target}")
+
+    _write(target / "CLAUDE.md", templates.replication_manual_claude_md(name, source_url=url))
+    _write(target / "queue.md", templates.replication_manual_queue_md(name, source_url=url))
+    _write(target / "devlog.md", templates.devlog_md(name))
+    _write(target / "README.md", templates.replication_manual_readme_md(name, source_url=url))
+    _write(target / "SKILL.md", templates.replication_manual_skill_md(name, source_url=url))
+    _write(target / ".gitignore", templates.REPLICATION_GITIGNORE)
+
+    _write_gitkeep(target / "data_lake")
+    _write_gitkeep(target / "replication_target")
+
+    workflows = target / ".github" / "workflows"
+    workflows.mkdir(parents=True, exist_ok=True)
+    _write(workflows / "pages.yml", templates.REPLICATION_PAGES_YML)
+    _write(workflows / "package.yml", templates.REPLICATION_PACKAGE_YML)
+
+    if is_windows:
+        _write(target / "!runClaude.bat", templates.RUNCLAUDE_BAT)
+
+    # Download the source (best-effort, retry/backoff) and record provenance.
+    saved = _download_source(url, target / "replication_target" / "source")
+    _write(
+        target / "source.json",
+        json.dumps(
+            {"source": "url", "source_url": url, "saved_as": saved},
+            indent=2,
+            ensure_ascii=False,
+        ),
+    )
+
+    message = (
+        f"Initial commit: URL replication scaffold for {url}\n"
+        f"\n"
+        f"Non-arXiv source downloaded to "
+        f"replication_target/source/{saved or '(download failed)'} "
+        f"(provenance in source.json).\n"
+        f"Scaffolded by `cleanvibe replicate` "
+        f"(https://github.com/Immanuelle/cleanvibe).\n"
+        f"Deliverables (GitHub Pages site + PDF report + ZIP package) build in "
+        f"GitHub Actions."
+    )
+    _git_init(target, message=message)
 
     if not no_claude:
         _launch_claude(target)

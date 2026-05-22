@@ -14,7 +14,12 @@ from unittest.mock import patch
 
 from cleanvibe import cli
 from cleanvibe.arxiv import ArxivPaper
-from cleanvibe.replicate import replicate_manual_project, replicate_project
+from cleanvibe.replicate import (
+    _slug_from_url,
+    replicate_manual_project,
+    replicate_project,
+    replicate_url_project,
+)
 
 
 def _paper() -> ArxivPaper:
@@ -278,8 +283,114 @@ class TestReplicateManual(unittest.TestCase):
             self.assertIn("manual", out.lower())
 
 
+def _fake_download(saved="paper.html"):
+    """A network-free stand-in for replicate._download_source."""
+    body = b"%PDF-1.7 x" if saved.endswith(".pdf") else "<html>fake</html>".encode()
+
+    def _dl(url, dest_dir):
+        dest_dir.mkdir(parents=True, exist_ok=True)
+        (dest_dir / saved).write_bytes(body)
+        return saved
+
+    return _dl
+
+
+def _run_url(url="https://lab.example.org/papers/cool-thing.pdf", saved="paper.html", **kwargs):
+    buf = io.StringIO()
+    with patch("cleanvibe.replicate._download_source", side_effect=_fake_download(saved)):
+        with redirect_stdout(buf):
+            replicate_url_project(url, no_claude=True, **kwargs)
+    return buf.getvalue()
+
+
+class TestReplicateUrl(unittest.TestCase):
+    """Non-arXiv URL mode downloads the source and scaffolds around it."""
+
+    def test_writes_tree_and_source_json(self):
+        with _in_tmp_cwd():
+            _run_url()
+            target = Path("replicating-cool-thing")
+            self.assertTrue(target.is_dir())
+            for rel in (
+                "CLAUDE.md",
+                "queue.md",
+                "devlog.md",
+                "README.md",
+                "SKILL.md",
+                "source.json",
+                ".gitignore",
+                "data_lake/.gitkeep",
+                "replication_target/.gitkeep",
+                ".github/workflows/pages.yml",
+                ".github/workflows/package.yml",
+            ):
+                self.assertTrue((target / rel).is_file(), f"missing {rel}")
+            self.assertTrue((target / ".git").is_dir(), "git repo not initialized")
+            # No arXiv artifacts in URL mode.
+            self.assertFalse((target / "download_paper.py").exists())
+            self.assertFalse((target / "paper.json").exists())
+            # The source was downloaded into replication_target/source/.
+            self.assertTrue(
+                (target / "replication_target" / "source" / "paper.html").is_file()
+            )
+            meta = json.loads((target / "source.json").read_text(encoding="utf-8"))
+            self.assertEqual(meta["source"], "url")
+            self.assertEqual(
+                meta["source_url"], "https://lab.example.org/papers/cool-thing.pdf"
+            )
+            self.assertEqual(meta["saved_as"], "paper.html")
+
+    def test_url_wording_not_manual(self):
+        with _in_tmp_cwd():
+            _run_url()
+            target = Path("replicating-cool-thing")
+            claude = (target / "CLAUDE.md").read_text(encoding="utf-8")
+            queue = (target / "queue.md").read_text(encoding="utf-8")
+            skill = (target / "SKILL.md").read_text(encoding="utf-8")
+            # URL-aware wording — not the manual "drop it in / stop and ask".
+            self.assertIn("downloaded source", claude)
+            self.assertNotIn("manual drop-in", claude)
+            self.assertIn("downloaded from a URL", queue)
+            self.assertNotIn("STOP and ask the user", queue)
+            self.assertIn("downloaded source", skill)
+            # The source URL appears for provenance.
+            self.assertIn("cool-thing.pdf", claude)
+
+    def test_dry_run_writes_nothing(self):
+        with _in_tmp_cwd():
+            out = _run_url(dry_run=True)
+            self.assertFalse(Path("replicating-cool-thing").exists())
+            self.assertIn("[dry-run]", out)
+            self.assertIn("URL", out)
+
+    def test_slug_from_url(self):
+        self.assertEqual(
+            _slug_from_url("https://lab.org/papers/cool-thing.pdf"), "cool-thing"
+        )
+        self.assertEqual(_slug_from_url("https://example.com/"), "example-com")
+        self.assertEqual(
+            _slug_from_url("https://example.com/research/Big_Paper.html"), "big-paper"
+        )
+
+
 class TestReplicateCliDispatch(unittest.TestCase):
     """The single positional arg routes to arXiv mode or folder mode."""
+
+    def test_url_routes_to_url_mode(self):
+        with _in_tmp_cwd():
+            buf = io.StringIO()
+            with patch(
+                "cleanvibe.replicate._download_source",
+                side_effect=_fake_download("paper.pdf"),
+            ):
+                with redirect_stdout(buf):
+                    cli.main(
+                        ["replicate", "https://lab.example.org/cool.pdf", "--no-claude"]
+                    )
+            target = Path("replicating-cool")
+            self.assertTrue((target / "source.json").is_file())
+            self.assertFalse((target / "paper.json").exists())
+            self.assertFalse((target / "download_paper.py").exists())
 
     def test_folder_name_routes_to_manual(self):
         with _in_tmp_cwd():

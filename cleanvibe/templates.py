@@ -1134,22 +1134,55 @@ def _manual_name(folder: str) -> str:
     return name or "replication"
 
 
-def replication_manual_claude_md(folder: str) -> str:
+def replication_manual_claude_md(folder: str, source_url: str | None = None) -> str:
     name = _manual_name(folder)
-    return f"""# {name} — paper replication (manual drop-in)
+    if source_url:
+        subtitle = "downloaded source"
+        intro_para = (
+            "from a **non-arXiv source URL**. The paper was downloaded into\n"
+            "`replication_target/source/` at scaffold time (it is not on arXiv\n"
+            "or clawRxiv) — see `source.json` for the URL and the saved filename."
+        )
+        paper_block = (
+            "> **The paper source is already here.**\n"
+            f"> `cleanvibe replicate` downloaded it from {source_url} into\n"
+            "> `replication_target/source/` (committed) and recorded the URL in\n"
+            "> `source.json`. You do NOT need to fetch it. Put any extra material\n"
+            "> (datasets, the PDF, notes) into `data_lake/`."
+        )
+        no_meta_bullet = (
+            "- **No `download_paper.py`, no arXiv `paper.json`.** The source was\n"
+            "  fetched directly from a URL at scaffold time (`source.json` records\n"
+            "  it). The agent derives the paper's identity by *reading the\n"
+            "  downloaded source* and records it in `notes/claims.md` / `README.md`."
+        )
+    else:
+        subtitle = "manual drop-in"
+        intro_para = (
+            "in **manual drop-in mode**. Nothing was fetched from arXiv — **you "
+            "supply the\npaper(s) and materials by hand.**"
+        )
+        paper_block = (
+            "> **The paper has to be here before anything useful can happen.**\n"
+            "> Put the paper PDF(s) into `replication_target/` (name the primary one\n"
+            "> `paper.pdf`). Put datasets, supplementary files, author-code exports,\n"
+            "> notes, and screenshots into `data_lake/`. If `replication_target/` has no\n"
+            "> PDF yet, the first `queue.md` item is to **stop and ask you for it** — the\n"
+            "> agent must not invent a paper."
+        )
+        no_meta_bullet = (
+            "- **No `download_paper.py`, no `paper.json`.** This mode has no arXiv\n"
+            "  metadata. The agent derives the paper's identity by *reading what you\n"
+            "  dropped in* and records it in `notes/claims.md` and `README.md`."
+        )
+    return f"""# {name} — paper replication ({subtitle})
 
 ## Project Description
 
 This is a **paper-replication project** scaffolded by `cleanvibe replicate`
-in **manual drop-in mode**. Nothing was fetched from arXiv — **you supply the
-paper(s) and materials by hand.**
+{intro_para}
 
-> **The paper has to be here before anything useful can happen.**
-> Put the paper PDF(s) into `replication_target/` (name the primary one
-> `paper.pdf`). Put datasets, supplementary files, author-code exports,
-> notes, and screenshots into `data_lake/`. If `replication_target/` has no
-> PDF yet, the first `queue.md` item is to **stop and ask you for it** — the
-> agent must not invent a paper.
+{paper_block}
 
 The goal is the same as any cleanvibe replication: reproduce the paper's
 headline result(s) and produce three compounding artifacts — the runnable
@@ -1180,9 +1213,7 @@ in the cleanvibe repo for the full framing.
 - **`data_lake/`** — other supplied/downloaded material (datasets, notes,
   exports). Standard cleanvibe convention; this *is* committed. The paper is
   NOT here.
-- **No `download_paper.py`, no `paper.json`.** This mode has no arXiv
-  metadata. The agent derives the paper's identity by *reading what you
-  dropped in* and records it in `notes/claims.md` and `README.md`.
+{no_meta_bullet}
 - **Go live early.** Create a PUBLIC GitHub repo and push near the start so
   every commit pushes and CI/Pages build as you go — don't leave it local-only.
 - **`src/`** — your reimplementation. **`scripts/run.py`** — the entry point
@@ -1214,8 +1245,43 @@ in the cleanvibe repo for the full framing.
 """
 
 
-def replication_manual_queue_md(folder: str) -> str:
+def replication_manual_queue_md(folder: str, source_url: str | None = None) -> str:
     name = _manual_name(folder)
+    if source_url:
+        preamble = (
+            "The paper source was **downloaded from a URL** to "
+            "`replication_target/source/`\n(see `source.json`). Supporting "
+            "material can be added to `data_lake/`."
+        )
+        step1 = (
+            "1. **Confirm the downloaded source is present, and triage materials.**\n"
+            "   The paper source was downloaded from a URL to\n"
+            "   `replication_target/source/` (see `source.json`) — you do NOT fetch it.\n"
+            "   - Verify `replication_target/source/` holds the downloaded paper\n"
+            "     (`paper.html` or `paper.pdf`). If it is empty, the download failed —\n"
+            "     STOP and tell the user the URL fetch did not succeed.\n"
+            "   - Move any datasets / supplementary / notes the user dropped in into\n"
+            "     `data_lake/`.\n"
+            "   - Commit. (`data_lake/` material is committed per the cleanvibe convention.)"
+        )
+    else:
+        preamble = (
+            "This is **manual drop-in mode** — no paper was downloaded. The paper "
+            "PDF(s)\nand supporting material are supplied by the user."
+        )
+        step1 = (
+            "1. **Confirm the paper and materials are present, and triage them.**\n"
+            "   Nothing was downloaded — this is manual drop-in mode.\n"
+            "   - Look in `replication_target/` for the paper PDF(s), and in the repo\n"
+            "     root / `data_lake/` for anything else the user dropped in.\n"
+            "   - If the user left the paper at the repo root, move it into\n"
+            "     `replication_target/` (name the primary paper `paper.pdf`).\n"
+            "   - Move datasets / supplementary / exports / notes into `data_lake/`.\n"
+            "   - **If `replication_target/` has no PDF, STOP and ask the user to drop\n"
+            "     the paper in before continuing. Do not invent or fetch a paper.**\n"
+            "   - Commit. (The dropped paper stays gitignored; `data_lake/` material is\n"
+            "     committed per the cleanvibe convention.)"
+        )
     return f"""# {name} — Work Queue
 
 **This file is a queue of concrete, executable steps, not a state snapshot.**
@@ -1228,8 +1294,7 @@ then push.** No checkmarks, no status indicators in place.
 execution so an interrupted session resumes from the queue, not from chat.
 The canonical methodology is `SKILL.md`; this queue is its executable form.
 
-This is **manual drop-in mode** — no paper was downloaded. The paper PDF(s)
-and supporting material are supplied by the user.
+{preamble}
 
 ---
 
@@ -1250,17 +1315,7 @@ completes it (and append to `devlog.md`).
 > before running is a future enhancement (see `todo.md`); for now, only proceed
 > if the user trusts the source.
 
-1. **Confirm the paper and materials are present, and triage them.**
-   Nothing was downloaded — this is manual drop-in mode.
-   - Look in `replication_target/` for the paper PDF(s), and in the repo
-     root / `data_lake/` for anything else the user dropped in.
-   - If the user left the paper at the repo root, move it into
-     `replication_target/` (name the primary paper `paper.pdf`).
-   - Move datasets / supplementary / exports / notes into `data_lake/`.
-   - **If `replication_target/` has no PDF, STOP and ask the user to drop
-     the paper in before continuing. Do not invent or fetch a paper.**
-   - Commit. (The dropped paper stays gitignored; `data_lake/` material is
-     committed per the cleanvibe convention.)
+{step1}
 
 2. **Identify the paper and go live early.** From the dropped PDF(s) determine
    the title, authors, venue/year, and any arXiv id / DOI; write that into
@@ -1333,24 +1388,44 @@ completes it (and append to `devlog.md`).
 """
 
 
-def replication_manual_skill_md(folder: str) -> str:
+def replication_manual_skill_md(folder: str, source_url: str | None = None) -> str:
     name = _manual_name(folder)
     slug = _slugify(name)
+    if source_url:
+        title_suffix = "downloaded source"
+        header_note = (
+            "No arXiv metadata — the paper source was **downloaded from a URL**\n"
+            "into `replication_target/source/` (see `source.json`). Identify the\n"
+            "paper by reading the downloaded source."
+        )
+        prereq = (
+            "The paper source is already in `replication_target/source/`\n"
+            "(downloaded from a URL). If it is empty the download failed — tell the\n"
+            "user. Prefer working from the downloaded source text."
+        )
+    else:
+        title_suffix = "manual drop-in"
+        header_note = (
+            "No arXiv metadata — the paper(s) are supplied by hand in\n"
+            "`replication_target/`. Identify the paper by reading what was dropped in."
+        )
+        prereq = (
+            "If `replication_target/` has no PDF, **stop and ask the user to drop the\n"
+            "paper in**. Do not fetch or invent a paper. Once present, prefer working\n"
+            "from `replication_target/paper.md` (a Markdown extraction) when available."
+        )
     return f"""---
 name: replicate-{slug}
 description: Replicate a user-supplied paper (dropped into replication_target/) and produce a runnable artifact, a published findings report, and a downloadable replication package.
 ---
 
-# Replicate (manual drop-in): {name}
+# Replicate ({title_suffix}): {name}
 
-No arXiv metadata — the paper(s) are supplied by hand in
-`replication_target/`. Identify the paper by reading what was dropped in.
+{header_note}
 
 ## Prerequisite
 
-If `replication_target/` has no PDF, **stop and ask the user to drop the
-paper in**. Do not fetch or invent a paper. Once present, prefer working
-from `replication_target/paper.md` (a Markdown extraction) when available.
+{prereq}
 
 ## Plan
 
@@ -1423,25 +1498,60 @@ gaps. Reimplementing from scratch is the fallback.
 """
 
 
-def replication_manual_readme_md(folder: str) -> str:
+def replication_manual_readme_md(folder: str, source_url: str | None = None) -> str:
     name = _manual_name(folder)
-    return f"""# Replicating: _(paper supplied by hand — fill this in)_
+    if source_url:
+        title = "# Replicating: _(downloaded from a URL — fill this in)_"
+        subtitle = (
+            "> Scaffolded with [cleanvibe](https://github.com/Immanuelle/cleanvibe)\n"
+            f"> `replicate` from a non-arXiv URL ({source_url}). The source was\n"
+            "> downloaded into `replication_target/source/` (see `source.json`)."
+        )
+        paper_line = (
+            f"**Paper:** _the source was downloaded from {source_url} into\n"
+            "`replication_target/source/`; fill in title / authors / venue / year\n"
+            "(and any arXiv id or DOI) after reading it._"
+        )
+        howto = (
+            "1. The paper source is already in `replication_target/source/`.\n"
+            "2. Put datasets / supplementary / notes into `data_lake/`.\n"
+            "3. Open Claude Code here and work `queue.md` top to bottom."
+        )
+        nopaper_note = (
+            "If `replication_target/source/` is empty, the URL download failed — "
+            "the agent will tell you rather than guess."
+        )
+    else:
+        title = "# Replicating: _(paper supplied by hand — fill this in)_"
+        subtitle = (
+            "> Scaffolded with [cleanvibe](https://github.com/Immanuelle/cleanvibe)\n"
+            "> `replicate` in **manual drop-in mode**. No arXiv metadata was fetched."
+        )
+        paper_line = (
+            "**Paper:** _unknown — drop the PDF into `replication_target/`, then fill in\n"
+            "title / authors / venue / year (and arXiv id or DOI if it has one) after\n"
+            "reading it._"
+        )
+        howto = (
+            "1. Put the paper PDF(s) into `replication_target/` (primary -> `paper.pdf`).\n"
+            "2. Put datasets / supplementary / notes into `data_lake/`.\n"
+            "3. Open Claude Code here and work `queue.md` top to bottom."
+        )
+        nopaper_note = (
+            "If `replication_target/` has no PDF, the agent will stop and ask you for it\n"
+            "rather than guess."
+        )
+    return f"""{title}
 
-> Scaffolded with [cleanvibe](https://github.com/Immanuelle/cleanvibe)
-> `replicate` in **manual drop-in mode**. No arXiv metadata was fetched.
+{subtitle}
 
-**Paper:** _unknown — drop the PDF into `replication_target/`, then fill in
-title / authors / venue / year (and arXiv id or DOI if it has one) after
-reading it._
+{paper_line}
 
 ## How to start
 
-1. Put the paper PDF(s) into `replication_target/` (primary -> `paper.pdf`).
-2. Put datasets / supplementary / notes into `data_lake/`.
-3. Open Claude Code here and work `queue.md` top to bottom.
+{howto}
 
-If `replication_target/` has no PDF, the agent will stop and ask you for it
-rather than guess.
+{nopaper_note}
 
 ## Replication status
 
