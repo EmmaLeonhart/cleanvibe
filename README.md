@@ -63,23 +63,38 @@ planning artifacts and hand off to the repo's own `todo.md`.
 ```
 cleanvibe replicate https://arxiv.org/abs/1706.03762
 cleanvibe replicate https://www.alphaxiv.org/overview/2201.02177
-cleanvibe replicate 1706.03762
+cleanvibe replicate https://doi.org/10.48550/arXiv.1706.03762
+cleanvibe replicate 1706.03762v5
 ```
 
 Any arXiv/alphaxiv id or URL is accepted — `/abs/`, `/pdf/`, `/html/`,
-alphaxiv's primary `/overview/`, `/forum/`, versioned ids, trailing slugs
-and query strings all resolve to the bare id. This will:
-1. Fetch the paper's metadata from the arXiv API
+`/src/`, alphaxiv's primary `/overview/`, `/audio/`, `/forum/`, the arXiv
+**DOI** form (`doi.org/10.48550/arXiv.<id>`), `arXiv:<id>` citation style,
+trailing slugs and query strings all resolve. A pinned `vN` **version** is
+preserved (recorded in `paper.json` and used for the download), not silently
+dropped. This will:
+1. Fetch the paper's metadata from the arXiv API (with **429-aware
+   retry/backoff** — arXiv rate-limits, so requests honour `Retry-After`
+   and back off rather than crashing)
 2. Create `replicating-<paper-slug>/` (silently `-2`/`-3` if it already exists)
 3. Scaffold a standalone replication project: cleanvibe conventions
    (`CLAUDE.md`, `queue.md`, `data_lake/`) **plus** the replication structure —
-   `SKILL.md` (the agent-executable replication plan), `download_paper.py`,
-   `replication_target/` (the paper itself lives here, gitignored — never in
-   `data_lake/`; the authors' code is cloned here as a git submodule),
-   `paper.json`, and `.github/workflows/` that build a GitHub Pages findings
-   site, a transportable PDF report, and a downloadable ZIP replication package
+   `SKILL.md` (the agent-executable replication plan), `download_paper.py`
+   (fetches the arXiv **HTML** first — it reads better than the PDF — then the
+   PDF as a fallback), `replication_target/` (the paper itself lives here,
+   gitignored — never in `data_lake/`; the authors' code is cloned here as a
+   git submodule), `paper.json`, and `.github/workflows/` that build a GitHub
+   Pages findings site, a transportable PDF report, and a downloadable ZIP
+   replication package
 4. Initialize a git repo with an initial commit
 5. Launch Claude Code inside the project
+
+The generated `queue.md`/`SKILL.md` tell the agent to **look for the
+authors' own replication recipe first** (a `REPRODUCE*.md`/`reproduce.*`
+script, a Makefile target, a Dockerfile, a "Reproducing the results" README
+section, or an agent recipe like `SKILL.md`/`AGENTS.md`/`.claude/`) and run
+that before attempting an independent reimplementation — many recent papers
+ship one.
 
 **From a folder you fill yourself (manual drop-in mode):**
 

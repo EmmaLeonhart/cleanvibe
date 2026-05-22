@@ -448,3 +448,29 @@ tests/scratch/replicating-sutra --no-claude` against the real arXiv API.
   both work, no rate-limit hit this run.
 - Confirmed all reported link forms (DOI `10.48550/arXiv.<id>`, versioned
   `…v1`, alphaxiv `/overview/`) route to arXiv mode, not folder mode.
+
+## 2026-05-22 — v1.4.0: robust replicate link parsing, 429 resilience, recipe-first
+
+Bundles the day's work (user report: `cleanvibe replicate
+https://arxiv.org/abs/2605.20919` threw errors, the DOI/versioned forms
+should work, the HTML is better than the PDF, the queue should follow an
+authors' replication recipe first, and arXiv was returning constant 429s):
+
+- **Parsing:** `split_arxiv_ref` handles every form — `arxiv.org/{abs,pdf,
+  html,src}/<id>[vN]`, `alphaxiv.org/{abs,overview,audio,forum}/<id>[vN]`,
+  the arXiv DOI (`doi.org/10.48550/arXiv.<id>`), `arXiv:<id>`, and bare ids.
+  The `vN` version is preserved (`ArxivPaper.version` / `id_with_version`,
+  `paper.json`).
+- **429 resilience:** `fetch_paper`'s requests go through `_read_url`, which
+  retries 429/503 with `Retry-After`-aware exponential backoff and raises a
+  clear error instead of a traceback. API base now `https`.
+- **HTML-first:** the generated `download_paper.py` fetches the arXiv HTML
+  (preferred for structured text) before the PDF, with the same backoff.
+- **Recipe-first:** both arXiv and manual replicate queue/SKILL templates
+  gained a step to find and follow an existing reproduction recipe before
+  reimplementing.
+- **Default paper + sandbox:** arXiv:2605.20919 ("Sutra") documented as the
+  default replication target; `tests/scratch/` gitignored for live runs.
+- Version `1.3.0` -> `1.4.0` (`cleanvibe/__init__.py`, `pyproject.toml`);
+  full suite 53/53 green; live smoke test passed. (Tag/release cut
+  separately.)

@@ -4,11 +4,9 @@
 
 ---
 
-## Active — `replicate` arXiv hardening (user report: lots of errors on `replicate https://arxiv.org/abs/2605.20919`)
+## Active
 
-Work top to bottom. Delete each item in the same commit that completes it and append a dated entry to `devlog.md`.
-
-1. **Finalize.** Run the full unittest suite; bump the version; update `README.md` (replicate URL forms incl. DOI/version, 429 resilience, HTML preference) and `devlog.md`. Leave `## Active` empty.
+_(Empty — `replicate` arXiv hardening shipped in v1.4.0: DOI/versioned link parsing, 429 retry/backoff, HTML-first download, and a recipe-first queue step. Pull the next item from `todo.md` and decompose it here when ready.)_
 
 ---
 
@@ -16,4 +14,4 @@ Work top to bottom. Delete each item in the same commit that completes it and ap
 
 - Completed work (chronological, with releases): `devlog.md`. Long-horizon backlog: `todo.md`.
 - Vision / framing: `docs/replication_framing.md`; reference corpus: `docs/replication-examples/`.
-- Narrative history: `git log`. Current version: `1.3.0`.
+- Narrative history: `git log`. Current version: `1.4.0`.
