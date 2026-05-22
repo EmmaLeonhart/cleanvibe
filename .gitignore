@@ -25,3 +25,7 @@ Thumbs.db
 # Environment
 .env
 .env.local
+
+# Live `cleanvibe replicate` smoke-test runs (default paper: arXiv:2605.20919,
+# "Sutra"). Each run scaffolds a full replication project here — never committed.
+tests/scratch/

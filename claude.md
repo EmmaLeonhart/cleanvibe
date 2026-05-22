@@ -54,5 +54,15 @@ cleanvibe/
 - **Finishing a queue item = delete from `queue.md` + append a dated entry to `devlog.md`**, in the same commit as the work, then push. NEVER tick boxes in place. `queue.md` only ever holds not-yet-done work; `devlog.md` is the chronological record of what has been done (and what was released).
 - **Keep this file, README.md, and devlog.md up to date** as the project evolves.
 
+## Default replication target & live smoke tests
+- **The default paper for `cleanvibe replicate` is arXiv:2605.20919 — "Sutra: Tensor-Op RNNs as a Compilation Target for Vector Symbolic Architectures"** (the maintainer's own paper). Use it whenever you need to exercise the `replicate` pipeline end-to-end against a real paper.
+- **`tests/scratch/` is a gitignored sandbox for live `replicate` runs.** It is in `.gitignore`; never commit its contents. Each run scaffolds a full replication project (which git-inits its own nested repo) in there.
+- The committed unit tests in `tests/` are network-free (they monkeypatch `fetch_paper`). A **live** smoke test actually hits arXiv, e.g.:
+  ```
+  python -m cleanvibe.cli replicate https://arxiv.org/abs/2605.20919 tests/scratch/replicating-sutra --no-claude
+  ```
+  Use `--no-claude` so it doesn't launch a Claude window, and an explicit path under `tests/scratch/`.
+- The full set of link forms the parser must accept (regression set): `https://arxiv.org/abs/<id>[vN]`, `/pdf/`, `/html/`, `/src/`, `https://doi.org/10.48550/arXiv.<id>`, `https://www.alphaxiv.org/{abs,overview,audio}/<id>`, bare `<id>[vN]`, and `arXiv:<id>`.
+
 ## Writing
 - Do not use "honest", "honesty", or "honestly" — and do not swap in "frank", "frankly", "candid", "candidly", or "transparently", which are the same self-congratulatory move in a different coat. When something failed, name the failure: "it didn't work", "I got that wrong", "this failed" — flat, no qualifier. Tagging a report "honest" implies the rest aren't, and couching a failure as honesty asks for credit for the admission, which is worse than the failure itself. Use a precise positive word ("accurate", "plainly", "truly") only when that is genuinely the meaning — never as a halo on a bad outcome.

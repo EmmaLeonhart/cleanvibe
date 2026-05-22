@@ -420,3 +420,16 @@ the replicate queue should look for and follow that *before* reimplementing.
 - `tests/test_replicate.py`: assert the recipe-first step and the HTML
   preference appear in the generated queue/SKILL/download_paper.py (both
   modes). Full suite 53/53 green.
+
+## 2026-05-22 — default replication target + gitignored live-scratch dir
+
+- **arXiv:2605.20919 ("Sutra", the maintainer's own paper) is now the
+  documented default paper** for exercising `cleanvibe replicate`
+  end-to-end. Recorded in `CLAUDE.md` along with the full regression set of
+  link forms the parser must accept.
+- **`tests/scratch/` is a gitignored sandbox** for live `replicate` runs
+  (added to `.gitignore`). The committed unit tests stay network-free
+  (they monkeypatch `fetch_paper`); live runs that actually hit arXiv land
+  in `tests/scratch/` and are never committed. `CLAUDE.md` documents the
+  exact `python -m cleanvibe.cli replicate … tests/scratch/… --no-claude`
+  invocation.
