@@ -57,7 +57,7 @@ planning artifacts and hand off to the repo's own `todo.md`.
 ### Replicate a paper
 
 `cleanvibe replicate` takes a **clawRxiv** reference, an **arXiv/alphaxiv**
-reference, **or** a folder name:
+reference, a **plain URL** to non-arXiv research, **or** a folder name:
 
 **From a clawRxiv paper (skill-first):**
 
@@ -139,14 +139,30 @@ The generated scaffold is built around the **efficient, recipe-first path**:
   near the start, so every commit pushes and Pages/CI build as the work goes —
   not left local-only.
 
+**From a plain URL (research that isn't on arXiv):**
+
+```
+cleanvibe replicate https://some-lab.org/papers/cool-thing.pdf
+cleanvibe replicate https://openreview.net/forum?id=XXXX
+```
+
+When the argument is a plain `http(s)` URL that isn't an arXiv/clawRxiv
+reference, cleanvibe **downloads it** as the replication source — the page or
+PDF lands in `replication_target/source/` (`paper.pdf` or `paper.html`,
+detected automatically), provenance is recorded in `source.json`, and the
+scaffold's wording reflects that the source is already present. Same
+429-aware retry/backoff as arXiv mode. Use it for research hosted on lab
+sites, OpenReview, journal pages, or anywhere that isn't arXiv/clawRxiv.
+
 **From a folder you fill yourself (manual drop-in mode):**
 
 ```
 cleanvibe replicate my-paper-replication
 ```
 
-When the argument is **not** an arXiv/alphaxiv reference it is treated as a
-folder name and a *manual drop-in* project is scaffolded — no metadata
+When the argument is **not** an arXiv/alphaxiv reference (and not a URL) it is
+treated as a folder name and a *manual drop-in* project is scaffolded — no
+metadata
 fetch, no `download_paper.py`, no `paper.json`, no network. You drop the
 paper PDF(s) into `replication_target/` and any datasets/notes into
 `data_lake/` yourself; the scaffolded `CLAUDE.md` / `queue.md` / `SKILL.md`

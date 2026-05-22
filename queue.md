@@ -4,11 +4,9 @@
 
 ---
 
-## Active — non-arXiv URL replication source (v1.6.2, patch)
+## Active
 
-User ask: `cleanvibe replicate` should also download a web page / PDF for research that's **not** on arXiv/clawRxiv. Work top to bottom; delete each item in the same commit that completes it and append to `devlog.md`.
-
-1. **Finalize.** Full suite; bump `1.6.1` → `1.6.2`; update `README.md` (the non-arXiv URL form) + `devlog.md`; merge to main, push, tag + release.
+_(empty — v1.6.2 added a non-arXiv URL replication source: `cleanvibe replicate <http(s)-url>` downloads the page/PDF into `replication_target/source/`. See `devlog.md`. Pull the next item from `todo.md` when work resumes.)_
 
 ---
 
@@ -16,4 +14,4 @@ User ask: `cleanvibe replicate` should also download a web page / PDF for resear
 
 - Completed work (chronological, with releases): `devlog.md`. Long-horizon backlog: `todo.md`.
 - Vision / framing: `docs/replication_framing.md`; reference corpus: `docs/replication-examples/`.
-- Narrative history: `git log`. Current version: `1.6.1`.
+- Narrative history: `git log`. Current version: `1.6.2`.

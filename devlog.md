@@ -657,3 +657,13 @@ so code run outside the repo uses this repo, not the old site-packages copy.
   all network-free (`_download_source` mocked). Full suite 75/75 green.
 - Live smoke test: `replicate https://example.com/` downloaded the page to
   `replication_target/source/paper.html` (528 B) and committed cleanly.
+
+## 2026-05-22 — v1.6.2: replicate from a non-arXiv URL
+
+Patch release for the change above (user: "tiny update so just up the last
+number"). `cleanvibe replicate <http(s)-url>` now downloads non-arXiv
+research (web page or PDF) into `replication_target/source/` and scaffolds
+around it. Version `1.6.1` -> `1.6.2` (`cleanvibe/__init__.py`,
+`pyproject.toml`); README documents the new URL form; full suite 75/75
+green; live smoke test passed. Pushed to `main`, tagged `v1.6.2`, GitHub
+release cut — Publish-to-PyPI runs on release.
