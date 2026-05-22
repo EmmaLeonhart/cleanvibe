@@ -395,3 +395,28 @@ the user got raw tracebacks ("constant 429 errors").
   exhaustion, and does not retry a non-transient 404. Suite green.
 - Verified live: the DOI form now fetches over https (Sutra v1), and the
   rendered `download_paper.py` compiles with an HTML-first plan.
+
+## 2026-05-22 — replicate templates: "follow the authors' recipe first" step
+
+User ask: many recent papers ship a reproduction script or agent skill, so
+the replicate queue should look for and follow that *before* reimplementing.
+
+- `cleanvibe/templates.py`: added a prominent step 4 ("Check for an existing
+  replication recipe — and follow it first") to both the arXiv
+  (`_REPLICATION_QUEUE_TMPL`, `_REPLICATION_SKILL_TMPL`) and manual
+  (`replication_manual_queue_md`, `replication_manual_skill_md`) templates,
+  right after "find the authors' code". It enumerates what to look for —
+  `REPRODUCE*.md` / `reproduce.*` / `replicate.*` / `run.sh`, a Makefile
+  reproduce target, Dockerfile, Colab, a "Reproducing the results" README
+  section, and agent recipes (`SKILL.md` / `AGENTS.md` / `.claude/` /
+  `.cursor/`), plus paperswithcode / release assets — and says to run it
+  first and only fall through to independent reimplementation if there's no
+  recipe or it fails. Remaining steps renumbered; the reimplement step now
+  reads "reimplement (or adapt the authors' code from step 4)".
+- HTML-first folded into the templates too: queue/SKILL acquire-the-paper
+  steps now fetch `paper.html` (preferred) + `paper.pdf` and work from a
+  `paper.md` extraction; the arXiv CLAUDE.md architecture lists
+  `paper.html` as the preferred source.
+- `tests/test_replicate.py`: assert the recipe-first step and the HTML
+  preference appear in the generated queue/SKILL/download_paper.py (both
+  modes). Full suite 53/53 green.

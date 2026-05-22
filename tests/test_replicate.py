@@ -87,6 +87,21 @@ class TestReplicateScaffold(unittest.TestCase):
             self.assertIn("arXiv:1706.03762", skill)
             self.assertIn("Attention Is All You Need", skill)
 
+    def test_recipe_first_and_html_preference(self):
+        with _in_tmp_cwd():
+            _run()
+            target = Path(f"replicating-{SLUG}")
+            queue = (target / "queue.md").read_text(encoding="utf-8")
+            skill = (target / "SKILL.md").read_text(encoding="utf-8")
+            # The recipe-first step is present in both the queue and the skill.
+            self.assertIn("existing replication recipe", queue)
+            self.assertIn("follow it first", queue.lower())
+            self.assertIn("existing replication recipe", skill)
+            # HTML is preferred over the PDF for the downloaded source.
+            self.assertIn("paper.html", queue)
+            download = (target / "download_paper.py").read_text(encoding="utf-8")
+            self.assertIn("paper.html", download)
+
     def test_paper_not_in_data_lake(self):
         with _in_tmp_cwd():
             _run()
@@ -163,6 +178,15 @@ class TestReplicateManual(unittest.TestCase):
             self.assertIn("STOP and ask the user", queue)
             skill = (target / "SKILL.md").read_text(encoding="utf-8")
             self.assertIn("name: replicate-my-paper", skill)
+
+    def test_recipe_first_step_present(self):
+        with _in_tmp_cwd():
+            _run_manual("my-paper")
+            target = Path("my-paper")
+            queue = (target / "queue.md").read_text(encoding="utf-8")
+            skill = (target / "SKILL.md").read_text(encoding="utf-8")
+            self.assertIn("existing replication recipe", queue)
+            self.assertIn("existing replication recipe", skill)
 
     def test_non_destructive_injection(self):
         """A pre-existing folder with a dropped paper / custom file is kept."""
