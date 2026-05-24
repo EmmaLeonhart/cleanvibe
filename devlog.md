@@ -713,3 +713,18 @@ cron and summarize` section that stays pinned at the bottom of every queue.
 This same section was rolled out across the top-level project CLAUDE.md files
 in the Github workspace. Version 1.8.0 -> 1.9.0 (`cleanvibe/__init__.py`,
 `pyproject.toml`). Full suite green; tagged v1.9.0, release cut.
+
+## 2026-05-24 — v1.9.1: fix Python 3.9 import (templates.py)
+
+`cleanvibe/templates.py` was missing `from __future__ import annotations`, so
+the `str | None` parameter annotations on the manual-replication template
+functions (`replication_manual_{claude,queue,skill,readme}_md`) were evaluated
+at import time and raised `TypeError: unsupported operand type(s) for |` on
+Python 3.9 — breaking `import cleanvibe.templates` (and therefore `cli.py`)
+entirely on 3.9, despite `requires-python = ">=3.9"`. This had been red in CI
+on the 3.9 matrix legs since the manual templates landed (v1.7.0/v1.8.0 CI was
+already failing on 3.9; the v1.9.0 release inherited it). Added the future
+import (deferring all annotations to strings), matching the convention already
+documented in CLAUDE.md and already present in `cli.py`/`arxiv.py`. Version
+1.9.0 -> 1.9.1 (`cleanvibe/__init__.py`, `pyproject.toml`). Tagged v1.9.1,
+release cut.

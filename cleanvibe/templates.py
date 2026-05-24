@@ -5,6 +5,8 @@ behaves inside a repo by enforcing documentation discipline, meaningful commits,
 queue-driven planning, and thoughtful work tracking.
 """
 
+from __future__ import annotations
+
 from datetime import datetime
 from string import Template
 
