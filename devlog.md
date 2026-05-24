@@ -692,3 +692,24 @@ from the house -- NOT an OS crontab, CI `schedule:`, or cloud scheduler --
 and that their absence is never a reason to delay or ask for confirmation
 (standing consent; just set it up). Version 1.7.0 -> 1.8.0
 (`cleanvibe/__init__.py`, `pyproject.toml`). Tagged v1.8.0, release cut.
+
+## 2026-05-24 — v1.9.0: hourly status-report cron for extensive work
+
+Added an "Hourly status-report cron for extensive work" section to the
+CLAUDE.md template (`claude_md()` in `cleanvibe/templates.py`) and to this
+repo's own CLAUDE.md. The default for any session involving relatively
+extensive work — above all, a large-scale population of `queue.md` with
+created tasks — is to run a local `CronCreate` job that fires every hour on
+the hour with a status report, so an autonomous run can't silently lose the
+thread of what it is doing. Lifecycle: the FIRST queue item kills the hourly
+cron; the LAST TWO queue items, pinned at the tail, restart it and then run
+an independent end-of-session summary. Entering planning mode also disables
+the cron (its restart lives at the end of the queue).
+
+Also wired the lifecycle into the bootstrap `queue_md()` template: a preamble
+note, a bullet in the "replace this bootstrap queue" step about keeping the
+tail section pinned, and a new headed `## Always last — restart the hourly
+cron and summarize` section that stays pinned at the bottom of every queue.
+This same section was rolled out across the top-level project CLAUDE.md files
+in the Github workspace. Version 1.8.0 -> 1.9.0 (`cleanvibe/__init__.py`,
+`pyproject.toml`). Full suite green; tagged v1.9.0, release cut.

@@ -54,6 +54,20 @@ _TODO: Document key decisions, file structure, and patterns as they emerge._
 - **The user is deliberately away from the keyboard.** They schedule work precisely so it runs while they are out of the house and not physically present. Their absence is the normal, expected condition for these jobs — it is NEVER a reason to delay the work, ask "are you sure?", wait for them to return, or refuse to proceed.
 - **Standing consent — just set it up.** Cron / `CronCreate` requests are pre-authorized. Create the job immediately and locally, then report what was scheduled. Do not block on confirmation or follow-up questions.
 
+## Hourly status-report cron for extensive work
+
+**For any session involving relatively extensive work — above all, any large-scale population of `queue.md` with created tasks — run a local hourly status-report cron.** Use the `CronCreate` tool to schedule a prompt that fires **every hour, on the hour**, giving a status report on the work being done. This is the default way of working on big jobs, and it exists to prevent the most common autonomous-agent failure: doing a large amount of work and silently losing the thread of what it is doing.
+
+**Sequencing around a large-scale queue fill:**
+
+- **The FIRST queue item is always: kill the hourly update cron job.**
+- **... then all the created work items, worked top to bottom ...**
+- **The LAST TWO queue items, always kept pinned at the tail, are:**
+  1. **Restart the hourly updates cron job.**
+  2. **Independently run the status-report action once more — an end-of-session summary of everything that happened this session.**
+
+**Planning mode disables this cron.** Entering planning mode kills the hourly cron; restarting it therefore belongs at the **end of the queue** (it is the second-to-last item above). A session that plans → fills the queue → executes will drop the cron when planning begins and bring it back as the queue drains.
+
 ## Emergency Stop Mode
 
 If the user sends a continuous series of "stop" messages (e.g. "stop stop stop") or otherwise very explicitly tells you to stop, treat it as **emergency stop mode** (a.k.a. emergency exit mode). This OVERRIDES every other instruction, including any in this file.
@@ -178,6 +192,8 @@ The purpose of this file is also to bound scope. If a task is not in this queue,
 
 See `CLAUDE.md` § "Workflow Rules" for how this file, planning mode, and the task tool stay in sync.
 
+**Hourly status-report cron.** Any large-scale fill of this queue with created tasks counts as "extensive work": the FIRST item worked is to **kill the hourly status-report cron**, and the **last two items are always pinned at the tail** — restart the hourly cron, then run an end-of-session summary (see the `## Always last` section below and `CLAUDE.md` § "Hourly status-report cron for extensive work"). Entering planning mode also disables the cron; its restart lives at the end of the queue.
+
 ---
 
 ## Active — First-session bootstrap
@@ -207,11 +223,23 @@ These items are the default opening sequence for a new cleanvibe project. Work t
    - Commit `todo.md` on its own so the long-horizon picture is a reviewable artifact, not buried inside a larger change.
 
 5. **Replace this bootstrap queue with the real project queue.** Pull the first item (or first few items) from `todo.md` and decompose them into a concrete, ordered list of implementation tasks. Write those into the `## Active` section of this file (deleting this bootstrap section entirely as part of the same edit). Each task should be small enough to finish and commit on its own. Mirror the queue into the task tool. As you drain queue items, refill by pulling and decomposing more from `todo.md`.
+   - **Keep the `## Always last — restart the hourly cron and summarize` section pinned at the very bottom of the queue.** It is never deleted; real work items go above it. If this is a large-scale fill, the first work item should be "kill the hourly status-report cron".
    - Commit the new queue.
 
 6. **Create a private GitHub repo and push.** Use whatever GitHub tooling is available (e.g. `gh repo create --private --source=. --push`) to create a private remote and push the current branch. Confirm CI (`.github/workflows/`) is wired up so pushes run tests.
 
 7. **Work the queue until the stop condition.** Pull the top item, do it, **delete it from `queue.md` AND append a dated entry to `devlog.md`** in the same commit as the work, push, let CI run. When `queue.md` empties, refill from `todo.md` by decomposing the next item. New ideas that surface mid-work go to the bottom of the queue (or to `todo.md` if they're longer-horizon), not into the currently-in-flight task. **Stop** when: `queue.md` is empty, the items still in `todo.md` are too abstract to break down further without more user input, and the repository is online with green CI. At that point, hand back to the user.
+
+---
+
+## Always last — restart the hourly cron and summarize
+
+**These two items stay pinned to the tail of the queue at all times** — below every bootstrap step and below every real work item. They are the closing half of the hourly-status-report lifecycle described in `CLAUDE.md` § "Hourly status-report cron for extensive work": when you do a large-scale fill of this queue, the FIRST item worked is to kill the hourly cron (planning mode disables it too), and these are always the LAST two, after everything else:
+
+A. **Restart the hourly updates cron job.** Re-create the `CronCreate` job that fires every hour, on the hour, with a status report.
+B. **Run the status-report action once more, independently** — an end-of-session summary of everything that happened this session.
+
+(During first-session bootstrap these simply sit here at the bottom; they become load-bearing the moment the queue is filled with a large batch of created tasks.)
 
 ---
 
