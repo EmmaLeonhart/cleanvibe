@@ -680,3 +680,15 @@ min, answers only direct questions from context (looking anything up counts
 as a forbidden action), and resumes only when the user says "emergency stop
 ended." Version 1.6.2 -> 1.7.0 (`cleanvibe/__init__.py`,
 `pyproject.toml`). Tagged v1.7.0, GitHub release cut announcing it.
+
+## 2026-05-23 — v1.8.0: "cron means local CronCreate" in the generated CLAUDE.md
+
+Added a "Cron jobs and scheduled work — LOCAL by default" section to the
+CLAUDE.md template (`claude_md()` in `cleanvibe/templates.py`) and to
+this repo's own CLAUDE.md. It makes explicit that when the user says
+"cron"/"cron job"/"schedule" generically they mean the in-session
+`CronCreate` tool running locally on their machine while they are away
+from the house -- NOT an OS crontab, CI `schedule:`, or cloud scheduler --
+and that their absence is never a reason to delay or ask for confirmation
+(standing consent; just set it up). Version 1.7.0 -> 1.8.0
+(`cleanvibe/__init__.py`, `pyproject.toml`). Tagged v1.8.0, release cut.
