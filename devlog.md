@@ -667,3 +667,16 @@ around it. Version `1.6.1` -> `1.6.2` (`cleanvibe/__init__.py`,
 `pyproject.toml`); README documents the new URL form; full suite 75/75
 green; live smoke test passed. Pushed to `main`, tagged `v1.6.2`, GitHub
 release cut — Publish-to-PyPI runs on release.
+
+## 2026-05-23 — v1.7.0: Emergency Stop Mode in the generated CLAUDE.md
+
+Added an "Emergency Stop Mode" section to the CLAUDE.md template that
+`cleanvibe` injects into every scaffolded project (`claude_md()` in
+`cleanvibe/templates.py`), and to this repo's own CLAUDE.md. On a
+continuous series of "stop" messages (or an explicit stop), Claude
+force-kills all repo/session processes and GitHub Actions runs, does NOT
+investigate or reverse anything, ignores repetitive messages for ~15-30
+min, answers only direct questions from context (looking anything up counts
+as a forbidden action), and resumes only when the user says "emergency stop
+ended." Version 1.6.2 -> 1.7.0 (`cleanvibe/__init__.py`,
+`pyproject.toml`). Tagged v1.7.0, GitHub release cut announcing it.
