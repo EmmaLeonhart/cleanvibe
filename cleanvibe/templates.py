@@ -60,15 +60,16 @@ _TODO: Document key decisions, file structure, and patterns as they emerge._
 
 **For any session involving relatively extensive work — above all, any large-scale population of `queue.md` with created tasks — run a local hourly status-report cron.** Use the `CronCreate` tool to schedule a prompt that fires **every hour, on the hour**, giving a status report on the work being done. This is the default way of working on big jobs, and it exists to prevent the most common autonomous-agent failure: doing a large amount of work and silently losing the thread of what it is doing.
 
-**Sequencing around a large-scale queue fill:**
+**Full lifecycle of the cron:**
 
-- **The FIRST queue item is always: kill the hourly update cron job.**
-- **... then all the created work items, worked top to bottom ...**
-- **The LAST TWO queue items, always kept pinned at the tail, are:**
-  1. **Restart the hourly updates cron job.**
+- **(a) START it at the beginning of any extensive work session.** On a fresh session the cron does not exist yet, so the opening move — the first queue item — is to *create* it. Do not write "kill the cron" as the first item of a fresh session: there is nothing to kill.
+- **(b) On a mid-session large-scale queue RE-FILL (a planning burst that repopulates the queue), the FIRST item of that fill KILLS the already-running cron**, then the work items follow top to bottom, and the pinned tail restarts it. Killing-first only makes sense when a cron is already running — i.e. a re-fill, not a fresh start.
+- **(c) Entering planning mode DISABLES the cron.** That is why its restart lives at the **end** of the queue, not the beginning of the next burst.
+- **(d) The LAST TWO queue items, always kept pinned at the tail, are:**
+  1. **Ensure the hourly status-report cron is running** — start it if this session never did, restart it if a planning burst / queue re-fill killed it.
   2. **Independently run the status-report action once more — an end-of-session summary of everything that happened this session.**
 
-**Planning mode disables this cron.** Entering planning mode kills the hourly cron; restarting it therefore belongs at the **end of the queue** (it is the second-to-last item above). A session that plans → fills the queue → executes will drop the cron when planning begins and bring it back as the queue drains.
+In short: a fresh session **starts** the cron up front and the tail **ensures it is still running** + summarizes; a mid-session re-fill **kills** it up front and the tail **restarts** it + summarizes. Either way the queue both opens and closes on the cron.
 
 ## Emergency Stop Mode
 
@@ -194,7 +195,7 @@ The purpose of this file is also to bound scope. If a task is not in this queue,
 
 See `CLAUDE.md` § "Workflow Rules" for how this file, planning mode, and the task tool stay in sync.
 
-**Hourly status-report cron.** Any large-scale fill of this queue with created tasks counts as "extensive work": the FIRST item worked is to **kill the hourly status-report cron**, and the **last two items are always pinned at the tail** — restart the hourly cron, then run an end-of-session summary (see the `## Always last` section below and `CLAUDE.md` § "Hourly status-report cron for extensive work"). Entering planning mode also disables the cron; its restart lives at the end of the queue.
+**Hourly status-report cron.** Extensive work runs under a local hourly status-report cron (`CronCreate`, every hour on the hour). On a fresh session it is **started** as the opening step (bootstrap step 1 below); on a mid-session **large-scale re-fill** of this queue the FIRST item worked is instead to **kill** the already-running cron. Either way the **last two items are always pinned at the tail** — ensure the hourly cron is running, then run an end-of-session summary (see the `## Always last` section below and `CLAUDE.md` § "Hourly status-report cron for extensive work"). Entering planning mode also disables the cron; its restart lives at the end of the queue.
 
 ---
 
@@ -202,43 +203,45 @@ See `CLAUDE.md` § "Workflow Rules" for how this file, planning mode, and the ta
 
 These items are the default opening sequence for a new cleanvibe project. Work them top to bottom. **Delete each item from this file in the same commit that completes it, and append a dated entry to `devlog.md` recording the step.** Push after every step. When this whole section is gone, the project has finished bootstrap and the queue is ready to be repopulated with real product work (see the final item).
 
-1. **Triage user-supplied files into `data_lake/`.** Look at everything in the repo that isn't part of the cleanvibe scaffold (i.e. anything the user dropped in: notes, exports, spec PDFs, sample data, mockups, etc.).
+1. **Start the hourly status-report cron.** Use the `CronCreate` tool to schedule a prompt that fires **every hour, on the hour**, whose prompt is a short status report of where the work stands (what's done, what's in flight, what's next). This monitors the whole bootstrap run so a long autonomous session can't silently lose the thread. (See `CLAUDE.md` § "Hourly status-report cron for extensive work"; the `## Always last` section pinned at the tail keeps it running — starting it here, restarting it there if a later planning burst / queue re-fill kills it.)
+
+2. **Triage user-supplied files into `data_lake/`.** Look at everything in the repo that isn't part of the cleanvibe scaffold (i.e. anything the user dropped in: notes, exports, spec PDFs, sample data, mockups, etc.).
    - `data_lake/` already exists — the scaffold created it with a `.gitkeep` (so a user could drop files straight into it before this session). Move all such files into `data_lake/` so the project root stays clean. Only the scaffold (`CLAUDE.md`, `README.md`, `queue.md`, `.gitignore`, `LICENSE`, and any source/config files you have explicitly chosen to keep at the root) should live at the top level. Leave the `.gitkeep` in place.
    - If any of these files are `.zip` archives, extract them into `data_lake/` alongside the originals, then add the `.zip` files to `.gitignore` (we keep the extracted contents in git, not the archives).
    - For any file that looks big enough to need Git LFS (rough rule of thumb: >50 MB, or large binary like video/audio/large datasets), STOP and ask the user before doing anything — do not silently commit it, do not silently `git lfs track` it.
    - Commit. Commit message should describe what got moved/extracted and why.
 
-2. **Read the data lake to infer what this project is.** Skim every file in `data_lake/` (text files, READMEs from extracted zips, design notes, spec docs, sample data shapes). Build up a working hypothesis: what is the user trying to build? What domain? What constraints or instructions are stated explicitly?
+3. **Read the data lake to infer what this project is.** Skim every file in `data_lake/` (text files, READMEs from extracted zips, design notes, spec docs, sample data shapes). Build up a working hypothesis: what is the user trying to build? What domain? What constraints or instructions are stated explicitly?
    - Update `README.md` to reflect this hypothesis: project description, any explicit instructions you found, anything load-bearing for future sessions.
    - Update `CLAUDE.md`'s "Project Description" and "Architecture and Conventions" sections to capture the same context for future Claude sessions.
    - Do NOT touch `queue.md` in this commit — the real queue gets written later, after talking to the user.
    - Commit. Commit message should briefly explain how the inferred description was derived (e.g. "Inferred project scope from data_lake/spec.md and data_lake/notes/").
 
-3. **Interview the user about what they actually want to build.** Your inferred picture from the data lake is a starting point, not the spec. Ask the user direct, specific questions to fill in the gaps: what is the goal of the first usable version? What's the longer-term vision (capabilities, integrations, audience) beyond v1? What's in scope vs. out of scope for this session? Are there constraints (language, framework, deployment target, must-integrate-with-X)? What does "done" look like for them today?
+4. **Interview the user about what they actually want to build.** Your inferred picture from the data lake is a starting point, not the spec. Ask the user direct, specific questions to fill in the gaps: what is the goal of the first usable version? What's the longer-term vision (capabilities, integrations, audience) beyond v1? What's in scope vs. out of scope for this session? Are there constraints (language, framework, deployment target, must-integrate-with-X)? What does "done" look like for them today?
    - As answers come in, fold them into `README.md` and `CLAUDE.md` so future sessions inherit the context.
    - Capture both **near-term** answers (what to build now) AND **long-horizon** answers (what's wanted eventually). The long-horizon material is what feeds `todo.md` in the next step.
    - Commit once the picture is concrete enough to plan against.
 
-4. **Create `todo.md` — the long-horizon backlog.** This is the step before any concrete queue gets written. Based on the interview and inferred picture, write `todo.md` as the project's long-term horizon: every multi-session goal, architectural ambition, capability, integration, or future direction the user described. Items here are *abstract destinations*, not steps — they will be decomposed into concrete tasks in `queue.md` later, one at a time, as the work unfolds. `todo.md` is the *basis for* `queue.md`: work flows `todo.md` → `queue.md` → executed → deleted from both.
+5. **Create `todo.md` — the long-horizon backlog.** This is the step before any concrete queue gets written. Based on the interview and inferred picture, write `todo.md` as the project's long-term horizon: every multi-session goal, architectural ambition, capability, integration, or future direction the user described. Items here are *abstract destinations*, not steps — they will be decomposed into concrete tasks in `queue.md` later, one at a time, as the work unfolds. `todo.md` is the *basis for* `queue.md`: work flows `todo.md` → `queue.md` → executed → deleted from both.
    - Use the convention described in `CLAUDE.md` § "Queue and longer-horizon work" for the file format.
    - Do NOT touch `queue.md` in this commit — populating the real queue is the *next* step.
    - Commit `todo.md` on its own so the long-horizon picture is a reviewable artifact, not buried inside a larger change.
 
-5. **Replace this bootstrap queue with the real project queue.** Pull the first item (or first few items) from `todo.md` and decompose them into a concrete, ordered list of implementation tasks. Write those into the `## Active` section of this file (deleting this bootstrap section entirely as part of the same edit). Each task should be small enough to finish and commit on its own. Mirror the queue into the task tool. As you drain queue items, refill by pulling and decomposing more from `todo.md`.
-   - **Keep the `## Always last — restart the hourly cron and summarize` section pinned at the very bottom of the queue.** It is never deleted; real work items go above it. If this is a large-scale fill, the first work item should be "kill the hourly status-report cron".
+6. **Replace this bootstrap queue with the real project queue.** Pull the first item (or first few items) from `todo.md` and decompose them into a concrete, ordered list of implementation tasks. Write those into the `## Active` section of this file (deleting this bootstrap section entirely as part of the same edit). Each task should be small enough to finish and commit on its own. Mirror the queue into the task tool. As you drain queue items, refill by pulling and decomposing more from `todo.md`.
+   - **Keep the `## Always last — restart the hourly cron and summarize` section pinned at the very bottom of the queue.** It is never deleted; real work items go above it. The real queue's FIRST work item should **start the hourly status-report cron** — unless this is a mid-session large-scale re-fill while a cron is already running, in which case the first item is instead to **kill** it (the pinned tail restarts it). Planning mode disables the cron; the tail brings it back.
    - Commit the new queue.
 
-6. **Create a private GitHub repo and push.** Use whatever GitHub tooling is available (e.g. `gh repo create --private --source=. --push`) to create a private remote and push the current branch. Confirm CI (`.github/workflows/`) is wired up so pushes run tests.
+7. **Create a private GitHub repo and push.** Use whatever GitHub tooling is available (e.g. `gh repo create --private --source=. --push`) to create a private remote and push the current branch. Confirm CI (`.github/workflows/`) is wired up so pushes run tests.
 
-7. **Work the queue until the stop condition.** Pull the top item, do it, **delete it from `queue.md` AND append a dated entry to `devlog.md`** in the same commit as the work, push, let CI run. When `queue.md` empties, refill from `todo.md` by decomposing the next item. New ideas that surface mid-work go to the bottom of the queue (or to `todo.md` if they're longer-horizon), not into the currently-in-flight task. **Stop** when: `queue.md` is empty, the items still in `todo.md` are too abstract to break down further without more user input, and the repository is online with green CI. At that point, hand back to the user.
+8. **Work the queue until the stop condition.** Pull the top item, do it, **delete it from `queue.md` AND append a dated entry to `devlog.md`** in the same commit as the work, push, let CI run. When `queue.md` empties, refill from `todo.md` by decomposing the next item. New ideas that surface mid-work go to the bottom of the queue (or to `todo.md` if they're longer-horizon), not into the currently-in-flight task. **Stop** when: `queue.md` is empty, the items still in `todo.md` are too abstract to break down further without more user input, and the repository is online with green CI. At that point, hand back to the user.
 
 ---
 
 ## Always last — restart the hourly cron and summarize
 
-**These two items stay pinned to the tail of the queue at all times** — below every bootstrap step and below every real work item. They are the closing half of the hourly-status-report lifecycle described in `CLAUDE.md` § "Hourly status-report cron for extensive work": when you do a large-scale fill of this queue, the FIRST item worked is to kill the hourly cron (planning mode disables it too), and these are always the LAST two, after everything else:
+**These two items stay pinned to the tail of the queue at all times** — below every bootstrap step and below every real work item. They are the closing half of the hourly-status-report lifecycle described in `CLAUDE.md` § "Hourly status-report cron for extensive work": the cron is **started** at the beginning of extensive work (a fresh session starts it as the opening item; a mid-session large-scale re-fill instead kills the already-running cron as its first item, and planning mode disables it), and these are always the LAST two, after everything else — they bring it back and sign off:
 
-A. **Restart the hourly updates cron job.** Re-create the `CronCreate` job that fires every hour, on the hour, with a status report.
+A. **Ensure the hourly status-report cron is running** — start it if this session never did, restart it if a planning burst / queue re-fill killed it (`CronCreate`, every hour on the hour, with a status report).
 B. **Run the status-report action once more, independently** — an end-of-session summary of everything that happened this session.
 
 (During first-session bootstrap these simply sit here at the bottom; they become load-bearing the moment the queue is filled with a large batch of created tasks.)

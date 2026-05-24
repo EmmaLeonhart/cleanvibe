@@ -728,3 +728,44 @@ import (deferring all annotations to strings), matching the convention already
 documented in CLAUDE.md and already present in `cli.py`/`arxiv.py`. Version
 1.9.0 -> 1.9.1 (`cleanvibe/__init__.py`, `pyproject.toml`). Tagged v1.9.1,
 release cut.
+
+## 2026-05-24 — v1.10.0: generated projects actually START the hourly cron
+
+v1.9.0 shipped the hourly-status-report *vision* into the generated templates
+but never wired the cron to fire: a freshly scaffolded project's bootstrap
+sequence had no step that creates the `CronCreate` job, and the pinned tail
+said "**restart** the hourly cron" when nothing had ever started one. So on a
+real `cleanvibe new` run the hourly reports never happened. v1.10.0 makes the
+vision real and reconciles the lifecycle so "start" and "kill-first" stop
+contradicting:
+
+- **`cleanvibe/templates.py` `queue_md()`** — new bootstrap **step 1**: *"Start
+  the hourly status-report cron"* (`CronCreate`, every hour on the hour); the
+  existing steps 1–7 renumbered down to 2–8. The preamble note and the pinned
+  `## Always last` section reworded so a fresh session **starts** the cron up
+  front and the tail **ensures it is still running** + summarizes, while a
+  mid-session re-fill **kills** it up front and the tail **restarts** it. Item A
+  of `## Always last` changed from "Restart the hourly updates cron job" to
+  "Ensure the hourly status-report cron is running — start it if this session
+  never did, restart it if a planning burst / queue re-fill killed it." The
+  "Replace this bootstrap queue" step now tells the agent the real queue's FIRST
+  item should start the cron (or kill it on a re-fill) with the tail pinned.
+- **`claude_md()`** § "Hourly status-report cron for extensive work" — replaced
+  the one-line "the FIRST queue item is always: kill the cron" sequencing (which
+  is nonsensical on a fresh session with no cron yet) with an explicit (a)–(d)
+  lifecycle: (a) START at the beginning of extensive work; (b) a mid-session
+  large-scale re-fill kills the already-running cron first, tail restarts;
+  (c) planning mode disables it; (d) the last two pinned items ensure-running +
+  summarize.
+- **This repo's own `CLAUDE.md`** got the same (a)–(d) lifecycle correction
+  (dogfooding).
+- **`tests/test_scaffold.py`** — two new tests: the bootstrap queue's opening
+  step starts the hourly cron (before triage), and `claude_md()` mentions
+  *starting* the cron at the beginning, not only killing/restarting. Full suite
+  **77/77** green (was 75).
+- This session dogfooded the lifecycle: a `CronCreate` hourly status-report cron
+  was started up front, the seven queue items worked top to bottom, and the
+  pinned `## Always last` items close it out.
+
+Version `1.9.1` -> `1.10.0` (`cleanvibe/__init__.py`, `pyproject.toml`); tagged
+`v1.10.0`, GitHub release cut (Publish-to-PyPI runs on release).

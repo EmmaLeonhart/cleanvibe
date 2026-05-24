@@ -150,6 +150,45 @@ class TestCreateProject(unittest.TestCase):
             self.assertIn("devlog.md", queue_content)
             self.assertIn("devlog.md", claude_content)
 
+    def test_bootstrap_queue_starts_hourly_cron(self):
+        # v1.10.0: the bootstrap queue's opening step must START the hourly
+        # status-report cron (not merely reference killing/restarting it).
+        # Earlier templates described the lifecycle but never wired the *start*,
+        # so a fresh `cleanvibe new` run never actually fired the hourly reports.
+        with tempfile.TemporaryDirectory() as tmp:
+            proj = Path(tmp) / "myproj"
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                create_project(proj, no_claude=True)
+            content = (proj / "queue.md").read_text(encoding="utf-8")
+            lower = content.lower()
+            self.assertIn("croncreate", lower)
+            self.assertIn("every hour", lower)
+            # An explicit "start ... cron" step, not only kill/restart.
+            self.assertIn("start the hourly status-report cron", lower)
+            # ... and it is the opening bootstrap step, before triaging files.
+            start_idx = lower.find("start the hourly status-report cron")
+            triage_idx = lower.find("triage user-supplied files")
+            self.assertGreater(start_idx, 0)
+            self.assertGreater(
+                triage_idx, start_idx,
+                "starting the cron must be the opening bootstrap step, before triage",
+            )
+
+    def test_claude_md_cron_lifecycle_mentions_start(self):
+        # The CLAUDE.md cron lifecycle must say to START the cron at the
+        # beginning of extensive work — not only kill/restart it. The pre-v1.10.0
+        # text only said "the FIRST item kills it," nonsensical on a fresh session.
+        content = templates.claude_md("myproj")
+        lower = content.lower()
+        self.assertIn("hourly status-report cron", lower)
+        self.assertIn("croncreate", lower)
+        # Mentions starting at the beginning, not only killing/restarting.
+        self.assertIn("start it at the beginning", lower)
+        # The lifecycle still covers kill-on-refill and planning-mode disable.
+        self.assertIn("kill", lower)
+        self.assertIn("planning mode", lower)
+
     def test_todo_md_template_exists_and_describes_flow(self):
         # The todo_md() builder must produce a file that explains its role
         # (long-horizon, abstract) and its relationship to queue.md.

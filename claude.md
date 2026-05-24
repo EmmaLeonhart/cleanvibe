@@ -104,12 +104,13 @@ When in emergency stop mode:
 
 **For any session involving relatively extensive work — above all, any large-scale population of `queue.md` with created tasks — run a local hourly status-report cron.** Use the `CronCreate` tool to schedule a prompt that fires **every hour, on the hour**, giving a status report on the work being done. This is the default way of working on big jobs, and it exists to prevent the most common autonomous-agent failure: doing a large amount of work and silently losing the thread of what it is doing.
 
-**Sequencing around a large-scale queue fill:**
+**Full lifecycle of the cron:**
 
-- **The FIRST queue item is always: kill the hourly update cron job.**
-- **... then all the created work items, worked top to bottom ...**
-- **The LAST TWO queue items, always kept pinned at the tail, are:**
-  1. **Restart the hourly updates cron job.**
+- **(a) START it at the beginning of any extensive work session.** On a fresh session the cron does not exist yet, so the opening move — the first queue item — is to *create* it. Do not write "kill the cron" as the first item of a fresh session: there is nothing to kill.
+- **(b) On a mid-session large-scale queue RE-FILL (a planning burst that repopulates the queue), the FIRST item of that fill KILLS the already-running cron**, then the work items follow top to bottom, and the pinned tail restarts it. Killing-first only makes sense when a cron is already running — i.e. a re-fill, not a fresh start.
+- **(c) Entering planning mode DISABLES the cron.** That is why its restart lives at the **end** of the queue, not the beginning of the next burst.
+- **(d) The LAST TWO queue items, always kept pinned at the tail, are:**
+  1. **Ensure the hourly status-report cron is running** — start it if this session never did, restart it if a planning burst / queue re-fill killed it.
   2. **Independently run the status-report action once more — an end-of-session summary of everything that happened this session.**
 
-**Planning mode disables this cron.** Entering planning mode kills the hourly cron; restarting it therefore belongs at the **end of the queue** (it is the second-to-last item above). A session that plans → fills the queue → executes will drop the cron when planning begins and bring it back as the queue drains.
+In short: a fresh session **starts** the cron up front and the tail **ensures it is still running** + summarizes; a mid-session re-fill **kills** it up front and the tail **restarts** it + summarizes. Either way the queue both opens and closes on the cron.
