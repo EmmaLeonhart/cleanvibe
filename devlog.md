@@ -769,3 +769,22 @@ contradicting:
 
 Version `1.9.1` -> `1.10.0` (`cleanvibe/__init__.py`, `pyproject.toml`); tagged
 `v1.10.0`, GitHub release cut (Publish-to-PyPI runs on release).
+
+## 2026-05-24 — v1.10.1: queue the replication-report status badge; cron is new-mode-only
+
+Queued (in `queue.md` `## Active`, pinned above the `## Always last` heartbeat)
+the work to make the `cleanvibe replicate` GitHub Pages findings report
+legible: a big color-coded status badge — green "Replicated" / red "Failed to
+replicate" / amber "Insufficient hardware to replicate" / blue "In progress"
+(default in-progress, driven by a `status` field in `paper.json`) — plus a
+structured, styled (non-black-and-white) theme, replacing today's bare
+`pandoc FINDINGS.md` output.
+
+Also codified in `CLAUDE.md` § "Hourly status-report cron for extensive work"
+that the hourly cron is **`new`/general work only** — the `cleanvibe replicate`
+templates deliberately omit it (a replication is a bounded, single-purpose
+workflow). Already true in the templates; the note prevents a future session
+from adding it back. This is a planning/docs release — the report feature
+itself is spec'd in the queue, to be implemented next. Version `1.10.0` ->
+`1.10.1` (`cleanvibe/__init__.py`, `pyproject.toml`); tagged `v1.10.1`,
+release cut.
