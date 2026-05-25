@@ -114,3 +114,5 @@ When in emergency stop mode:
   2. **Independently run the status-report action once more — an end-of-session summary of everything that happened this session.**
 
 In short: a fresh session **starts** the cron up front and the tail **ensures it is still running** + summarizes; a mid-session re-fill **kills** it up front and the tail **restarts** it + summarizes. Either way the queue both opens and closes on the cron.
+
+**Replication projects are exempt.** This cron is for `new` / general extensive work only — the `cleanvibe replicate` templates deliberately omit it. A paper replication is a bounded, single-purpose workflow with its own queue/SKILL and definition of done; it does not get the hourly heartbeat. Do not add the cron to the replication templates (`_REPLICATION_*`, clawRxiv, manual).
