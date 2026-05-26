@@ -788,3 +788,56 @@ from adding it back. This is a planning/docs release — the report feature
 itself is spec'd in the queue, to be implemented next. Version `1.10.0` ->
 `1.10.1` (`cleanvibe/__init__.py`, `pyproject.toml`); tagged `v1.10.1`,
 release cut.
+## 2026-05-26 — v1.11.0: three-cron playbook + self-update mechanism
+
+Generalized the productivity loop in the generated `CLAUDE.md` / `queue.md`
+templates, and added a self-update pointer so existing cleanvibe-scaffolded
+projects can pick up new sections without being re-scaffolded.
+
+- **`claude_md()`** — replaced the single "Hourly status-report cron for
+  extensive work" section with **"Autonomous productivity loop — the
+  three-cron playbook"**: work-loop at :03 (sync, take top `queue.md` item or
+  promote from `todo.md`, hard rails, commit + push, one-line report),
+  auto-flush at :15 (commit + push pending work, no empty commits),
+  status-report at :42 (heartbeat, reporting only). Lifecycle (fresh-session
+  start, mid-session re-fill kill, planning-mode disable, pinned-tail
+  restart) carries over verbatim, just generalized from one cron to three.
+  This was already empirically the most productive shape in Yantra; v1.11.0
+  promotes it into the default.
+
+- **`claude_md()`** — added **"Check cleanvibe for skill updates (weekly)"**.
+  Every generated `CLAUDE.md` now carries three fields: the cleanvibe version
+  that generated it, the date of the last update check, and the canonical
+  updates URL (`https://cleanvibe.emmaleonhart.com/updates.md`). The
+  instruction: weekly, `WebFetch` the updates page; fold in any sections
+  introduced after the generating version; bump the version + date.
+  Opportunistic — fetch failures silently roll over.
+
+- **`queue_md()`** — bootstrap step 1 now starts the three-cron set (not just
+  the status-report cron); preamble references the playbook; `## Always last`
+  pinned-tail items ensure all three crons are running.
+
+- **`pages/updates.md`** — new file, deployed at
+  `cleanvibe.emmaleonhart.com/updates.md` via the existing `pages.yml`
+  workflow. Hand-maintained index of every section / skill keyed by the
+  cleanvibe version that introduced it. The canonical source the CLAUDE.md
+  self-update mechanism fetches.
+
+- **`tests/test_scaffold.py`** — `test_bootstrap_queue_starts_hourly_cron`
+  renamed to `test_bootstrap_queue_starts_three_crons` and expanded to
+  assert all three crons are named in the bootstrap queue with their cron
+  strings (`3 * * * *`, `15 * * * *`, `42 * * * *`). New test
+  `test_claude_md_has_weekly_update_check_section` asserts the self-update
+  section is in every generated CLAUDE.md.
+
+- **Replication templates remain exempt** (v1.10.1 codification); replication
+  CLAUDE.md still uses the single, simpler structure.
+
+Companion changes outside cleanvibe (same dated work, separate repos): the
+new `claude_md()` sections were propagated by hand into the existing CLAUDE.md
+of Yantra (added the update-check section; the three-cron playbook was
+already there in Yantra-specific form), Sutra (upgraded from single
+status-report cron to the three-cron playbook, added the update-check
+section), and TradingThing (same upgrade as Sutra).
+
+Version `1.10.1` -> `1.11.0` (`cleanvibe/__init__.py`, `pyproject.toml`).

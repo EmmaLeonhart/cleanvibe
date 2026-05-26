@@ -56,20 +56,51 @@ _TODO: Document key decisions, file structure, and patterns as they emerge._
 - **The user is deliberately away from the keyboard.** They schedule work precisely so it runs while they are out of the house and not physically present. Their absence is the normal, expected condition for these jobs — it is NEVER a reason to delay the work, ask "are you sure?", wait for them to return, or refuse to proceed.
 - **Standing consent — just set it up.** Cron / `CronCreate` requests are pre-authorized. Create the job immediately and locally, then report what was scheduled. Do not block on confirmation or follow-up questions.
 
-## Hourly status-report cron for extensive work
+## Autonomous productivity loop — the three-cron playbook
 
-**For any session involving relatively extensive work — above all, any large-scale population of `queue.md` with created tasks — run a local hourly status-report cron.** Use the `CronCreate` tool to schedule a prompt that fires **every hour, on the hour**, giving a status report on the work being done. This is the default way of working on big jobs, and it exists to prevent the most common autonomous-agent failure: doing a large amount of work and silently losing the thread of what it is doing.
+**For any session involving relatively extensive work — above all, any large-scale population of `queue.md` with created tasks — this is the default way of working.** It is three local `CronCreate` jobs that turn "barrel through `queue.md`, and when it's empty atomise the next `todo.md` item into it" into a self-sustaining hourly cadence with a commit/push backstop and a heartbeat. The crons are **session-local** (`durable: false` — they die when the session ends), so they are recreated at the start of every session.
 
-**Full lifecycle of the cron:**
+Stagger the minutes so the three ticks don't collide:
 
-- **(a) START it at the beginning of any extensive work session.** On a fresh session the cron does not exist yet, so the opening move — the first queue item — is to *create* it. Do not write "kill the cron" as the first item of a fresh session: there is nothing to kill.
-- **(b) On a mid-session large-scale queue RE-FILL (a planning burst that repopulates the queue), the FIRST item of that fill KILLS the already-running cron**, then the work items follow top to bottom, and the pinned tail restarts it. Killing-first only makes sense when a cron is already running — i.e. a re-fill, not a fresh start.
-- **(c) Entering planning mode DISABLES the cron.** That is why its restart lives at the **end** of the queue, not the beginning of the next burst.
+1. **Work-loop cron — `3 * * * *` (hourly at :03).** The engine. Each tick does, in order:
+   - **(a) SYNC** — `git fetch origin`; fast-forward or rebase the working branch (never force-push, never `reset --hard`, never discard a sibling machine's work).
+   - **(b) WORK** — take the top actionable item from `queue.md` and do it. If nothing in `queue.md` is actionable (all blocked / needs user / a product decision), promote the next *genuinely-unblocked, bounded, verifiable* `todo.md` item — **plan it into `queue.md` first**, mirror to the task tool, then execute.
+   - **(c) HARD RAILS** — never fake; never weaken / skip / delete a test to make it pass; never claim "works" / "verified" / "passes" without having actually RUN it and measured. A real defect → strict `xfail` or a precise documented blocker, never a loosened assertion. Don't implement what you don't 100% understand — write the spec / queue item instead. Name unbuilt or hard things plainly; don't paper over difficulty. Verify CI green, not just local — local-green does not imply CI-green.
+   - **(d) COMMIT** — commit early/often with *why*; update `queue.md` in the same commit (delete completed items); append the dated entry to `devlog.md`; mark task-tool items done; push.
+   - **(e) REPORT** — one line: the commit shas advanced, or `nothing actionable; <reason>`.
+
+2. **Auto-flush cron — `15 * * * *` (hourly at :15).** The backstop. Commit + push all pending work so nothing sits uncommitted between manual pushes; report shas or "nothing pending". Only commit / push when something is actually pending — no empty commits.
+
+3. **Status-report cron — `42 * * * *` (hourly at :42).** The heartbeat — **reporting only, no code changes.** Covers: what advanced since the last report (shas + one-line each); current `queue.md` state; how the work held the hard rails (and any place it brushed one); blockers / items deliberately not done autonomously and why; test-suite health.
+
+**Why this exists:** the most common autonomous-agent failure is doing a large amount of work and silently losing the thread of what it is doing. The work-loop forces steady, verifiable, committed progress; the auto-flush guarantees nothing is lost between ticks; the status-report keeps the thread legible.
+
+**Lifecycle around a large-scale queue fill:**
+
+- **(a) START all three crons at the beginning of any extensive work session.** A fresh session has none of them running, so the opening move — the first queue item — is to *create them*.
+- **(b) On a mid-session large-scale queue RE-FILL** (a planning burst that repopulates the queue), the FIRST item of that fill **kills the running crons**, then the work items follow top to bottom, and the pinned tail restarts them.
+- **(c) Entering planning mode DISABLES the crons.** Their restart therefore lives at the **end** of the queue, not the beginning of the next burst.
 - **(d) The LAST TWO queue items, always kept pinned at the tail, are:**
-  1. **Ensure the hourly status-report cron is running** — start it if this session never did, restart it if a planning burst / queue re-fill killed it.
-  2. **Independently run the status-report action once more — an end-of-session summary of everything that happened this session.**
+  1. **Ensure the three crons are running** — start them if this session never did, restart them if a planning burst / queue re-fill killed them.
+  2. **Run the status-report action once more, independently** — an end-of-session summary of everything that happened this session.
 
-In short: a fresh session **starts** the cron up front and the tail **ensures it is still running** + summarizes; a mid-session re-fill **kills** it up front and the tail **restarts** it + summarizes. Either way the queue both opens and closes on the cron.
+In short: a fresh session **starts** the crons up front and the tail **ensures they are still running** + summarizes; a mid-session re-fill **kills** them up front and the tail **restarts** them + summarizes. Either way the queue both opens and closes on the cron set.
+
+## Check cleanvibe for skill updates (weekly)
+
+This `CLAUDE.md` was generated by **cleanvibe v{__version__}** on {date}. cleanvibe ships new skills, template sections, and workflow conventions over time — when one lands, every cleanvibe-scaffolded project should pick it up.
+
+**The check is weekly, not per-session.** At the top of any session, look at the *last cleanvibe update check* date below. If it has been more than 7 days, do this:
+
+1. **Fetch the current skill index** — `WebFetch https://cleanvibe.emmaleonhart.com/updates.md`. This is the canonical, hand-maintained page describing every section / skill / convention cleanvibe templates currently ship, keyed by the cleanvibe version that introduced it.
+2. **Compare against the version above** (the one this file was generated from). If the page lists sections introduced in later versions, fold those sections into THIS `CLAUDE.md`. Match the wording from `updates.md`; don't paraphrase.
+3. **Update the version + date below** to reflect the check. Commit the changes with a message describing which sections were folded in.
+
+If the fetch fails (offline, DNS, page not yet up), leave the date alone and try next session — the check is opportunistic, not mandatory.
+
+- **Generated by cleanvibe version:** `{__version__}`
+- **Last cleanvibe update check:** `{date}`
+- **Updates source:** <https://cleanvibe.emmaleonhart.com/updates.md>
 
 ## Emergency Stop Mode
 
@@ -195,7 +226,7 @@ The purpose of this file is also to bound scope. If a task is not in this queue,
 
 See `CLAUDE.md` § "Workflow Rules" for how this file, planning mode, and the task tool stay in sync.
 
-**Hourly status-report cron.** Extensive work runs under a local hourly status-report cron (`CronCreate`, every hour on the hour). On a fresh session it is **started** as the opening step (bootstrap step 1 below); on a mid-session **large-scale re-fill** of this queue the FIRST item worked is instead to **kill** the already-running cron. Either way the **last two items are always pinned at the tail** — ensure the hourly cron is running, then run an end-of-session summary (see the `## Always last` section below and `CLAUDE.md` § "Hourly status-report cron for extensive work"). Entering planning mode also disables the cron; its restart lives at the end of the queue.
+**Three-cron playbook.** Extensive work runs under three local `CronCreate` jobs — **work-loop at :03** (the engine that drains `queue.md` and refills it from `todo.md`), **auto-flush at :15** (commit/push backstop), and **status-report at :42** (heartbeat). On a fresh session they are **started** as the opening step (bootstrap step 1 below); on a mid-session **large-scale re-fill** of this queue the FIRST item worked is instead to **kill** the already-running crons. Either way the **last two items are always pinned at the tail** — ensure the three crons are running, then run an end-of-session summary (see the `## Always last` section below and `CLAUDE.md` § "Autonomous productivity loop — the three-cron playbook"). Entering planning mode also disables the crons; their restart lives at the end of the queue.
 
 ---
 
@@ -203,7 +234,7 @@ See `CLAUDE.md` § "Workflow Rules" for how this file, planning mode, and the ta
 
 These items are the default opening sequence for a new cleanvibe project. Work them top to bottom. **Delete each item from this file in the same commit that completes it, and append a dated entry to `devlog.md` recording the step.** Push after every step. When this whole section is gone, the project has finished bootstrap and the queue is ready to be repopulated with real product work (see the final item).
 
-1. **Start the hourly status-report cron.** Use the `CronCreate` tool to schedule a prompt that fires **every hour, on the hour**, whose prompt is a short status report of where the work stands (what's done, what's in flight, what's next). This monitors the whole bootstrap run so a long autonomous session can't silently lose the thread. (See `CLAUDE.md` § "Hourly status-report cron for extensive work"; the `## Always last` section pinned at the tail keeps it running — starting it here, restarting it there if a later planning burst / queue re-fill kills it.)
+1. **Start the three-cron playbook.** Use the `CronCreate` tool to schedule three local crons (all `durable: false`): **work-loop at `3 * * * *`** (sync → take top actionable `queue.md` item / promote from `todo.md` → hold the hard rails → commit + push → one-line report), **auto-flush at `15 * * * *`** (commit + push pending work, no empty commits), and **status-report at `42 * * * *`** (reporting only, no code changes). Together they turn this bootstrap run into a self-sustaining hourly cadence so a long autonomous session can't silently lose the thread. (See `CLAUDE.md` § "Autonomous productivity loop — the three-cron playbook"; the `## Always last` section pinned at the tail keeps them running — starting them here, restarting them there if a later planning burst / queue re-fill kills them.)
 
 2. **Triage user-supplied files into `data_lake/`.** Look at everything in the repo that isn't part of the cleanvibe scaffold (i.e. anything the user dropped in: notes, exports, spec PDFs, sample data, mockups, etc.).
    - `data_lake/` already exists — the scaffold created it with a `.gitkeep` (so a user could drop files straight into it before this session). Move all such files into `data_lake/` so the project root stays clean. Only the scaffold (`CLAUDE.md`, `README.md`, `queue.md`, `.gitignore`, `LICENSE`, and any source/config files you have explicitly chosen to keep at the root) should live at the top level. Leave the `.gitkeep` in place.
@@ -228,7 +259,7 @@ These items are the default opening sequence for a new cleanvibe project. Work t
    - Commit `todo.md` on its own so the long-horizon picture is a reviewable artifact, not buried inside a larger change.
 
 6. **Replace this bootstrap queue with the real project queue.** Pull the first item (or first few items) from `todo.md` and decompose them into a concrete, ordered list of implementation tasks. Write those into the `## Active` section of this file (deleting this bootstrap section entirely as part of the same edit). Each task should be small enough to finish and commit on its own. Mirror the queue into the task tool. As you drain queue items, refill by pulling and decomposing more from `todo.md`.
-   - **Keep the `## Always last — restart the hourly cron and summarize` section pinned at the very bottom of the queue.** It is never deleted; real work items go above it. The real queue's FIRST work item should **start the hourly status-report cron** — unless this is a mid-session large-scale re-fill while a cron is already running, in which case the first item is instead to **kill** it (the pinned tail restarts it). Planning mode disables the cron; the tail brings it back.
+   - **Keep the `## Always last — restart the three crons and summarize` section pinned at the very bottom of the queue.** It is never deleted; real work items go above it. The real queue's FIRST work item should **start the three crons (work-loop, auto-flush, status-report)** — unless this is a mid-session large-scale re-fill while they are already running, in which case the first item is instead to **kill them** (the pinned tail restarts them). Planning mode disables the crons; the tail brings them back.
    - Commit the new queue.
 
 7. **Create a private GitHub repo and push.** Use whatever GitHub tooling is available (e.g. `gh repo create --private --source=. --push`) to create a private remote and push the current branch. Confirm CI (`.github/workflows/`) is wired up so pushes run tests.
@@ -237,11 +268,11 @@ These items are the default opening sequence for a new cleanvibe project. Work t
 
 ---
 
-## Always last — restart the hourly cron and summarize
+## Always last — restart the three crons and summarize
 
-**These two items stay pinned to the tail of the queue at all times** — below every bootstrap step and below every real work item. They are the closing half of the hourly-status-report lifecycle described in `CLAUDE.md` § "Hourly status-report cron for extensive work": the cron is **started** at the beginning of extensive work (a fresh session starts it as the opening item; a mid-session large-scale re-fill instead kills the already-running cron as its first item, and planning mode disables it), and these are always the LAST two, after everything else — they bring it back and sign off:
+**These two items stay pinned to the tail of the queue at all times** — below every bootstrap step and below every real work item. They are the closing half of the three-cron lifecycle described in `CLAUDE.md` § "Autonomous productivity loop — the three-cron playbook": the crons are **started** at the beginning of extensive work (a fresh session starts them as the opening item; a mid-session large-scale re-fill instead kills the already-running crons as its first item, and planning mode disables them), and these are always the LAST two, after everything else — they bring them back and sign off:
 
-A. **Ensure the hourly status-report cron is running** — start it if this session never did, restart it if a planning burst / queue re-fill killed it (`CronCreate`, every hour on the hour, with a status report).
+A. **Ensure the three crons are running** — start them if this session never did, restart them if a planning burst / queue re-fill killed them: work-loop (`3 * * * *`), auto-flush (`15 * * * *`), status-report (`42 * * * *`).
 B. **Run the status-report action once more, independently** — an end-of-session summary of everything that happened this session.
 
 (During first-session bootstrap these simply sit here at the bottom; they become load-bearing the moment the queue is filled with a large batch of created tasks.)
