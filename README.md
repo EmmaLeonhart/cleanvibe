@@ -12,6 +12,16 @@ A tiny Python CLI that scaffolds AI-assisted coding projects and launches Claude
 pip install cleanvibe
 ```
 
+### Developer install (working on cleanvibe itself)
+
+```
+git clone https://github.com/Immanuelle/cleanvibe
+cd cleanvibe
+pip install .         # or use !dev-install.bat on Windows
+```
+
+**Use `pip install .`, not `pip install -e .`.** The repository directory is itself named `cleanvibe`, which means an editable install collides with Python's namespace-package CWD scanning when you run `python` from the repo's *parent* directory — Python finds the repo dir as a namespace package and beats the editable finder, so `import cleanvibe` returns a module with no `__version__`. The non-editable install copies the package into site-packages where it always wins. After any source edit, run `pip install .` again (or `!dev-install.bat`). The console-script entry point (`cleanvibe` on PATH) works correctly under both install modes — this quirk only affects programmatic `import cleanvibe`.
+
 ## Usage
 
 ### Create a new project

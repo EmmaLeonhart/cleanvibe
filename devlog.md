@@ -841,3 +841,45 @@ status-report cron to the three-cron playbook, added the update-check
 section), and TradingThing (same upgrade as Sutra).
 
 Version `1.10.1` -> `1.11.0` (`cleanvibe/__init__.py`, `pyproject.toml`).
+
+## 2026-05-26 — v1.11.0 follow-up: dev-install convenience + namespace-shadowing note
+
+While verifying the v1.11.0 ship I confirmed an existing quirk:
+`pip install -e .` from this repo lands `cleanvibe` in the editable
+finder, but the finder gets registered AFTER `PathFinder` in
+`sys.meta_path`. When Python is invoked from this repo's *parent*
+directory (e.g. `C:\Users\…\Documents\Github`), `PathFinder` scans
+CWD (sys.path[0] = `''`), finds the repo directory `Github/cleanvibe/`
+as a candidate, treats it as a **namespace** package (no `__init__.py`
+at the repo root), and never reaches the editable finder. Result:
+`import cleanvibe` succeeds but the module has no `__version__`,
+no `__file__`, and the package code never loads.
+
+The CLI (`cleanvibe.exe`, the console-script entry point) is unaffected
+because the launcher resolves through the entry-point dispatch, not
+through arbitrary-CWD `import`. The bug only bites programmatic
+`import cleanvibe` from one specific parent directory.
+
+The root cause is structural — the repo dir name equals the package
+name, which is a recipe for CWD-shadowing under editable installs.
+Fixing it properly would mean renaming either the repo or the package.
+Both are too invasive for what is, in practice, a "don't use `-e .`"
+issue.
+
+What landed today:
+
+- **README.md "Developer install" section** — tells contributors to use
+  `pip install .` (or `!dev-install.bat`), not `pip install -e .`, and
+  explains why in one paragraph.
+- **`!dev-install.bat`** — a one-line convenience that runs
+  `python -m pip install .` from the repo root. `!` floats it to the
+  top of the file listing (same prefix convention as `!runClaude.bat`).
+- No code change. The fix is documentation + a clearer dev workflow,
+  not a setuptools or templates change.
+
+Independently verified during this session: the v1.11.0 wheel installs
+clean (`pip install .` from `cleanvibe/`), `cleanvibe --version` prints
+`1.11.0` from every tested CWD (including the previously-broken
+`Documents/Github` parent), and `python -c "import cleanvibe"` from
+that parent CWD now resolves to the site-packages copy with
+`__version__ == '1.11.0'`.
