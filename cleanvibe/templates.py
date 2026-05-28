@@ -852,6 +852,7 @@ from __future__ import annotations
 
 import gzip
 import io
+import socket
 import sys
 import tarfile
 import time
@@ -868,6 +869,10 @@ _TARGET = Path(__file__).parent / "replication_target"
 _SOURCE = _TARGET / "source"
 _MAX_RETRIES = 4
 _BASE_BACKOFF = 3.0  # arXiv asks for ~3s between requests
+# Socket read timeouts come up as plain TimeoutError (3.10+) or socket.timeout
+# (3.9) and are NOT a subclass of urllib.error.URLError, so they need their
+# own except-clause to participate in the retry loop.
+_TIMEOUT_ERRORS = (TimeoutError, socket.timeout)
 
 # Filenames that suggest a ready-made reproduction recipe / replication asset.
 _RECIPE_HINTS = (
@@ -903,9 +908,10 @@ def _get(url):
                 backoff *= 2
                 continue
             raise
-        except urllib.error.URLError:
+        except (urllib.error.URLError, *_TIMEOUT_ERRORS) as e:
             if last:
                 raise
+            print(f"  transient error ({e!r}); retrying in {backoff:.0f}s")
             time.sleep(backoff)
             backoff *= 2
     raise AssertionError("unreachable")

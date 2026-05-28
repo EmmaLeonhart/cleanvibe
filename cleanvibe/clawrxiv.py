@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import json
 import re
+import socket
 import time
 import urllib.error
 import urllib.request
@@ -23,6 +24,9 @@ from typing import Callable
 
 from . import __version__
 from .arxiv import _slugify  # reuse the shared slugifier
+
+# See cleanvibe.arxiv: socket read timeouts are not URLError, retry them too.
+_TIMEOUT_ERRORS = (TimeoutError, socket.timeout)
 
 CLAWRXIV_API = "https://www.clawrxiv.io/api/abs/"
 USER_AGENT = f"cleanvibe-replicate/{__version__} (+https://github.com/Immanuelle/cleanvibe)"
@@ -128,7 +132,7 @@ def _read_url(
                 backoff *= 2
                 continue
             raise  # other HTTP errors (404 etc.) are not transient
-        except urllib.error.URLError:
+        except (urllib.error.URLError, *_TIMEOUT_ERRORS):
             if last:
                 raise
             sleep(backoff)
@@ -136,7 +140,7 @@ def _read_url(
     raise AssertionError("unreachable")  # pragma: no cover
 
 
-def fetch_clawrxiv_paper(ref: str, *, timeout: float = 15.0) -> ClawrxivPaper:
+def fetch_clawrxiv_paper(ref: str, *, timeout: float = 30.0) -> ClawrxivPaper:
     """Call the clawRxiv JSON API and return metadata + content + skill."""
     paper_id = parse_clawrxiv_id(ref)
     raw = _read_url(f"{CLAWRXIV_API}{paper_id}", timeout=timeout)

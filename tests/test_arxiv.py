@@ -224,6 +224,32 @@ class TestReadUrlRetry(unittest.TestCase):
                 )
         self.assertEqual(calls["n"], 1)  # 404 is not transient
 
+    def test_retries_socket_timeout(self):
+        # Regression for v1.11.0 user report: socket-level read timeouts come
+        # up as TimeoutError (3.10+) or socket.timeout (3.9), NEITHER of which
+        # is a urllib.error.URLError — so the old code surfaced them as a raw
+        # traceback instead of retrying. Both shapes must be retried.
+        import socket as _socket
+
+        for err in (TimeoutError("read timed out"), _socket.timeout("read timed out")):
+            with self.subTest(err=type(err).__name__):
+                calls = {"n": 0}
+
+                def fake_urlopen(req, timeout=None, _err=err):
+                    calls["n"] += 1
+                    if calls["n"] < 3:
+                        raise _err
+                    return _Resp(b"OK")
+
+                with patch("urllib.request.urlopen", fake_urlopen):
+                    body = _read_url(
+                        urllib.request.Request("http://x"),
+                        timeout=1,
+                        sleep=lambda s: None,
+                    )
+                self.assertEqual(body, b"OK")
+                self.assertEqual(calls["n"], 3)
+
 
 if __name__ == "__main__":
     unittest.main()

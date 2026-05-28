@@ -8,6 +8,7 @@ Ported from the now-absorbed ``replication_skill`` project, which used
 from __future__ import annotations
 
 import re
+import socket
 import time
 import urllib.error
 import urllib.parse
@@ -23,6 +24,11 @@ ARXIV_API = "https://export.arxiv.org/api/query"
 # between requests; we use that as the base backoff and retry a few times.
 _MAX_RETRIES = 4
 _BASE_BACKOFF = 3.0
+# Socket read timeouts come up as plain ``TimeoutError`` (3.10+) or
+# ``socket.timeout`` (3.9) — NEITHER is a subclass of ``urllib.error.URLError``,
+# so without this tuple they would bypass the retry loop and surface as a raw
+# traceback (the v1.11.0 user report).
+_TIMEOUT_ERRORS = (TimeoutError, socket.timeout)
 ATOM_NS = {"atom": "http://www.w3.org/2005/Atom"}
 USER_AGENT = f"cleanvibe-replicate/{__version__} (+https://github.com/Immanuelle/cleanvibe)"
 
@@ -170,7 +176,9 @@ def _read_url(
                 backoff *= 2
                 continue
             raise  # other HTTP errors (404 etc.) are not transient
-        except urllib.error.URLError:
+        except (urllib.error.URLError, *_TIMEOUT_ERRORS):
+            # URLError covers DNS / refused / SSL; the timeout tuple covers
+            # socket-level read timeouts (a separate exception hierarchy).
             if last:
                 raise
             sleep(backoff)
@@ -178,7 +186,7 @@ def _read_url(
     raise AssertionError("unreachable")  # pragma: no cover
 
 
-def fetch_paper(arxiv_ref: str, *, timeout: float = 15.0) -> ArxivPaper:
+def fetch_paper(arxiv_ref: str, *, timeout: float = 30.0) -> ArxivPaper:
     """Call the arXiv Atom API and return metadata for a single paper.
 
     Accepts any reference :func:`split_arxiv_ref` understands. If a version is

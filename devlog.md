@@ -883,3 +883,35 @@ clean (`pip install .` from `cleanvibe/`), `cleanvibe --version` prints
 `Documents/Github` parent), and `python -c "import cleanvibe"` from
 that parent CWD now resolves to the site-packages copy with
 `__version__ == '1.11.0'`.
+
+## 2026-05-28 — v1.11.1: retry socket read timeouts in arXiv / clawRxiv fetch
+
+User report: `cleanvibe replicate https://arxiv.org/abs/2605.20919` died with
+a raw `TimeoutError` traceback from `ssl.py` -> `socket.recv_into` partway
+through the arXiv API call. The retry loop in `cleanvibe/arxiv.py` (and
+`clawrxiv.py`, and the generated `download_paper.py` template) caught
+`urllib.error.HTTPError` for 429/503 and `urllib.error.URLError` for transient
+connection errors — but socket-level read timeouts surface as plain
+`TimeoutError` (3.10+) or `socket.timeout` (3.9), **neither of which is a
+subclass of `URLError`**. So the timeout bypassed the retry loop entirely and
+the user got a traceback instead of a retry. (HTTP 429s were already covered
+in v1.4.0; this is the missing parallel case for read timeouts.)
+
+- **`cleanvibe/arxiv.py` `_read_url`** and **`cleanvibe/clawrxiv.py`
+  `_read_url`**: added `(TimeoutError, socket.timeout)` (module-level
+  `_TIMEOUT_ERRORS`) to the transient-error except clause alongside
+  `URLError`. Bumped the default `timeout` from 15s to 30s — arXiv's
+  Atom endpoint can be slow under load, and the v1.4.0 retry/backoff
+  only helps if the first attempt actually returns *something* rather
+  than hanging out the whole timeout window.
+- **`cleanvibe/templates.py`** `download_paper.py` template: same fix
+  in the generated `_get()`, so every freshly scaffolded replication
+  project picks up the retry. Logs the retry reason (`transient error
+  (...); retrying in Ns`) so a user staring at a slow download knows
+  why it's pausing.
+- **`tests/test_arxiv.py`**: `test_retries_socket_timeout` exercises
+  both `TimeoutError` and `socket.timeout` via `subTest`, asserting the
+  call is retried instead of propagating. Full suite **79/79** green
+  (was 77).
+- Version `1.11.0` -> `1.11.1` (`cleanvibe/__init__.py`,
+  `pyproject.toml`).
