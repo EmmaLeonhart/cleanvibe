@@ -20,7 +20,7 @@ from __future__ import annotations
 import platform
 from pathlib import Path
 
-from . import __version__, templates
+from . import __version__, skills, templates
 from .scaffold import _git_init, _launch_claude, _write, _write_gitkeep
 
 
@@ -50,6 +50,7 @@ def research_project(
             "docs/index.html",
             "docs/.nojekyll",
             ".github/workflows/pages.yml",
+            ".claude/skills/ (6 skills)",
         ):
             print(f"[dry-run] Would write: {path / rel}")
         if is_windows:
@@ -68,6 +69,8 @@ def research_project(
     _write(path / "queue.md", templates.research_queue_md(project_name, question))
     _write(path / "devlog.md", templates.devlog_md(project_name))
     _write(path / ".gitignore", templates.RESEARCH_GITIGNORE)
+
+    skills.write_skills(path)
 
     # data_lake/ for datasets; literature/ for the up-front literature review.
     _write_gitkeep(path / "data_lake")

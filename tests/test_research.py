@@ -156,10 +156,14 @@ class TestResearchScaffold(unittest.TestCase):
         self.assertIn("literature/", claude)
         # The question is embedded.
         self.assertIn("What is the capacity of a reservoir agent?", claude)
-        # Shared blocks from `new` are present (no drift).
-        self.assertIn("three-cron playbook", lower)
-        self.assertIn("Emergency Stop Mode", claude)
-        self.assertIn("Check cleanvibe for skill updates", claude)
+        # v1.14.0: the shared workflow/cron/emergency blocks moved to skills.
+        # CLAUDE.md carries the Skills pointer; the prose lives in vendored skills.
+        self.assertIn("## Skills", claude)
+        self.assertIn("autonomous-loop", claude)
+        loop = (proj / ".claude" / "skills" / "autonomous-loop" / "SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("three-cron playbook", loop.lower())
+        stop = (proj / ".claude" / "skills" / "emergency-stop" / "SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("Emergency Stop Mode", stop)
 
     def test_question_placeholder_when_absent(self):
         proj, _ = _make()  # no question

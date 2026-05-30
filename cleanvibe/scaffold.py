@@ -10,7 +10,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from . import __version__, templates
+from . import __version__, skills, templates
 
 
 def create_project(path: Path, dry_run: bool = False, no_claude: bool = False) -> None:
@@ -27,6 +27,7 @@ def create_project(path: Path, dry_run: bool = False, no_claude: bool = False) -
         print(f"[dry-run] Would write: {path / 'devlog.md'}")
         print(f"[dry-run] Would write: {path / '.gitignore'}")
         print(f"[dry-run] Would write: {path / 'data_lake' / '.gitkeep'}")
+        print(f"[dry-run] Would write: {path / '.claude' / 'skills'} (6 skills)")
         if is_windows:
             print(f"[dry-run] Would write: {path / '!runClaude.bat'}")
         print(f"[dry-run] Would run: git init")
@@ -43,6 +44,7 @@ def create_project(path: Path, dry_run: bool = False, no_claude: bool = False) -
     _write(path / "devlog.md", templates.devlog_md(project_name))
     _write(path / ".gitignore", templates.GITIGNORE)
     _write_gitkeep(path / "data_lake")
+    skills.write_skills(path)
 
     if is_windows:
         _write(path / "!runClaude.bat", templates.RUNCLAUDE_BAT)
@@ -75,6 +77,7 @@ def clone_project(repo: str, path: Path, dry_run: bool = False, no_claude: bool 
         print(f"[dry-run] Would prepend-or-write: CLAUDE.md (clone onboarding)")
         print(f"[dry-run] Would prepend-or-write: queue.md (clone onboarding)")
         print(f"[dry-run] Would write if missing: devlog.md (clone starter; backfilled by onboarding queue)")
+        print(f"[dry-run] Would write if missing: .claude/skills/ (6 skills)")
         injected = ".gitignore" + (", !runClaude.bat" if is_windows else "")
         print(f"[dry-run] Would inject if missing: {injected}")
         print(f"[dry-run] Would NOT create data_lake/ or inject README.md")
@@ -101,6 +104,10 @@ def clone_project(repo: str, path: Path, dry_run: bool = False, no_claude: bool 
 
     _prepend_or_write(path / "CLAUDE.md", templates.clone_claude_md(project_name))
     _prepend_or_write(path / "queue.md", templates.clone_queue_md(project_name))
+
+    if not (path / ".claude" / "skills").exists():
+        skills.write_skills(path, overwrite=False)
+        print(f"  Injected .claude/skills/ (6 skills)")
 
     devlog = path / "devlog.md"
     if not devlog.exists():
@@ -238,6 +245,11 @@ def _inject_scaffold(path: Path, project_name: str, is_windows: bool) -> bool:
     if not gitkeep.exists():
         _write_gitkeep(path / "data_lake")
         print(f"  Injected data_lake/.gitkeep (was missing)")
+        injected = True
+
+    if not (path / ".claude" / "skills").exists():
+        skills.write_skills(path, overwrite=False)
+        print(f"  Injected .claude/skills/ (was missing)")
         injected = True
 
     if is_windows:
