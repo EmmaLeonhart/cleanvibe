@@ -551,8 +551,9 @@ reusable, agent-executable replication methodology.
   site (the shared `report-theme.css` cleanvibe report theme + a color-coded
   replication status badge driven by `paper.json` `status`) + PDF report;
   `.github/workflows/package.yml` builds the downloadable ZIP replication
-  package. You must make the repo public and enable Pages (Settings -> Pages
-  -> Source: GitHub Actions) — the workflows carry TODO markers for this.
+  package. Just make the repo **public** — `pages.yml` **auto-enables Pages**
+  itself (`actions/configure-pages` with `enablement: true`), so there is no
+  manual Settings toggle to do.
   Vision for the site shape: http://latent-space.emmaleonhart.com/
 
 ## Workflow Rules
@@ -1117,10 +1118,10 @@ Thumbs.db
 # Static constant — contains ${{ }} expressions; never run through Template.
 REPLICATION_PAGES_YML = """# Publishes FINDINGS.md as a GitHub Pages site + a transportable PDF report.
 #
-# TODO (one-time, by the repo owner):
-#   1. Make this repository public.
-#   2. Settings -> Pages -> Source: "GitHub Actions".
-# Until then this workflow will run but the deploy step has nothing to serve.
+# Pages is auto-enabled by the `actions/configure-pages` step below
+# (enablement: true), so there is NO manual "Settings -> Pages" toggle to do —
+# the only requirement is that the repo is PUBLIC. The first push that runs this
+# workflow turns Pages on and deploys.
 
 name: pages
 
@@ -1145,6 +1146,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: recursive
+      - name: Configure Pages (auto-enables Pages if not already on)
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
       - name: Install pandoc
         run: sudo apt-get update && sudo apt-get install -y pandoc
       - name: Build themed findings site + PDF report
@@ -2179,9 +2184,10 @@ Thumbs.db
 RESEARCH_PAGES_YML = """# Publishes the docs/ folder as a GitHub Pages site (the themed research
 # report) and builds a transportable PDF from FINDINGS.md into docs/report.pdf.
 #
-# TODO (one-time, by the repo owner):
-#   1. Make this repository public (free GitHub Pages).
-#   2. Settings -> Pages -> Source: "GitHub Actions".
+# Pages is auto-enabled by the `actions/configure-pages` step below
+# (enablement: true), so there is NO manual "Settings -> Pages" toggle to do —
+# the only requirement is that the repo is PUBLIC (free GitHub Pages). The first
+# push that runs this workflow turns Pages on and deploys.
 
 name: pages
 
@@ -2204,6 +2210,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Configure Pages (auto-enables Pages if not already on)
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
       - name: Install pandoc
         run: sudo apt-get update && sudo apt-get install -y pandoc
       - name: Build report PDF into docs/
@@ -2615,7 +2625,7 @@ Work these top to bottom. **Delete each item from this file in the same commit t
 
 5. **Create `todo.md` — the long-horizon research plan.** Informed by the gap the literature review surfaced, write `todo.md` as the project's long-term horizon: the hypotheses to test, experiments to run / things to build, and the eventual shape of the report. Items here are *abstract destinations*, decomposed into concrete steps in `queue.md` later. Use the format in `CLAUDE.md` § "Queue and longer-horizon work". Commit `todo.md` on its own.
 
-6. **Go live: create a PUBLIC GitHub repo and push.** Public is required for free GitHub Pages. `gh repo create --public --source=. --push`. Confirm CI (`.github/workflows/`) is wired and set **Settings → Pages → Source: GitHub Actions** so `docs/` (the report site) and the built PDF deploy. From here every commit pushes and Pages/CI build as you go.
+6. **Go live: create a PUBLIC GitHub repo and push.** Public is required for free GitHub Pages. `gh repo create --public --source=. --push`. The `pages.yml` workflow **auto-enables Pages itself** (via `actions/configure-pages` with `enablement: true`) — there is no manual Settings toggle to do; just confirm the repo is public and CI (`.github/workflows/`) is wired, and on push `docs/` (the report site) + the built PDF deploy. From here every commit pushes and Pages/CI build as you go.
 
 7. **Replace this bootstrap queue with the real research queue.** Pull the first item(s) from `todo.md` and decompose them into a concrete, ordered list of experiment / implementation tasks under a new `## Active` section (deleting this bootstrap section as part of the same edit). Mirror into the task tool. **Keep the `## Always last` section pinned at the very bottom.** The real queue's FIRST work item should **start the three crons** — unless this is a mid-session large-scale re-fill while they are already running, in which case the first item is instead to **kill them** (the pinned tail restarts them). Commit the new queue.
 

@@ -142,6 +142,9 @@ class TestResearchScaffold(unittest.TestCase):
         self.assertIn("deploy-pages", yml)
         self.assertIn("FINDINGS.md", yml)
         self.assertIn("report.pdf", yml)
+        # Auto-enables Pages so a fresh public repo doesn't 404 on deploy.
+        self.assertIn("configure-pages", yml)
+        self.assertIn("enablement: true", yml)
 
     def test_claude_md_research_sections(self):
         proj, _ = _make(question="What is the capacity of a reservoir agent?")

@@ -988,3 +988,25 @@ replication reports with a status badge" queue item in the same pass.
   suite **101/101** green (was 96). Verified both generated Pages workflows parse
   as YAML.
 - Version `1.12.0` -> `1.13.0` (`cleanvibe/__init__.py`, `pyproject.toml`).
+
+## 2026-05-29 — v1.13.1: Pages workflows auto-enable GitHub Pages (deploy no longer 404s)
+
+Real-world bug, caught on the first live research project (`reservoiragent`): the
+`pages` workflow built + uploaded the artifact fine, but **`actions/deploy-pages`
+failed with `HttpError: Not Found (404)` — "Ensure GitHub Pages has been
+enabled"**. Root cause: GitHub Pages was never enabled with Source = "GitHub
+Actions" for the repo. The old templates only documented that as a manual
+one-time `Settings -> Pages` toggle (a TODO comment), so any freshly scaffolded
+repo whose owner forgot the toggle had its very first deployment fail.
+
+Fix: both `RESEARCH_PAGES_YML` and `REPLICATION_PAGES_YML` now run
+`actions/configure-pages@v5` with `enablement: true` in the build job, which
+**turns Pages on via the API automatically** (the `pages: write` permission is
+already granted). No manual Settings step anymore — the only requirement is that
+the repo is public. Updated the workflow header comments, the research bootstrap
+"go live" step, and the replication CLAUDE deliverables note (the stale "TODO
+markers / set Settings -> Pages" wording was now inaccurate). Added tests
+asserting `configure-pages` + `enablement: true` are wired into both workflows.
+Full suite **101/101** green; both generated workflows verified to parse as YAML.
+
+- Version `1.13.0` -> `1.13.1` (`cleanvibe/__init__.py`, `pyproject.toml`).

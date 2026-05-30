@@ -235,6 +235,9 @@ class TestReplicateReportTheme(unittest.TestCase):
         # Still builds the transportable PDF and deploys.
         self.assertIn("report.pdf", yml)
         self.assertIn("deploy-pages", yml)
+        # Auto-enables Pages so a fresh public repo doesn't 404 on deploy.
+        self.assertIn("configure-pages", yml)
+        self.assertIn("enablement: true", yml)
 
 
 def _run_manual(folder="my-paper", **kwargs):
