@@ -32,12 +32,33 @@ cleanvibe new my-project
 
 This will:
 1. Create the directory `my-project/`
-2. Write `CLAUDE.md` (workflow rules for AI-assisted development)
+2. Write `CLAUDE.md` (a short pointer to the skills + project-specific notes)
 3. Write `README.md` (starter documentation)
 4. Write `queue.md` (active work queue, pre-seeded with a first-session bootstrap sequence that walks Claude through triaging dropped-in files, inferring the project, interviewing the user, creating `todo.md`, populating the real queue, and pushing to a private GitHub repo)
 5. Write `.gitignore` (sensible Python defaults)
-6. Initialize a git repo with an initial commit
-7. Launch Claude Code inside the project
+6. Vendor `.claude/skills/` (the six workflow skills — see below)
+7. Initialize a git repo with an initial commit
+8. Launch Claude Code inside the project
+
+### Skills (v1.14.0+)
+
+The workflow behaviors that used to be inlined into `CLAUDE.md` now ship as six
+standalone **skills**, auto-discovered by Claude Code from `.claude/skills/`:
+
+| Skill | Fires when |
+|---|---|
+| `emergency-stop` | you repeatedly say "stop" / demand an immediate halt |
+| `cron-is-local` | you mention "cron" / "schedule" (means local `CronCreate`) |
+| `autonomous-loop` | starting extensive autonomous work (the three-cron playbook) |
+| `queue-driven-workflow` | any multi-step work (plan into `queue.md` first; the `todo`→`queue`→`devlog` flow) |
+| `writing-style` | writing any prose (avoid the "honest"/"frank" tic) |
+| `cleanvibe-update-check` | session start, weekly (refresh skills from cleanvibe) |
+
+They're vendored into every `new` / `convert` / `clone` / `research` project and
+kept current by the `cleanvibe-update-check` skill (which reads
+<https://cleanvibe.emmaleonhart.com/updates.md>). The single source of truth is
+`cleanvibe/skills.py`; `CLAUDE.md` keeps only a short `## Skills` pointer. To
+back-fill these into an existing repo, run `migrate_repos_to_skills.py`.
 
 ### Research a question — your own investigation
 

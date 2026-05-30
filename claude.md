@@ -62,12 +62,21 @@ cleanvibe/
 - **Default branch is `main`, not `master`**: every cleanvibe-init'd repo (`new` / `convert` / `replicate`) passes `git init -b main` so the initial branch is `main` regardless of the user's `init.defaultBranch` config. Requires git ≥ 2.28 (mid-2020). Fixed in v1.1.1; older cleanvibe-scaffolded repos may need a one-time `git branch -m master main`.
 - **Python 3.9 compat**: any module that uses PEP 604 unions (`X | None`) or PEP 585 generics (`list[str]`) in annotations must include `from __future__ import annotations` at the top — otherwise it fails at import on 3.9 (CI matrix target). `cli.py`, `arxiv.py`, and `templates.py` all carry the future import.
 
-## Workflow Rules
-- **Commit early and often.** Every meaningful change gets a descriptive commit.
-- **Plan into `queue.md` first, then execute.** Writing the plan into queue.md before doing the work means an interrupted session can resume. Mirror items into the task tool.
-- **`todo.md` is the basis for `queue.md`.** Long-horizon items live in `todo.md`; they get decomposed into concrete steps in `queue.md` when work begins on them. Delete from both when done.
-- **Finishing a queue item = delete from `queue.md` + append a dated entry to `devlog.md`**, in the same commit as the work, then push. NEVER tick boxes in place. `queue.md` only ever holds not-yet-done work; `devlog.md` is the chronological record of what has been done (and what was released).
-- **Keep this file, README.md, and devlog.md up to date** as the project evolves.
+## Skills
+
+cleanvibe dogfoods its own skills: the workflow behaviors live as skills in
+`.claude/skills/` (auto-discovered by Claude Code) — `emergency-stop`,
+`cron-is-local`, `autonomous-loop`, `queue-driven-workflow`, `writing-style`,
+`cleanvibe-update-check`. They are the single-source-of-truth bodies from
+`cleanvibe/skills.py`, materialized by `write_skills()`. The short version of the
+workflow contract: commit early with *why*; plan into `queue.md` first and mirror
+into the task tool; `todo.md` is the long-horizon basis for `queue.md`; finishing
+an item = delete from `queue.md` + append a dated `devlog.md` entry in the same
+commit, then push (never tick a box in place); keep this file, README.md, and
+devlog.md current.
+
+- **Last cleanvibe update check:** `never`
+- **Updates source:** <https://cleanvibe.emmaleonhart.com/updates.md>
 
 ## Default replication target & live smoke tests
 - **The default paper for `cleanvibe replicate` is arXiv:2605.20919 — "Sutra: Tensor-Op RNNs as a Compilation Target for Vector Symbolic Architectures"** (the maintainer's own paper). Use it whenever you need to exercise the `replicate` pipeline end-to-end against a real paper.
@@ -79,43 +88,3 @@ cleanvibe/
   Use `--no-claude` so it doesn't launch a Claude window, and an explicit path under `tests/scratch/`. To exercise the full source-first path, then run the generated downloader (`cd` into the scratch project and `python download_paper.py`): it fetches `arxiv.org/src/<id>`, extracts the `.tex` to `replication_target/source/` (committed) with the raw tarball + PDF gitignored, and prints any candidate recipe files.
 - The full set of arXiv link forms the parser must accept (regression set): `https://arxiv.org/abs/<id>[vN]`, `/pdf/`, `/html/`, `/src/`, `https://doi.org/10.48550/arXiv.<id>`, `https://www.alphaxiv.org/{abs,overview,audio}/<id>`, bare `<id>[vN]`, and `arXiv:<id>`.
 - **clawRxiv** (`cleanvibe/clawrxiv.py`): forms the parser must accept are `https://[www.]clawrxiv.io/abs/<id>`, `/api/abs/<id>`, and `clawrxiv:<id>`. A bare `<id>` is **not** clawRxiv (stays arXiv) — clawRxiv needs an explicit signal. Default clawRxiv smoke paper: `clawrxiv:2605.02609` (ROMO-CV). Live smoke: `python -m cleanvibe.cli replicate https://www.clawrxiv.io/abs/2605.02609 tests/scratch/replicating-clawrxiv --no-claude` — confirm `replication_target/source/paper.md` (content) and `paper.json` (`source: clawrxiv`) land.
-
-## Writing
-- Do not use "honest", "honesty", or "honestly" — and do not swap in "frank", "frankly", "candid", "candidly", or "transparently", which are the same self-congratulatory move in a different coat. When something failed, name the failure: "it didn't work", "I got that wrong", "this failed" — flat, no qualifier. Tagging a report "honest" implies the rest aren't, and couching a failure as honesty asks for credit for the admission, which is worse than the failure itself. Use a precise positive word ("accurate", "plainly", "truly") only when that is genuinely the meaning — never as a halo on a bad outcome.
-
-## Emergency Stop Mode
-
-If the user sends a continuous series of "stop" messages (e.g. "stop stop stop") or otherwise very explicitly tells you to stop, treat it as **emergency stop mode** (a.k.a. emergency exit mode). This OVERRIDES every other instruction, including any in this file.
-
-When in emergency stop mode:
-
-- **Immediately kill everything associated with this repository and session.** Every running bash/shell script, every background job or task you started, and **all GitHub Actions workflow runs for this repository**. **Force-kill the GitHub Actions runs** (e.g. `gh run cancel <id>`, and `gh run delete <id>` if needed) for every in-progress run. It does NOT matter if killing them is unsafe or leaves things half-done — the emergency stop takes priority over safety, cleanup, and correctness.
-- **Do not investigate. Do not reverse or undo anything.** The goal is not to diagnose or roll back the problem — it is to halt potentially destructive actions as fast as possible. Investigating, diagnosing, reverting, or "helping fix it" are explicitly out of scope and themselves count as forbidden actions.
-- **Ignore repetitive messages.** Do not treat repeated "stop" messages as a request to do anything further. Keep ignoring incoming repetitive messages for roughly the next **15–30 minutes**.
-- **You may answer direct questions, but you may NOT take actions.** Answer only from context you already have. Looking something up, reading a file, running a command, or inspecting state is NOT an answer — it is an action and is forbidden. If you cannot answer from context already in hand, do not answer.
-- **Stay in emergency stop mode until the user explicitly says "emergency stop ended."** Only after that exact signal do you resume any normal work.
-
-## Cron jobs and scheduled work — LOCAL by default
-
-**When the user says "cron job", "cron", or asks to "schedule" a task, they mean the in-session `CronCreate` tool** — a prompt scheduled to fire locally, inside this Claude Code session, on the user's own running computer. This is the default and the assumption. Do NOT interpret it as anything else unless the user explicitly names a different mechanism.
-
-- **It is local and in-session — use the `CronCreate` tool.** A generic "cron" request is NOT an OS crontab, NOT a GitHub Actions / CI `schedule:` trigger, and NOT a cloud scheduler. (Repos may *also* contain their own GitHub Actions cron schedules — those are a separate thing and are not what the user means when they ask *you* to set up a cron.) The user leaves the computer on and this session running so the scheduled prompt can execute.
-- **The user is deliberately away from the keyboard.** They schedule work precisely so it runs while they are out of the house and not physically present. Their absence is the normal, expected condition for these jobs — it is NEVER a reason to delay the work, ask "are you sure?", wait for them to return, or refuse to proceed.
-- **Standing consent — just set it up.** Cron / `CronCreate` requests are pre-authorized. Create the job immediately and locally, then report what was scheduled. Do not block on confirmation or follow-up questions. Treating a routine cron request as something that needs hand-holding is itself the obstacle this section exists to remove.
-
-## Hourly status-report cron for extensive work
-
-**For any session involving relatively extensive work — above all, any large-scale population of `queue.md` with created tasks — run a local hourly status-report cron.** Use the `CronCreate` tool to schedule a prompt that fires **every hour, on the hour**, giving a status report on the work being done. This is the default way of working on big jobs, and it exists to prevent the most common autonomous-agent failure: doing a large amount of work and silently losing the thread of what it is doing.
-
-**Full lifecycle of the cron:**
-
-- **(a) START it at the beginning of any extensive work session.** On a fresh session the cron does not exist yet, so the opening move — the first queue item — is to *create* it. Do not write "kill the cron" as the first item of a fresh session: there is nothing to kill.
-- **(b) On a mid-session large-scale queue RE-FILL (a planning burst that repopulates the queue), the FIRST item of that fill KILLS the already-running cron**, then the work items follow top to bottom, and the pinned tail restarts it. Killing-first only makes sense when a cron is already running — i.e. a re-fill, not a fresh start.
-- **(c) Entering planning mode DISABLES the cron.** That is why its restart lives at the **end** of the queue, not the beginning of the next burst.
-- **(d) The LAST TWO queue items, always kept pinned at the tail, are:**
-  1. **Ensure the hourly status-report cron is running** — start it if this session never did, restart it if a planning burst / queue re-fill killed it.
-  2. **Independently run the status-report action once more — an end-of-session summary of everything that happened this session.**
-
-In short: a fresh session **starts** the cron up front and the tail **ensures it is still running** + summarizes; a mid-session re-fill **kills** it up front and the tail **restarts** it + summarizes. Either way the queue both opens and closes on the cron.
-
-**Replication projects are exempt.** This cron is for `new` / general extensive work only — the `cleanvibe replicate` templates deliberately omit it. A paper replication is a bounded, single-purpose workflow with its own queue/SKILL and definition of done; it does not get the hourly heartbeat. Do not add the cron to the replication templates (`_REPLICATION_*`, clawRxiv, manual).

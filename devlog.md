@@ -1010,3 +1010,34 @@ asserting `configure-pages` + `enablement: true` are wired into both workflows.
 Full suite **101/101** green; both generated workflows verified to parse as YAML.
 
 - Version `1.13.0` -> `1.13.1` (`cleanvibe/__init__.py`, `pyproject.toml`).
+
+---
+
+## 2026-05-30 — v1.14.0: Workflow behaviors become standalone skills
+
+The reusable workflow prose that had been inlined into every generated
+`CLAUDE.md` (Workflow Rules, Writing, Cron-is-local, the three-cron playbook,
+the weekly update check, Emergency Stop) is now **six standalone skills**, the
+single source of truth being `cleanvibe/skills.py` (`SKILLS` dict +
+`write_skills()`). Slugs: `emergency-stop`, `cron-is-local`, `autonomous-loop`,
+`queue-driven-workflow`, `writing-style`, `cleanvibe-update-check`.
+
+- `skills.py` materializes each skill to `.claude/skills/<slug>/SKILL.md`.
+  `new` / `convert` / `clone` / `research` all call `write_skills()`; the
+  generated `CLAUDE.md` now carries only a short `## Skills` pointer (a fresh
+  scaffold's CLAUDE.md dropped from ~120 lines to ~20). Replication modes are
+  left as-is (bounded workflow, already exempt from the cron tail).
+- `templates.py`: removed the inlined `_CLAUDE_CORE_RULES` / `_WRITING_SECTION` /
+  `_common_claude_tail` blocks; added `SKILLS_POINTER`.
+- `cleanvibe-update-check` is **redefined**: instead of folding new sections into
+  `CLAUDE.md`, it now refreshes `.claude/skills/` to the latest shipped versions.
+- `pages/updates.md`: new v1.14.0 entry describing the six skills + the migration
+  path; the "how to read" intro now keys on skills, not CLAUDE.md sections.
+- New `migrate_repos_to_skills.py`: back-fills the skills into existing repos
+  (sync ff-only, write skills, trim CLAUDE.md, commit + push; skips dirty /
+  diverged repos). This repo dogfoods its own `.claude/skills/`.
+- Tests: `tests/test_skills.py` (skill set, frontmatter, write tree) and
+  `tests/test_migrate.py`; scaffold/research tests updated to assert the new
+  pointer + vendored skills shape. Full suite green.
+
+- Version `1.13.1` -> `1.14.0` (`cleanvibe/__init__.py`, `pyproject.toml`).
