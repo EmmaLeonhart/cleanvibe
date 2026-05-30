@@ -915,3 +915,47 @@ in v1.4.0; this is the missing parallel case for read timeouts.)
   (was 77).
 - Version `1.11.0` -> `1.11.1` (`cleanvibe/__init__.py`,
   `pyproject.toml`).
+
+## 2026-05-29 — v1.12.0: `cleanvibe research` (original-research mode)
+
+A fifth project mode alongside `new` / `clone` / `convert` / `replicate`:
+`cleanvibe research <name>` (also `cleanvibe new <name> --research [--question Q]`).
+It is `new` for *your own* investigation — not a replication of someone else's
+paper — so it keeps everything `new` has (`data_lake/`, the three-cron
+playbook, `todo.md`->`queue.md`->`devlog.md`) and borrows two things from
+`replicate`:
+
+1. **An up-front literature review (agentic RAG)** as the distinctive bootstrap
+   step, committed under `literature/` (`REVIEW.md` + sources), done *before*
+   any building — what separates `research` from a plain `new` project.
+2. **A published, themed GitHub Pages report** under `docs/` — committed
+   `index.html` with a warm "paper" light theme + dark-mode variant (adapted
+   from latent-space-cartography / http://latent-space.emmaleonhart.com/), plus
+   `docs/report.pdf` built from `FINDINGS.md` by `.github/workflows/pages.yml`.
+
+The bootstrap queue is literature-review-first: start crons -> triage
+`data_lake/` -> define the research question (interview) -> **literature
+review** -> write `todo.md` -> go **public** on GitHub (required for free Pages)
+-> replace the bootstrap queue with the real experiment/build queue -> work it,
+keeping `FINDINGS.md` + the `docs/` report current. Research is extensive work,
+so — unlike replication, which is exempt — it KEEPS the three-cron playbook.
+
+- **`cleanvibe/research.py`** (new): `research_project(path, question, dry_run,
+  no_claude)` — mirrors `create_project` but research-flavored (`data_lake/`,
+  `literature/`, themed `docs/`, `pages.yml`, git init on `main`, launch Claude).
+- **`cleanvibe/templates.py`**: extracted `_CLAUDE_CORE_RULES` /
+  `_WRITING_SECTION` / `_common_claude_tail(date)` so `claude_md` (`new`) and
+  `research_claude_md` share the workflow/cron/update-check/emergency-stop text
+  **without drift**. Added `research_{claude,readme,queue}_md`,
+  `research_index_html`, `RESEARCH_GITIGNORE`, `RESEARCH_PAGES_YML`, and the
+  themed `_RESEARCH_INDEX_HTML` (filled via `str.replace` of
+  `__PROJECT_NAME__`/`__QUESTION__`/`__DATE__` — its CSS is full of `{` and `$`,
+  so neither f-strings nor `string.Template` are safe).
+- **`cleanvibe/cli.py`**: `research` subcommand (`--question`/`--dry-run`/
+  `--no-claude`) + a `--research` flag on `new` that routes to the same handler.
+- **`tests/test_research.py`** (new, 17 tests): expected tree, lit-review-before-
+  building ordering, research-question step, three-cron playbook, public-repo/
+  Pages step, themed `docs/index.html`, `pages.yml` deploys `docs/` + builds PDF,
+  CLAUDE.md research sections, `--question` threading, `new`-without-`--research`
+  regression. Full suite **96/96** green (was 79).
+- Version `1.11.1` -> `1.12.0` (`cleanvibe/__init__.py`, `pyproject.toml`).

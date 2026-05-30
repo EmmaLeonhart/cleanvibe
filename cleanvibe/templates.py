@@ -15,11 +15,17 @@ from .arxiv import ArxivPaper, _slugify
 from .clawrxiv import ClawrxivPaper
 
 
-def claude_md(project_name: str) -> str:
-    date = datetime.now().strftime("%Y-%m-%d")
-    return f"""# {project_name}
+# ---------------------------------------------------------------------------
+# Shared CLAUDE.md building blocks
+#
+# Extracted so `new` (claude_md) and `research` (research_claude_md) emit the
+# same workflow rules, writing rule, cron playbook, weekly-update check, and
+# emergency-stop text without drift. The replication templates deliberately do
+# NOT use the cron tail — replications are a bounded workflow, exempt from the
+# heartbeat (see CLAUDE.md § "Autonomous productivity loop").
+# ---------------------------------------------------------------------------
 
-## Workflow Rules
+_CLAUDE_CORE_RULES = """## Workflow Rules
 - **Commit early and often.** Every meaningful change gets a commit with a clear message explaining *why*, not just what.
 - **Plan into `queue.md` first, then execute.** When entering planning mode (or doing any non-trivial multi-step work), the FIRST action is to write the plan into `queue.md` as concrete items. Only then begin executing. This means an interrupted session can resume from the queue — the plan does not live only in chat context.
 - **Finishing an item = delete from `queue.md` + append to `devlog.md`, then commit and push.** IMPORTANT: when a queue item is done, **delete the item from `queue.md`** and **append a dated entry to `devlog.md`** recording what was completed, in the *same commit as the work*, then push. NEVER mark an item done in place (no `[x]`, no "✓", no "DONE" — a checked box left in `queue.md` is the failure mode this rule exists to prevent). `queue.md` only ever holds not-yet-done work; `devlog.md` is where "done" lives.
@@ -37,18 +43,21 @@ def claude_md(project_name: str) -> str:
 ## Testing
 - **Write unit tests early.** As soon as there is testable logic, create a test file. Use `pytest` for Python projects or the appropriate test framework for the language in use.
 - **Set up CI as soon as tests exist.** Create a `.github/workflows/ci.yml` GitHub Actions workflow that runs the test suite on push and pull request. Keep the workflow simple — install dependencies and run tests.
-- **Keep tests passing.** Do not commit code that breaks existing tests. If a change requires updating tests, update them in the same commit.
+- **Keep tests passing.** Do not commit code that breaks existing tests. If a change requires updating tests, update them in the same commit."""
 
-## Writing
-- Do not use "honest", "honesty", or "honestly" — and do not swap in "frank", "frankly", "candid", "candidly", or "transparently", which are the same self-congratulatory move in a different coat. When something failed, name the failure: "it didn't work", "I got that wrong", "this failed" — flat, no qualifier. Tagging a report "honest" implies the rest aren't, and couching a failure as honesty asks for credit for the admission, which is worse than the failure itself. Use a precise positive word ("accurate", "plainly", "truly") only when that is genuinely the meaning — never as a halo on a bad outcome.
 
-## Project Description
-_TODO: Describe what this project is about._
+_WRITING_SECTION = """## Writing
+- Do not use "honest", "honesty", or "honestly" — and do not swap in "frank", "frankly", "candid", "candidly", or "transparently", which are the same self-congratulatory move in a different coat. When something failed, name the failure: "it didn't work", "I got that wrong", "this failed" — flat, no qualifier. Tagging a report "honest" implies the rest aren't, and couching a failure as honesty asks for credit for the admission, which is worse than the failure itself. Use a precise positive word ("accurate", "plainly", "truly") only when that is genuinely the meaning — never as a halo on a bad outcome."""
 
-## Architecture and Conventions
-_TODO: Document key decisions, file structure, and patterns as they emerge._
 
-## Cron jobs and scheduled work — LOCAL by default
+def _common_claude_tail(date: str) -> str:
+    """Cron rules + three-cron playbook + weekly cleanvibe update check +
+    emergency-stop mode + the current-date footer.
+
+    Shared verbatim by `new` (``claude_md``) and `research`
+    (``research_claude_md``) so the two never drift.
+    """
+    return f"""## Cron jobs and scheduled work — LOCAL by default
 
 **When the user says "cron job", "cron", or asks to "schedule" a task, they mean the in-session `CronCreate` tool** — a prompt scheduled to fire locally, inside this Claude Code session, on the user's own running computer. This is the default and the assumption. Do NOT interpret it as anything else unless the user explicitly names a different mechanism.
 
@@ -115,7 +124,24 @@ When in emergency stop mode:
 - **Stay in emergency stop mode until the user explicitly says "emergency stop ended."** Only after that exact signal do you resume any normal work.
 
 # currentDate
-Today's date is {date}.
+Today's date is {date}."""
+
+
+def claude_md(project_name: str) -> str:
+    date = datetime.now().strftime("%Y-%m-%d")
+    return f"""# {project_name}
+
+{_CLAUDE_CORE_RULES}
+
+{_WRITING_SECTION}
+
+## Project Description
+_TODO: Describe what this project is about._
+
+## Architecture and Conventions
+_TODO: Document key decisions, file structure, and patterns as they emerge._
+
+{_common_claude_tail(date)}
 """
 
 
@@ -2030,3 +2056,508 @@ def clawrxiv_skill_md(paper: ClawrxivPaper) -> str:
 
 def clawrxiv_readme_md(paper: ClawrxivPaper) -> str:
     return _CLAWRXIV_README_TMPL.substitute(_clawrxiv_subs(paper))
+
+
+# ---------------------------------------------------------------------------
+# Research project templates (`cleanvibe research <name>`)
+#
+# A research project is, like `cleanvibe new`, a *fresh* project you scaffold
+# for your OWN investigation — not a replication of someone else's paper. It
+# keeps everything `new` has (data_lake/, the three-cron playbook,
+# todo.md → queue.md → devlog.md), and adds two things borrowed from the
+# replication flow:
+#   1. an up-front **literature review** step (agentic RAG) before any building,
+#      with sources + a synthesized survey committed under `literature/`; and
+#   2. a published, **themed GitHub Pages report** under `docs/` (light "paper"
+#      theme + dark-mode variant, adapted from the latent-space-cartography
+#      site http://latent-space.emmaleonhart.com/) plus a transportable PDF,
+#      built by `.github/workflows/pages.yml`.
+#
+# The CLAUDE.md/queue.md share their workflow/cron/emergency-stop blocks with
+# `new` via `_CLAUDE_CORE_RULES` / `_WRITING_SECTION` / `_common_claude_tail`
+# (no drift). Research IS extensive work, so — unlike replication — it KEEPS
+# the three-cron playbook.
+# ---------------------------------------------------------------------------
+
+
+# Placeholder used when the user did not pass `--question`; the bootstrap queue
+# pins it down by interviewing the user.
+_RESEARCH_QUESTION_PLACEHOLDER = (
+    "_(not yet defined — the bootstrap queue's first research step pins this "
+    "down with you)_"
+)
+
+
+def _research_question(question: str | None) -> str:
+    q = (question or "").strip()
+    return q if q else _RESEARCH_QUESTION_PLACEHOLDER
+
+
+RESEARCH_GITIGNORE = """# Research outputs (regenerated by runs; not committed)
+results/
+checkpoints/
+*.ckpt
+*.pt
+*.pth
+wandb/
+
+# Built deliverables (GitHub Actions builds the PDF into docs/; the root copy
+# is transient). The docs/ site itself IS committed.
+report.pdf
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+dist/
+build/
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE / OS / env
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+.env
+.env.local
+"""
+
+
+# GitHub Actions: publish the themed docs/ site + build a transportable PDF
+# report from FINDINGS.md into docs/report.pdf. Static constant — contains
+# ${{ }} expressions; never run through Template.
+RESEARCH_PAGES_YML = """# Publishes the docs/ folder as a GitHub Pages site (the themed research
+# report) and builds a transportable PDF from FINDINGS.md into docs/report.pdf.
+#
+# TODO (one-time, by the repo owner):
+#   1. Make this repository public (free GitHub Pages).
+#   2. Settings -> Pages -> Source: "GitHub Actions".
+
+name: pages
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install pandoc
+        run: sudo apt-get update && sudo apt-get install -y pandoc
+      - name: Build report PDF into docs/
+        run: |
+          mkdir -p docs
+          if [ -f FINDINGS.md ]; then
+            pandoc FINDINGS.md -s -o docs/report.pdf || echo "PDF render skipped"
+          else
+            echo "No FINDINGS.md yet; skipping PDF build"
+          fi
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
+"""
+
+
+# The themed report landing page that ships in docs/index.html. Adapted from
+# http://latent-space.emmaleonhart.com/ (warm "paper" light theme + dark-mode
+# variant). Placeholders (__PROJECT_NAME__ / __QUESTION__ / __DATE__) are filled
+# by str.replace — the CSS is full of `{` and `$`, so neither f-strings nor
+# string.Template are safe here. The agent edits the CONTENT (lede, cards,
+# pillars, findings) as the project progresses; the chrome stays.
+_RESEARCH_INDEX_HTML = """<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>__PROJECT_NAME__</title>
+<meta name="description" content="A cleanvibe research project: __QUESTION__">
+<style>
+  :root {
+    --bg: #f6f2ec;
+    --surface: #efe9df;
+    --card: #ece4d6;
+    --accent: #b8553a;
+    --accent-soft: #e9d5cc;
+    --text: #2d2a26;
+    --dim: #6e6a61;
+    --green: #5b7a4a;
+    --yellow: #a07a2b;
+    --blue: #3f6487;
+    --border: #d9d1c1;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.75;
+    max-width: 880px; margin: 0 auto; padding: 2.5rem 1.5rem;
+    font-size: 16.5px;
+  }
+  h1 {
+    color: var(--text); font-size: 2.2rem; margin-bottom: 0.4rem;
+    font-weight: 700; letter-spacing: -0.01em;
+  }
+  h2 {
+    color: var(--blue); font-size: 1.35rem; margin: 2.75rem 0 1rem;
+    padding-bottom: 0.4rem; border-bottom: 1px solid var(--border);
+    font-weight: 600;
+  }
+  p { margin-bottom: 1rem; }
+  a { color: var(--blue); text-decoration: none; border-bottom: 1px solid transparent; }
+  a:hover { border-bottom-color: var(--blue); }
+  .lede { color: var(--dim); font-size: 1.1rem; margin-top: 0.8rem; line-height: 1.65; }
+  .question {
+    background: var(--surface); border-left: 3px solid var(--accent);
+    border-radius: 4px; padding: 1rem 1.3rem; margin: 1.5rem 0;
+    font-size: 1.05rem; color: var(--text);
+  }
+  .question .kicker {
+    display: block; font-size: 0.78rem; text-transform: uppercase;
+    letter-spacing: 0.06em; color: var(--accent); font-weight: 700;
+    margin-bottom: 0.3rem;
+  }
+  .actions {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 1rem; margin: 2rem 0 0.5rem;
+  }
+  .action {
+    display: block; background: var(--card); border: 1px solid var(--border);
+    border-radius: 8px; padding: 1.25rem 1.3rem; color: var(--text);
+    transition: border-color 0.15s, transform 0.15s;
+  }
+  .action:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .action .kicker {
+    font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--accent); font-weight: 700;
+  }
+  .action .title { font-size: 1.12rem; font-weight: 600; margin: 0.35rem 0 0.3rem; }
+  .action .desc { font-size: 0.9rem; color: var(--dim); line-height: 1.55; }
+  .action .arrow { color: var(--accent); font-weight: 700; }
+  .pillars { margin: 1rem 0; }
+  .pillar {
+    background: var(--surface); border-left: 3px solid var(--blue);
+    border-radius: 4px; padding: 1rem 1.3rem; margin: 1rem 0;
+  }
+  .pillar h3 { color: var(--blue); font-size: 1.05rem; font-weight: 600; margin-bottom: 0.3rem; }
+  .pillar p { color: var(--dim); font-size: 0.95rem; margin: 0; }
+  code {
+    background: var(--surface); padding: 0.1rem 0.35rem; border-radius: 3px;
+    font-family: 'Cascadia Code', 'Fira Code', Consolas, monospace; font-size: 0.86em;
+    color: var(--accent); border: 1px solid var(--border);
+  }
+  footer {
+    margin-top: 3rem; padding-top: 1.2rem; border-top: 1px solid var(--border);
+    color: var(--dim); font-size: 0.85rem;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1c1d22;
+      --surface: #26282f;
+      --card: #2d3038;
+      --accent: #d97757;
+      --accent-soft: rgba(217,119,87,0.12);
+      --text: #e8e4dc;
+      --dim: #9a9589;
+      --green: #8ba87a;
+      --yellow: #c6a15e;
+      --blue: #85a8c4;
+      --border: #3a3d46;
+    }
+  }
+  @media (max-width: 600px) {
+    body { padding: 1.2rem; }
+    .actions { grid-template-columns: 1fr; }
+    h1 { font-size: 1.7rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- This is the published research report (GitHub Pages serves docs/). Edit the
+     CONTENT as the project progresses; keep the theme/chrome. The build step in
+     .github/workflows/pages.yml also drops a transportable report.pdf alongside. -->
+
+<h1>__PROJECT_NAME__</h1>
+<p class="lede">
+  A <strong>cleanvibe research project</strong>. <em>TODO: replace this lede with a
+  one-paragraph plain-language summary of what this project investigates and what
+  it found.</em>
+</p>
+
+<div class="question">
+  <span class="kicker">Research question</span>
+  __QUESTION__
+</div>
+
+<div class="actions">
+  <a class="action" href="#findings">
+    <div class="kicker">Read</div>
+    <div class="title">The findings</div>
+    <div class="desc">
+      The results of the investigation. <span class="arrow">&darr;</span>
+    </div>
+  </a>
+  <a class="action" href="report.pdf">
+    <div class="kicker">Download</div>
+    <div class="title">The report (PDF)</div>
+    <div class="desc">
+      Full write-up, typeset. <span class="arrow">&darr;</span>
+    </div>
+  </a>
+  <a class="action" href="#">
+    <div class="kicker">Source</div>
+    <div class="title">GitHub repository</div>
+    <div class="desc">
+      Code, data, and the literature review. <span class="arrow">&nearr;</span>
+    </div>
+  </a>
+</div>
+
+<h2>What this project does</h2>
+<div class="pillars">
+  <div class="pillar">
+    <h3>1 &middot; The question</h3>
+    <p>__QUESTION__</p>
+  </div>
+  <div class="pillar">
+    <h3>2 &middot; Grounded in the literature</h3>
+    <p>
+      TODO: one line on the prior work this builds on (the full survey lives in
+      <code>literature/REVIEW.md</code>) and the gap this project addresses.
+    </p>
+  </div>
+  <div class="pillar">
+    <h3>3 &middot; The finding</h3>
+    <p>TODO: one line on the headline result, once there is one.</p>
+  </div>
+</div>
+
+<h2 id="findings">Findings</h2>
+<p>
+  <em>TODO: write the findings here (or render them from <code>FINDINGS.md</code>).
+  Until results exist, this project is <strong>in progress</strong>.</em>
+</p>
+
+<footer>
+  <p>
+    Scaffolded with <a href="https://github.com/Immanuelle/cleanvibe">cleanvibe</a>
+    <code>research</code> &middot; generated __DATE__
+  </p>
+</footer>
+
+</body>
+</html>
+"""
+
+
+def research_index_html(project_name: str, question: str | None = None) -> str:
+    """The themed docs/index.html report landing page for a research project."""
+    date = datetime.now().strftime("%Y-%m-%d")
+    q = _research_question(question)
+    return (
+        _RESEARCH_INDEX_HTML
+        .replace("__PROJECT_NAME__", project_name)
+        .replace("__QUESTION__", q)
+        .replace("__DATE__", date)
+    )
+
+
+def research_claude_md(project_name: str, question: str | None = None) -> str:
+    date = datetime.now().strftime("%Y-%m-%d")
+    q = _research_question(question)
+    return f"""# {project_name} — research project
+
+## Project Description
+
+This is a **research project** scaffolded by `cleanvibe research`. Unlike a
+*replication* (which reproduces someone else's paper), this is **your own**
+investigation: you pose a question, survey the prior literature, run experiments
+or build something to answer it, and publish the findings.
+
+> **Research question:** {q}
+
+Like a cleanvibe replication it produces a published, legible report — a themed
+**GitHub Pages site** (`docs/`) plus a transportable PDF — but the content is
+original research, grounded in a literature review rather than in one target
+paper.
+
+## Research workflow (the shape of this project)
+
+1. **Question.** Pin down precisely what is being investigated / built and what a
+   successful answer looks like. (Bootstrap step; the `> Research question` above
+   gets filled in then.)
+2. **Literature review (agentic RAG) — BEFORE building anything.** Survey the
+   prior work: use whatever agentic search / RAG tooling is available (web
+   search, `WebFetch`, and the `deep-research` skill if present) to find the
+   relevant papers, posts, datasets, and code; read them; collect sources with
+   citations into `literature/`; synthesize `literature/REVIEW.md` (what is
+   already known, the gaps, and what *this* project adds). This grounds the work
+   in the field instead of reinventing it, and it is what makes a `research`
+   project different from a plain `new` one.
+3. **Hypotheses & experiments.** Turn the identified gap into concrete, testable
+   experiments / build steps. Plan them `todo.md` → `queue.md`.
+4. **Build & run.** Implement under `src/`; entry point `scripts/run.py`;
+   metrics → `results/`.
+5. **Findings & report.** Write `FINDINGS.md`; keep the themed `docs/` site and
+   the PDF report current as results land.
+
+## Architecture and Conventions
+
+- **`literature/`** — the literature review: source notes (one file per source,
+  or a `sources.md`) and `REVIEW.md` (the synthesized survey, with citations).
+  Committed; it is the evidentiary base of the project. Built in workflow step 2,
+  before any implementation.
+- **`data_lake/`** — datasets and other supplied/downloaded material (standard
+  cleanvibe convention). Committed.
+- **`src/`** — the research code. **`scripts/run.py`** — the entry point CI can
+  invoke. **`results/`** — metrics JSON / run outputs (gitignored). **`FINDINGS.md`**
+  — the write-up (question, method, results, limitations).
+- **`docs/`** — the **published GitHub Pages site** (themed `index.html`, figures,
+  and the built `report.pdf`). This is the legibility layer. The theme ships
+  pre-styled (warm "paper" light theme + dark-mode variant); edit the content,
+  keep the chrome. Site-shape inspiration: http://latent-space.emmaleonhart.com/
+- **Go live early.** Create a **PUBLIC** GitHub repo and push near the start so
+  every commit pushes and Pages/CI build as you go (public is required for free
+  GitHub Pages).
+- **Deliverables are built by GitHub Actions.** `.github/workflows/pages.yml`
+  deploys `docs/` (the report site) and builds `docs/report.pdf` from
+  `FINDINGS.md`. Make the repo public and set Settings -> Pages -> Source:
+  GitHub Actions.
+
+{_CLAUDE_CORE_RULES}
+
+{_WRITING_SECTION}
+
+{_common_claude_tail(date)}
+"""
+
+
+def research_readme_md(project_name: str, question: str | None = None) -> str:
+    q = _research_question(question)
+    return f"""# {project_name}
+
+> A **research project** scaffolded with
+> [cleanvibe](https://github.com/Immanuelle/cleanvibe) `research`.
+
+**Research question:** {q}
+
+## About
+
+This is an original research project (not a replication). It poses a question,
+surveys the prior literature, runs experiments / builds something to answer it,
+and publishes the findings as a themed GitHub Pages report + a transportable PDF.
+
+The distinctive first move is a **literature review** (agentic RAG) *before* any
+building — see `literature/`.
+
+## How it's organized
+
+- `literature/` — the literature review (sources + `REVIEW.md`), built first.
+- `data_lake/` — datasets and supplied material.
+- `src/` — the research code; `scripts/run.py` — the run entry point.
+- `results/` — run outputs (gitignored). `FINDINGS.md` — the write-up.
+- `docs/` — the published GitHub Pages report site (themed) + built PDF.
+- `queue.md` / `todo.md` / `devlog.md` — the cleanvibe work loop.
+
+## Getting started
+
+```
+cd {project_name}
+claude
+```
+
+Then work `queue.md` top to bottom. The bootstrap sequence pins down the
+research question with you, runs the literature review, plans the experiments,
+takes the repo public, and keeps the report current as results land.
+
+## Published report
+
+Once the repo is public with Pages set to **Source: GitHub Actions**,
+`.github/workflows/pages.yml` deploys `docs/` (the report site) and builds
+`docs/report.pdf`. Site-shape inspiration: http://latent-space.emmaleonhart.com/
+"""
+
+
+def research_queue_md(project_name: str, question: str | None = None) -> str:
+    q = _research_question(question)
+    return f"""# {project_name} — Work Queue (research)
+
+**This file is a queue of *concrete, executable steps*, not a state snapshot.** It lists what is being worked on right now. Finished work lives in `devlog.md` (a dated entry) and `git log`; longer-horizon, *abstract* work lives in `todo.md` and gets decomposed into items here when it's ready to execute. **When an item is done, delete it from this file AND append a dated entry to `devlog.md` in the same commit, then push.** Do not add checkmarks, "done" markers, or status indicators in place. If an item is still here, it is not done.
+
+**This is a `cleanvibe research` project** — your own investigation, not a replication. Its distinctive move is an up-front **literature review** (agentic RAG) before any building, and a published, themed GitHub Pages **report** under `docs/`.
+
+**Why this file exists:** when a planning step produces a plan, that plan is written here BEFORE execution starts, so an interrupted session can pick up from the queue rather than from chat context that may be gone.
+
+See `CLAUDE.md` § "Workflow Rules" and § "Research workflow" for how this file, planning mode, and the task tool stay in sync.
+
+**Three-cron playbook.** Research IS extensive work, so it runs under three local `CronCreate` jobs — **work-loop at :03** (the engine that drains `queue.md` and refills it from `todo.md`), **auto-flush at :15** (commit/push backstop), and **status-report at :42** (heartbeat). On a fresh session they are **started** as the opening step (bootstrap step 1 below); on a mid-session **large-scale re-fill** of this queue the FIRST item worked is instead to **kill** the already-running crons. Either way the **last two items are always pinned at the tail** (see `## Always last`). Entering planning mode also disables the crons; their restart lives at the end of the queue. (See `CLAUDE.md` § "Autonomous productivity loop — the three-cron playbook".)
+
+---
+
+## Active — First-session bootstrap (research)
+
+Work these top to bottom. **Delete each item from this file in the same commit that completes it, and append a dated entry to `devlog.md`.** Push after every step. When this whole section is gone, the project has finished bootstrap and the queue is ready to be repopulated with the real research/experiment work (see the final item).
+
+1. **Start the three-cron playbook.** Use the `CronCreate` tool to schedule three local crons (all `durable: false`): **work-loop at `3 * * * *`** (sync → take top actionable `queue.md` item / promote from `todo.md` → hold the hard rails → commit + push → one-line report), **auto-flush at `15 * * * *`** (commit + push pending work, no empty commits), and **status-report at `42 * * * *`** (reporting only, no code changes). Together they turn this run into a self-sustaining hourly cadence so a long autonomous session can't silently lose the thread. (See `CLAUDE.md` § "Autonomous productivity loop"; the `## Always last` section keeps them running.)
+
+2. **Triage user-supplied files into `data_lake/`.** Move anything the user dropped in (notes, exports, datasets, spec PDFs, prior drafts) into `data_lake/` so the root stays clean; leave the `.gitkeep`. Extract any `.zip` into `data_lake/` and add the `.zip` to `.gitignore`. For anything large enough to need Git LFS (>50 MB, or large binary like video/audio/datasets), STOP and ask the user first. Commit, describing what moved.
+
+3. **Define the research question (interview the user).** This is *your own* project, so the question is the foundation. Read everything in `data_lake/` to build a hypothesis, then ask the user directly: **What question are you trying to answer? What are you building / investigating? What would a successful outcome look like? What's in scope vs. out of scope? Any constraints (methods, data, compute, deadline)?** Write the concrete research question into `README.md` (replace the placeholder), `CLAUDE.md`'s `> Research question` line and "Project Description", and the `docs/index.html` lede + question block. Commit, briefly noting how the question was arrived at.
+
+4. **Literature review (agentic RAG) — BEFORE building anything.** This is the step that makes a `research` project different from a plain `new` one. Survey the prior work on the question: use whatever agentic search / RAG tooling is available (web search, `WebFetch`, and the `deep-research` skill if present). For each relevant source, write a short note (claim, method, what it contributes, citation) into `literature/` — one file per source, or a single `literature/sources.md`. Then synthesize `literature/REVIEW.md`: what is already known, where the gaps are, and what *this* project adds. Cite sources properly. Reflect the one-line "grounded in the literature" summary into `docs/index.html`. Commit `literature/` on its own so the review is a reviewable artifact.
+
+5. **Create `todo.md` — the long-horizon research plan.** Informed by the gap the literature review surfaced, write `todo.md` as the project's long-term horizon: the hypotheses to test, experiments to run / things to build, and the eventual shape of the report. Items here are *abstract destinations*, decomposed into concrete steps in `queue.md` later. Use the format in `CLAUDE.md` § "Queue and longer-horizon work". Commit `todo.md` on its own.
+
+6. **Go live: create a PUBLIC GitHub repo and push.** Public is required for free GitHub Pages. `gh repo create --public --source=. --push`. Confirm CI (`.github/workflows/`) is wired and set **Settings → Pages → Source: GitHub Actions** so `docs/` (the report site) and the built PDF deploy. From here every commit pushes and Pages/CI build as you go.
+
+7. **Replace this bootstrap queue with the real research queue.** Pull the first item(s) from `todo.md` and decompose them into a concrete, ordered list of experiment / implementation tasks under a new `## Active` section (deleting this bootstrap section as part of the same edit). Mirror into the task tool. **Keep the `## Always last` section pinned at the very bottom.** The real queue's FIRST work item should **start the three crons** — unless this is a mid-session large-scale re-fill while they are already running, in which case the first item is instead to **kill them** (the pinned tail restarts them). Commit the new queue.
+
+8. **Work the queue until the stop condition.** Pull the top item, do it, **delete it from `queue.md` AND append a dated entry to `devlog.md`** in the same commit, push, let CI run. Build under `src/`, run via `scripts/run.py`, capture metrics to `results/`, and keep `FINDINGS.md` + the themed `docs/` report current as results land. When `queue.md` empties, refill from `todo.md`. **Stop** when: the research question has a defensible answer (or a clearly reported partial result), `FINDINGS.md` and the published `docs/` report reflect it, `queue.md` is empty, and the repo is online with green CI/Pages. At that point, hand back to the user.
+
+---
+
+## Always last — restart the three crons and summarize
+
+**These two items stay pinned to the tail of the queue at all times** — below every bootstrap step and below every real work item. They are the closing half of the three-cron lifecycle in `CLAUDE.md` § "Autonomous productivity loop":
+
+A. **Ensure the three crons are running** — start them if this session never did, restart them if a planning burst / queue re-fill killed them: work-loop (`3 * * * *`), auto-flush (`15 * * * *`), status-report (`42 * * * *`).
+B. **Run the status-report action once more, independently** — an end-of-session summary of everything that happened this session.
+
+---
+
+## Pointers
+
+- Long-horizon backlog (abstract goals, source of future queue items): `todo.md`.
+- The literature review (the project's evidentiary base): `literature/REVIEW.md`.
+- Completed work (chronological, with milestones): `devlog.md`.
+- Narrative history: `git log`.
+"""

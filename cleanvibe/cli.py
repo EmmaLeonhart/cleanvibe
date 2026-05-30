@@ -2,6 +2,7 @@
 
 Usage:
     cleanvibe new PATH          Create a new scaffolded project
+    cleanvibe research PATH     Create an original-research project (literature-review-first + published report)
     cleanvibe clone REPO [PATH] Clone a repo and inject scaffolding
     cleanvibe convert [PATH]    Convert an existing directory into a cleanvibe project
     cleanvibe replicate REF     Scaffold a replication project: clawRxiv ref, arXiv/alphaxiv ref, a non-arXiv URL, or a drop-in folder
@@ -25,6 +26,7 @@ from .replicate import (
     replicate_project,
     replicate_url_project,
 )
+from .research import research_project
 from .scaffold import clone_project, convert_project, create_project
 
 
@@ -40,6 +42,24 @@ def _confirm(question: str) -> bool:
 def _looks_like_url(value: str) -> bool:
     """True for a plain http(s) URL (used to route non-arXiv research downloads)."""
     return value.strip().lower().startswith(("http://", "https://"))
+
+
+def _do_research(args) -> None:
+    """Handler shared by `cleanvibe research PATH` and `cleanvibe new PATH --research`.
+
+    Research projects are fresh (like `new`), not in-place conversions — so on a
+    non-empty target we just create under a free sibling name rather than
+    offering to convert.
+    """
+    path = args.path
+    question = getattr(args, "question", None)
+    if path.exists() and any(path.iterdir()) and not args.dry_run:
+        suggestion = _suggest_name(path)
+        print(f"{path} already exists and is not empty; using {suggestion} instead.")
+        path = suggestion
+    research_project(
+        path, question=question, dry_run=args.dry_run, no_claude=args.no_claude
+    )
 
 
 def _suggest_name(path: Path) -> Path:
@@ -74,9 +94,37 @@ def main(argv: list[str] | None = None) -> None:
     )
     new_parser.add_argument("path", type=Path, help="Directory to create")
     new_parser.add_argument(
+        "--research", action="store_true",
+        help="Scaffold an original-research project (same as `cleanvibe research`): "
+        "literature-review-first bootstrap + a published, themed report",
+    )
+    new_parser.add_argument(
+        "--question", default=None,
+        help="(research only) the research question, if you already know it",
+    )
+    new_parser.add_argument(
         "--dry-run", action="store_true", help="Show what would be created without writing anything"
     )
     new_parser.add_argument(
+        "--no-claude", action="store_true", help="Skip launching Claude Code after scaffolding"
+    )
+
+    # cleanvibe research PATH
+    research_parser = subparsers.add_parser(
+        "research",
+        help="Create an original-research project: literature-review-first "
+        "bootstrap (agentic RAG) and a published, themed GitHub Pages report",
+    )
+    research_parser.add_argument("path", type=Path, help="Directory to create")
+    research_parser.add_argument(
+        "--question", default=None,
+        help="The research question, if you already know it (otherwise the "
+        "bootstrap queue pins it down with you)",
+    )
+    research_parser.add_argument(
+        "--dry-run", action="store_true", help="Show what would be created without writing anything"
+    )
+    research_parser.add_argument(
         "--no-claude", action="store_true", help="Skip launching Claude Code after scaffolding"
     )
 
@@ -144,7 +192,15 @@ def main(argv: list[str] | None = None) -> None:
         parser.print_help()
         sys.exit(0)
 
+    if args.command == "research":
+        _do_research(args)
+        return
+
     if args.command == "new":
+        if args.research:
+            # `cleanvibe new PATH --research` is an alias for `cleanvibe research`.
+            _do_research(args)
+            return
         if args.path.exists() and any(args.path.iterdir()):
             # Existing, non-empty directory: prompt instead of erroring.
             if args.dry_run:

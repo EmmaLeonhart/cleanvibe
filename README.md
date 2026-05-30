@@ -39,6 +39,41 @@ This will:
 6. Initialize a git repo with an initial commit
 7. Launch Claude Code inside the project
 
+### Research a question — your own investigation
+
+```
+cleanvibe research reservoiragent
+cleanvibe research reservoiragent --question "What is the memory capacity of a reservoir-computing agent?"
+cleanvibe new reservoiragent --research      # equivalent alias
+```
+
+`research` is for an **original-research project** — *your own* investigation,
+not a [replication](#replicate-a-paper) of someone else's paper. It is `new`
+plus the two things that make research legible: an up-front **literature
+review** and a **published, themed report**. It scaffolds everything `new`
+does (`CLAUDE.md`, `README.md`, `queue.md`, `devlog.md`, `.gitignore`,
+`data_lake/`, the three-cron playbook) and adds:
+
+- **`literature/`** — the literature review, built *before* any code. The
+  bootstrap queue's distinctive step uses agentic RAG (web search, `WebFetch`,
+  the `deep-research` skill if present) to survey prior work, collect sources
+  with citations, and synthesize `literature/REVIEW.md` (what's known, the
+  gaps, what *this* project adds). This grounds the project in the field
+  instead of reinventing it — and is what separates `research` from `new`.
+- **`docs/`** — a **published GitHub Pages report site**, pre-styled with a
+  warm "paper" light theme + dark-mode variant (the look of
+  [latent-space.emmaleonhart.com](http://latent-space.emmaleonhart.com/)), plus
+  a transportable PDF built from `FINDINGS.md`. `.github/workflows/pages.yml`
+  deploys it. The agent edits the content; the theme stays.
+
+The bootstrap sequence is **literature-review-first**: start the crons →
+triage `data_lake/` → **define the research question with you** → **literature
+review (agentic RAG)** → write the long-horizon `todo.md` → go **public** on
+GitHub (required for free Pages) → replace the bootstrap queue with the real
+experiment/build queue → work it, keeping `FINDINGS.md` + the `docs/` report
+current. Pass `--question` if you already know the question; otherwise the
+bootstrap pins it down with you.
+
 ### Clone an existing repo — codebase onboarding
 
 ```
@@ -191,6 +226,8 @@ methodology. See `docs/replication_framing.md` for the full vision.
 ```
 cleanvibe new my-project --dry-run        # Preview what would be created
 cleanvibe new my-project --no-claude      # Skip launching Claude Code
+cleanvibe research my-study --dry-run     # Preview the research scaffold
+cleanvibe research my-study --no-claude   # Scaffold a research project without launching Claude
 cleanvibe clone REPO path --dry-run       # Preview what would be done
 cleanvibe replicate URL --dry-run         # Preview the arXiv replication scaffold
 cleanvibe replicate FOLDER --dry-run      # Preview the manual drop-in scaffold
@@ -223,10 +260,12 @@ project site (built from `pages/` and deployed by GitHub Actions):
 As of **v1.0.0**, cleanvibe commits to the following contract (semantic
 versioning from here on):
 
-- **Subcommands** `new`, `clone`, `convert`, and `replicate` are stable. Their
-  core behavior will not change incompatibly within the 1.x line.
+- **Subcommands** `new`, `research`, `clone`, `convert`, and `replicate` are
+  stable. Their core behavior will not change incompatibly within the 1.x line.
 - **Injected files**: `new` guarantees `CLAUDE.md`, `README.md`, `queue.md`,
-  `.gitignore`, and `data_lake/.gitkeep`. `replicate` always guarantees
+  `.gitignore`, and `data_lake/.gitkeep`. `research` guarantees all of those
+  **plus** `literature/.gitkeep`, `docs/index.html` (the themed report site),
+  and `.github/workflows/pages.yml`. `replicate` always guarantees
   `SKILL.md`, `CLAUDE.md`, `queue.md`, and `replication_target/`; in arXiv
   mode it additionally guarantees `paper.json` and `download_paper.py`; in
   clawRxiv mode it guarantees `paper.json` and
