@@ -151,6 +151,12 @@ def _download_source(url: str, dest_dir: Path):
     return fname
 
 
+# The replication verdict that drives the report's status badge. The agent
+# flips it to one of the other values when the replication concludes; the
+# themed GitHub Pages report (REPLICATION_PAGES_YML) colours the banner from it.
+_STATUS_DEFAULT = "in-progress"  # allowed: in-progress | replicated | failed | insufficient-hardware
+
+
 def _paper_json(paper) -> str:
     return json.dumps(
         {
@@ -162,6 +168,8 @@ def _paper_json(paper) -> str:
             "published": paper.published,
             "pdf_url": paper.pdf_url,
             "summary": paper.summary,
+            # Replication verdict for the report's status badge (see above).
+            "status": _STATUS_DEFAULT,
         },
         indent=2,
         ensure_ascii=False,
@@ -183,6 +191,8 @@ def _clawrxiv_paper_json(paper) -> str:
             "abs_url": paper.abs_url,
             "api_url": paper.api_url,
             "has_skill_file": paper.has_skill_file,
+            # Replication verdict for the report's status badge (see above).
+            "status": _STATUS_DEFAULT,
         },
         indent=2,
         ensure_ascii=False,
@@ -222,6 +232,7 @@ def replicate_project(
             "replication_target/.gitkeep",
             ".github/workflows/pages.yml",
             ".github/workflows/package.yml",
+            "report-theme.css",
         ):
             print(f"[dry-run] Would write: {target / rel}")
         if is_windows:
@@ -256,6 +267,10 @@ def replicate_project(
     workflows.mkdir(parents=True, exist_ok=True)
     _write(workflows / "pages.yml", templates.REPLICATION_PAGES_YML)
     _write(workflows / "package.yml", templates.REPLICATION_PACKAGE_YML)
+
+    # The shared cleanvibe report theme (the Pages build inlines this into the
+    # themed findings site). Same theme as `cleanvibe research`.
+    _write(target / "report-theme.css", templates.CLEANVIBE_REPORT_CSS)
 
     if is_windows:
         _write(target / "!runClaude.bat", templates.RUNCLAUDE_BAT)
@@ -317,6 +332,7 @@ def replicate_clawrxiv_project(
             "replication_target/.gitkeep",
             ".github/workflows/pages.yml",
             ".github/workflows/package.yml",
+            "report-theme.css",
         ):
             print(f"[dry-run] Would write: {target / rel}")
         if paper.has_skill_file:
@@ -365,6 +381,10 @@ def replicate_clawrxiv_project(
     workflows.mkdir(parents=True, exist_ok=True)
     _write(workflows / "pages.yml", templates.REPLICATION_PAGES_YML)
     _write(workflows / "package.yml", templates.REPLICATION_PACKAGE_YML)
+
+    # The shared cleanvibe report theme (the Pages build inlines this into the
+    # themed findings site). Same theme as `cleanvibe research`.
+    _write(target / "report-theme.css", templates.CLEANVIBE_REPORT_CSS)
 
     if is_windows:
         _write(target / "!runClaude.bat", templates.RUNCLAUDE_BAT)
@@ -420,6 +440,7 @@ def replicate_manual_project(folder, dry_run: bool = False, no_claude: bool = Fa
         "replication_target/.gitkeep",
         ".github/workflows/pages.yml",
         ".github/workflows/package.yml",
+        "report-theme.css",
     )
 
     if dry_run:
@@ -462,6 +483,9 @@ def replicate_manual_project(folder, dry_run: bool = False, no_claude: bool = Fa
         target / ".github" / "workflows" / "package.yml",
         templates.REPLICATION_PACKAGE_YML,
     )
+    # The shared cleanvibe report theme (same as `cleanvibe research`); the
+    # Pages build inlines it into the themed findings site.
+    _write_if_missing(target / "report-theme.css", templates.CLEANVIBE_REPORT_CSS)
 
     if is_windows:
         _write_if_missing(target / "!runClaude.bat", templates.RUNCLAUDE_BAT)
@@ -527,6 +551,7 @@ def replicate_url_project(
             "replication_target/.gitkeep",
             ".github/workflows/pages.yml",
             ".github/workflows/package.yml",
+            "report-theme.css",
         ):
             print(f"[dry-run] Would write: {target / rel}")
         if is_windows:
@@ -555,6 +580,10 @@ def replicate_url_project(
     workflows.mkdir(parents=True, exist_ok=True)
     _write(workflows / "pages.yml", templates.REPLICATION_PAGES_YML)
     _write(workflows / "package.yml", templates.REPLICATION_PACKAGE_YML)
+
+    # The shared cleanvibe report theme (the Pages build inlines this into the
+    # themed findings site). Same theme as `cleanvibe research`.
+    _write(target / "report-theme.css", templates.CLEANVIBE_REPORT_CSS)
 
     if is_windows:
         _write(target / "!runClaude.bat", templates.RUNCLAUDE_BAT)

@@ -125,6 +125,15 @@ class TestResearchScaffold(unittest.TestCase):
         self.assertNotIn("__PROJECT_NAME__", html)
         self.assertNotIn("__QUESTION__", html)
         self.assertNotIn("__DATE__", html)
+        self.assertNotIn("__REPORT_CSS__", html)
+
+    def test_shares_theme_with_replication(self):
+        # research and replicate use ONE report theme (CLEANVIBE_REPORT_CSS).
+        proj, _ = _make()
+        html = (proj / "docs" / "index.html").read_text(encoding="utf-8")
+        self.assertIn(templates.CLEANVIBE_REPORT_CSS, html)
+        # The shared theme carries the replication status-badge styles too.
+        self.assertIn(".status-badge", templates.CLEANVIBE_REPORT_CSS)
 
     def test_pages_yml_deploys_docs_and_builds_pdf(self):
         proj, _ = _make()

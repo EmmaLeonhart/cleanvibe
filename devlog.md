@@ -959,3 +959,32 @@ so — unlike replication, which is exempt — it KEEPS the three-cron playbook.
   CLAUDE.md research sections, `--question` threading, `new`-without-`--research`
   regression. Full suite **96/96** green (was 79).
 - Version `1.11.1` -> `1.12.0` (`cleanvibe/__init__.py`, `pyproject.toml`).
+
+## 2026-05-29 — v1.13.0: one shared report theme for research + replication (+ status badge)
+
+Made the v1.12.0 research report theme the **default cleanvibe report theme for
+both** `research` and `replicate`, and finished the long-standing "prettier
+replication reports with a status badge" queue item in the same pass.
+
+- **`templates.CLEANVIBE_REPORT_CSS`** (new): single source of truth for the
+  theme — warm "paper" light theme + dark-mode variant (from
+  latent-space-cartography) + color-coded `.status-badge` classes. `research`
+  inlines it into `docs/index.html`; `replicate` writes it to a committed
+  `report-theme.css`.
+- **`REPLICATION_PAGES_YML`** rewritten: was bare `pandoc FINDINGS.md -s`
+  (black-and-white, no structure). Now it renders the FINDINGS body with pandoc,
+  wraps it in the shared theme + a **big color-coded replication status badge**
+  (🟢 replicated / 🔴 failed / 🟠 insufficient-hardware / 🔵 in-progress) in a
+  self-contained `site/index.html`, and still builds `report.pdf`. The verdict
+  is read (`jq`) from a **`status` field in `paper.json`** (default
+  `"in-progress"`), so it can't drift from a stray string.
+- **`replicate.py`**: `_paper_json` / `_clawrxiv_paper_json` now emit
+  `status: "in-progress"`; all four replicate modes (arXiv / clawRxiv / URL /
+  manual) write `report-theme.css`. Replication CLAUDE/README/SKILL/queue
+  templates document the `status` field + allowed values + the themed report;
+  the site-shape exemplar switched from `sutra` to `latent-space.emmaleonhart.com`.
+- **Tests**: +5 (theme shared between modes, `report-theme.css` written, badge +
+  status wiring, `paper.json` status default, generated Pages YAML themed). Full
+  suite **101/101** green (was 96). Verified both generated Pages workflows parse
+  as YAML.
+- Version `1.12.0` -> `1.13.0` (`cleanvibe/__init__.py`, `pyproject.toml`).

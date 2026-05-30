@@ -183,6 +183,12 @@ The generated scaffold is built around the **efficient, recipe-first path**:
 - **Go live early.** The agent is told to create a PUBLIC GitHub repo and push
   near the start, so every commit pushes and Pages/CI build as the work goes —
   not left local-only.
+- **Themed report with a status badge.** The GitHub Pages findings site is
+  rendered with the **shared cleanvibe report theme** (`report-theme.css` — the
+  same warm "paper" + dark-mode theme `cleanvibe research` uses) and topped with
+  a big color-coded **replication status badge** — 🟢 replicated / 🔴 failed /
+  🟠 insufficient hardware / 🔵 in progress — driven by a `status` field in
+  `paper.json` (defaults to in-progress). A transportable PDF is built too.
 
 **From a plain URL (research that isn't on arXiv):**
 

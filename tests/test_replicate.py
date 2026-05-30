@@ -12,7 +12,7 @@ from contextlib import contextmanager, redirect_stdout
 from pathlib import Path
 from unittest.mock import patch
 
-from cleanvibe import cli
+from cleanvibe import cli, templates
 from cleanvibe.arxiv import ArxivPaper
 from cleanvibe.replicate import (
     _slug_from_url,
@@ -195,6 +195,46 @@ class TestReplicateScaffold(unittest.TestCase):
             )
             self.assertIn("[dry-run]", out)
             self.assertIn("1706.03762", out)
+
+
+class TestReplicateReportTheme(unittest.TestCase):
+    """The replication report uses the shared cleanvibe theme + a status badge."""
+
+    def test_paper_json_has_status_default(self):
+        with _in_tmp_cwd():
+            _run()
+            target = Path(f"replicating-{SLUG}")
+            meta = json.loads((target / "paper.json").read_text(encoding="utf-8"))
+            self.assertEqual(meta["status"], "in-progress")
+
+    def test_report_theme_css_written_and_shared(self):
+        with _in_tmp_cwd():
+            _run()
+            css = (Path(f"replicating-{SLUG}") / "report-theme.css").read_text(
+                encoding="utf-8"
+            )
+            # Same theme as research mode (one source: CLEANVIBE_REPORT_CSS).
+            self.assertEqual(css, templates.CLEANVIBE_REPORT_CSS)
+            self.assertIn("--accent: #b8553a", css)          # light theme
+            self.assertIn("prefers-color-scheme: dark", css)  # dark variant
+            self.assertIn(".status-badge", css)              # verdict badge
+
+    def test_manual_mode_also_themed(self):
+        with _in_tmp_cwd():
+            replicate_manual_project("m", no_claude=True)
+            self.assertTrue((Path("m") / "report-theme.css").is_file())
+
+    def test_pages_yml_themed_with_badge(self):
+        yml = templates.REPLICATION_PAGES_YML
+        self.assertIn("status-badge", yml)
+        self.assertIn("report-theme.css", yml)
+        self.assertIn("jq -r", yml)  # reads paper.json status
+        # All four verdict classes are mapped to labels.
+        for cls in ("replicated", "failed", "insufficient", "in-progress"):
+            self.assertIn(cls, yml)
+        # Still builds the transportable PDF and deploys.
+        self.assertIn("report.pdf", yml)
+        self.assertIn("deploy-pages", yml)
 
 
 def _run_manual(folder="my-paper", **kwargs):

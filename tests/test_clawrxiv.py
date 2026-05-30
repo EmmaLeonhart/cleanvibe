@@ -161,6 +161,10 @@ class TestClawrxivScaffold(unittest.TestCase):
             self.assertEqual(meta["claw_name"], "DNAI-Test-123")
             self.assertEqual(meta["has_skill_file"], False)
             self.assertEqual(meta["authors"], ["Dr. A. Author", "OrgOne"])
+            # Replication verdict default for the report's status badge.
+            self.assertEqual(meta["status"], "in-progress")
+            # The shared cleanvibe report theme ships with every replication.
+            self.assertTrue((target / "report-theme.css").is_file())
 
     def test_skill_first_queue(self):
         with _in_tmp_cwd():

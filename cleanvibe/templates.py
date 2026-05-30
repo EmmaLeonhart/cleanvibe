@@ -547,11 +547,13 @@ reusable, agent-executable replication methodology.
 - **Go live early.** Create a PUBLIC GitHub repo and push near the start so
   every commit pushes and CI/Pages build as you go — don't leave it local-only.
 - **Deliverables are built by GitHub Actions, not committed.**
-  `.github/workflows/pages.yml` publishes the GitHub Pages site + PDF report;
+  `.github/workflows/pages.yml` publishes a **themed** GitHub Pages findings
+  site (the shared `report-theme.css` cleanvibe report theme + a color-coded
+  replication status badge driven by `paper.json` `status`) + PDF report;
   `.github/workflows/package.yml` builds the downloadable ZIP replication
   package. You must make the repo public and enable Pages (Settings -> Pages
   -> Source: GitHub Actions) — the workflows carry TODO markers for this.
-  Vision for the site shape: http://sutra.emmaleonhart.com/
+  Vision for the site shape: http://latent-space.emmaleonhart.com/
 
 ## Workflow Rules
 
@@ -675,8 +677,11 @@ it (and append to `devlog.md`).
     recipe covered vs. what you filled; gaps (hyperparameters, preprocessing,
     omitted architecture details) and where/why it diverged. Commit and push.
 
-11. **Publish and finish.** Confirm `.github/workflows/pages.yml` (site + PDF
-    report) and `.github/workflows/package.yml` (ZIP) run green; set
+11. **Publish and finish.** Set the replication verdict in `paper.json`
+    `status` — `replicated` / `failed` / `insufficient-hardware` — so the
+    report's big status badge turns green / red / amber (it defaults to
+    `in-progress`, blue). Confirm `.github/workflows/pages.yml` (themed site +
+    PDF report) and `.github/workflows/package.yml` (ZIP) run green; set
     Settings → Pages → Source: GitHub Actions. Keep `SKILL.md` (and
     `replication_skill.md`, if you found one) truthful to what you actually did.
     **Stop / hand back** when `FINDINGS.md` reports at least one headline number
@@ -844,7 +849,7 @@ Three compounding artifacts:
 To publish, **make this repo public** and set **Settings -> Pages -> Source:
 GitHub Actions**. Then `pages.yml` deploys the findings site + PDF report and
 `package.yml` builds a downloadable ZIP replication package. Site shape
-inspiration: http://sutra.emmaleonhart.com/
+inspiration: http://latent-space.emmaleonhart.com/
 """
 )
 
@@ -1142,13 +1147,39 @@ jobs:
           submodules: recursive
       - name: Install pandoc
         run: sudo apt-get update && sudo apt-get install -y pandoc
-      - name: Build site + PDF report
+      - name: Build themed findings site + PDF report
         run: |
           mkdir -p site
-          # Findings page (falls back to README if FINDINGS.md not written yet)
+          # Findings source (falls back to README if FINDINGS.md not written yet)
           SRC=FINDINGS.md
           [ -f "$SRC" ] || SRC=README.md
-          pandoc "$SRC" -s -o site/index.html --metadata title="Replication report"
+
+          # Replication verdict, from paper.json `status` (default in-progress).
+          STATUS=in-progress
+          if [ -f paper.json ]; then
+            STATUS=$(jq -r '.status // "in-progress"' paper.json 2>/dev/null || echo in-progress)
+          fi
+          case "$STATUS" in
+            replicated)            LABEL="Replicated"; CLASS="replicated";;
+            failed)                LABEL="Failed to replicate"; CLASS="failed";;
+            insufficient-hardware) LABEL="Insufficient hardware to replicate"; CLASS="insufficient";;
+            *)                     LABEL="In progress"; CLASS="in-progress";;
+          esac
+
+          # Render the findings body (fragment), then wrap it in the shared
+          # cleanvibe report theme + the color-coded status badge.
+          pandoc "$SRC" -o body.html
+          {
+            echo '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">'
+            echo '<meta name="viewport" content="width=device-width, initial-scale=1.0">'
+            echo '<title>Replication report</title><style>'
+            [ -f report-theme.css ] && cat report-theme.css
+            echo '</style></head><body>'
+            echo "<div class=\\"status-badge $CLASS\\">$LABEL</div>"
+            cat body.html
+            echo '</body></html>'
+          } > site/index.html
+
           pandoc "$SRC" -o site/report.pdf || echo "PDF render skipped"
       - uses: actions/upload-pages-artifact@v3
         with:
@@ -1336,10 +1367,12 @@ in the cleanvibe repo for the full framing.
   CI invokes. **`results/`** — metrics JSON (gitignored). **`FINDINGS.md`** —
   the report (reproduced vs. reported, gaps, divergences).
 - **Deliverables are built by GitHub Actions, not committed.**
-  `.github/workflows/pages.yml` publishes the GitHub Pages site + PDF report;
+  `.github/workflows/pages.yml` publishes a **themed** GitHub Pages findings
+  site (the shared `report-theme.css` cleanvibe report theme + a color-coded
+  replication status badge driven by `paper.json` `status`) + PDF report;
   `.github/workflows/package.yml` builds the downloadable ZIP replication
   package. Make the repo public and set Settings -> Pages -> Source: GitHub
-  Actions. Vision for the site shape: http://sutra.emmaleonhart.com/
+  Actions. Vision for the site shape: http://latent-space.emmaleonhart.com/
 
 ## Workflow Rules
 
@@ -1485,13 +1518,17 @@ completes it (and append to `devlog.md`).
    recipe covered vs. what you filled; gaps (hyperparameters, preprocessing,
    omitted architecture details) and where/why it diverged. Commit and push.
 
-10. **Publish and finish.** Confirm `.github/workflows/pages.yml` (site + PDF)
-    and `.github/workflows/package.yml` (ZIP) run green; set Settings → Pages →
-    Source: GitHub Actions. Keep `SKILL.md` (and `replication_skill.md`, if
-    found) truthful. **Stop / hand back** when `FINDINGS.md` reports at least
-    one headline number with its reproduced value, `scripts/run.py` runs
-    end-to-end from a clean clone (or documents the un-automatable data step),
-    the repo is public and pushed, and the Pages deployment is green.
+10. **Publish and finish.** Record the replication verdict so the report's big
+    status badge is right: write a `paper.json` with a `status` field —
+    `replicated` / `failed` / `insufficient-hardware` (it defaults to
+    `in-progress`, blue, when absent). Confirm `.github/workflows/pages.yml`
+    (themed site + PDF) and `.github/workflows/package.yml` (ZIP) run green; set
+    Settings → Pages → Source: GitHub Actions. Keep `SKILL.md` (and
+    `replication_skill.md`, if found) truthful. **Stop / hand back** when
+    `FINDINGS.md` reports at least one headline number with its reproduced
+    value, `scripts/run.py` runs end-to-end from a clean clone (or documents the
+    un-automatable data step), the repo is public and pushed, and the Pages
+    deployment is green.
 
 ---
 
@@ -1699,7 +1736,7 @@ Three compounding artifacts:
 To publish, **make this repo public** and set **Settings -> Pages -> Source:
 GitHub Actions**. Then `pages.yml` deploys the findings site + PDF report and
 `package.yml` builds a downloadable ZIP replication package. Site shape
-inspiration: http://sutra.emmaleonhart.com/
+inspiration: http://latent-space.emmaleonhart.com/
 """
 
 
@@ -1789,10 +1826,12 @@ agent-executable replication methodology.
 - **Go live early.** Create a PUBLIC GitHub repo and push near the start so
   every commit pushes and CI/Pages build as you go — don't leave it local-only.
 - **Deliverables are built by GitHub Actions, not committed.**
-  `.github/workflows/pages.yml` publishes the GitHub Pages site + PDF report;
+  `.github/workflows/pages.yml` publishes a **themed** GitHub Pages findings
+  site (the shared `report-theme.css` cleanvibe report theme + a color-coded
+  replication status badge driven by `paper.json` `status`) + PDF report;
   `.github/workflows/package.yml` builds the downloadable ZIP replication
   package. Make the repo public and enable Pages (Settings -> Pages -> Source:
-  GitHub Actions). Vision for the site shape: http://sutra.emmaleonhart.com/
+  GitHub Actions). Vision for the site shape: http://latent-space.emmaleonhart.com/
 
 ## Workflow Rules
 
@@ -1888,7 +1927,10 @@ Work top to bottom. Delete each item in the same commit that completes it
    recipe covered vs. what you filled; gaps and where/why it diverged. Commit
    and push.
 
-10. **Publish and finish.** Confirm `.github/workflows/pages.yml` (site + PDF)
+10. **Publish and finish.** Set the replication verdict in `paper.json` `status`
+   — `replicated` / `failed` / `insufficient-hardware` — so the report's big
+   status badge turns green / red / amber (it defaults to `in-progress`, blue).
+   Confirm `.github/workflows/pages.yml` (themed site + PDF)
    and `.github/workflows/package.yml` (ZIP) run green; set Settings → Pages →
    Source: GitHub Actions. Keep `SKILL.md` and `replication_skill.md` truthful.
    **Stop / hand back** when `FINDINGS.md` reports at least one headline number
@@ -2037,7 +2079,7 @@ Three compounding artifacts:
 To publish, **make this repo public** and set **Settings -> Pages -> Source:
 GitHub Actions**. Then `pages.yml` deploys the findings site + PDF report and
 `package.yml` builds a downloadable ZIP replication package. Site shape
-inspiration: http://sutra.emmaleonhart.com/
+inspiration: http://latent-space.emmaleonhart.com/
 """
 )
 
@@ -2188,21 +2230,13 @@ jobs:
 """
 
 
-# The themed report landing page that ships in docs/index.html. Adapted from
-# http://latent-space.emmaleonhart.com/ (warm "paper" light theme + dark-mode
-# variant). Placeholders (__PROJECT_NAME__ / __QUESTION__ / __DATE__) are filled
-# by str.replace — the CSS is full of `{` and `$`, so neither f-strings nor
-# string.Template are safe here. The agent edits the CONTENT (lede, cards,
-# pillars, findings) as the project progresses; the chrome stays.
-_RESEARCH_INDEX_HTML = """<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>__PROJECT_NAME__</title>
-<meta name="description" content="A cleanvibe research project: __QUESTION__">
-<style>
-  :root {
+# The default cleanvibe **report theme** — one source of truth, shared by BOTH
+# `research` (docs/index.html) and `replicate` (the GitHub Pages findings site).
+# Adapted from http://latent-space.emmaleonhart.com/ : a warm "paper" light
+# theme + a dark-mode variant, plus the color-coded `.status-badge` used by the
+# replication report (green = replicated, red = failed, amber = insufficient
+# hardware, blue = in progress). Self-contained, dependency-free CSS.
+CLEANVIBE_REPORT_CSS = """  :root {
     --bg: #f6f2ec;
     --surface: #efe9df;
     --card: #ece4d6;
@@ -2231,10 +2265,31 @@ _RESEARCH_INDEX_HTML = """<!DOCTYPE html>
     padding-bottom: 0.4rem; border-bottom: 1px solid var(--border);
     font-weight: 600;
   }
+  h3 { font-size: 1.1rem; font-weight: 600; margin: 1.5rem 0 0.5rem; }
   p { margin-bottom: 1rem; }
   a { color: var(--blue); text-decoration: none; border-bottom: 1px solid transparent; }
   a:hover { border-bottom-color: var(--blue); }
+  ul, ol { margin: 0 0 1rem 1.5rem; }
+  li { margin-bottom: 0.3rem; }
+  blockquote {
+    border-left: 3px solid var(--border); padding-left: 1rem; margin: 1rem 0;
+    color: var(--dim);
+  }
+  table { border-collapse: collapse; width: 100%; margin: 1.2rem 0; font-size: 0.95rem; }
+  th, td { border: 1px solid var(--border); padding: 0.5rem 0.7rem; text-align: left; }
+  th { background: var(--surface); font-weight: 600; }
+  img { max-width: 100%; height: auto; border-radius: 6px; }
   .lede { color: var(--dim); font-size: 1.1rem; margin-top: 0.8rem; line-height: 1.65; }
+  /* Replication verdict banner (driven by paper.json `status`). */
+  .status-badge {
+    display: block; text-align: center; font-weight: 700; font-size: 1.15rem;
+    color: #fff; padding: 0.9rem 1.2rem; border-radius: 8px; margin: 1.5rem 0;
+    letter-spacing: 0.01em;
+  }
+  .status-badge.replicated { background: var(--green); }
+  .status-badge.failed { background: var(--accent); }
+  .status-badge.insufficient { background: var(--yellow); }
+  .status-badge.in-progress { background: var(--blue); }
   .question {
     background: var(--surface); border-left: 3px solid var(--accent);
     border-radius: 4px; padding: 1rem 1.3rem; margin: 1.5rem 0;
@@ -2274,6 +2329,11 @@ _RESEARCH_INDEX_HTML = """<!DOCTYPE html>
     font-family: 'Cascadia Code', 'Fira Code', Consolas, monospace; font-size: 0.86em;
     color: var(--accent); border: 1px solid var(--border);
   }
+  pre {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 6px;
+    padding: 1rem; overflow-x: auto; margin: 1rem 0;
+  }
+  pre code { background: none; border: none; padding: 0; color: var(--text); }
   footer {
     margin-top: 3rem; padding-top: 1.2rem; border-top: 1px solid var(--border);
     color: var(--dim); font-size: 0.85rem;
@@ -2297,7 +2357,24 @@ _RESEARCH_INDEX_HTML = """<!DOCTYPE html>
     body { padding: 1.2rem; }
     .actions { grid-template-columns: 1fr; }
     h1 { font-size: 1.7rem; }
-  }
+  }"""
+
+
+# The themed report landing page that ships in docs/index.html (research mode).
+# Placeholders (__PROJECT_NAME__ / __QUESTION__ / __DATE__ / __REPORT_CSS__) are
+# filled by str.replace — the CSS is full of `{` and `$`, so neither f-strings
+# nor string.Template are safe here. The agent edits the CONTENT (lede, cards,
+# pillars, findings) as the project progresses; the chrome (the shared
+# CLEANVIBE_REPORT_CSS theme) stays.
+_RESEARCH_INDEX_HTML = """<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>__PROJECT_NAME__</title>
+<meta name="description" content="A cleanvibe research project: __QUESTION__">
+<style>
+__REPORT_CSS__
 </style>
 </head>
 <body>
@@ -2385,6 +2462,7 @@ def research_index_html(project_name: str, question: str | None = None) -> str:
     q = _research_question(question)
     return (
         _RESEARCH_INDEX_HTML
+        .replace("__REPORT_CSS__", CLEANVIBE_REPORT_CSS)
         .replace("__PROJECT_NAME__", project_name)
         .replace("__QUESTION__", q)
         .replace("__DATE__", date)
