@@ -472,8 +472,10 @@ git push
 Run:
 ```bash
 cd "C:\\Users\\Immanuelle\\Documents\\Github\\cleanvibe"
-python -c "from pathlib import Path; from cleanvibe import skills; print(skills.write_skills(Path.home()/'.claude'))"
+python -c "from pathlib import Path; from cleanvibe import skills; print(skills.write_skills(Path.home()))"
 ```
+Note: `write_skills` itself appends `.claude/skills`, so pass `Path.home()` (NOT
+`Path.home()/'.claude'`, which would nest to `~/.claude/.claude/skills`).
 Expected: prints six paths under `~/.claude/skills/`.
 
 - [ ] **Step 2: Verify discovery shape**
