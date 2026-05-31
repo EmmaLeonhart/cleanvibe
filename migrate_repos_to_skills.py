@@ -78,23 +78,20 @@ def _is_drop(title: str) -> bool:
 def _trim_claude(text: str) -> str:
     """Remove the skill-covered sections; prepend the ## Skills pointer once.
 
-    A dropped section runs from its heading until the next heading at the same
-    or higher level that is not itself a dropped section (nested lower-level
-    subsections under a dropped section are removed too).
+    A dropped section runs from its heading until the NEXT heading of any level.
+    This is deliberately conservative: it removes the boilerplate block (which is
+    always flat — bullets/numbered lists, no internal headings) but PRESERVES any
+    project-specific sub-headed content a repo placed under a boilerplate heading
+    (e.g. custom `###` rules under `## Workflow Rules`). A run of consecutive
+    boilerplate `##` sections is each matched and dropped in turn.
     """
     lines = text.splitlines(keepends=True)
     out = []
     skipping = False
-    drop_level = 0
     for ln in lines:
         level, title = _heading_level(ln)
         if level is not None:
-            if _is_drop(title):
-                skipping = True
-                drop_level = level
-                continue
-            if skipping and level <= drop_level:
-                skipping = False
+            skipping = _is_drop(title)
         if not skipping:
             out.append(ln)
     body = "".join(out)
