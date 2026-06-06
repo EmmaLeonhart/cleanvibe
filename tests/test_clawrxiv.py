@@ -6,6 +6,7 @@ fetch_clawrxiv_paper is monkeypatched so nothing hits the clawRxiv API.
 import io
 import json
 import os
+import subprocess
 import tempfile
 import unittest
 from contextlib import contextmanager, redirect_stdout
@@ -109,6 +110,7 @@ class TestClawrxivScaffold(unittest.TestCase):
                 "README.md",
                 "SKILL.md",
                 "paper.json",
+                "download_paper.py",
                 ".gitignore",
                 "replication_target/source/paper.md",
                 "data_lake/.gitkeep",
@@ -118,8 +120,16 @@ class TestClawrxivScaffold(unittest.TestCase):
             ):
                 self.assertTrue((target / rel).is_file(), f"missing {rel}")
             self.assertTrue((target / ".git").is_dir(), "git repo not initialized")
-            # clawRxiv mode has NO download_paper.py (content fetched via API).
-            self.assertFalse((target / "download_paper.py").exists())
+            # clawRxiv ships a download_paper.py that re-fetches the content from
+            # the API (so the gitignored replication_target/ can be repopulated).
+            self.assertTrue((target / "download_paper.py").is_file())
+            # The paper content is written LOCALLY but NEVER committed (copyright).
+            tracked = subprocess.run(
+                ["git", "ls-files", "replication_target"],
+                cwd=target, capture_output=True, text=True,
+            ).stdout.replace("\\", "/")
+            self.assertNotIn("paper.md", tracked)
+            self.assertIn("replication_target/.gitkeep", tracked)
 
     def test_content_written_to_source(self):
         with _in_tmp_cwd():
@@ -211,7 +221,8 @@ class TestClawrxivCliDispatch(unittest.TestCase):
             self.assertTrue((target / "paper.json").is_file())
             meta = json.loads((target / "paper.json").read_text(encoding="utf-8"))
             self.assertEqual(meta["source"], "clawrxiv")
-            self.assertFalse((target / "download_paper.py").exists())
+            # clawRxiv now ships a download_paper.py (API re-fetch).
+            self.assertTrue((target / "download_paper.py").is_file())
 
     def test_clawrxiv_citation_routes_to_clawrxiv_mode(self):
         with _in_tmp_cwd():

@@ -1041,3 +1041,48 @@ single source of truth being `cleanvibe/skills.py` (`SKILLS` dict +
   pointer + vendored skills shape. Full suite green.
 
 - Version `1.13.1` -> `1.14.0` (`cleanvibe/__init__.py`, `pyproject.toml`).
+
+---
+
+## 2026-06-05 — v1.15.0: copyright fix — the paper is NEVER committed
+
+**Bug (serious):** `cleanvibe replicate` was **committing the paper** into the
+generated repo. The gitignore only excluded the PDF/HTML/tarball, while the
+extracted arXiv LaTeX `source/`, the clawRxiv `paper.md`, and the downloaded
+URL source were all committed — and the arXiv scaffolder had a dedicated
+"commit 2" (`_run_extraction_commit`) that downloaded, extracted, **and
+committed** the e-print source before launch. That redistributes a copyrighted
+work in every replication repo. The whole point of `download_paper.py` is the
+opposite: deterministically drop the paper into a **gitignored** directory so it
+provides local context without ever being committed.
+
+**Fix — the contract is now uniform across all four replicate modes:**
+- `REPLICATION_GITIGNORE` ignores the **entire** `replication_target/` tree
+  (`replication_target/*` + `!replication_target/.gitkeep` — the `/*` form, not
+  bare `replication_target/`, so git can still re-include `.gitkeep`; an
+  outright-ignored directory can't have a child re-included).
+- `replicate.py`: `_run_extraction_commit` → `_run_extraction` — it still runs
+  `download_paper.py` before launch so the agent opens onto an extracted paper,
+  but it **commits nothing**. The arXiv initial-commit message and dry-run text
+  were corrected (no more "commit 2").
+- **clawRxiv and URL modes gained a `download_paper.py`** so an empty
+  `replication_target/` is always repopulatable without committing the paper:
+  `clawrxiv_download_paper_py` re-fetches `content` from the clawRxiv API;
+  `url_download_paper_py` re-downloads from the URL recorded in `source.json`.
+- Submodule guidance now uses `git submodule add -f …` (the path is gitignored;
+  only the gitlink/.gitmodules are committed — never the paper).
+- Every template's prose (CLAUDE/queue/SKILL/README + the `download_paper.py`
+  docstrings) flipped from "source/ is committed" to "gitignored, local context
+  only; run `download_paper.py` if empty". Manual drop-in mode was already
+  correct (paper dropped in by hand, gitignored).
+
+**Tests:** new assertions that nothing under `replication_target/` is
+git-tracked after scaffold (`git ls-files` / `git check-ignore`) for arXiv,
+clawRxiv, and URL modes; stale `replication_target/*.pdf`-only gitignore
+assertions and the clawRxiv `paper.md`-committed assertion updated; the
+extraction-helper test renamed to match `_run_extraction`. Full suite green
+(109 passed). An offline simulation confirmed end-to-end that a populated
+`replication_target/source/paper.md` + `paper.pdf` stays untracked while
+`.gitkeep` is tracked. (Live arXiv smoke deferred — arXiv was timing out.)
+
+- Version `1.14.0` -> `1.15.0` (`cleanvibe/__init__.py`, `pyproject.toml`).

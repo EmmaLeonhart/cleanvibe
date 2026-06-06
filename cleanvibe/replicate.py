@@ -39,13 +39,18 @@ from .scaffold import (
 )
 
 
-def _run_extraction_commit(target: Path) -> None:
-    """Commit 2 of the arXiv scaffold: download + extract the source, commit it.
+def _run_extraction(target: Path) -> None:
+    """Populate ``replication_target/`` LOCALLY by running ``download_paper.py``.
 
     This runs the just-written ``download_paper.py`` (which fetches the arXiv
     e-print source, extracts it to ``replication_target/source/``, and saves the
-    PDF) and makes a second commit, **before Claude is launched** — so the agent
-    opens onto an already-extracted, already-committed paper source.
+    PDF) **before Claude is launched** — so the agent opens onto an
+    already-extracted paper.
+
+    Crucially, **nothing here is committed**: ``replication_target/`` is fully
+    gitignored because it holds the copyrighted paper. Committing it would
+    redistribute the paper. The download is purely a local convenience; if the
+    directory is empty the agent (or the user) just re-runs ``download_paper.py``.
 
     This is *data download + archive extraction by cleanvibe's own stdlib code*,
     NOT execution of third-party code, so it needs no user consent. It is
@@ -55,7 +60,7 @@ def _run_extraction_commit(target: Path) -> None:
     dl = target / "download_paper.py"
     if not dl.exists():
         return
-    print("  Extracting arXiv source (download_paper.py) for commit 2 ...")
+    print("  Fetching arXiv source locally (download_paper.py; NOT committed) ...")
     try:
         result = subprocess.run(
             [sys.executable, "download_paper.py"],
@@ -70,29 +75,7 @@ def _run_extraction_commit(target: Path) -> None:
     if result.returncode != 0:
         print("  extraction did not complete; the agent will run download_paper.py")
         return
-    subprocess.run(["git", "add", "-A"], cwd=target, capture_output=True)
-    status = subprocess.run(
-        ["git", "status", "--porcelain"], cwd=target, capture_output=True, text=True
-    )
-    if not status.stdout.strip():
-        return  # nothing new to commit (e.g. PDF-only, already gitignored)
-    subprocess.run(
-        [
-            "git",
-            "commit",
-            "-q",
-            "-m",
-            "Extract arXiv source (download_paper.py)\n\n"
-            "Commit 2 of the cleanvibe replicate scaffold: the e-print source is "
-            "downloaded and extracted to replication_target/source/ (committed); "
-            "the raw archive and PDF are gitignored. Data download + extraction "
-            "only — running the authors' recipe/code is gated on user consent "
-            "(see queue.md step 1).",
-        ],
-        cwd=target,
-        capture_output=True,
-    )
-    print("  Committed extracted source (commit 2)")
+    print("  Paper fetched into replication_target/ (local only, gitignored)")
 
 
 def _resolve_target(base: Path) -> Path:
@@ -205,10 +188,11 @@ def replicate_project(
 ) -> None:
     """Scaffold a standalone replication project for an arXiv/alphaxiv paper.
 
-    After the framework commit (commit 1), unless ``extract=False``, the source
-    is downloaded + extracted and committed (commit 2) *before* Claude launches,
-    so the agent opens onto an already-extracted paper. ``extract=False`` keeps
-    the unit tests network-free.
+    After the single framework commit, unless ``extract=False``, the paper is
+    downloaded + extracted *locally* (into the gitignored ``replication_target/``)
+    *before* Claude launches, so the agent opens onto an already-extracted paper
+    — but the paper is **never committed** (it is copyrighted). ``extract=False``
+    keeps the unit tests network-free.
     """
     is_windows = platform.system() == "Windows"
     paper = fetch_paper(arxiv)
@@ -238,10 +222,10 @@ def replicate_project(
         if is_windows:
             print(f"[dry-run] Would write: {target / '!runClaude.bat'}")
         print(f"[dry-run] Would run: git init")
-        print(f"[dry-run] Would run: git add . && git commit  (commit 1: framework)")
+        print(f"[dry-run] Would run: git add . && git commit  (framework only — paper not committed)")
         if extract:
-            print(f"[dry-run] Would run: python download_paper.py + git commit  "
-                  f"(commit 2: extracted source)")
+            print(f"[dry-run] Would run: python download_paper.py  "
+                  f"(populate replication_target/ LOCALLY — gitignored, never committed)")
         if not no_claude:
             print(f"[dry-run] Would launch: claude")
         return
@@ -281,17 +265,18 @@ def replicate_project(
         f'Replicating "{paper.title}"\n'
         f"Scaffolded by `cleanvibe replicate` "
         f"(https://github.com/Immanuelle/cleanvibe).\n"
-        f"Paper source -> replication_target/source/ (commit 2 extracts it).\n"
+        f"The paper lives in replication_target/ — gitignored, NEVER committed "
+        f"(copyrighted). Run `python download_paper.py` to (re)populate it locally.\n"
         f"Deliverables (GitHub Pages site + PDF report + ZIP package) build in "
         f"GitHub Actions."
     )
     _git_init(target, message=message)
 
-    # Commit 2 (before launch): download + extract the source so the agent opens
-    # onto an already-extracted, already-committed paper. Best-effort; data
-    # download only — running the authors' code stays gated on user consent.
+    # Before launch: download + extract the source LOCALLY so the agent opens
+    # onto an already-extracted paper. Nothing is committed — replication_target/
+    # is gitignored (the paper is copyrighted). Best-effort; data download only.
     if extract:
-        _run_extraction_commit(target)
+        _run_extraction(target)
 
     if not no_claude:
         _launch_claude(target)
@@ -326,8 +311,8 @@ def replicate_clawrxiv_project(
             "README.md",
             "SKILL.md",
             "paper.json",
+            "download_paper.py",
             ".gitignore",
-            "replication_target/source/paper.md",
             "data_lake/.gitkeep",
             "replication_target/.gitkeep",
             ".github/workflows/pages.yml",
@@ -335,6 +320,8 @@ def replicate_clawrxiv_project(
             "report-theme.css",
         ):
             print(f"[dry-run] Would write: {target / rel}")
+        print(f"[dry-run] Would write (LOCAL ONLY, gitignored): "
+              f"{target / 'replication_target' / 'source' / 'paper.md'}")
         if paper.has_skill_file:
             print(f"[dry-run] Would write: {target / 'replication_skill.md'} "
                   f"(clawRxiv skillMd)")
@@ -343,7 +330,7 @@ def replicate_clawrxiv_project(
                   f"paper.md (agent extracts it)")
         if is_windows:
             print(f"[dry-run] Would write: {target / '!runClaude.bat'}")
-        print(f"[dry-run] NO download_paper.py (content fetched via API)")
+        print(f"[dry-run] download_paper.py re-fetches content from the clawRxiv API")
         print(f"[dry-run] Would run: git init")
         print(f"[dry-run] Would run: git add . && git commit")
         if not no_claude:
@@ -358,19 +345,21 @@ def replicate_clawrxiv_project(
     _write(target / "devlog.md", templates.devlog_md(f"replicating-{paper.slug}"))
     _write(target / "README.md", templates.clawrxiv_readme_md(paper))
     _write(target / "SKILL.md", templates.clawrxiv_skill_md(paper))
+    _write(target / "download_paper.py", templates.clawrxiv_download_paper_py(paper))
     _write(target / ".gitignore", templates.REPLICATION_GITIGNORE)
     _write(target / "paper.json", _clawrxiv_paper_json(paper))
 
-    # The clawRxiv content is the paper text: write it to source/ (committed),
-    # mirroring the extracted-arXiv-source convention. The paper is NOT in
-    # data_lake/.
+    # The clawRxiv content is the paper text. Write it LOCALLY to source/ so the
+    # agent opens onto the paper — but replication_target/ is gitignored (the
+    # paper is copyrighted, NEVER committed). `download_paper.py` repopulates it
+    # from the API if the directory is empty. The paper is NOT in data_lake/.
     source = target / "replication_target" / "source"
     source.mkdir(parents=True, exist_ok=True)
     _write(source / "paper.md", paper.content)
 
     # The skill recipe — only when clawRxiv shipped one as a separate field.
     # Otherwise it is embedded in paper.md and the queue tells the agent to
-    # extract it.
+    # extract it. (replication_skill.md is at the repo root, so it IS committed.)
     if paper.has_skill_file:
         _write(target / "replication_skill.md", paper.skill_md)
 
@@ -400,7 +389,9 @@ def replicate_clawrxiv_project(
         f'Replicating "{paper.title}"\n'
         f"Scaffolded by `cleanvibe replicate` "
         f"(https://github.com/Immanuelle/cleanvibe).\n"
-        f"Paper content -> replication_target/source/paper.md; {skill_note}.\n"
+        f"Paper content -> replication_target/source/paper.md — gitignored, "
+        f"NEVER committed (copyrighted); `python download_paper.py` re-fetches "
+        f"it from the clawRxiv API. {skill_note}.\n"
         f"Skill-first: run the recipe, then verify against the paper.\n"
         f"Deliverables (GitHub Pages site + PDF report + ZIP package) build in "
         f"GitHub Actions."
@@ -546,6 +537,7 @@ def replicate_url_project(
             "README.md",
             "SKILL.md",
             "source.json",
+            "download_paper.py",
             ".gitignore",
             "data_lake/.gitkeep",
             "replication_target/.gitkeep",
@@ -556,7 +548,8 @@ def replicate_url_project(
             print(f"[dry-run] Would write: {target / rel}")
         if is_windows:
             print(f"[dry-run] Would write: {target / '!runClaude.bat'}")
-        print(f"[dry-run] NO download_paper.py / arXiv paper.json (URL mode)")
+        print(f"[dry-run] Source downloaded LOCAL ONLY (gitignored); "
+              f"download_paper.py re-fetches from source.json. NO arXiv paper.json (URL mode)")
         print(f"[dry-run] Would run: git init && git add . && git commit")
         if not no_claude:
             print(f"[dry-run] Would launch: claude")
@@ -571,6 +564,7 @@ def replicate_url_project(
     _write(target / "devlog.md", templates.devlog_md(name))
     _write(target / "README.md", templates.replication_manual_readme_md(name, source_url=url))
     _write(target / "SKILL.md", templates.replication_manual_skill_md(name, source_url=url))
+    _write(target / "download_paper.py", templates.url_download_paper_py(url))
     _write(target / ".gitignore", templates.REPLICATION_GITIGNORE)
 
     _write_gitkeep(target / "data_lake")
@@ -602,9 +596,10 @@ def replicate_url_project(
     message = (
         f"Initial commit: URL replication scaffold for {url}\n"
         f"\n"
-        f"Non-arXiv source downloaded to "
+        f"Non-arXiv source downloaded LOCALLY to "
         f"replication_target/source/{saved or '(download failed)'} "
-        f"(provenance in source.json).\n"
+        f"(provenance in source.json) — gitignored, NEVER committed "
+        f"(copyrighted); `python download_paper.py` re-fetches it.\n"
         f"Scaffolded by `cleanvibe replicate` "
         f"(https://github.com/Immanuelle/cleanvibe).\n"
         f"Deliverables (GitHub Pages site + PDF report + ZIP package) build in "

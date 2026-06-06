@@ -8,7 +8,7 @@
 
 ## Active
 
-_(empty — the research mode and the shared themed report + status badge both shipped in v1.12.0 / v1.13.0; see `devlog.md`.)_
+_(empty — the v1.15.0 copyright fix shipped: `replication_target/` is now fully gitignored and the paper is never committed in any replicate mode; see `devlog.md`.)_
 
 ---
 
@@ -25,4 +25,4 @@ B. **Run the status-report action once more, independently** — an end-of-sessi
 
 - Completed work (chronological, with releases): `devlog.md`. Long-horizon backlog: `todo.md`.
 - Vision / framing: `docs/replication_framing.md`; reference corpus: `docs/replication-examples/`.
-- Narrative history: `git log`. Current version: `1.13.1`.
+- Narrative history: `git log`. Current version: `1.15.0`.

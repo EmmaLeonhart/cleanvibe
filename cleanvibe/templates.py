@@ -434,17 +434,21 @@ reusable, agent-executable replication methodology.
   end). Find and run it FIRST, then verify its output against the paper and
   fill only the gaps. A from-scratch reimplementation is the fallback, not the
   default — it is what burned a huge amount of tokens before this convention.
-- **`replication_target/`** holds the paper and everything pulled *about* it:
+- **`replication_target/` is the paper's home, and the WHOLE directory is
+  gitignored — the paper is copyrighted and is NEVER committed.** It is local
+  context only; `python download_paper.py` (re)populates it from arXiv, so if it
+  is empty (e.g. a fresh clone) just run that script. Inside it:
   - `replication_target/source/` — the extracted arXiv **LaTeX/e-print
-    source** (committed; run `python download_paper.py`). **Primary** source:
-    the `.tex` reads far more token-efficiently than the rendered HTML (no
-    base64 figure blobs) and is where the reproduction recipe usually lives.
-  - `replication_target/arxiv-source.tar.gz` — the raw source archive
-    (gitignored; the extracted `source/` is what's committed).
-  - `replication_target/paper.pdf` — the PDF, as a fallback / complete record
-    (gitignored, same downloader). The paper does NOT go in `data_lake/`.
+    source**. **Primary** source: the `.tex` reads far more token-efficiently
+    than the rendered HTML (no base64 figure blobs) and is where the
+    reproduction recipe usually lives.
+  - `replication_target/arxiv-source.tar.gz` — the raw source archive.
+  - `replication_target/paper.pdf` — the PDF, as a fallback / complete record.
+    The paper does NOT go in `data_lake/`.
   - the authors' code, if any, cloned as a **git submodule** in here
-    (`git submodule add <repo> replication_target/<name>`).
+    (`git submodule add -f <repo> replication_target/<name>` — the `-f` is
+    needed because `replication_target/` is gitignored; the gitlink is a
+    *reference* to their repo, not a copy of the paper, so it is fine to commit).
 - **`replication_skill.md`** (repo root) — if the source/paper ships a
   reproduction recipe, copy it here and run it first. **`replication/`** — if a
   replication zip is shipped/linked, extract it here (the zip is gitignored,
@@ -525,12 +529,14 @@ it (and append to `devlog.md`).
    (see `todo.md`); for now, only proceed if the user trusts the source.
 
 2. **Read the already-extracted source.** The scaffolder downloaded the arXiv
-   **e-print source** ($src_url) and committed it to `replication_target/source/`
-   (commit 2) — far cheaper to read than the rendered HTML, which embeds figures
-   as huge base64 blobs. Read the paper straight from the `.tex` in `source/` —
-   no HTML→markdown step. (If `source/` is empty — e.g. the scaffold ran offline,
-   or the paper is PDF-only — run `python download_paper.py` now and commit it;
-   that is a plain download, not third-party code, so it is not gated.)
+   **e-print source** ($src_url) to `replication_target/source/` **locally** —
+   far cheaper to read than the rendered HTML, which embeds figures as huge
+   base64 blobs. Read the paper straight from the `.tex` in `source/` — no
+   HTML→markdown step. `replication_target/` is **gitignored and NEVER committed**
+   (the paper is copyrighted); it is local context only. If `source/` is empty —
+   a fresh clone, an offline scaffold, or a PDF-only paper — run
+   `python download_paper.py` to repopulate it (a plain download, not
+   third-party code, so it is not gated). Do NOT commit the paper.
 
 3. **Create the GitHub repo and push — now, not at the end.** Create a PUBLIC
    repo and push: `gh repo create --public --source=. --push` (public is
@@ -647,9 +653,11 @@ gaps. Reimplementing from scratch is the fallback, not the default.
 > `todo.md`.)
 
 1. **Acquire the LaTeX source.** The scaffolder already downloaded + extracted
-   the e-print source to `replication_target/source/` (committed) and saved the
-   PDF (gitignored) — read the `.tex` directly. (If `source/` is empty, run
-   `python download_paper.py`; that is a plain download, not gated.)
+   the e-print source to `replication_target/source/` **locally** and saved the
+   PDF — read the `.tex` directly. The whole `replication_target/` is gitignored
+   and **NEVER committed** (the paper is copyrighted). If `source/` is empty
+   (fresh clone / offline scaffold), run `python download_paper.py` to
+   repopulate it; that is a plain download, not gated. Never commit the paper.
 
 2. **Go live early.** Create a PUBLIC GitHub repo and push
    (`gh repo create --public --source=. --push`) so every later commit pushes
@@ -743,12 +751,14 @@ Three compounding artifacts:
 
 ## Layout
 
-- `replication_target/` — the paper and everything pulled about it:
-  - `source/` — extracted arXiv LaTeX/e-print source (committed; the primary,
-    token-efficient text — read the `.tex` directly). Fetched by
-    `python download_paper.py`; the raw archive is gitignored.
-  - `paper.pdf` — downloaded PDF (gitignored; fallback / complete record).
-  - the authors' code, if any, as a git **submodule**.
+- `replication_target/` — the paper's home; the **whole directory is gitignored
+  and NEVER committed** (the paper is copyrighted — local context only). Run
+  `python download_paper.py` to (re)populate it if it is empty.
+  - `source/` — extracted arXiv LaTeX/e-print source (the primary,
+    token-efficient text — read the `.tex` directly).
+  - `paper.pdf` — downloaded PDF (fallback / complete record).
+  - the authors' code, if any, as a git **submodule** (a reference, not a copy
+    of the paper — fine to commit).
 - `replication_skill.md` — the authors' recipe, if one is shipped (run first).
 - `data_lake/` — other downloaded/supplied material (NOT the paper).
 - `src/` — your reimplementation. `scripts/run.py` — CI entry point.
@@ -778,9 +788,12 @@ run.sh script, a Makefile target, a Dockerfile, or a link to a replication zip
 -- usually near the end of the paper.
 
 This script downloads the source archive, extracts it to
-``replication_target/source/`` (committed), saves the PDF as a fallback /
-complete record (gitignored), and prints any files that look like a
-reproduction recipe so the agent can find and run it FIRST.
+``replication_target/source/``, saves the PDF as a fallback / complete record,
+and prints any files that look like a reproduction recipe so the agent can find
+and run it FIRST. Everything it writes lands under ``replication_target/``,
+which is **gitignored** — the paper is copyrighted and is NEVER committed; this
+fetch is local context only. If the directory is empty, just run this script
+again to repopulate it.
 
 arXiv submissions come in a few shapes; all are handled:
   * a gzip-compressed tar (the common case: many files)  -> extracted
@@ -974,19 +987,23 @@ if __name__ == "__main__":
 )
 
 
-REPLICATION_GITIGNORE = """# The paper itself — downloaded, never committed
-replication_target/*.pdf
-replication_target/*.html
-# The raw arXiv source archive is gitignored; the EXTRACTED
-# replication_target/source/ tree IS committed (that is the readable paper text).
-replication_target/*.tar.gz
-replication_target/*.tar
-replication_target/*.tgz
-replication_target/arxiv-source.*
+REPLICATION_GITIGNORE = """# The paper — downloaded LOCALLY for context, NEVER committed.
+# `replication_target/` holds the copyrighted paper (PDF/HTML, extracted LaTeX
+# source, clawRxiv markdown). Committing any of it would redistribute the paper,
+# so EVERYTHING under the directory is gitignored — only `.gitkeep` is kept so
+# the empty directory survives a clone. It is repopulated on demand by
+# `python download_paper.py` (re-fetches from the recorded source); if it is
+# empty, run that script.
+#
+# NOTE: this ignores the directory *contents* (`/*`), not the directory itself —
+# git can't re-include `.gitkeep` if its parent dir is ignored outright. The
+# authors' code, if cloned as a submodule in here, needs `git submodule add -f`
+# (the gitlink/.gitmodules are committed; the paper never is).
+replication_target/*
+!replication_target/.gitkeep
 # A downloaded replication zip is ignored; its extracted replication/ contents
 # are committed.
 replication/*.zip
-!replication_target/.gitkeep
 
 # Replication outputs
 results/
@@ -1191,6 +1208,59 @@ def replication_download_paper_py(paper: ArxivPaper) -> str:
 # ---------------------------------------------------------------------------
 
 
+_URL_DOWNLOAD_TMPL = Template(
+    '''"""Re-download the source for this URL-based replication (local only).
+
+The paper was downloaded from a plain web URL at scaffold time into
+``replication_target/source/`` (provenance recorded in ``source.json``). That
+directory is **gitignored** — the paper is copyrighted and is NEVER committed;
+the download is local context only. If the directory is empty (e.g. a fresh
+clone), run this script to repopulate it from the recorded URL.
+
+Stdlib only (``urllib``).
+"""
+
+from __future__ import annotations
+
+import json
+import sys
+import urllib.request
+from pathlib import Path
+
+_HERE = Path(__file__).parent
+_SOURCE = _HERE / "replication_target" / "source"
+
+
+def main() -> int:
+    meta = json.loads((_HERE / "source.json").read_text(encoding="utf-8"))
+    url = meta.get("source_url")
+    if not url:
+        print("no source_url in source.json; nothing to download")
+        return 1
+    _SOURCE.mkdir(parents=True, exist_ok=True)
+    print(f"downloading {url}")
+    req = urllib.request.Request(url, headers={"User-Agent": "cleanvibe-replicate"})
+    with urllib.request.urlopen(req, timeout=60) as resp:
+        data = resp.read()
+    is_pdf = url.lower().split("?")[0].endswith(".pdf") or data[:5] == b"%PDF-"
+    out = _SOURCE / ("paper.pdf" if is_pdf else "paper.html")
+    out.write_bytes(data)
+    print(f"  wrote {out} ({len(data)} bytes)")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+'''
+)
+
+
+def url_download_paper_py(source_url: str) -> str:
+    # source_url is recorded in source.json and read at runtime; the template
+    # itself needs no substitution, but keep the signature for symmetry/clarity.
+    return _URL_DOWNLOAD_TMPL.template
+
+
 def _manual_name(folder: str) -> str:
     """Display name for a manual replication project from its folder path."""
     name = folder.replace("\\", "/").rstrip("/").rsplit("/", 1)[-1]
@@ -1207,17 +1277,19 @@ def replication_manual_claude_md(folder: str, source_url: str | None = None) -> 
             "or clawRxiv) — see `source.json` for the URL and the saved filename."
         )
         paper_block = (
-            "> **The paper source is already here.**\n"
+            "> **The paper source is already here (locally).**\n"
             f"> `cleanvibe replicate` downloaded it from {source_url} into\n"
-            "> `replication_target/source/` (committed) and recorded the URL in\n"
-            "> `source.json`. You do NOT need to fetch it. Put any extra material\n"
-            "> (datasets, the PDF, notes) into `data_lake/`."
+            "> `replication_target/source/` and recorded the URL in `source.json`.\n"
+            "> `replication_target/` is **gitignored and NEVER committed** (the\n"
+            "> paper is copyrighted) — it is local context only. If it is empty\n"
+            "> (e.g. a fresh clone), run `python download_paper.py` to re-fetch it.\n"
+            "> Put any extra material (datasets, notes) into `data_lake/`."
         )
         no_meta_bullet = (
-            "- **No `download_paper.py`, no arXiv `paper.json`.** The source was\n"
-            "  fetched directly from a URL at scaffold time (`source.json` records\n"
-            "  it). The agent derives the paper's identity by *reading the\n"
-            "  downloaded source* and records it in `notes/claims.md` / `README.md`."
+            "- **`download_paper.py` re-fetches the source from the URL in\n"
+            "  `source.json`; no arXiv `paper.json`.** The agent derives the\n"
+            "  paper's identity by *reading the downloaded source* and records it\n"
+            "  in `notes/claims.md` / `README.md`. Never commit the paper itself."
         )
     else:
         subtitle = "manual drop-in"
@@ -1269,7 +1341,8 @@ in the cleanvibe repo for the full framing.
     text, made during the replication, so later steps work from structured
     text rather than raw PDF.
   - the authors' code, if any, cloned as a **git submodule** in here
-    (`git submodule add <repo> replication_target/<name>`).
+    (`git submodule add -f <repo> replication_target/<name>` — `-f` because
+    `replication_target/` is gitignored; only the gitlink is committed).
 - **`replication_skill.md`** (repo root) — the authors' recipe, if one is
   shipped (run first). **`replication/`** — an extracted replication zip (zip
   gitignored, contents committed).
@@ -1469,8 +1542,10 @@ def replication_manual_skill_md(folder: str, source_url: str | None = None) -> s
         )
         prereq = (
             "The paper source is already in `replication_target/source/`\n"
-            "(downloaded from a URL). If it is empty the download failed — tell the\n"
-            "user. Prefer working from the downloaded source text."
+            "(downloaded from a URL — gitignored, NEVER committed). If it is empty\n"
+            "(fresh clone / failed download), run `python download_paper.py` to\n"
+            "re-fetch it from `source.json`. Prefer working from the source text;\n"
+            "never commit the paper."
         )
     else:
         title_suffix = "manual drop-in"
@@ -1662,13 +1737,14 @@ inspiration: http://latent-space.emmaleonhart.com/
 # clawRxiv (clawrxiv.io) publishes papers authored autonomously by AI agents
 # and serves them via a JSON API that *differentiates* the paper content, the
 # abstract, and a skill file (an agent-runnable replication recipe). The
-# scaffolder fetches all three up front: the content is written to
-# `replication_target/source/paper.md` (committed) and the skill recipe, when
-# clawRxiv ships one separately, to `replication_skill.md` at the root. This is
-# the purest recipe-first case, so the queue is **skill-first**: run the recipe
-# before any reimplementation. No `download_paper.py` (the API returns
-# everything in a single call); the replication gitignore + workflow constants
-# above are reused as-is.
+# scaffolder fetches all three up front: the content is written LOCALLY to
+# `replication_target/source/paper.md` (gitignored — copyrighted, NEVER
+# committed) and the skill recipe, when clawRxiv ships one separately, to
+# `replication_skill.md` at the root (committed — it's a recipe, not the paper).
+# This is the purest recipe-first case, so the queue is **skill-first**: run the
+# recipe before any reimplementation. `download_paper.py` re-fetches the content
+# from the clawRxiv API if `replication_target/` is empty (e.g. a fresh clone);
+# the replication gitignore + workflow constants above are reused as-is.
 # ---------------------------------------------------------------------------
 
 
@@ -1700,6 +1776,101 @@ def _clawrxiv_subs(paper: ClawrxivPaper) -> dict:
     }
 
 
+_CLAWRXIV_DOWNLOAD_TMPL = Template(
+    '''"""Fetch clawrxiv:$paper_id into replication_target/ (local only).
+
+clawRxiv serves the paper from a JSON API ($api_url): the ``content`` field is
+the full markdown body and ``skillMd`` (when present) is an agent-runnable
+replication recipe. This script writes the content to
+``replication_target/source/paper.md`` and, if a separate skill file is served,
+to ``replication_skill.md``.
+
+Everything written under ``replication_target/`` is **gitignored** — the paper
+is copyrighted and is NEVER committed; this fetch is local context only. If the
+directory is empty (e.g. a fresh clone), just run this script to repopulate it.
+
+Stdlib only (``urllib`` + ``json``).
+"""
+
+from __future__ import annotations
+
+import json
+import socket
+import sys
+import time
+import urllib.error
+import urllib.request
+from pathlib import Path
+
+API_URL = "$api_url"
+
+_TARGET = Path(__file__).parent / "replication_target"
+_SOURCE = _TARGET / "source"
+_MAX_RETRIES = 4
+_BASE_BACKOFF = 2.0
+_TIMEOUT_ERRORS = (TimeoutError, socket.timeout)
+
+
+def _get(url):
+    """GET url with retry/backoff for clawRxiv rate limiting; return bytes."""
+    backoff = _BASE_BACKOFF
+    for attempt in range(_MAX_RETRIES):
+        last = attempt == _MAX_RETRIES - 1
+        try:
+            req = urllib.request.Request(
+                url, headers={"User-Agent": "cleanvibe-replicate"}
+            )
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                return resp.read()
+        except urllib.error.HTTPError as e:
+            if e.code in (429, 503) and not last:
+                print(f"  rate-limited (HTTP {e.code}); retrying in {backoff:.0f}s")
+                time.sleep(backoff)
+                backoff *= 2
+                continue
+            raise
+        except (urllib.error.URLError, *_TIMEOUT_ERRORS) as e:
+            if last:
+                raise
+            print(f"  transient error ({e!r}); retrying in {backoff:.0f}s")
+            time.sleep(backoff)
+            backoff *= 2
+    raise AssertionError("unreachable")
+
+
+def main() -> int:
+    _SOURCE.mkdir(parents=True, exist_ok=True)
+    paper_md = _SOURCE / "paper.md"
+    if paper_md.exists() and paper_md.stat().st_size > 0:
+        print(f"already present: {paper_md}")
+        return 0
+    print(f"fetching {API_URL}")
+    obj = json.loads(_get(API_URL).decode("utf-8"))
+    content = obj.get("content") or ""
+    if not content.strip():
+        print("  clawRxiv returned no content; nothing written")
+        return 1
+    paper_md.write_text(content, encoding="utf-8")
+    print(f"  wrote {paper_md} ({len(content)} chars)")
+    skill = obj.get("skillMd")
+    if skill and skill.strip():
+        skill_path = Path(__file__).parent / "replication_skill.md"
+        if not skill_path.exists():
+            skill_path.write_text(skill, encoding="utf-8")
+            print(f"  wrote {skill_path} (clawRxiv skillMd)")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
+'''
+)
+
+
+def clawrxiv_download_paper_py(paper: ClawrxivPaper) -> str:
+    return _CLAWRXIV_DOWNLOAD_TMPL.substitute(_clawrxiv_subs(paper))
+
+
 _CLAWRXIV_CLAUDE_TMPL = Template(
     """# replicating-$slug
 
@@ -1729,7 +1900,10 @@ agent-executable replication methodology.
   $skill_location Run it FIRST, then verify its output against the paper and
   fill only the gaps. A from-scratch reimplementation is the fallback.
 - **`replication_target/source/paper.md`** — the clawRxiv paper **content**,
-  written at scaffold time (committed; no download step). Read it directly.
+  written locally at scaffold time. The whole `replication_target/` is
+  **gitignored and NEVER committed** (the paper is copyrighted — local context
+  only). Read it directly; if it is empty (fresh clone), run
+  `python download_paper.py` to re-fetch the content from the clawRxiv API.
 - **`replication_skill.md`** (repo root) — the clawRxiv skill recipe, when one
   was shipped separately; otherwise extract it from `paper.md` (see above).
 - **`paper.json`** — the frozen clawRxiv metadata (title, authors, claw name,
@@ -1980,8 +2154,9 @@ Three compounding artifacts:
 
 ## Layout
 
-- `replication_target/source/paper.md` — the clawRxiv paper content (committed;
-  fetched at scaffold time — read it directly).
+- `replication_target/source/paper.md` — the clawRxiv paper content (gitignored,
+  NEVER committed — copyrighted, local only; fetched at scaffold time, re-fetch
+  with `python download_paper.py`). Read it directly.
 - `replication_skill.md` — the clawRxiv skill recipe (when shipped separately;
   otherwise embedded in `paper.md`). **Run it first.**
 - `paper.json` — frozen clawRxiv metadata (from $api_url).

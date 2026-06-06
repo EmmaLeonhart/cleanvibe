@@ -137,11 +137,13 @@ AI agents and exposes a JSON API (`/api/abs/<id>`) that **differentiates the
 paper content, abstract, and skill file** (an agent-runnable replication
 recipe). That separation is the purest recipe-first case, so clawRxiv gets its
 own dedicated mode. The scaffold fetches all three up front: the paper content
-is written to `replication_target/source/paper.md` (committed), and when
-clawRxiv ships a separate skill file it lands at `replication_skill.md` at the
-root (otherwise the recipe is embedded in the content and the queue tells the
-agent to extract it). There is **no `download_paper.py`** — the API returns
-everything in one call — and the generated `queue.md`/`SKILL.md` are
+is written **locally** to `replication_target/source/paper.md` (gitignored —
+the paper is copyrighted and is **never committed**), and when clawRxiv ships a
+separate skill file it lands at `replication_skill.md` at the root (otherwise
+the recipe is embedded in the content and the queue tells the agent to extract
+it). A `download_paper.py` re-fetches the content from the clawRxiv API if
+`replication_target/` is ever empty (e.g. a fresh clone). The generated
+`queue.md`/`SKILL.md` are
 **skill-first**: go live early, run the recipe, verify it against the paper,
 check all references, then fill only the gaps. clawRxiv ids look arXiv-shaped,
 so a bare id stays arXiv — use a `clawrxiv.io` URL or `clawrxiv:<id>` to select
@@ -184,10 +186,12 @@ The generated scaffold is built around the **efficient, recipe-first path**:
   source** (`arxiv.org/src/<id>`) and extracts the `.tex` to
   `replication_target/source/`. The `.tex` is far more token-efficient than the
   rendered HTML, which embeds figures as huge base64 data-URIs you'd otherwise
-  have to strip. The raw archive is gitignored; the extracted `source/` is
-  committed. The `cleanvibe replicate` command runs this extraction itself as a
-  **second commit before launching Claude**, so the agent opens onto an
-  already-extracted, already-committed paper.
+  have to strip. **The paper is never committed:** the whole `replication_target/`
+  tree is gitignored (papers are copyrighted), so the download is local context
+  only — run `python download_paper.py` to (re)populate it whenever it's empty.
+  The `cleanvibe replicate` command runs this download itself **before launching
+  Claude**, so the agent opens onto an already-extracted paper — but nothing
+  under `replication_target/` ever enters a commit.
 - **Consent before running code.** Because a replication runs code you didn't
   write (the recipe / cloned scripts / a downloaded zip), the generated
   `queue.md`'s **first step** makes the agent stop and get your explicit consent
@@ -220,11 +224,12 @@ cleanvibe replicate https://openreview.net/forum?id=XXXX
 
 When the argument is a plain `http(s)` URL that isn't an arXiv/clawRxiv
 reference, cleanvibe **downloads it** as the replication source — the page or
-PDF lands in `replication_target/source/` (`paper.pdf` or `paper.html`,
-detected automatically), provenance is recorded in `source.json`, and the
-scaffold's wording reflects that the source is already present. Same
-429-aware retry/backoff as arXiv mode. Use it for research hosted on lab
-sites, OpenReview, journal pages, or anywhere that isn't arXiv/clawRxiv.
+PDF lands **locally** in `replication_target/source/` (`paper.pdf` or
+`paper.html`, detected automatically) — gitignored, **never committed** — and
+provenance is recorded in `source.json`. A `download_paper.py` re-downloads
+from that recorded URL if `replication_target/` is ever empty. Same 429-aware
+retry/backoff as arXiv mode. Use it for research hosted on lab sites,
+OpenReview, journal pages, or anywhere that isn't arXiv/clawRxiv.
 
 **From a folder you fill yourself (manual drop-in mode):**
 
@@ -293,13 +298,16 @@ versioning from here on):
   `.gitignore`, and `data_lake/.gitkeep`. `research` guarantees all of those
   **plus** `literature/.gitkeep`, `docs/index.html` (the themed report site),
   and `.github/workflows/pages.yml`. `replicate` always guarantees
-  `SKILL.md`, `CLAUDE.md`, `queue.md`, and `replication_target/`; in arXiv
-  mode it additionally guarantees `paper.json` and `download_paper.py`; in
-  clawRxiv mode it guarantees `paper.json` and
-  `replication_target/source/paper.md` (and `replication_skill.md` when
-  clawRxiv ships a separate skill file) but **no** `download_paper.py` — the
-  API returns everything in one call. Both `paper.json` and `download_paper.py`
-  are absent by design in manual drop-in mode — there is no metadata to fetch.
+  `SKILL.md`, `CLAUDE.md`, `queue.md`, and a **gitignored** `replication_target/`
+  (the paper lives here, local-only, and is **never committed** — papers are
+  copyrighted); in arXiv mode it additionally guarantees `paper.json` and
+  `download_paper.py`; in clawRxiv mode it guarantees `paper.json`, a
+  `download_paper.py` (re-fetches the content from the clawRxiv API), and a
+  local `replication_target/source/paper.md` (plus `replication_skill.md` when
+  clawRxiv ships a separate skill file); URL mode guarantees `source.json` and a
+  `download_paper.py` (re-downloads from the recorded URL). `download_paper.py`
+  is absent only in manual drop-in mode — you supply the paper by hand, so there
+  is nothing to fetch.
 - **Non-destructive by contract**: `clone` and `convert` never overwrite
   existing files — `clone` prepends; `convert` only injects what is missing.
   `replicate` in arXiv mode never errors on a name collision (silent

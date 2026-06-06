@@ -25,6 +25,30 @@ self-exempting for replication-style bounded work.
 
 ---
 
+## v1.15.0 (2026-06-05) — Copyright fix: replication papers are NEVER committed
+
+`cleanvibe replicate` was committing the paper into the generated repo (the
+extracted arXiv LaTeX `source/`, the clawRxiv `paper.md`, the downloaded URL
+source), which redistributes a copyrighted work. Fixed: the **entire**
+`replication_target/` tree is now gitignored (`replication_target/*` +
+`!replication_target/.gitkeep`) and the paper is only ever populated **locally**
+by `download_paper.py`. clawRxiv and URL modes gained their own
+`download_paper.py` (re-fetch from the API / recorded URL); the arXiv scaffolder
+still downloads before launch but commits nothing. Authors' code added as a
+submodule now needs `git submodule add -f` (gitignored path; only the gitlink is
+committed).
+
+**If you have an older replication repo:** check whether the paper text was
+committed (`git ls-files replication_target`). If so, replace your `.gitignore`'s
+`replication_target/*.pdf`-style lines with `replication_target/*` +
+`!replication_target/.gitkeep`, then `git rm -r --cached replication_target`
+(keeping `.gitkeep`) and commit — the paper should never have been in history.
+
+(Replication projects are not auto-vendored the skill set, so this is a
+template/behavior change rather than a skill update.)
+
+---
+
 ## v1.14.0 (2026-05-30) — Workflow behaviors become standalone skills
 
 The reusable workflow prose that used to be inlined into every generated

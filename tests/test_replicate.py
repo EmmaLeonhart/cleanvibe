@@ -6,6 +6,7 @@ fetch_paper is monkeypatched so nothing hits the arXiv API.
 import io
 import json
 import os
+import subprocess
 import tempfile
 import unittest
 from contextlib import contextmanager, redirect_stdout
@@ -143,21 +144,52 @@ class TestReplicateScaffold(unittest.TestCase):
             self.assertIn("1. **STOP", queue)
             self.assertIn("consent", skill.lower())
 
-    def test_extract_runs_commit_2_when_enabled(self):
-        """extract=True invokes the commit-2 extraction helper; False doesn't."""
+    def test_extract_runs_local_populate_when_enabled(self):
+        """extract=True invokes the local-populate helper; False doesn't.
+
+        The helper populates replication_target/ LOCALLY (gitignored) — it does
+        NOT commit the paper (copyright). Here it's patched out entirely.
+        """
         with _in_tmp_cwd():
             with patch("cleanvibe.replicate.fetch_paper", return_value=_paper()), \
-                    patch("cleanvibe.replicate._run_extraction_commit") as ex:
+                    patch("cleanvibe.replicate._run_extraction") as ex:
                 with redirect_stdout(io.StringIO()):
                     replicate_project("1706.03762", no_claude=True, extract=True)
             ex.assert_called_once()
 
         with _in_tmp_cwd():
             with patch("cleanvibe.replicate.fetch_paper", return_value=_paper()), \
-                    patch("cleanvibe.replicate._run_extraction_commit") as ex:
+                    patch("cleanvibe.replicate._run_extraction") as ex:
                 with redirect_stdout(io.StringIO()):
                     replicate_project("1706.03762", no_claude=True, extract=False)
             ex.assert_not_called()
+
+    def test_replication_target_fully_gitignored_and_not_tracked(self):
+        """The whole replication_target/ tree is gitignored — the paper (and any
+        extracted source under it) is NEVER committed. Only .gitkeep is tracked."""
+        with _in_tmp_cwd():
+            _run()  # extract=False, so nothing is downloaded
+            target = Path(f"replicating-{SLUG}")
+            gi = (target / ".gitignore").read_text(encoding="utf-8")
+            self.assertIn("replication_target/", gi)
+            self.assertIn("!replication_target/.gitkeep", gi)
+            # Simulate a downloaded paper landing under replication_target/.
+            (target / "replication_target" / "source").mkdir(parents=True)
+            (target / "replication_target" / "source" / "paper.md").write_text("x")
+            (target / "replication_target" / "paper.pdf").write_bytes(b"%PDF-1.7")
+            tracked = subprocess.run(
+                ["git", "ls-files", "replication_target"],
+                cwd=target, capture_output=True, text=True,
+            ).stdout
+            self.assertIn("replication_target/.gitkeep", tracked.replace("\\", "/"))
+            self.assertNotIn("paper.pdf", tracked)
+            self.assertNotIn("paper.md", tracked)
+            # git sees nothing addable under the source tree (fully ignored).
+            check = subprocess.run(
+                ["git", "check-ignore", "replication_target/source/paper.md"],
+                cwd=target, capture_output=True, text=True,
+            )
+            self.assertEqual(check.returncode, 0, "paper.md must be gitignored")
 
     def test_paper_not_in_data_lake(self):
         with _in_tmp_cwd():
@@ -169,7 +201,7 @@ class TestReplicateScaffold(unittest.TestCase):
             )
             # The paper's home is replication_target/ (gitignored), not data_lake.
             gitignore = (target / ".gitignore").read_text(encoding="utf-8")
-            self.assertIn("replication_target/*.pdf", gitignore)
+            self.assertIn("replication_target/", gitignore)
             self.assertFalse((target / "data_lake" / "paper.pdf").exists())
 
     def test_naming_and_collision_suffix(self):
@@ -316,7 +348,9 @@ class TestReplicateManual(unittest.TestCase):
         with _in_tmp_cwd():
             _run_manual("p")
             gi = (Path("p") / ".gitignore").read_text(encoding="utf-8")
-            self.assertIn("replication_target/*.pdf", gi)
+            # The whole replication_target/ tree is gitignored (paper copyright).
+            self.assertIn("replication_target/", gi)
+            self.assertIn("!replication_target/.gitkeep", gi)
 
     def test_dry_run_writes_nothing(self):
         with _in_tmp_cwd():
@@ -361,6 +395,7 @@ class TestReplicateUrl(unittest.TestCase):
                 "README.md",
                 "SKILL.md",
                 "source.json",
+                "download_paper.py",
                 ".gitignore",
                 "data_lake/.gitkeep",
                 "replication_target/.gitkeep",
@@ -369,13 +404,19 @@ class TestReplicateUrl(unittest.TestCase):
             ):
                 self.assertTrue((target / rel).is_file(), f"missing {rel}")
             self.assertTrue((target / ".git").is_dir(), "git repo not initialized")
-            # No arXiv artifacts in URL mode.
-            self.assertFalse((target / "download_paper.py").exists())
+            # URL mode has a download_paper.py (re-fetch) but no arXiv paper.json.
             self.assertFalse((target / "paper.json").exists())
-            # The source was downloaded into replication_target/source/.
+            # The source was downloaded LOCALLY into replication_target/source/
+            # (gitignored — never committed).
             self.assertTrue(
                 (target / "replication_target" / "source" / "paper.html").is_file()
             )
+            tracked = subprocess.run(
+                ["git", "ls-files", "replication_target"],
+                cwd=target, capture_output=True, text=True,
+            ).stdout.replace("\\", "/")
+            self.assertNotIn("paper.html", tracked)
+            self.assertIn("replication_target/.gitkeep", tracked)
             meta = json.loads((target / "source.json").read_text(encoding="utf-8"))
             self.assertEqual(meta["source"], "url")
             self.assertEqual(
@@ -433,7 +474,8 @@ class TestReplicateCliDispatch(unittest.TestCase):
             target = Path("replicating-cool")
             self.assertTrue((target / "source.json").is_file())
             self.assertFalse((target / "paper.json").exists())
-            self.assertFalse((target / "download_paper.py").exists())
+            # URL mode ships a download_paper.py (re-fetch from source.json).
+            self.assertTrue((target / "download_paper.py").is_file())
 
     def test_folder_name_routes_to_manual(self):
         with _in_tmp_cwd():
@@ -446,10 +488,10 @@ class TestReplicateCliDispatch(unittest.TestCase):
     def test_arxiv_ref_routes_to_arxiv_mode(self):
         with _in_tmp_cwd():
             buf = io.StringIO()
-            # Patch the commit-2 extraction so the CLI default (extract=True)
-            # doesn't hit the network in this dispatch test.
+            # Patch the local-populate extraction so the CLI default
+            # (extract=True) doesn't hit the network in this dispatch test.
             with patch("cleanvibe.replicate.fetch_paper", return_value=_paper()), \
-                    patch("cleanvibe.replicate._run_extraction_commit") as extract:
+                    patch("cleanvibe.replicate._run_extraction") as extract:
                 with redirect_stdout(buf):
                     cli.main(
                         ["replicate", "https://www.alphaxiv.org/overview/1706.03762",
