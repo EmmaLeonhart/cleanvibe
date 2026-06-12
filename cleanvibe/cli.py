@@ -3,6 +3,7 @@
 Usage:
     cleanvibe new PATH          Create a new scaffolded project
     cleanvibe research PATH     Create an original-research project (literature-review-first + published report)
+    cleanvibe original PATH     Create an original-research project with an uncertain topic (adds a topic-finding loop)
     cleanvibe clone REPO [PATH] Clone a repo and inject scaffolding
     cleanvibe convert [PATH]    Convert an existing directory into a cleanvibe project
     cleanvibe replicate REF     Scaffold a replication project: clawRxiv ref, arXiv/alphaxiv ref, a non-arXiv URL, or a drop-in folder
@@ -26,6 +27,7 @@ from .replicate import (
     replicate_project,
     replicate_url_project,
 )
+from .original import original_project
 from .research import research_project
 from .scaffold import clone_project, convert_project, create_project
 
@@ -59,6 +61,25 @@ def _do_research(args) -> None:
         path = suggestion
     research_project(
         path, question=question, dry_run=args.dry_run, no_claude=args.no_claude
+    )
+
+
+def _do_original(args) -> None:
+    """Handler shared by `cleanvibe original PATH` and `cleanvibe new PATH --original`.
+
+    Like research, original projects are fresh (not in-place conversions) — so on
+    a non-empty target we create under a free sibling name rather than converting.
+    The seed is an `area` (a field to explore), not a `question`: the question is
+    what the topic-finding loop discovers.
+    """
+    path = args.path
+    area = getattr(args, "area", None)
+    if path.exists() and any(path.iterdir()) and not args.dry_run:
+        suggestion = _suggest_name(path)
+        print(f"{path} already exists and is not empty; using {suggestion} instead.")
+        path = suggestion
+    original_project(
+        path, area=area, dry_run=args.dry_run, no_claude=args.no_claude
     )
 
 
@@ -103,6 +124,17 @@ def main(argv: list[str] | None = None) -> None:
         help="(research only) the research question, if you already know it",
     )
     new_parser.add_argument(
+        "--original", action="store_true",
+        help="Scaffold an original-research project with an UNCERTAIN topic "
+        "(same as `cleanvibe original`): adds a topic-finding loop before the "
+        "literature review",
+    )
+    new_parser.add_argument(
+        "--area", default=None,
+        help="(original only) a focus area / field to seed topic finding, if you "
+        "have a rough direction",
+    )
+    new_parser.add_argument(
         "--dry-run", action="store_true", help="Show what would be created without writing anything"
     )
     new_parser.add_argument(
@@ -125,6 +157,26 @@ def main(argv: list[str] | None = None) -> None:
         "--dry-run", action="store_true", help="Show what would be created without writing anything"
     )
     research_parser.add_argument(
+        "--no-claude", action="store_true", help="Skip launching Claude Code after scaffolding"
+    )
+
+    # cleanvibe original PATH
+    original_parser = subparsers.add_parser(
+        "original",
+        help="Create an original-research project with an UNCERTAIN topic: like "
+        "`research` but adds a topic-finding loop that discovers and selects the "
+        "research question before the literature review",
+    )
+    original_parser.add_argument("path", type=Path, help="Directory to create")
+    original_parser.add_argument(
+        "--area", default=None,
+        help="A focus area / field to seed topic finding, if you have a rough "
+        "direction (otherwise the bootstrap loop explores broadly with you)",
+    )
+    original_parser.add_argument(
+        "--dry-run", action="store_true", help="Show what would be created without writing anything"
+    )
+    original_parser.add_argument(
         "--no-claude", action="store_true", help="Skip launching Claude Code after scaffolding"
     )
 
@@ -196,7 +248,15 @@ def main(argv: list[str] | None = None) -> None:
         _do_research(args)
         return
 
+    if args.command == "original":
+        _do_original(args)
+        return
+
     if args.command == "new":
+        if args.original:
+            # `cleanvibe new PATH --original` is an alias for `cleanvibe original`.
+            _do_original(args)
+            return
         if args.research:
             # `cleanvibe new PATH --research` is an alias for `cleanvibe research`.
             _do_research(args)

@@ -1086,3 +1086,37 @@ extraction-helper test renamed to match `_run_extraction`. Full suite green
 `.gitkeep` is tracked. (Live arXiv smoke deferred — arXiv was timing out.)
 
 - Version `1.14.0` -> `1.15.0` (`cleanvibe/__init__.py`, `pyproject.toml`).
+
+## 2026-06-11 — v1.16.0: `cleanvibe original` — research with a topic-finding loop
+
+A sixth mode: **`cleanvibe original <name>`** (also `cleanvibe new <name>
+--original [--area FIELD]`). It is `cleanvibe research` for the case where the
+**topic is uncertain** — you don't yet have a fixed research question.
+
+- **`cleanvibe/original.py`** (`original_project(path, area, dry_run, no_claude)`)
+  mirrors `research_project` and adds a committed `topics/.gitkeep`. It reuses the
+  research deliverables wholesale: `RESEARCH_GITIGNORE`, `RESEARCH_PAGES_YML`,
+  `CLEANVIBE_REPORT_CSS`, and the `_RESEARCH_INDEX_HTML` shell.
+- **The distinctive bootstrap step is a topic-finding loop** (queue step 3, before
+  the literature review): explore the focus area with agentic search/RAG, draft a
+  slate of candidate research questions, score them (novelty / tractability /
+  interest / available data-compute / what a result is worth), confirm the
+  shortlist with the user, and converge on ONE — recording candidates + scoring +
+  the chosen question + rationale in `topics/TOPICS.md`. Then it proceeds exactly
+  like `research` (literature review → experiments → published findings). It keeps
+  everything `research` has, including the three-cron playbook (original research
+  IS extensive work).
+- **The seed is an `--area` (a field), not a `--question`** — the question is what
+  the loop discovers. At scaffold time the question is always a placeholder
+  (`_ORIGINAL_QUESTION_PLACEHOLDER`, "not yet chosen…"); the area falls back to
+  `_ORIGINAL_AREA_PLACEHOLDER` ("open…") when omitted.
+- **Templates** (`templates.py`): `original_{claude,readme,queue,index_html}` +
+  `_topic_area` helper. **CLI** (`cli.py`): `original` subparser with `--area`, a
+  `new --original` alias routed through a shared `_do_original` handler (checked
+  before `--research`).
+- **Tests:** `tests/test_original.py` (19 tests) — tree incl. `topics/`,
+  topic-finding-before-literature-review ordering, three-cron playbook,
+  public-for-Pages, themed/shared-theme docs, the topic-finding question
+  placeholder, CLI dispatch + `new --original` alias, `--area` threading. Full
+  suite green (128 passed).
+- Version `1.15.0` -> `1.16.0` (`cleanvibe/__init__.py`).

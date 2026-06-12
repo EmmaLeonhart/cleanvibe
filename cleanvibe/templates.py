@@ -2734,3 +2734,227 @@ B. **Run the status-report action once more, independently** — an end-of-sessi
 - Completed work (chronological, with milestones): `devlog.md`.
 - Narrative history: `git log`.
 """
+
+
+# ── `cleanvibe original` — research with an up-front topic-finding loop ──────
+# `original` is `research` for an UNCERTAIN topic: it keeps everything research
+# has (literature review, themed report, three-cron playbook) and prepends a
+# topic-finding loop that discovers a worthwhile research question before the
+# literature review narrows in. The optional seed is an `area` (a field/domain),
+# not a `question`. It reuses RESEARCH_GITIGNORE / RESEARCH_PAGES_YML /
+# CLEANVIBE_REPORT_CSS / _RESEARCH_INDEX_HTML.
+
+_ORIGINAL_AREA_PLACEHOLDER = (
+    "_(open — no area fixed yet; the bootstrap queue's topic-finding loop "
+    "explores broadly and converges on one with you)_"
+)
+_ORIGINAL_QUESTION_PLACEHOLDER = (
+    "_(not yet chosen — the bootstrap queue's topic-finding loop discovers and "
+    "selects this before the literature review)_"
+)
+
+
+def _topic_area(area: str | None) -> str:
+    a = (area or "").strip()
+    return a if a else _ORIGINAL_AREA_PLACEHOLDER
+
+
+def original_index_html(project_name: str, area: str | None = None) -> str:
+    """The themed docs/index.html for an original-research project. Reuses the
+    shared research report shell; the question is unknown at scaffold time, so
+    the topic-finding placeholder stands in until the loop selects one."""
+    date = datetime.now().strftime("%Y-%m-%d")
+    return (
+        _RESEARCH_INDEX_HTML
+        .replace("__REPORT_CSS__", CLEANVIBE_REPORT_CSS)
+        .replace("__PROJECT_NAME__", project_name)
+        .replace("__QUESTION__", _ORIGINAL_QUESTION_PLACEHOLDER)
+        .replace("__DATE__", date)
+    )
+
+
+def original_claude_md(project_name: str, area: str | None = None) -> str:
+    date = datetime.now().strftime("%Y-%m-%d")
+    a = _topic_area(area)
+    return f"""# {project_name} — original-research project (topic-finding)
+
+## Project Description
+
+This is an **original-research project** scaffolded by `cleanvibe original`. It
+is `cleanvibe research` for an **uncertain topic**: you do not yet have a fixed
+research question. The distinctive first move is a **topic-finding loop** that
+explores the area, generates and scores candidate questions, and converges on
+ONE worth pursuing — *then* it proceeds exactly like a `research` project
+(literature review → experiments → published findings).
+
+> **Focus area (seed for topic finding):** {a}
+> **Research question:** {_ORIGINAL_QUESTION_PLACEHOLDER}
+
+Like every cleanvibe research project it produces a published, legible report —
+a themed **GitHub Pages site** (`docs/`) plus a transportable PDF — but the work
+*starts* one step earlier than `research`: with choosing what to investigate.
+
+## Research workflow (the shape of this project)
+
+1. **Topic-finding loop — BEFORE anything else.** The topic is uncertain, so
+   first discover it. Explore the focus area (broad agentic search / RAG), draft
+   a slate of candidate research questions, score them (novelty, tractability,
+   interest, available data/compute, what a result would be worth), and converge
+   on ONE. Record candidates + scoring + the chosen question + rationale in
+   `topics/TOPICS.md`. Confirm the shortlist direction with the user before
+   committing to one. This is what makes `original` different from `research`.
+2. **Question.** The topic-finding loop's output: the concrete question being
+   investigated and what a successful answer looks like. Fill in the
+   `> Research question` line above and the docs lede once chosen.
+3. **Literature review (agentic RAG) — BEFORE building anything.** Now narrowed
+   to the chosen question, survey the prior work: web search, `WebFetch`, the
+   `deep-research` skill if present. Collect cited sources into `literature/`;
+   synthesize `literature/REVIEW.md` (what is known, the gap, what this adds).
+4. **Hypotheses & experiments.** Turn the gap into testable experiments / build
+   steps. Plan them `todo.md` → `queue.md`.
+5. **Build & run.** Implement under `src/`; entry point `scripts/run.py`;
+   metrics → `results/`.
+6. **Findings & report.** Write `FINDINGS.md`; keep the themed `docs/` site and
+   the PDF report current as results land.
+
+## Architecture and Conventions
+
+- **`topics/`** — the topic-finding loop's artifacts: candidate questions, the
+  scoring, and `TOPICS.md` (the chosen question + why it won over the rest).
+  Committed; it is the record of *why this question*. Built in workflow step 1,
+  before the literature review.
+- **`literature/`** — the literature review on the chosen question: source notes
+  (one file per source, or a `sources.md`) and `REVIEW.md` (the synthesized
+  survey, with citations). Committed; the evidentiary base. Built in step 3.
+- **`data_lake/`** — datasets and other supplied/downloaded material (standard
+  cleanvibe convention). Committed.
+- **`src/`** — the research code. **`scripts/run.py`** — the entry point CI can
+  invoke. **`results/`** — metrics JSON / run outputs (gitignored). **`FINDINGS.md`**
+  — the write-up (question, method, results, limitations).
+- **`docs/`** — the **published GitHub Pages site** (themed `index.html`, figures,
+  and the built `report.pdf`). The theme ships pre-styled (warm "paper" light
+  theme + dark-mode variant); edit the content, keep the chrome. Site-shape
+  inspiration: http://latent-space.emmaleonhart.com/
+- **Go live early.** Create a **PUBLIC** GitHub repo and push near the start so
+  every commit pushes and Pages/CI build as you go (public is required for free
+  GitHub Pages).
+- **Deliverables are built by GitHub Actions.** `.github/workflows/pages.yml`
+  deploys `docs/` and builds `docs/report.pdf` from `FINDINGS.md`. Make the repo
+  public and set Settings -> Pages -> Source: GitHub Actions.
+
+{SKILLS_POINTER}
+
+# currentDate
+Today's date is {date}.
+"""
+
+
+def original_readme_md(project_name: str, area: str | None = None) -> str:
+    a = _topic_area(area)
+    return f"""# {project_name}
+
+> An **original-research project** scaffolded with
+> [cleanvibe](https://github.com/Immanuelle/cleanvibe) `original`.
+
+**Focus area (seed for topic finding):** {a}
+**Research question:** {_ORIGINAL_QUESTION_PLACEHOLDER}
+
+## About
+
+This is an original-research project with an **uncertain topic**. It is
+`cleanvibe research` plus an up-front **topic-finding loop**: it explores the
+focus area, generates and scores candidate research questions, and converges on
+one *before* the literature review narrows in — then runs experiments / builds
+something to answer it and publishes the findings as a themed GitHub Pages
+report + a transportable PDF.
+
+The distinctive first move is **topic finding** (see `topics/`); the second is a
+**literature review** (agentic RAG) on the chosen question (see `literature/`).
+
+## How it's organized
+
+- `topics/` — the topic-finding loop (candidates + scoring + `TOPICS.md`), first.
+- `literature/` — the literature review on the chosen question (sources + `REVIEW.md`).
+- `data_lake/` — datasets and supplied material.
+- `src/` — the research code; `scripts/run.py` — the run entry point.
+- `results/` — run outputs (gitignored). `FINDINGS.md` — the write-up.
+- `docs/` — the published GitHub Pages report site (themed) + built PDF.
+- `queue.md` / `todo.md` / `devlog.md` — the cleanvibe work loop.
+
+## Getting started
+
+```
+cd {project_name}
+claude
+```
+
+Then work `queue.md` top to bottom. The bootstrap sequence runs the
+topic-finding loop to choose the question, runs the literature review on it,
+plans the experiments, takes the repo public, and keeps the report current as
+results land.
+
+## Published report
+
+Once the repo is public with Pages set to **Source: GitHub Actions**,
+`.github/workflows/pages.yml` deploys `docs/` (the report site) and builds
+`docs/report.pdf`. Site-shape inspiration: http://latent-space.emmaleonhart.com/
+"""
+
+
+def original_queue_md(project_name: str, area: str | None = None) -> str:
+    a = _topic_area(area)
+    return f"""# {project_name} — Work Queue (original research)
+
+**This file is a queue of *concrete, executable steps*, not a state snapshot.** It lists what is being worked on right now. Finished work lives in `devlog.md` (a dated entry) and `git log`; longer-horizon, *abstract* work lives in `todo.md` and gets decomposed into items here when it's ready to execute. **When an item is done, delete it from this file AND append a dated entry to `devlog.md` in the same commit, then push.** Do not add checkmarks, "done" markers, or status indicators in place. If an item is still here, it is not done.
+
+**This is a `cleanvibe original` project** — your own investigation with an *uncertain topic*. Its distinctive move is an up-front **topic-finding loop** (discover and select the research question) BEFORE the literature review, which itself comes before any building. It publishes a themed GitHub Pages **report** under `docs/`.
+
+> **Focus area (seed for topic finding):** {a}
+
+**Why this file exists:** when a planning step produces a plan, that plan is written here BEFORE execution starts, so an interrupted session can pick up from the queue rather than from chat context that may be gone.
+
+See `CLAUDE.md` § "Workflow Rules" and § "Research workflow" for how this file, planning mode, and the task tool stay in sync.
+
+**Three-cron playbook.** Original research IS extensive work, so it runs under three local `CronCreate` jobs — **work-loop at :03** (the engine that drains `queue.md` and refills it from `todo.md`), **auto-flush at :15** (commit/push backstop), and **status-report at :42** (heartbeat). On a fresh session they are **started** as the opening step (bootstrap step 1 below); on a mid-session **large-scale re-fill** of this queue the FIRST item worked is instead to **kill** the already-running crons. Either way the **last two items are always pinned at the tail** (see `## Always last`). Entering planning mode also disables the crons; their restart lives at the end of the queue. (See `CLAUDE.md` § "Autonomous productivity loop — the three-cron playbook".)
+
+---
+
+## Active — First-session bootstrap (original research)
+
+Work these top to bottom. **Delete each item from this file in the same commit that completes it, and append a dated entry to `devlog.md`.** Push after every step. When this whole section is gone, the project has finished bootstrap and the queue is ready to be repopulated with the real research/experiment work (see the final item).
+
+1. **Start the three-cron playbook.** Use the `CronCreate` tool to schedule three local crons (all `durable: false`): **work-loop at `3 * * * *`** (sync → take top actionable `queue.md` item / promote from `todo.md` → hold the hard rails → commit + push → one-line report), **auto-flush at `15 * * * *`** (commit + push pending work, no empty commits), and **status-report at `42 * * * *`** (reporting only, no code changes). Together they turn this run into a self-sustaining hourly cadence so a long autonomous session can't silently lose the thread. (See `CLAUDE.md` § "Autonomous productivity loop"; the `## Always last` section keeps them running.)
+
+2. **Triage user-supplied files into `data_lake/`.** Move anything the user dropped in (notes, exports, datasets, spec PDFs, prior drafts) into `data_lake/` so the root stays clean; leave the `.gitkeep`. Extract any `.zip` into `data_lake/` and add the `.zip` to `.gitignore`. For anything large enough to need Git LFS (>50 MB, or large binary like video/audio/datasets), STOP and ask the user first. Commit, describing what moved.
+
+3. **Topic-finding loop — discover and select the research question.** This is the step that makes an `original` project different from a `research` one: the topic is *uncertain*, so find it before anything else. Starting from the focus area above (if open, ask the user for a rough direction first), explore broadly with whatever agentic search / RAG tooling is available (web search, `WebFetch`, the `deep-research` skill if present) plus anything in `data_lake/`. Draft a slate of **candidate research questions**; for each, note novelty, tractability, interest, available data/compute, and what a result would be worth. Score them and converge on ONE. Write the candidates + scoring + the chosen question + the rationale (why it won) into `topics/TOPICS.md`. **Present the shortlist to the user and confirm the direction before locking it in.** Then write the chosen question into `README.md`, `CLAUDE.md`'s `> Research question` line and "Project Description", and the `docs/index.html` lede + question block. Commit `topics/` on its own so the topic selection is a reviewable artifact.
+
+4. **Literature review (agentic RAG) — on the chosen question, BEFORE building anything.** Now that the topic is fixed, survey the prior work on it: use whatever agentic search / RAG tooling is available (web search, `WebFetch`, and the `deep-research` skill if present). For each relevant source, write a short note (claim, method, what it contributes, citation) into `literature/` — one file per source, or a single `literature/sources.md`. Then synthesize `literature/REVIEW.md`: what is already known, where the gaps are, and what *this* project adds. Cite sources properly. Reflect the one-line "grounded in the literature" summary into `docs/index.html`. Commit `literature/` on its own so the review is a reviewable artifact.
+
+5. **Create `todo.md` — the long-horizon research plan.** Informed by the gap the literature review surfaced, write `todo.md` as the project's long-term horizon: the hypotheses to test, experiments to run / things to build, and the eventual shape of the report. Items here are *abstract destinations*, decomposed into concrete steps in `queue.md` later. Use the format in `CLAUDE.md` § "Queue and longer-horizon work". Commit `todo.md` on its own.
+
+6. **Go live: create a PUBLIC GitHub repo and push.** Public is required for free GitHub Pages. `gh repo create --public --source=. --push`. The `pages.yml` workflow **auto-enables Pages itself** (via `actions/configure-pages` with `enablement: true`) — there is no manual Settings toggle to do; just confirm the repo is public and CI (`.github/workflows/`) is wired, and on push `docs/` (the report site) + the built PDF deploy. From here every commit pushes and Pages/CI build as you go.
+
+7. **Replace this bootstrap queue with the real research queue.** Pull the first item(s) from `todo.md` and decompose them into a concrete, ordered list of experiment / implementation tasks under a new `## Active` section (deleting this bootstrap section as part of the same edit). Mirror into the task tool. **Keep the `## Always last` section pinned at the very bottom.** The real queue's FIRST work item should **start the three crons** — unless this is a mid-session large-scale re-fill while they are already running, in which case the first item is instead to **kill them** (the pinned tail restarts them). Commit the new queue.
+
+8. **Work the queue until the stop condition.** Pull the top item, do it, **delete it from `queue.md` AND append a dated entry to `devlog.md`** in the same commit, push, let CI run. Build under `src/`, run via `scripts/run.py`, capture metrics to `results/`, and keep `FINDINGS.md` + the themed `docs/` report current as results land. When `queue.md` empties, refill from `todo.md`. **Stop** when: the research question has a defensible answer (or a clearly reported partial result), `FINDINGS.md` and the published `docs/` report reflect it, `queue.md` is empty, and the repo is online with green CI/Pages. At that point, hand back to the user.
+
+---
+
+## Always last — restart the three crons and summarize
+
+**These two items stay pinned to the tail of the queue at all times** — below every bootstrap step and below every real work item. They are the closing half of the three-cron lifecycle in `CLAUDE.md` § "Autonomous productivity loop":
+
+A. **Ensure the three crons are running** — start them if this session never did, restart them if a planning burst / queue re-fill killed them: work-loop (`3 * * * *`), auto-flush (`15 * * * *`), status-report (`42 * * * *`).
+B. **Run the status-report action once more, independently** — an end-of-session summary of everything that happened this session.
+
+---
+
+## Pointers
+
+- The topic-finding record (why this question): `topics/TOPICS.md`.
+- Long-horizon backlog (abstract goals, source of future queue items): `todo.md`.
+- The literature review (the project's evidentiary base): `literature/REVIEW.md`.
+- Completed work (chronological, with milestones): `devlog.md`.
+- Narrative history: `git log`.
+"""

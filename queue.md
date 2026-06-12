@@ -6,9 +6,11 @@
 
 ---
 
-## Active
+## Active — `cleanvibe original` smoke test
 
-_(empty — the v1.15.0 copyright fix shipped: `replication_target/` is now fully gitignored and the paper is never committed in any replicate mode; see `devlog.md`.)_
+`cleanvibe original` shipped in v1.16.0 (see `devlog.md`). Remaining:
+
+1. **Smoke test** — scaffold a real `cleanvibe original` run in a gitignored dir (`tests/scratch/`) with `--no-claude`, confirm the tree (incl. `topics/`), then move to running it for real (launch Claude into it).
 
 ---
 
@@ -25,4 +27,4 @@ B. **Run the status-report action once more, independently** — an end-of-sessi
 
 - Completed work (chronological, with releases): `devlog.md`. Long-horizon backlog: `todo.md`.
 - Vision / framing: `docs/replication_framing.md`; reference corpus: `docs/replication-examples/`.
-- Narrative history: `git log`. Current version: `1.15.0`.
+- Narrative history: `git log`. Current version: `1.16.0`.

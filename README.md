@@ -95,6 +95,35 @@ experiment/build queue → work it, keeping `FINDINGS.md` + the `docs/` report
 current. Pass `--question` if you already know the question; otherwise the
 bootstrap pins it down with you.
 
+### Original research — when you don't have a topic yet
+
+```
+cleanvibe original driftprobe
+cleanvibe original driftprobe --area "reservoir computing"
+cleanvibe new driftprobe --original                          # equivalent alias
+```
+
+`original` is `research` for an **uncertain topic**: you don't yet have a fixed
+research question. It keeps everything `research` has — `literature/`,
+`data_lake/`, the three-cron playbook, the themed `docs/` report — and prepends
+one distinctive bootstrap step:
+
+- **`topics/`** — the **topic-finding loop**, run *before* the literature review.
+  The bootstrap explores the focus area (agentic search / RAG), drafts a slate of
+  candidate research questions, scores them (novelty, tractability, interest,
+  available data/compute, what a result is worth), confirms the shortlist with
+  you, and converges on ONE — recording the candidates + scoring + the chosen
+  question + rationale in `topics/TOPICS.md`. Then it proceeds exactly like
+  `research`.
+
+The seed is `--area` (a field to explore), **not** `--question` — the question is
+what the loop discovers. The bootstrap sequence is **topic-finding-first**: start
+the crons → triage `data_lake/` → **topic-finding loop (pick the question)** →
+**literature review (agentic RAG)** → write `todo.md` → go **public** → replace
+the bootstrap queue → work it. Use `original` when you want to investigate *some*
+area but haven't settled on the precise question; use [`research`](#research-a-question--your-own-investigation)
+when you already know what you're asking.
+
 ### Clone an existing repo — codebase onboarding
 
 ```
@@ -292,8 +321,9 @@ project site (built from `pages/` and deployed by GitHub Actions):
 As of **v1.0.0**, cleanvibe commits to the following contract (semantic
 versioning from here on):
 
-- **Subcommands** `new`, `research`, `clone`, `convert`, and `replicate` are
-  stable. Their core behavior will not change incompatibly within the 1.x line.
+- **Subcommands** `new`, `research`, `original`, `clone`, `convert`, and
+  `replicate` are stable. Their core behavior will not change incompatibly
+  within the 1.x line.
 - **Injected files**: `new` guarantees `CLAUDE.md`, `README.md`, `queue.md`,
   `.gitignore`, and `data_lake/.gitkeep`. `research` guarantees all of those
   **plus** `literature/.gitkeep`, `docs/index.html` (the themed report site),
