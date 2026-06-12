@@ -6,11 +6,9 @@
 
 ---
 
-## Active — `cleanvibe original` smoke test
+## Active
 
-`cleanvibe original` shipped in v1.16.0 (see `devlog.md`). Remaining:
-
-1. **Smoke test** — scaffold a real `cleanvibe original` run in a gitignored dir (`tests/scratch/`) with `--no-claude`, confirm the tree (incl. `topics/`), then move to running it for real (launch Claude into it).
+_(empty — `cleanvibe original` shipped in v1.16.0 and was smoke-tested live in `tests/scratch/`; see `devlog.md`.)_
 
 ---
 

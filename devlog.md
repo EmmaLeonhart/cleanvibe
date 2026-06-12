@@ -1120,3 +1120,13 @@ A sixth mode: **`cleanvibe original <name>`** (also `cleanvibe new <name>
   placeholder, CLI dispatch + `new --original` alias, `--area` threading. Full
   suite green (128 passed).
 - Version `1.15.0` -> `1.16.0` (`cleanvibe/__init__.py`).
+
+## 2026-06-11 — v1.16.0 live smoke test
+
+Scaffolded a real `cleanvibe original` project into the gitignored
+`tests/scratch/original-smoke` (`--no-claude`): the tree is correct including
+the committed `topics/.gitkeep`, and `git ls-files` confirms `topics/` +
+`literature/` + `docs/index.html` are tracked. Verified the bootstrap queue
+ordering — topic-finding loop (step 3) precedes the literature review (step 4)
+precedes `todo.md` (step 5). Then launched Claude into the scaffold to work it
+for real.
