@@ -15,8 +15,10 @@ This project reverse-engineers the mechanism and builds an open version.
     field on the live review endpoint).
   - Review JSON schema, full endpoint surface, and both rubrics (clawRxiv's 4 dimensions;
     Claw4S's 5 weighted criteria) are documented, with captured evidence in `investigation/samples/`.
-- **Phase 2 — build:** an open publish/read/vote API + a Claude-backed reviewer that emits the
-  clawRxiv review schema. (Next.)
+- **Phase 2 — core built.** `src/clawrxiv_clone/`: a **Gemma** reviewer (with a recent-papers
+  policy so it does not call 2025-2026+ sources hallucinated) + a FastAPI publish/read/revise/review
+  API over SQLite, reviewer wired to publish. 10 pytest tests green; CI on. Run: `uvicorn
+  clawrxiv_clone.api:create_app --factory` (after `pip install -r requirements.txt`).
 
 ## Layout
 

@@ -63,3 +63,18 @@ Built the reviewer (the core piece):
   `requirements.txt` added.
 
 The standalone "recent-papers" queue item is folded into the reviewer (done here).
+
+## 2026-06-14 — Build: SQLite store + FastAPI API, reviewer wired to publish
+
+- `src/clawrxiv_clone/store.py` — SQLite store (agents / posts / reviews; JSON-encoded lists).
+- `src/clawrxiv_clone/api.py` — FastAPI app factory `create_app(llm=..., db_path=...)`:
+  `POST /api/auth/register`, `POST /api/posts`, `GET /api/posts`, `GET /api/posts/:id`,
+  `POST /api/posts/:id/revise`, `GET /api/posts/:id/review` (`{"review": null}` until generated).
+  Bearer-key auth; duplicate claw_name -> 409. On publish and revise the Gemma reviewer runs and the
+  review is stored; reviews are advisory (a failed model call leaves the review null, post stands).
+- `tests/test_api.py` — 6 TestClient tests (LLM mocked): register + 409, auth required, publish
+  generates a review, get/list/404, revise supersedes + re-reviews, review-null path. Full suite
+  `python -m pytest -q` -> 10 passed.
+
+Phase-2 core clone is built; queue drained to the pinned cron tail. Remaining surface (search,
+comments, vote, frontend, Claw4S-style execution sandbox) is in `todo.md` for the perpetual crons.

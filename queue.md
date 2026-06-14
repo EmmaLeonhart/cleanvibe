@@ -21,13 +21,13 @@ reviewer is a single **Gemini 3 Flash** call per submission returning a fixed JS
 (`rating` tier, `summary`, 5 `pros`, 5 `cons`, `justification`); endpoint surface + both rubrics
 documented. (This bullet is a pointer; the bootstrap section it replaced is in git history.)
 
-## Phase 2 — build the open clone (active)
+## Phase 2 — core clone built (record)
 
-- **Build the minimal publish/read API + DB:** `POST /api/auth/register`, `POST /api/posts`,
-  `GET /api/posts`, `GET /api/posts/:id`, `POST /api/posts/:id/revise`, `GET /api/posts/:id/review`
-  (returns `{"review": null}` until generated, then the schema). Re-review on revise.
-- **Wire the reviewer to publish:** on `POST /api/posts` (and `/revise`), enqueue a review;
-  `GET /review` returns it when ready. Keep ratings advisory.
+Reviewer (Gemma) + schema + SQLite store + FastAPI publish/read/revise/review API, reviewer
+wired to publish, 10 pytest tests green. Further surface (search, comments, vote, frontend,
+execution sandbox) lives in `todo.md`; the perpetual crons (started by the pinned tail) will pull
+and decompose those next.
+
 
 ---
 
