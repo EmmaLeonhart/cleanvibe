@@ -24,13 +24,14 @@ documented. (This bullet is a pointer; the bootstrap section it replaced is in g
 ## Phase 2 — build the open clone (active)
 
 - **Decide the stack (needs a quick user steer / brainstorm).** Proposed default: Python +
-  FastAPI + SQLite for the API/DB, the official `anthropic` SDK for the reviewer (structured
-  output via a tool/`response_format`-style schema), `pytest` + GitHub Actions CI. Confirm or
+  FastAPI + SQLite for the API/DB; the reviewer runs on **Gemma** (the model we use now; serving
+  method - local via Ollama/transformers, or a hosted Gemma API - is a stack decision), with
+  structured/JSON output coerced to the review schema; `pytest` + GitHub Actions CI. Confirm or
   adjust before building, and record the decision in `CLAUDE.md` § "Architecture and Conventions".
 - **Build the reviewer module first (the core, most-interesting piece).** A function that takes a
   paper (title + abstract + markdown body) and returns the **clawRxiv review schema**
   (`rating` from a fixed tier enum, `summary`, exactly 5 `pros`, 5 `cons`, `justification`,
-  `model`, `createdAt`) via a Claude structured-output call. Encode a rubric adapted from the
+  `model`, `createdAt`) via a **Gemma** structured-output call. Encode a rubric adapted from the
   LabClaw peer-review skill skeleton. Unit-test the output **shape** against the captured sample
   schema in `investigation/samples/review_*.json` (mock the LLM call in tests; no live key in CI).
 - **Set up `pytest` + `.github/workflows/ci.yml`** as soon as the reviewer module has a test.
@@ -39,6 +40,15 @@ documented. (This bullet is a pointer; the bootstrap section it replaced is in g
   (returns `{"review": null}` until generated, then the schema). Re-review on revise.
 - **Wire the reviewer to publish:** on `POST /api/posts` (and `/revise`), enqueue a review;
   `GET /review` returns it when ready. Keep ratings advisory.
+
+- **Make the reviewer accept recent (2025-2026+) papers - do NOT flag them as hallucinated.**
+  Our reviewer is **Gemma**, whose training cutoff predates many real papers, so by default it
+  calls genuine recent sources/citations "hallucinated." This exact failure hit our RAN paper:
+  clawRxiv's reviewer wrongly flagged real 2025-2026 references and a "2024-2026" date as
+  hallucinations. The review skill/prompt must: (1) inject the current date; (2) instruct the
+  model that papers/citations dated after its training cutoff are plausibly real and must NOT be
+  assumed fabricated; (3) ideally verify recent citations (resolve arXiv IDs / a quick lookup)
+  rather than guessing. Keep this pinned at the tail of the build work until implemented.
 
 ## Always last is below; the FIRST build item, when the work-loop crons are (re)started for this
 ## project, is to start the three crons — see the pinned tail.

@@ -39,8 +39,10 @@ reverse-engineers the mechanism and builds an open clone.
   (`rating` tier, `summary`, 5 `pros`, 5 `cons`, `justification`). Full endpoint surface and
   two rubrics documented.
 - **Phase 2 - build.** A publish/read/vote API + a reviewer that takes a paper and returns
-  the clawRxiv review schema via structured output. **Our reviewer uses a current Claude
-  model** (default Opus 4.8; Haiku 4.5 for cost), not Gemini - record the choice here when made.
+  the clawRxiv review schema via structured output. **Our reviewer uses Gemma** (Google's
+  open-weights model; serving method TBD in the build phase). Note: Gemma's training cutoff
+  predates many real papers, so the review skill must be told to accept recent (2025-2026+)
+  sources rather than calling them hallucinated - see the pinned tail item in `queue.md`.
 - **Phase 3 (optional) - execution sandbox** for Claw4S-style skill auto-execution.
 
 ## Reference material (history-preserved)
