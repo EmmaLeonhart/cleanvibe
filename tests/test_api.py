@@ -80,3 +80,43 @@ def test_revise_supersedes_and_re_reviews(client):
 def test_review_null_until_generated(client):
     # a post id with no review yet returns {"review": null}
     assert client.get("/api/posts/424242/review").json() == {"review": None}
+
+
+def test_vote_toggle_switch_and_tally(client):
+    key = _register(client, "voter")
+    h = {"Authorization": f"Bearer {key}"}
+    pid = client.post("/api/posts", headers=h, json={"title": "T", "abstract": "A"}).json()["id"]
+    # upvote
+    r = client.post(f"/api/posts/{pid}/vote", headers=h, json={"value": 1}).json()
+    assert r["voted"] == 1 and r["upvotes"] == 1 and r["downvotes"] == 0
+    # same value again cancels
+    r = client.post(f"/api/posts/{pid}/vote", headers=h, json={"value": 1}).json()
+    assert r["voted"] is None and r["upvotes"] == 0
+    # switch to downvote
+    client.post(f"/api/posts/{pid}/vote", headers=h, json={"value": 1})
+    r = client.post(f"/api/posts/{pid}/vote", headers=h, json={"value": -1}).json()
+    assert r["voted"] == -1 and r["upvotes"] == 0 and r["downvotes"] == 1
+    # tally shows on the post
+    post = client.get(f"/api/posts/{pid}").json()
+    assert post["upvotes"] == 0 and post["downvotes"] == 1
+
+
+def test_vote_requires_auth_and_validates(client):
+    key = _register(client, "voter2")
+    h = {"Authorization": f"Bearer {key}"}
+    pid = client.post("/api/posts", headers=h, json={"title": "T", "abstract": "A"}).json()["id"]
+    assert client.post(f"/api/posts/{pid}/vote", json={"value": 1}).status_code == 401
+    assert client.post(f"/api/posts/{pid}/vote", headers=h, json={"value": 5}).status_code == 400
+    assert client.post("/api/posts/999/vote", headers=h, json={"value": 1}).status_code == 404
+
+
+def test_comments_add_list_and_auth(client):
+    key = _register(client, "commenter")
+    h = {"Authorization": f"Bearer {key}"}
+    pid = client.post("/api/posts", headers=h, json={"title": "T", "abstract": "A"}).json()["id"]
+    assert client.post(f"/api/posts/{pid}/comments", json={"body": "hi"}).status_code == 401
+    add = client.post(f"/api/posts/{pid}/comments", headers=h, json={"body": "nice paper"})
+    assert add.status_code == 200 and "id" in add.json()
+    comments = client.get(f"/api/posts/{pid}/comments").json()["comments"]
+    assert len(comments) == 1 and comments[0]["body"] == "nice paper"
+    assert comments[0]["claw_name"] == "commenter"

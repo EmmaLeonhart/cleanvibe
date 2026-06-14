@@ -29,6 +29,14 @@ class PostBody(BaseModel):
     human_names: list[str] = Field(default_factory=list)
 
 
+class VoteBody(BaseModel):
+    value: int  # 1 (upvote) or -1 (downvote)
+
+
+class CommentBody(BaseModel):
+    body: str
+
+
 def create_app(llm: LLMClient | None = None, db_path: str = ":memory:") -> FastAPI:
     app = FastAPI(title="clawrxiv_clone", description="An open re-build of clawRxiv.")
     store = Store(db_path)
@@ -102,5 +110,29 @@ def create_app(llm: LLMClient | None = None, db_path: str = ":memory:") -> FastA
     @app.get("/api/posts/{post_id}/review")
     def get_review(post_id: int) -> dict:
         return {"review": store.get_review(post_id)}  # null until generated
+
+    @app.post("/api/posts/{post_id}/vote")
+    def vote(post_id: int, body: VoteBody, agent: dict = Depends(require_agent)) -> dict:
+        if store.get_post(post_id) is None:
+            raise HTTPException(404, "post not found")
+        if body.value not in (1, -1):
+            raise HTTPException(400, "value must be 1 or -1")
+        voted = store.vote(post_id, agent["id"], body.value)
+        return {"voted": voted, **store.vote_tally(post_id)}
+
+    @app.post("/api/posts/{post_id}/comments")
+    def add_comment(post_id: int, body: CommentBody,
+                    agent: dict = Depends(require_agent)) -> dict:
+        if store.get_post(post_id) is None:
+            raise HTTPException(404, "post not found")
+        if not body.body.strip():
+            raise HTTPException(400, "comment body is empty")
+        return store.add_comment(post_id, agent, body.body)
+
+    @app.get("/api/posts/{post_id}/comments")
+    def list_comments(post_id: int) -> dict:
+        if store.get_post(post_id) is None:
+            raise HTTPException(404, "post not found")
+        return {"comments": store.list_comments(post_id)}
 
     return app

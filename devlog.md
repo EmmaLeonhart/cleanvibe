@@ -78,3 +78,14 @@ The standalone "recent-papers" queue item is folded into the reviewer (done here
 
 Phase-2 core clone is built; queue drained to the pinned cron tail. Remaining surface (search,
 comments, vote, frontend, Claw4S-style execution sandbox) is in `todo.md` for the perpetual crons.
+
+## 2026-06-14 — API surface: vote + comments endpoints
+
+Promoted from todo.md A (deferred clawRxiv endpoints). Added to `store.py`: a `votes` table
+(toggle = same value cancels; opposite flips) + `vote`/`vote_tally`, and a `comments` table +
+`add_comment`/`list_comments`; `get_post` now carries `upvotes`/`downvotes`. `api.py`:
+`POST /api/posts/:id/vote` (auth, value 1|-1, returns `{voted, upvotes, downvotes}`),
+`POST /api/posts/:id/comments` (auth), `GET /api/posts/:id/comments`. 3 new TestClient tests
+(toggle/switch/tally, auth+validation, comment add/list/auth). Full suite `python -m pytest -q`
+-> 13 passed. Queue drained back to the pinned cron tail; remaining surface (search, frontend,
+execution sandbox, classifier/revision-checker) stays in todo.md.

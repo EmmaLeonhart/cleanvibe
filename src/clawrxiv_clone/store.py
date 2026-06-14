@@ -43,6 +43,20 @@ CREATE TABLE IF NOT EXISTS reviews (
     model         TEXT NOT NULL,
     created_at    TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS votes (
+    post_id  INTEGER NOT NULL,
+    agent_id INTEGER NOT NULL,
+    value    INTEGER NOT NULL,
+    PRIMARY KEY (post_id, agent_id)
+);
+CREATE TABLE IF NOT EXISTS comments (
+    id         INTEGER PRIMARY KEY AUTOINCREMENT,
+    post_id    INTEGER NOT NULL,
+    agent_id   INTEGER NOT NULL,
+    claw_name  TEXT NOT NULL,
+    body       TEXT NOT NULL,
+    created_at TEXT NOT NULL
+);
 """
 
 
@@ -100,6 +114,7 @@ class Store:
         post = dict(row)
         post["tags"] = json.loads(post["tags"])
         post["human_names"] = json.loads(post["human_names"])
+        post.update(self.vote_tally(post_id))
         return post
 
     def list_posts(self, limit: int = 20, offset: int = 0) -> list[dict[str, Any]]:
@@ -144,3 +159,51 @@ class Store:
         review["postId"] = review.pop("post_id")
         review["createdAt"] = review.pop("created_at")
         return review
+
+    # --- votes ---
+    def vote(self, post_id: int, agent_id: int, value: int) -> int | None:
+        """+1/-1. Same value again cancels (-> None); opposite flips. Returns the new state."""
+        if value not in (1, -1):
+            raise ValueError("value must be 1 or -1")
+        row = self.conn.execute(
+            "SELECT value FROM votes WHERE post_id = ? AND agent_id = ?", (post_id, agent_id)
+        ).fetchone()
+        if row is None:
+            self.conn.execute(
+                "INSERT INTO votes (post_id, agent_id, value) VALUES (?,?,?)",
+                (post_id, agent_id, value))
+            result: int | None = value
+        elif row["value"] == value:
+            self.conn.execute(
+                "DELETE FROM votes WHERE post_id = ? AND agent_id = ?", (post_id, agent_id))
+            result = None
+        else:
+            self.conn.execute(
+                "UPDATE votes SET value = ? WHERE post_id = ? AND agent_id = ?",
+                (value, post_id, agent_id))
+            result = value
+        self.conn.commit()
+        return result
+
+    def vote_tally(self, post_id: int) -> dict[str, int]:
+        row = self.conn.execute(
+            "SELECT COALESCE(SUM(value = 1), 0) AS up, COALESCE(SUM(value = -1), 0) AS down "
+            "FROM votes WHERE post_id = ?", (post_id,)
+        ).fetchone()
+        return {"upvotes": int(row["up"]), "downvotes": int(row["down"])}
+
+    # --- comments ---
+    def add_comment(self, post_id: int, agent: dict, body: str) -> dict[str, Any]:
+        now = _now()
+        cur = self.conn.execute(
+            "INSERT INTO comments (post_id, agent_id, claw_name, body, created_at) "
+            "VALUES (?,?,?,?,?)", (post_id, agent["id"], agent["claw_name"], body, now))
+        self.conn.commit()
+        return {"id": int(cur.lastrowid), "created_at": now}
+
+    def list_comments(self, post_id: int) -> list[dict[str, Any]]:
+        rows = self.conn.execute(
+            "SELECT id, claw_name, body, created_at FROM comments "
+            "WHERE post_id = ? ORDER BY id", (post_id,)
+        ).fetchall()
+        return [dict(r) for r in rows]
