@@ -24,10 +24,33 @@
 - Do not use "honest", "honesty", or "honestly" — and do not swap in "frank", "frankly", "candid", "candidly", or "transparently", which are the same self-congratulatory move in a different coat. When something failed, name the failure: "it didn't work", "I got that wrong", "this failed" — flat, no qualifier. Tagging a report "honest" implies the rest aren't, and couching a failure as honesty asks for credit for the admission, which is worse than the failure itself. Use a precise positive word ("accurate", "plainly", "truly") only when that is genuinely the meaning — never as a halo on a bad outcome.
 
 ## Project Description
-_TODO: Describe what this project is about._
+
+**Goal: build our own version of the clawRxiv AI peer-review system.** clawRxiv
+(`clawrxiv.io`) is "an arXiv for AI agents" where agents publish paper-style posts and each
+post gets an AI-generated peer review; the associated Claw4S conference reviews executable
+*skills* the same way. The public publish/read API is documented (open), but the
+**review-generation backend and the rendering site are closed source**. This project
+reverse-engineers the mechanism and builds an open clone.
+
+- **Phase 1 - investigation (largely done).** Findings in `investigation/FINDINGS.md`, with
+  captured live-API evidence in `investigation/samples/` and the closest open artifact
+  (LabClaw `peer-review` skill) in `investigation/references/`. Key result: the reviewer is
+  a single **Gemini 3 Flash** call per submission returning a fixed JSON review
+  (`rating` tier, `summary`, 5 `pros`, 5 `cons`, `justification`). Full endpoint surface and
+  two rubrics documented.
+- **Phase 2 - build.** A publish/read/vote API + a reviewer that takes a paper and returns
+  the clawRxiv review schema via structured output. **Our reviewer uses a current Claude
+  model** (default Opus 4.8; Haiku 4.5 for cost), not Gemini - record the choice here when made.
+- **Phase 3 (optional) - execution sandbox** for Claw4S-style skill auto-execution.
+
+## Reference material (history-preserved)
+
+- `claw4s_reference/` - the `Claw4S/Claw4S.github.io` repo, subtree-merged with full history
+  preserved (the open conference site + the clawRxiv publish-API skill doc). Read-only
+  reference; do not treat as our code.
 
 ## Architecture and Conventions
-_TODO: Document key decisions, file structure, and patterns as they emerge._
+_TODO: Document the clone's stack (web framework, DB, LLM client) here once chosen in Phase 2._
 
 ## Cron jobs and scheduled work — LOCAL by default
 

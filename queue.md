@@ -12,6 +12,41 @@ See `CLAUDE.md` § "Workflow Rules" for how this file, planning mode, and the ta
 
 ---
 
+## Phase 1 — investigation: DONE (record)
+
+The reverse-engineering of clawRxiv's AI peer review is complete; write-up in
+`investigation/FINDINGS.md` with captured live-API evidence (`investigation/samples/`) and the
+closest open artifact (`investigation/references/labclaw_peer_review_SKILL.md`). Headline: the
+reviewer is a single **Gemini 3 Flash** call per submission returning a fixed JSON review
+(`rating` tier, `summary`, 5 `pros`, 5 `cons`, `justification`); endpoint surface + both rubrics
+documented. (This bullet is a pointer; the bootstrap section it replaced is in git history.)
+
+## Phase 2 — build the open clone (active)
+
+- **Decide the stack (needs a quick user steer / brainstorm).** Proposed default: Python +
+  FastAPI + SQLite for the API/DB, the official `anthropic` SDK for the reviewer (structured
+  output via a tool/`response_format`-style schema), `pytest` + GitHub Actions CI. Confirm or
+  adjust before building, and record the decision in `CLAUDE.md` § "Architecture and Conventions".
+- **Build the reviewer module first (the core, most-interesting piece).** A function that takes a
+  paper (title + abstract + markdown body) and returns the **clawRxiv review schema**
+  (`rating` from a fixed tier enum, `summary`, exactly 5 `pros`, 5 `cons`, `justification`,
+  `model`, `createdAt`) via a Claude structured-output call. Encode a rubric adapted from the
+  LabClaw peer-review skill skeleton. Unit-test the output **shape** against the captured sample
+  schema in `investigation/samples/review_*.json` (mock the LLM call in tests; no live key in CI).
+- **Set up `pytest` + `.github/workflows/ci.yml`** as soon as the reviewer module has a test.
+- **Build the minimal publish/read API + DB:** `POST /api/auth/register`, `POST /api/posts`,
+  `GET /api/posts`, `GET /api/posts/:id`, `POST /api/posts/:id/revise`, `GET /api/posts/:id/review`
+  (returns `{"review": null}` until generated, then the schema). Re-review on revise.
+- **Wire the reviewer to publish:** on `POST /api/posts` (and `/revise`), enqueue a review;
+  `GET /review` returns it when ready. Keep ratings advisory.
+
+## Always last is below; the FIRST build item, when the work-loop crons are (re)started for this
+## project, is to start the three crons — see the pinned tail.
+
+## Always last` section below and `CLAUDE.md` § "Autonomous productivity loop — the three-cron playbook"). Entering planning mode also disables the crons; their restart lives at the end of the queue.
+
+---
+
 ## Active — First-session bootstrap
 
 These items are the default opening sequence for a new cleanvibe project. Work them top to bottom. **Delete each item from this file in the same commit that completes it, and append a dated entry to `devlog.md` recording the step.** Push after every step. When this whole section is gone, the project has finished bootstrap and the queue is ready to be repopulated with real product work (see the final item).
