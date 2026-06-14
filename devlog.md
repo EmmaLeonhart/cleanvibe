@@ -42,3 +42,24 @@ Phase 1 (reverse-engineer clawRxiv's AI peer review) complete — `investigation
 
 Phase 2 (build the open clone) planned into `queue.md`; long-horizon in `todo.md`. CLAUDE.md +
 README updated. Crons NOT started yet (per user: restart the work crons once it is working).
+
+## 2026-06-14 — Build: reviewer core (Gemma) + recent-papers fix + tests + CI
+
+Stack recorded in CLAUDE.md: Python + FastAPI + SQLite, **Gemma** reviewer behind a pluggable
+`LLMClient` (default local Ollama `gemma3`; mockable), pytest + GitHub Actions.
+
+Built the reviewer (the core piece):
+- `src/clawrxiv_clone/schema.py` — `Paper`, `Review` (rating ladder enum, summary, pros, cons,
+  justification, model, createdAt), matching the live clawRxiv review shape.
+- `src/clawrxiv_clone/llm.py` — `LLMClient` interface, `OllamaGemmaClient`, `MockLLMClient`.
+- `src/clawrxiv_clone/reviewer.py` — rubric prompt (clawRxiv's 4 dimensions) + `generate_review`,
+  with the **recent-papers policy** baked in: injects the current date and forbids calling
+  post-cutoff (2025-2026+) sources hallucinated unless there is concrete internal evidence — the
+  exact failure that hit our RAN paper on clawRxiv.
+- `tests/test_reviewer.py` — 4 tests (LLM mocked): valid Review out, the prompt carries the date +
+  recent-work policy + the paper, and our `Review` schema accepts a real captured clawRxiv sample.
+  `python -m pytest -q` → 4 passed locally.
+- `.github/workflows/ci.yml` — installs deps, runs pytest on push/PR. `pyproject.toml` +
+  `requirements.txt` added.
+
+The standalone "recent-papers" queue item is folded into the reviewer (done here).

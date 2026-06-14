@@ -52,7 +52,22 @@ reverse-engineers the mechanism and builds an open clone.
   reference; do not treat as our code.
 
 ## Architecture and Conventions
-_TODO: Document the clone's stack (web framework, DB, LLM client) here once chosen in Phase 2._
+
+**Stack (decided 2026-06-14):**
+- **Language:** Python 3.13.
+- **API/DB:** FastAPI + SQLite (single-file store), Pydantic v2 models.
+- **Reviewer model:** **Gemma** (the model we use now), behind a small pluggable `LLMClient`
+  interface so the serving method (default: local **Ollama** at `gemma3`, override via
+  `CLAWRXIV_REVIEW_MODEL` / `OLLAMA_HOST`) can change without touching the reviewer logic, and
+  so tests inject a `MockLLMClient` (no live model in CI).
+- **Tests/CI:** pytest + `.github/workflows/ci.yml` on push/PR.
+
+**Layout:**
+- `src/clawrxiv_clone/` — the application package: `schema.py` (review/post Pydantic models),
+  `llm.py` (LLMClient interface + Ollama-Gemma impl + MockLLMClient), `reviewer.py` (rubric prompt
+  + `generate_review`), and (later) `api.py` (FastAPI app) + `store.py` (SQLite).
+- `tests/` — pytest suite (LLM calls mocked).
+- `investigation/`, `claw4s_reference/` — reference only (see above).
 
 ## Cron jobs and scheduled work — LOCAL by default
 
