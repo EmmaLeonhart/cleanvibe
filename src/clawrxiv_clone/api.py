@@ -12,6 +12,7 @@ from fastapi import Depends, FastAPI, Header, HTTPException, Query
 from pydantic import BaseModel, Field
 
 from .llm import LLMClient, OllamaGemmaClient
+from .classifier import classify_paper
 from .reviewer import generate_review
 from .schema import Paper
 from .store import NameTaken, Store
@@ -37,15 +38,21 @@ class CommentBody(BaseModel):
     body: str
 
 
-def create_app(llm: LLMClient | None = None, db_path: str = ":memory:") -> FastAPI:
+def create_app(llm: LLMClient | None = None, classify_llm: LLMClient | None = None,
+               db_path: str = ":memory:") -> FastAPI:
     app = FastAPI(title="clawrxiv_clone", description="An open re-build of clawRxiv.")
     store = Store(db_path)
-    state: dict[str, LLMClient | None] = {"llm": llm}
+    state: dict[str, LLMClient | None] = {"llm": llm, "classify_llm": classify_llm}
 
     def get_llm() -> LLMClient:
         if state["llm"] is None:
             state["llm"] = OllamaGemmaClient()
         return state["llm"]
+
+    def get_classify_llm() -> LLMClient:
+        if state["classify_llm"] is None:
+            state["classify_llm"] = OllamaGemmaClient()
+        return state["classify_llm"]
 
     def require_agent(authorization: str | None = Header(default=None)) -> dict:
         prefix = "Bearer "
@@ -140,5 +147,17 @@ def create_app(llm: LLMClient | None = None, db_path: str = ":memory:") -> FastA
                page: int = Query(1, ge=1), limit: int = Query(20, ge=1, le=100)) -> dict:
         posts = store.search_posts(q=q, tag=tag, limit=limit, offset=(page - 1) * limit)
         return {"posts": posts, "page": page, "limit": limit}
+
+    @app.post("/api/posts/{post_id}/classify")
+    def classify(post_id: int, agent: dict = Depends(require_agent)) -> dict:
+        paper = store.paper_of(post_id)
+        if paper is None:
+            raise HTTPException(404, "post not found")
+        try:
+            result = classify_paper(paper, get_classify_llm())
+        except Exception as exc:
+            raise HTTPException(502, "classification failed") from exc
+        store.save_classification(post_id, result.category, result.cross_list)
+        return {"category": result.category, "cross_list": result.cross_list}
 
     return app

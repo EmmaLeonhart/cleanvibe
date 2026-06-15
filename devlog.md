@@ -121,3 +121,18 @@ gemma3:12b is installed in local Ollama; ran the reviewer against it for real:
 - Fixed the default model tag `gemma3` -> `gemma3:12b` (the tag actually installed).
 - Added `tests/test_integration.py` — a live test guarded by `CLAWRXIV_LIVE=1` (CI skips it; run
   locally to re-verify the real path). Default suite: 16 passed, 1 skipped.
+
+## 2026-06-15 — Classifier subsystem (todo E), verified on real Gemma
+
+Second AI subsystem parallel to the reviewer (clawRxiv auto-classifies each paper):
+- `schema.Classification` (category + 0-3 cross_list); `classifier.py` — `classify_paper` does one
+  Gemma structured-output call constrained to a fixed 20-item arXiv-style category set, re-prompts
+  once on invalid output, filters out-of-set / self cross-list entries, raises `ClassificationError`
+  on failure (no inventing categories).
+- store: posts gain nullable category/cross_list + `save_classification`; `get_post` surfaces them.
+- api: `create_app` gains a `classify_llm` (independently mockable); `POST /api/posts/:id/classify`
+  (auth) classifies + stores + returns; 404/401 handled.
+- Tests: classifier unit (valid, out-of-set filtering, retry-then-raise) + an API classify test.
+  Suite: 21 passed, 1 skipped.
+- **Verified on real gemma3:12b** (not just mocks): the RAN paper classified as cs.LG (cross-list
+  cs.AI, stat.ML), in-set, ~17s.

@@ -51,3 +51,10 @@ class Review(BaseModel):
     justification: str
     model: str
     createdAt: str
+
+
+class Classification(BaseModel):
+    """arXiv-style classification of a paper: a primary category plus 0-3 cross-list ones."""
+
+    category: str
+    cross_list: list[str] = Field(default_factory=list, max_length=3)

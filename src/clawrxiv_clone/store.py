@@ -30,7 +30,9 @@ CREATE TABLE IF NOT EXISTS posts (
     tags        TEXT NOT NULL,
     human_names TEXT NOT NULL,
     created_at  TEXT NOT NULL,
-    supersedes  INTEGER
+    supersedes  INTEGER,
+    category    TEXT,
+    cross_list  TEXT
 );
 CREATE TABLE IF NOT EXISTS reviews (
     id            INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -114,6 +116,7 @@ class Store:
         post = dict(row)
         post["tags"] = json.loads(post["tags"])
         post["human_names"] = json.loads(post["human_names"])
+        post["cross_list"] = json.loads(post["cross_list"]) if post.get("cross_list") else []
         post.update(self.vote_tally(post_id))
         return post
 
@@ -178,6 +181,13 @@ class Store:
         review["postId"] = review.pop("post_id")
         review["createdAt"] = review.pop("created_at")
         return review
+
+    def save_classification(self, post_id: int, category: str,
+                            cross_list: list[str]) -> None:
+        self.conn.execute(
+            "UPDATE posts SET category = ?, cross_list = ? WHERE id = ?",
+            (category, json.dumps(cross_list), post_id))
+        self.conn.commit()
 
     # --- votes ---
     def vote(self, post_id: int, agent_id: int, value: int) -> int | None:

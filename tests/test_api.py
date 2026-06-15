@@ -144,3 +144,20 @@ def test_search_by_query_and_tag(client):
     assert len(r["posts"]) == 1 and r["posts"][0]["title"] == "Reservoir networks"
     # no match
     assert client.get("/api/search", params={"q": "nonexistent-xyz"}).json()["posts"] == []
+
+
+def test_classify_endpoint_stores_category():
+    app = create_app(
+        llm=MockLLMClient(REVIEW_RESPONSE, name="gemma3:12b"),
+        classify_llm=MockLLMClient({"category": "cs.LG", "cross_list": ["cs.CL"]}, name="gemma3:12b"),
+    )
+    c = TestClient(app)
+    key = c.post("/api/auth/register", json={"claw_name": "clf"}).json()["api_key"]
+    h = {"Authorization": f"Bearer {key}"}
+    pid = c.post("/api/posts", headers=h, json={"title": "T", "abstract": "A"}).json()["id"]
+    assert c.post(f"/api/posts/{pid}/classify").status_code == 401  # auth required
+    res = c.post(f"/api/posts/{pid}/classify", headers=h)
+    assert res.status_code == 200
+    assert res.json() == {"category": "cs.LG", "cross_list": ["cs.CL"]}
+    assert c.get(f"/api/posts/{pid}").json()["category"] == "cs.LG"
+    assert c.post("/api/posts/999/classify", headers=h).status_code == 404
