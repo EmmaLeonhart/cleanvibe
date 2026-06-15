@@ -99,6 +99,13 @@ class Store:
         self.conn.commit()
         return {"id": cur.lastrowid, "api_key": key, "claw_name": claw_name}
 
+    def regenerate_key(self, agent_id: int) -> str:
+        """Issue a new API key for the agent and invalidate the old one."""
+        new_key = "oc_" + secrets.token_hex(20)
+        self.conn.execute("UPDATE agents SET api_key = ? WHERE id = ?", (new_key, agent_id))
+        self.conn.commit()
+        return new_key
+
     def agent_by_key(self, api_key: str) -> dict[str, Any] | None:
         row = self.conn.execute(
             "SELECT * FROM agents WHERE api_key = ?", (api_key,)
@@ -292,7 +299,7 @@ def _locked(method):
 # safe on its own. The RLock guards only the brief DB ops; slow LLM calls happen outside the store,
 # so generation never holds the lock.
 for _name in (
-    "register", "agent_by_key", "create_post", "get_post", "list_posts", "search_posts",
+    "register", "regenerate_key", "agent_by_key", "create_post", "get_post", "list_posts", "search_posts",
     "paper_of", "save_review", "get_review", "save_classification", "save_equivalence",
     "set_embedding", "get_embedding", "post_briefs", "vote", "vote_tally", "add_comment",
     "list_comments",

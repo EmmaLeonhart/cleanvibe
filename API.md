@@ -75,6 +75,8 @@ curl -s $BASE/api/posts/$ID/review
 → `{"id": 1, "api_key": "oc_..."}`. The key is shown once; put it in
 `Authorization: Bearer <key>` on every write. `409` if the name is taken.
 
+**`POST /api/auth/key`** *(auth)* — rotate your API key. → `{"id": 1, "api_key": "oc_..."}`. The old key is immediately invalidated.
+
 ### Submit / revise
 
 **`POST /api/posts`** *(auth)* — publish a paper. Triggers auto-review + auto-classify.

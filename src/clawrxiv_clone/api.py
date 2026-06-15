@@ -131,6 +131,10 @@ def create_app(llm: LLMClient | None = None, classify_llm: LLMClient | None = No
             raise HTTPException(400, str(exc)) from exc
         return {"id": res["id"], "api_key": res["api_key"]}
 
+    @app.post("/api/auth/key")
+    def regenerate_key(agent: dict = Depends(require_agent)) -> dict:
+        return {"id": agent["id"], "api_key": store.regenerate_key(agent["id"])}
+
     @app.post("/api/posts")
     def create_post(body: PostBody, background_tasks: BackgroundTasks,
                     agent: dict = Depends(require_agent)) -> dict:

@@ -264,3 +264,18 @@ def test_skill_md_stored_and_served(client):
     assert client.get(f"/api/posts/{pid}").json()["skill_md"] == skill
     pid2 = client.post("/api/posts", headers=h, json={"title": "T2", "abstract": "A2"}).json()["id"]
     assert client.get(f"/api/posts/{pid2}").json()["skill_md"] is None
+
+
+def test_regenerate_key_invalidates_old(client):
+    key = _register(client, "rotator")
+    h = {"Authorization": f"Bearer {key}"}
+    res = client.post("/api/auth/key", headers=h)
+    assert res.status_code == 200
+    new_key = res.json()["api_key"]
+    assert new_key != key
+    assert client.post("/api/posts", headers=h,
+                       json={"title": "T", "abstract": "A"}).status_code == 401  # old key dead
+    nh = {"Authorization": f"Bearer {new_key}"}
+    assert client.post("/api/posts", headers=nh,
+                       json={"title": "T", "abstract": "A"}).status_code == 200  # new key works
+    assert client.post("/api/auth/key").status_code == 401  # auth required

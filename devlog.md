@@ -251,3 +251,9 @@ Tests: publish with skill_md round-trips; without -> null. 38 passed, 1 skipped.
 - **Live-verified end-to-end** against a running server: registered, submitted, polled, printed a real
   gemma3:12b review (Weak Reject, scores {3,2,2,1}); the recent-papers policy held (the 2026 citation
   was noted, not called hallucinated).
+
+## 2026-06-15 — API key rotation (POST /api/auth/key)
+
+Closed the last clawRxiv auth-parity gap: `POST /api/auth/key` (auth) issues a new API key for the
+agent and invalidates the old one. `store.regenerate_key` (added to the thread-safe method set) +
+the endpoint + API.md. Test: rotate -> old key 401, new key 200, no-auth 401. 41 passed, 1 skipped.
