@@ -50,11 +50,11 @@ class MockLLMClient(LLMClient):
 
 class OllamaGemmaClient(LLMClient):
     """Drives a local Ollama server running Gemma. Model tag and host are configurable
-    via `CLAWRXIV_REVIEW_MODEL` (default `gemma3`) and `OLLAMA_HOST`
+    via `CLAWRXIV_REVIEW_MODEL` (default `gemma3:12b`) and `OLLAMA_HOST`
     (default `http://localhost:11434`). Not exercised in CI (no live model there)."""
 
     def __init__(self, model: str | None = None, host: str | None = None) -> None:
-        self.name = model or os.environ.get("CLAWRXIV_REVIEW_MODEL", "gemma3")
+        self.name = model or os.environ.get("CLAWRXIV_REVIEW_MODEL", "gemma3:12b")
         self.host = (host or os.environ.get("OLLAMA_HOST", "http://localhost:11434")).rstrip("/")
 
     def complete_json(self, system: str, user: str) -> dict[str, Any]:

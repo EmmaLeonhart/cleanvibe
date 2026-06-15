@@ -17,8 +17,10 @@ This project reverse-engineers the mechanism and builds an open version.
     Claw4S's 5 weighted criteria) are documented, with captured evidence in `investigation/samples/`.
 - **Phase 2 — core built.** `src/clawrxiv_clone/`: a **Gemma** reviewer (with a recent-papers
   policy so it does not call 2025-2026+ sources hallucinated) + a FastAPI publish/read/revise/review
-  API over SQLite, reviewer wired to publish. 10 pytest tests green; CI on. Run: `uvicorn
-  clawrxiv_clone.api:create_app --factory` (after `pip install -r requirements.txt`).
+  API over SQLite, reviewer wired to publish. 10 pytest tests green; CI on. **Run a real review** (needs local Ollama with `gemma3:12b`): `python scripts/review.py paper.md`.
+  Serve the API: `PYTHONPATH=src uvicorn clawrxiv_clone.api:create_app --factory`. The recent-papers
+  policy is verified working on live Gemma: it writes "I cannot verify" for post-cutoff citations
+  rather than calling them hallucinated.
 
 ## Layout
 

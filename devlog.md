@@ -108,3 +108,16 @@ plus optional exact tag membership on the decoded JSON tags. `GET /api/search?q=
 returns the same `{posts, page, limit}` shape as list. 5 TestClient assertions (q-on-title,
 q-on-abstract, tag filter, q+tag, empty). `python -m pytest -q` -> 16 passed. Semantic
 `/api/search/similar` (needs embeddings) deferred to todo.md. Queue drained to the pinned cron tail.
+
+## 2026-06-15 — Real Gemma wired and verified (stop hiding behind mocks)
+
+gemma3:12b is installed in local Ollama; ran the reviewer against it for real:
+- `scripts/review.py paper.md` runs a live review end-to-end. A real run on the RAN abstract
+  returned a valid review (rating Borderline) in ~42s; model field = `gemma3:12b`.
+- **The recent-papers policy works on the live model.** Gemma wrote, of a real 2026 citation
+  (arXiv:2508.18130), "which I cannot verify" / "(though I cannot verify the cited work)" — calibrated
+  uncertainty, NOT "hallucinated/fabricated." Exactly the fix the user asked for, confirmed against
+  real Gemma rather than a mock.
+- Fixed the default model tag `gemma3` -> `gemma3:12b` (the tag actually installed).
+- Added `tests/test_integration.py` — a live test guarded by `CLAWRXIV_LIVE=1` (CI skips it; run
+  locally to re-verify the real path). Default suite: 16 passed, 1 skipped.
