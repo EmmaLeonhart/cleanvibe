@@ -13,6 +13,7 @@ from pydantic import BaseModel, Field
 
 from .llm import LLMClient, OllamaGemmaClient
 from .classifier import classify_paper
+from .embeddings import EmbedClient, OllamaEmbedClient, cosine, embed_text
 from .equivalence import check_equivalence
 from .reviewer import generate_review
 from .schema import Paper
@@ -41,11 +42,12 @@ class CommentBody(BaseModel):
 
 def create_app(llm: LLMClient | None = None, classify_llm: LLMClient | None = None,
                equivalence_llm: LLMClient | None = None,
+               embedder: EmbedClient | None = None,
                db_path: str = ":memory:") -> FastAPI:
     app = FastAPI(title="clawrxiv_clone", description="An open re-build of clawRxiv.")
     store = Store(db_path)
-    state: dict[str, LLMClient | None] = {"llm": llm, "classify_llm": classify_llm,
-                                          "equivalence_llm": equivalence_llm}
+    state: dict[str, object] = {"llm": llm, "classify_llm": classify_llm,
+                                "equivalence_llm": equivalence_llm, "embedder": embedder}
 
     def get_llm() -> LLMClient:
         if state["llm"] is None:
@@ -61,6 +63,11 @@ def create_app(llm: LLMClient | None = None, classify_llm: LLMClient | None = No
         if state["equivalence_llm"] is None:
             state["equivalence_llm"] = OllamaGemmaClient()
         return state["equivalence_llm"]
+
+    def get_embedder() -> EmbedClient:
+        if state["embedder"] is None:
+            state["embedder"] = OllamaEmbedClient()
+        return state["embedder"]
 
     def require_agent(authorization: str | None = Header(default=None)) -> dict:
         prefix = "Bearer "
@@ -185,5 +192,25 @@ def create_app(llm: LLMClient | None = None, classify_llm: LLMClient | None = No
         except Exception as exc:
             raise HTTPException(502, "equivalence check failed") from exc
         return {"equivalent": verdict.equivalent, "reason": verdict.reason}
+
+    @app.get("/api/search/similar")
+    def search_similar(post_id: int, limit: int = Query(5, ge=1, le=50)) -> dict:
+        if store.get_post(post_id) is None:
+            raise HTTPException(404, "post not found")
+        embedder_client = get_embedder()
+        for brief in store.post_briefs():  # lazily embed + cache any missing vectors
+            if brief["embedding"] is None:
+                vec = embedder_client.embed(embed_text(brief["title"], brief["abstract"]))
+                store.set_embedding(brief["id"], vec)
+        target = store.get_embedding(post_id)
+        scored = []
+        for brief in store.post_briefs():
+            if brief["id"] == post_id or brief["embedding"] is None:
+                continue
+            scored.append({"id": brief["id"], "title": brief["title"],
+                           "abstract": brief["abstract"],
+                           "score": cosine(target, brief["embedding"])})
+        scored.sort(key=lambda item: item["score"], reverse=True)
+        return {"results": scored[:limit]}
 
     return app

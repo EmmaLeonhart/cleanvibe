@@ -32,7 +32,8 @@ CREATE TABLE IF NOT EXISTS posts (
     created_at  TEXT NOT NULL,
     supersedes  INTEGER,
     category    TEXT,
-    cross_list  TEXT
+    cross_list  TEXT,
+    embedding   TEXT
 );
 CREATE TABLE IF NOT EXISTS reviews (
     id            INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -188,6 +189,28 @@ class Store:
             "UPDATE posts SET category = ?, cross_list = ? WHERE id = ?",
             (category, json.dumps(cross_list), post_id))
         self.conn.commit()
+
+    def set_embedding(self, post_id: int, vec: list[float]) -> None:
+        self.conn.execute("UPDATE posts SET embedding = ? WHERE id = ?",
+                          (json.dumps(vec), post_id))
+        self.conn.commit()
+
+    def get_embedding(self, post_id: int) -> list[float] | None:
+        row = self.conn.execute(
+            "SELECT embedding FROM posts WHERE id = ?", (post_id,)).fetchone()
+        if not row or row["embedding"] is None:
+            return None
+        return json.loads(row["embedding"])
+
+    def post_briefs(self) -> list[dict[str, Any]]:
+        rows = self.conn.execute(
+            "SELECT id, title, abstract, embedding FROM posts ORDER BY id").fetchall()
+        out = []
+        for row in rows:
+            brief = dict(row)
+            brief["embedding"] = json.loads(brief["embedding"]) if brief["embedding"] else None
+            out.append(brief)
+        return out
 
     # --- votes ---
     def vote(self, post_id: int, agent_id: int, value: int) -> int | None:

@@ -153,3 +153,17 @@ Third (and last) clawRxiv AI subsystem: "verifies revisions represent the same b
 With this, all three clawRxiv AI subsystems are reconstructed on Gemma: reviewer (recent-papers
 policy), classifier (arXiv category), and revision-equivalence checker. Remaining todo: semantic
 search (embeddings available locally), frontend, and the hard execution sandbox.
+
+## 2026-06-15 — Semantic search: GET /api/search/similar (embeddings)
+
+- `embeddings.py` — `EmbedClient` interface, `OllamaEmbedClient` (default nomic-embed-text),
+  `MockEmbedClient` (deterministic keyword vectors), `cosine`, `embed_text`.
+- store: posts gain a nullable `embedding` (JSON) column + `set_embedding`/`get_embedding`/`post_briefs`.
+- api: `create_app` gains an independently-mockable `embedder`; `GET /api/search/similar?post_id=&limit=`
+  lazily embeds + caches any missing vectors, then cosine-ranks the rest against the target (excludes
+  the target), returns top-N with scores. 404 on unknown post.
+- Tests: cosine + mock-embed units; the similar endpoint ranks same-topic posts above off-topic
+  (MockEmbedClient). Suite: 29 passed, 1 skipped. (Fixed one over-strict float-equality assertion in
+  the cosine test -- the code was right; identical-vector cosine is 0.9999999998, not exactly 1.0.)
+- **Verified on real nomic-embed-text** (768-dim): a reservoir/reservoir pair (cosine 0.661) ranks
+  above reservoir/graph (0.588).

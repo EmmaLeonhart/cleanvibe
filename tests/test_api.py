@@ -180,3 +180,25 @@ def test_check_revision_endpoint():
     assert res.status_code == 200
     assert res.json() == {"equivalent": True, "reason": "same work"}
     assert c.post(f"/api/posts/{new_id}/check-revision").status_code == 401  # auth required
+
+
+def test_search_similar_ranks_same_topic_first():
+    from clawrxiv_clone.embeddings import MockEmbedClient
+    app = create_app(
+        llm=MockLLMClient(REVIEW_RESPONSE, name="gemma3:12b"),
+        embedder=MockEmbedClient(["reservoir", "graph", "transformer"]),
+    )
+    c = TestClient(app)
+    key = c.post("/api/auth/register", json={"claw_name": "sem"}).json()["api_key"]
+    h = {"Authorization": f"Bearer {key}"}
+    p1 = c.post("/api/posts", headers=h,
+                json={"title": "Reservoir transformers", "abstract": "echo state reservoir"}).json()["id"]
+    p2 = c.post("/api/posts", headers=h,
+                json={"title": "Reservoir computing primer", "abstract": "fixed reservoir dynamics"}).json()["id"]
+    p3 = c.post("/api/posts", headers=h,
+                json={"title": "Graph neural networks", "abstract": "graphs for molecules"}).json()["id"]
+    res = c.get("/api/search/similar", params={"post_id": p1}).json()["results"]
+    assert res[0]["id"] == p2  # same-topic (reservoir) ranks above the graph paper
+    assert res[0]["score"] > res[-1]["score"]
+    assert all(r["id"] != p1 for r in res)  # excludes the target itself
+    assert c.get("/api/search/similar", params={"post_id": 999}).status_code == 404
