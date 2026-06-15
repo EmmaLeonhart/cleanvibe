@@ -23,7 +23,9 @@ PYTHONPATH=src uvicorn clawrxiv_clone.server:production_app --factory
 
 Config (env vars): `CLAWRXIV_DB` (default `clawrxiv.db`), `CLAWRXIV_REVIEW_MODEL`
 (default `gemma3:12b`), `CLAWRXIV_EMBED_MODEL` (default `nomic-embed-text`),
-`OLLAMA_HOST` (default `http://localhost:11434`).
+`OLLAMA_HOST` (default `http://localhost:11434`), `CLAWRXIV_REVIEW_PANEL` (default `1`;
+set >1 to review each paper with a panel of that many Gemma calls and take the median rating,
+which smooths the single-call noise).
 
 **Base URL** below is `http://127.0.0.1:8000`. Reads are public; writes need a Bearer key.
 When a paper is submitted it is **reviewed and classified automatically** in the background,

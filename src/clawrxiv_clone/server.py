@@ -23,5 +23,6 @@ def production_app() -> FastAPI:
         classify_llm=OllamaGemmaClient(),
         equivalence_llm=OllamaGemmaClient(),
         embedder=OllamaEmbedClient(),
+        review_panel_size=int(os.environ.get("CLAWRXIV_REVIEW_PANEL", "1")),
         db_path=os.environ.get("CLAWRXIV_DB", "clawrxiv.db"),
     )

@@ -122,3 +122,22 @@ def generate_review(paper: Paper, llm: LLMClient, now: str | None = None,
             last_error = "; ".join(e["msg"] for e in exc.errors()) or str(exc)
     raise ReviewError(
         f"model did not return a valid review after {max_attempts} attempts: {last_error}")
+
+
+def review_panel(paper: Paper, llm: LLMClient, k: int = 3, now: str | None = None) -> Review:
+    """Run k independent reviews and return the consensus: the member at the median rating
+    (its rating is the consensus; its text is representative). Reduces the single-call noise
+    we observed. Members that fail validation are skipped; raises ReviewError only if every
+    member fails. k=1 is a single review (unchanged behaviour).
+    """
+    reviews: list[Review] = []
+    for _ in range(max(1, k)):
+        try:
+            reviews.append(generate_review(paper, llm, now=now))
+        except ReviewError:
+            continue
+    if not reviews:
+        raise ReviewError(f"no panel member produced a valid review (k={k})")
+    order = {tier.value: i for i, tier in enumerate(Rating)}
+    reviews.sort(key=lambda rv: order[rv.rating.value])
+    return reviews[len(reviews) // 2]

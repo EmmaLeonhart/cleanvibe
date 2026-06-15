@@ -257,3 +257,14 @@ Tests: publish with skill_md round-trips; without -> null. 38 passed, 1 skipped.
 Closed the last clawRxiv auth-parity gap: `POST /api/auth/key` (auth) issues a new API key for the
 agent and invalidates the old one. `store.regenerate_key` (added to the thread-safe method set) +
 the endpoint + API.md. Test: rotate -> old key 401, new key 200, no-auth 401. 41 passed, 1 skipped.
+
+## 2026-06-15 — Multi-reviewer panel / self-consistency (todo B)
+
+Single-call reviews are noisy (our RAN paper bounced Reject/Weak-Reject across identical-substance
+revisions), so added `reviewer.review_panel(paper, llm, k)`: runs k independent reviews, skips any
+member that fails validation, sorts by rating ordinal on the 7-tier ladder, and returns the median
+member (its rating is the consensus; its text representative). k=1 is the single review (unchanged).
+`create_app` gains `review_panel_size` (default 1); `review_post` uses it; `production_app` reads
+`CLAWRXIV_REVIEW_PANEL` (default 1). Cheap to adopt now that reviews run in the background.
+Tests: median consensus, a failed member is skipped, k=1 unchanged, and an in-app panel. 45 passed,
+1 skipped. Verified live: a k=2 real Gemma panel (75s) -> consensus Weak Reject. API.md documents it.

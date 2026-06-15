@@ -6,7 +6,7 @@ import pathlib
 import pytest
 
 from clawrxiv_clone.llm import MockLLMClient
-from clawrxiv_clone.reviewer import RATING_TIERS, ReviewError, generate_review
+from clawrxiv_clone.reviewer import RATING_TIERS, ReviewError, generate_review, review_panel
 from clawrxiv_clone.schema import Paper, Rating, Review
 
 SAMPLES = pathlib.Path(__file__).resolve().parents[1] / "investigation" / "samples"
@@ -99,3 +99,29 @@ def test_review_without_scores_defaults_empty():
     review = generate_review(Paper(title="T", abstract="A"),
                              MockLLMClient(_mock_response()), now="2026-06-14 12:00:00")
     assert review.scores == {}
+
+
+_PANEL_BASE = {"summary": "s", "pros": ["a", "b", "c", "d", "e"],
+               "cons": ["a", "b", "c", "d", "e"], "justification": "j"}
+
+
+def test_review_panel_median_consensus():
+    seq = [dict(_PANEL_BASE, rating="Reject"), dict(_PANEL_BASE, rating="Weak Reject"),
+           dict(_PANEL_BASE, rating="Weak Accept")]
+    r = review_panel(Paper(title="T", abstract="A"), MockLLMClient(seq), k=3,
+                     now="2026-06-15 00:00:00")
+    assert r.rating is Rating.WEAK_REJECT  # median of the three
+
+
+def test_review_panel_skips_failed_member():
+    bad = {"summary": "missing required fields"}  # invalid -> member fails after retries
+    good = dict(_PANEL_BASE, rating="Accept")
+    llm = MockLLMClient([bad, bad, good])  # member 1: bad,bad (fails); member 2: good
+    r = review_panel(Paper(title="T", abstract="A"), llm, k=2, now="2026-06-15 00:00:00")
+    assert r.rating is Rating.ACCEPT
+
+
+def test_review_panel_k1_is_single():
+    r = review_panel(Paper(title="T", abstract="A"), MockLLMClient(_mock_response()), k=1,
+                     now="2026-06-15 00:00:00")
+    assert r.rating is Rating.WEAK_ACCEPT

@@ -18,7 +18,7 @@ from .llm import LLMClient, OllamaGemmaClient
 from .classifier import classify_paper
 from .embeddings import EmbedClient, OllamaEmbedClient, cosine, embed_text
 from .equivalence import check_equivalence
-from .reviewer import generate_review
+from .reviewer import review_panel
 from .schema import Paper
 from .store import NameTaken, Store
 
@@ -46,7 +46,7 @@ class CommentBody(BaseModel):
 
 def create_app(llm: LLMClient | None = None, classify_llm: LLMClient | None = None,
                equivalence_llm: LLMClient | None = None,
-               embedder: EmbedClient | None = None,
+               embedder: EmbedClient | None = None, review_panel_size: int = 1,
                db_path: str = ":memory:") -> FastAPI:
     app = FastAPI(title="clawrxiv_clone", description="An open re-build of clawRxiv.")
     store = Store(db_path)
@@ -89,7 +89,7 @@ def create_app(llm: LLMClient | None = None, classify_llm: LLMClient | None = No
         if paper is None:
             return
         try:
-            review = generate_review(paper, get_llm())
+            review = review_panel(paper, get_llm(), k=review_panel_size)
         except Exception:  # advisory: a failed model call must not break publishing
             return
         store.save_review(post_id, review)

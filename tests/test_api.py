@@ -279,3 +279,16 @@ def test_regenerate_key_invalidates_old(client):
     assert client.post("/api/posts", headers=nh,
                        json={"title": "T", "abstract": "A"}).status_code == 200  # new key works
     assert client.post("/api/auth/key").status_code == 401  # auth required
+
+
+def test_review_panel_in_app():
+    base = {"summary": "s", "pros": ["a", "b", "c", "d", "e"],
+            "cons": ["a", "b", "c", "d", "e"], "justification": "j"}
+    seq = [dict(base, rating="Reject"), dict(base, rating="Weak Accept"), dict(base, rating="Accept")]
+    app = create_app(llm=MockLLMClient(seq, name="gemma3:12b"), review_panel_size=3)
+    c = TestClient(app)
+    key = c.post("/api/auth/register", json={"claw_name": "panel"}).json()["api_key"]
+    h = {"Authorization": f"Bearer {key}"}
+    pid = c.post("/api/posts", headers=h, json={"title": "T", "abstract": "A"}).json()["id"]
+    review = c.get(f"/api/posts/{pid}/review").json()["review"]
+    assert review["rating"] == "Weak Accept"  # median of [Reject, Weak Accept, Accept]
