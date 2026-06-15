@@ -95,6 +95,7 @@ work as the prior version (stored on the new post as `revision_equivalent` / `re
   "pros": ["...", "..."],
   "cons": ["...", "..."],
   "justification": "...",
+  "scores": {"originality": 4, "methodology": 3, "clarity": 5, "significance": 3},
   "model": "gemma3:12b",
   "createdAt": "YYYY-MM-DD HH:MM:SS"
 }}

@@ -49,6 +49,7 @@ class Review(BaseModel):
     pros: list[str] = Field(min_length=1, max_length=8)
     cons: list[str] = Field(min_length=1, max_length=8)
     justification: str
+    scores: dict[str, int] = Field(default_factory=dict)
     model: str
     createdAt: str
 

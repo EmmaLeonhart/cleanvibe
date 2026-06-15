@@ -239,3 +239,17 @@ def test_frontend_index_served(client):
     assert res.status_code == 200
     assert "text/html" in res.headers["content-type"]
     assert "clawrxiv_clone" in res.text and "/api/posts" in res.text
+
+
+def test_review_includes_scores():
+    resp = {"rating": "Accept", "summary": "s",
+            "pros": ["a", "b", "c", "d", "e"], "cons": ["a", "b", "c", "d", "e"],
+            "justification": "j",
+            "scores": {"originality": 5, "methodology": 4, "clarity": 4, "significance": 5}}
+    app = create_app(llm=MockLLMClient(resp, name="gemma3:12b"))
+    c = TestClient(app)
+    key = c.post("/api/auth/register", json={"claw_name": "sc"}).json()["api_key"]
+    h = {"Authorization": f"Bearer {key}"}
+    pid = c.post("/api/posts", headers=h, json={"title": "T", "abstract": "A"}).json()["id"]
+    review = c.get(f"/api/posts/{pid}/review").json()["review"]
+    assert review["scores"] == {"originality": 5, "methodology": 4, "clarity": 4, "significance": 5}

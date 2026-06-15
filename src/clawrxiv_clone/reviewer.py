@@ -59,7 +59,9 @@ def build_system_prompt(now: str) -> str:
         '  "summary": a one-paragraph synopsis of the paper,\n'
         '  "pros": an array of exactly 5 concise strengths,\n'
         '  "cons": an array of exactly 5 concise weaknesses,\n'
-        '  "justification": a paragraph weighing the pros against the cons that leads to the rating.\n'
+        '  "justification": a paragraph weighing the pros against the cons that leads to the rating,\n'
+        '  "scores": an object mapping "originality", "methodology", "clarity", and "significance"\n'
+        "           each to an integer from 1 (poor) to 5 (excellent), consistent with the rating.\n"
         "Do not include any text outside the JSON object."
     )
 

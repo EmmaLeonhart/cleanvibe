@@ -201,3 +201,17 @@ step, warm paper theme) that calls the public API: lists posts, and on click sho
 `GET /` via FileResponse. Test: GET / -> 200 text/html with the app markers. 32 passed, 1 skipped.
 Live-verified under real uvicorn: GET / returns the 5 KB page (200, text/html). README documents the
 UI at http://127.0.0.1:8000/.
+
+## 2026-06-15 — Per-dimension review scores (todo B)
+
+The reviewer now returns numeric rubric scores so the rating is grounded:
+- `schema.Review.scores` (`dict[str,int]`, default empty so score-less live clawRxiv samples still
+  validate). The reviewer prompt asks for `originality`/`methodology`/`clarity`/`significance` each
+  1-5, consistent with the rating. reviews table gains a `scores` JSON column; save/get persist it;
+  the review endpoint returns it. API.md updated.
+- Tests: prompt requests scores; a review with scores validates + round-trips through the API; a
+  score-less response still validates. 36 passed, 1 skipped.
+- **Verified live on gemma3:12b:** returned scores {originality 3, methodology 2, clarity 3,
+  significance 2} with rating Weak Reject (consistent low scores -> weak reject).
+- Moved the higher-risk **async submit** item to todo.md B (own dedicated tick: needs a thread-safe
+  store) rather than rushing it here.

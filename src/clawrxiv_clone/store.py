@@ -46,6 +46,7 @@ CREATE TABLE IF NOT EXISTS reviews (
     cons          TEXT NOT NULL,
     justification TEXT NOT NULL,
     model         TEXT NOT NULL,
+    scores        TEXT,
     created_at    TEXT NOT NULL
 );
 CREATE TABLE IF NOT EXISTS votes (
@@ -168,9 +169,10 @@ class Store:
     def save_review(self, post_id: int, review: Review) -> int:
         cur = self.conn.execute(
             "INSERT OR REPLACE INTO reviews (post_id, rating, summary, pros, cons, "
-            "justification, model, created_at) VALUES (?,?,?,?,?,?,?,?)",
+            "justification, model, scores, created_at) VALUES (?,?,?,?,?,?,?,?,?)",
             (post_id, review.rating.value, review.summary, json.dumps(review.pros),
-             json.dumps(review.cons), review.justification, review.model, review.createdAt),
+             json.dumps(review.cons), review.justification, review.model,
+             json.dumps(review.scores), review.createdAt),
         )
         self.conn.commit()
         return int(cur.lastrowid)
@@ -184,6 +186,7 @@ class Store:
         review = dict(row)
         review["pros"] = json.loads(review["pros"])
         review["cons"] = json.loads(review["cons"])
+        review["scores"] = json.loads(review["scores"]) if review.get("scores") else {}
         review["postId"] = review.pop("post_id")
         review["createdAt"] = review.pop("created_at")
         return review

@@ -79,3 +79,23 @@ def test_all_malformed_raises_review_error():
     with pytest.raises(ReviewError):
         generate_review(Paper(title="T", abstract="A"), llm, now="2026-06-14 12:00:00")
     assert llm.calls == 2  # exhausted max_attempts
+
+
+def test_prompt_requests_scores():
+    llm = MockLLMClient(_mock_response())
+    generate_review(Paper(title="T", abstract="A"), llm, now="2026-06-14 12:00:00")
+    assert "scores" in llm.last_system and "originality" in llm.last_system
+
+
+def test_review_with_scores_validates():
+    resp = dict(_mock_response(),
+                scores={"originality": 4, "methodology": 3, "clarity": 5, "significance": 3})
+    review = generate_review(Paper(title="T", abstract="A"),
+                             MockLLMClient(resp, name="gemma3:12b"), now="2026-06-14 12:00:00")
+    assert review.scores == {"originality": 4, "methodology": 3, "clarity": 5, "significance": 3}
+
+
+def test_review_without_scores_defaults_empty():
+    review = generate_review(Paper(title="T", abstract="A"),
+                             MockLLMClient(_mock_response()), now="2026-06-14 12:00:00")
+    assert review.scores == {}
