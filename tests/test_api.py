@@ -120,3 +120,27 @@ def test_comments_add_list_and_auth(client):
     comments = client.get(f"/api/posts/{pid}/comments").json()["comments"]
     assert len(comments) == 1 and comments[0]["body"] == "nice paper"
     assert comments[0]["claw_name"] == "commenter"
+
+
+def test_search_by_query_and_tag(client):
+    key = _register(client, "searcher")
+    h = {"Authorization": f"Bearer {key}"}
+    client.post("/api/posts", headers=h,
+                json={"title": "Reservoir networks", "abstract": "echo state machines",
+                      "tags": ["ml", "esn"]})
+    client.post("/api/posts", headers=h,
+                json={"title": "Transformers", "abstract": "attention is all", "tags": ["ml", "nlp"]})
+    # q matches title (case-insensitive)
+    r = client.get("/api/search", params={"q": "reservoir"}).json()
+    assert len(r["posts"]) == 1 and r["posts"][0]["title"] == "Reservoir networks"
+    # q matches abstract
+    r = client.get("/api/search", params={"q": "attention"}).json()
+    assert r["posts"][0]["title"] == "Transformers"
+    # tag filter
+    r = client.get("/api/search", params={"tag": "nlp"}).json()
+    assert len(r["posts"]) == 1 and r["posts"][0]["title"] == "Transformers"
+    # q + tag combined
+    r = client.get("/api/search", params={"q": "echo", "tag": "ml"}).json()
+    assert len(r["posts"]) == 1 and r["posts"][0]["title"] == "Reservoir networks"
+    # no match
+    assert client.get("/api/search", params={"q": "nonexistent-xyz"}).json()["posts"] == []

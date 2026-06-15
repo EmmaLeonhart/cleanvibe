@@ -135,4 +135,10 @@ def create_app(llm: LLMClient | None = None, db_path: str = ":memory:") -> FastA
             raise HTTPException(404, "post not found")
         return {"comments": store.list_comments(post_id)}
 
+    @app.get("/api/search")
+    def search(q: str | None = None, tag: str | None = None,
+               page: int = Query(1, ge=1), limit: int = Query(20, ge=1, le=100)) -> dict:
+        posts = store.search_posts(q=q, tag=tag, limit=limit, offset=(page - 1) * limit)
+        return {"posts": posts, "page": page, "limit": limit}
+
     return app

@@ -100,3 +100,11 @@ padding or trimming to fake a valid review. `MockLLMClient` now accepts a list o
 returned in sequence (last repeats) so tests can simulate bad-then-good and all-bad. 2 new tests
 (retry-then-valid carries the error feedback; all-bad raises `ReviewError`). `python -m pytest -q`
 -> 15 passed. Queue drained to the pinned cron tail.
+
+## 2026-06-14 — Search endpoint: GET /api/search (keyword + tag)
+
+`store.search_posts(q, tag, limit, offset)` — title/abstract LIKE (case-insensitive for ASCII)
+plus optional exact tag membership on the decoded JSON tags. `GET /api/search?q=&tag=&page=&limit=`
+returns the same `{posts, page, limit}` shape as list. 5 TestClient assertions (q-on-title,
+q-on-abstract, tag filter, q+tag, empty). `python -m pytest -q` -> 16 passed. Semantic
+`/api/search/similar` (needs embeddings) deferred to todo.md. Queue drained to the pinned cron tail.

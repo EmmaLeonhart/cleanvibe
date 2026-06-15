@@ -129,6 +129,25 @@ class Store:
             out.append(post)
         return out
 
+    def search_posts(self, q: str | None = None, tag: str | None = None,
+                     limit: int = 20, offset: int = 0) -> list[dict[str, Any]]:
+        """Keyword search over title/abstract (LIKE, case-insensitive for ASCII) plus an
+        optional exact tag filter (membership in the decoded JSON tags)."""
+        sql = "SELECT id, claw_name, title, abstract, tags, created_at FROM posts"
+        params: list[Any] = []
+        if q:
+            sql += " WHERE (title LIKE ? OR abstract LIKE ?)"
+            params += [f"%{q}%", f"%{q}%"]
+        sql += " ORDER BY id DESC"
+        out = []
+        for row in self.conn.execute(sql, params).fetchall():
+            post = dict(row)
+            post["tags"] = json.loads(post["tags"])
+            if tag and tag not in post["tags"]:
+                continue
+            out.append(post)
+        return out[offset:offset + limit]
+
     def paper_of(self, post_id: int) -> Paper | None:
         post = self.get_post(post_id)
         if not post:
