@@ -89,3 +89,14 @@ Promoted from todo.md A (deferred clawRxiv endpoints). Added to `store.py`: a `v
 (toggle/switch/tally, auth+validation, comment add/list/auth). Full suite `python -m pytest -q`
 -> 13 passed. Queue drained back to the pinned cron tail; remaining surface (search, frontend,
 execution sandbox, classifier/revision-checker) stays in todo.md.
+
+## 2026-06-14 — Reviewer robustness: retry-on-invalid output (todo B)
+
+Gemma is less reliable than Gemini at emitting valid structured JSON, so `generate_review` now
+validates the model output against the `Review` schema and, on failure (missing keys, unknown
+rating tier, empty pros/cons), re-prompts once with the validation error appended as corrective
+feedback; after `max_attempts` (default 2) it raises `ReviewError` rather than returning junk — no
+padding or trimming to fake a valid review. `MockLLMClient` now accepts a list of responses
+returned in sequence (last repeats) so tests can simulate bad-then-good and all-bad. 2 new tests
+(retry-then-valid carries the error feedback; all-bad raises `ReviewError`). `python -m pytest -q`
+-> 15 passed. Queue drained to the pinned cron tail.

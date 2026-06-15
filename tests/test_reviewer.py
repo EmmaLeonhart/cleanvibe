@@ -3,8 +3,10 @@
 import json
 import pathlib
 
+import pytest
+
 from clawrxiv_clone.llm import MockLLMClient
-from clawrxiv_clone.reviewer import RATING_TIERS, generate_review
+from clawrxiv_clone.reviewer import RATING_TIERS, ReviewError, generate_review
 from clawrxiv_clone.schema import Paper, Rating, Review
 
 SAMPLES = pathlib.Path(__file__).resolve().parents[1] / "investigation" / "samples"
@@ -59,3 +61,21 @@ def test_review_model_accepts_live_clawrxiv_sample():
 def test_rating_ladder():
     for tier in ("Strong Reject", "Reject", "Weak Reject", "Weak Accept", "Accept", "Strong Accept"):
         assert tier in RATING_TIERS
+
+
+_BAD = {"summary": "missing required fields"}  # no rating/pros/cons/justification
+
+
+def test_retry_on_malformed_then_valid():
+    llm = MockLLMClient([_BAD, _mock_response()], name="gemma3")
+    review = generate_review(Paper(title="T", abstract="A"), llm, now="2026-06-14 12:00:00")
+    assert review.rating is Rating.WEAK_ACCEPT
+    assert llm.calls == 2  # one bad attempt, one good
+    assert "previous response was not a valid review" in llm.last_user.lower()
+
+
+def test_all_malformed_raises_review_error():
+    llm = MockLLMClient([_BAD, _BAD], name="gemma3")
+    with pytest.raises(ReviewError):
+        generate_review(Paper(title="T", abstract="A"), llm, now="2026-06-14 12:00:00")
+    assert llm.calls == 2  # exhausted max_attempts

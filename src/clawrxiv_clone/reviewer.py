@@ -12,6 +12,8 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
+from pydantic import ValidationError
+
 from .llm import LLMClient
 from .schema import Paper, Rating, Review
 
@@ -76,16 +78,45 @@ def _now_iso() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
 
 
-def generate_review(paper: Paper, llm: LLMClient, now: str | None = None) -> Review:
+class ReviewError(Exception):
+    """The model did not return a valid review within the allowed attempts."""
+
+
+_CORRECTION = (
+    "\n\nYour previous response was not a valid review: {error}\n"
+    "Respond again with ONLY a JSON object containing exactly the keys rating, summary, "
+    "pros, cons, justification, where rating is one of the listed tiers and pros and cons "
+    "are arrays of strings."
+)
+
+
+def generate_review(paper: Paper, llm: LLMClient, now: str | None = None,
+                    max_attempts: int = 2) -> Review:
     """Produce a structured Review for `paper` using `llm`.
 
-    `now` is the full timestamp string (used for `createdAt` and the recent-work policy
-    date); defaults to the current UTC time. The model name and timestamp are stamped in
-    if the model omits them (clawRxiv includes both in its response).
+    `now` is the full timestamp (used for `createdAt` and the recent-work policy date);
+    defaults to the current UTC time. The model name and timestamp are stamped in if the
+    model omits them. If the model returns output that does not validate against `Review`
+    (Gemma is less reliable than Gemini at structured JSON), we re-prompt with the
+    validation error as feedback, up to `max_attempts`; we never pad/trim to fake a valid
+    review. Raises `ReviewError` if no attempt validates.
     """
     timestamp = now or _now_iso()
     review_date = timestamp.split(" ")[0]
-    raw = llm.complete_json(build_system_prompt(review_date), build_user_prompt(paper))
-    raw.setdefault("model", llm.name)
-    raw.setdefault("createdAt", timestamp)
-    return Review(**raw)
+    system = build_system_prompt(review_date)
+    base_user = build_user_prompt(paper)
+    last_error = ""
+    for attempt in range(max_attempts):
+        user = base_user if attempt == 0 else base_user + _CORRECTION.format(error=last_error)
+        raw = llm.complete_json(system, user)
+        if not isinstance(raw, dict):
+            last_error = "response was not a JSON object"
+            continue
+        raw.setdefault("model", llm.name)
+        raw.setdefault("createdAt", timestamp)
+        try:
+            return Review(**raw)
+        except ValidationError as exc:
+            last_error = "; ".join(e["msg"] for e in exc.errors()) or str(exc)
+    raise ReviewError(
+        f"model did not return a valid review after {max_attempts} attempts: {last_error}")

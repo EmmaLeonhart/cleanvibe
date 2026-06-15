@@ -32,16 +32,20 @@ class MockLLMClient(LLMClient):
     assert on prompt content (e.g. that the current date and the recent-papers
     instruction are present)."""
 
-    def __init__(self, response: dict[str, Any], name: str = "mock-model") -> None:
-        self._response = response
+    def __init__(self, response: dict[str, Any] | list[dict[str, Any]],
+                 name: str = "mock-model") -> None:
+        self._responses = list(response) if isinstance(response, list) else [response]
         self.name = name
+        self.calls = 0
         self.last_system: str | None = None
         self.last_user: str | None = None
 
     def complete_json(self, system: str, user: str) -> dict[str, Any]:
         self.last_system = system
         self.last_user = user
-        return json.loads(json.dumps(self._response))  # deep copy
+        item = self._responses[min(self.calls, len(self._responses) - 1)]
+        self.calls += 1
+        return json.loads(json.dumps(item))  # deep copy
 
 
 class OllamaGemmaClient(LLMClient):
