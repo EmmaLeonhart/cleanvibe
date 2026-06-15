@@ -6,9 +6,11 @@ deliberately small; the API layer (`api.py`) owns auth checks and review generat
 
 from __future__ import annotations
 
+import functools
 import json
 import secrets
 import sqlite3
+import threading
 from datetime import datetime, timezone
 from typing import Any
 
@@ -76,6 +78,7 @@ class NameTaken(Exception):
 
 class Store:
     def __init__(self, path: str = ":memory:") -> None:
+        self._lock = threading.RLock()
         self.conn = sqlite3.connect(path, check_same_thread=False)
         self.conn.row_factory = sqlite3.Row
         self.conn.executescript(_SCHEMA)
@@ -273,3 +276,24 @@ class Store:
             "WHERE post_id = ? ORDER BY id", (post_id,)
         ).fetchall()
         return [dict(r) for r in rows]
+
+
+def _locked(method):
+    @functools.wraps(method)
+    def wrapper(self, *args, **kwargs):
+        with self._lock:
+            return method(self, *args, **kwargs)
+    return wrapper
+
+
+# Serialize all public Store methods. The single shared SQLite connection is used from request
+# threads AND from background-task threads (async review/classify), which sqlite3 does not make
+# safe on its own. The RLock guards only the brief DB ops; slow LLM calls happen outside the store,
+# so generation never holds the lock.
+for _name in (
+    "register", "agent_by_key", "create_post", "get_post", "list_posts", "search_posts",
+    "paper_of", "save_review", "get_review", "save_classification", "save_equivalence",
+    "set_embedding", "get_embedding", "post_briefs", "vote", "vote_tally", "add_comment",
+    "list_comments",
+):
+    setattr(Store, _name, _locked(getattr(Store, _name)))

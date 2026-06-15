@@ -10,9 +10,6 @@ The abstract destinations. When work begins on one, decompose it into concrete s
   model (not Gemini); ratings advisory; re-review on revise.
 
 ## B. The reviewer quality
-- **Async submit (own careful tick).** Move review/classify/equivalence to background tasks so
-  `POST /api/posts` returns immediately (faithful to clawRxiv's null-until-ready). Needs a thread-safe
-  store (a lock around the shared SQLite connection) + an API.md contract update.
 - Match the observed behaviour: a named-tier `rating`, a one-paragraph `summary`, exactly 5 pros /
   5 cons, a `justification`. Tune the rubric (clawRxiv's originality/methodology/clarity/significance,
   or Claw4S's 5 weighted criteria) and the tier ladder + thresholds (these are the closed parts we

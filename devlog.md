@@ -215,3 +215,18 @@ The reviewer now returns numeric rubric scores so the rating is grounded:
   significance 2} with rating Weak Reject (consistent low scores -> weak reject).
 - Moved the higher-risk **async submit** item to todo.md B (own dedicated tick: needs a thread-safe
   store) rather than rushing it here.
+
+## 2026-06-15 — Async submit: non-blocking POST, background review (todo B)
+
+`POST /api/posts` and `/revise` no longer block on Gemma:
+- **Thread-safe store:** added an `RLock` and wrapped all 18 public methods (a class-level decorator
+  loop) so the shared SQLite connection is safe across request + background-task threads. The slow
+  LLM call stays OUTSIDE the lock (only brief DB ops are guarded), so generation never blocks reads.
+- **api:** `create_post`/`revise` schedule `review_post` (+ classify / equivalence) via FastAPI
+  `BackgroundTasks` and return the id immediately. `GET /review` is null-until-ready (faithful to
+  clawRxiv). API.md contract updated (poll for the review).
+- **Tests:** existing tests unchanged (TestClient runs background tasks before returning, so review is
+  present after POST in tests); added `test_store_concurrency.py` (8 threads x 20 iters = 160
+  concurrent posts with get/vote/list -> no errors). 37 passed, 1 skipped.
+- **Verified live:** `POST /api/posts` returned in **0.14s** (was ~50s); the review was `null`
+  immediately, then appeared ~39s later (Weak Reject) from the background task.

@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import pathlib
 
-from fastapi import Depends, FastAPI, Header, HTTPException, Query
+from fastapi import BackgroundTasks, Depends, FastAPI, Header, HTTPException, Query
 from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
@@ -131,13 +131,14 @@ def create_app(llm: LLMClient | None = None, classify_llm: LLMClient | None = No
         return {"id": res["id"], "api_key": res["api_key"]}
 
     @app.post("/api/posts")
-    def create_post(body: PostBody, agent: dict = Depends(require_agent)) -> dict:
+    def create_post(body: PostBody, background_tasks: BackgroundTasks,
+                    agent: dict = Depends(require_agent)) -> dict:
         paper = Paper(title=body.title, abstract=body.abstract, content=body.content,
                       tags=body.tags)
         post_id = store.create_post(agent, paper, human_names=body.human_names)
-        review_post(post_id)
+        background_tasks.add_task(review_post, post_id)  # generated in the background
         if auto_classify:
-            classify_post(post_id)
+            background_tasks.add_task(classify_post, post_id)
         return {"id": post_id, "created_at": store.get_post(post_id)["created_at"]}
 
     @app.get("/api/posts")
@@ -153,18 +154,19 @@ def create_app(llm: LLMClient | None = None, classify_llm: LLMClient | None = No
         return post
 
     @app.post("/api/posts/{post_id}/revise")
-    def revise(post_id: int, body: PostBody, agent: dict = Depends(require_agent)) -> dict:
+    def revise(post_id: int, body: PostBody, background_tasks: BackgroundTasks,
+               agent: dict = Depends(require_agent)) -> dict:
         if store.get_post(post_id) is None:
             raise HTTPException(404, "post not found")
         paper = Paper(title=body.title, abstract=body.abstract, content=body.content,
                       tags=body.tags)
         new_id = store.create_post(agent, paper, human_names=body.human_names,
                                    supersedes=post_id)
-        review_post(new_id)
+        background_tasks.add_task(review_post, new_id)
         if auto_classify:
-            classify_post(new_id)
+            background_tasks.add_task(classify_post, new_id)
         if auto_equivalence:
-            equivalence_post(new_id, post_id)
+            background_tasks.add_task(equivalence_post, new_id, post_id)
         return {"id": new_id, "supersedes": post_id}
 
     @app.get("/api/posts/{post_id}/review")
