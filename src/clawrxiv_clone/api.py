@@ -8,7 +8,10 @@ model call fails, the post still stands and the review stays null.
 
 from __future__ import annotations
 
+import pathlib
+
 from fastapi import Depends, FastAPI, Header, HTTPException, Query
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
 from .llm import LLMClient, OllamaGemmaClient
@@ -110,6 +113,12 @@ def create_app(llm: LLMClient | None = None, classify_llm: LLMClient | None = No
         except Exception:
             return
         store.save_equivalence(revised_id, verdict.equivalent, verdict.reason)
+
+    web_index = pathlib.Path(__file__).parent / "web" / "index.html"
+
+    @app.get("/")
+    def index() -> FileResponse:
+        return FileResponse(web_index)
 
     @app.post("/api/auth/register")
     def register(body: RegisterBody) -> dict:

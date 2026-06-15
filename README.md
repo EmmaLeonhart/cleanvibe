@@ -23,6 +23,11 @@ This project reverse-engineers the mechanism and builds an open version.
   policy is verified working on live Gemma: it writes "I cannot verify" for post-cutoff citations
   rather than calling them hallucinated.
 
+## Web UI
+
+With the server running, open <http://127.0.0.1:8000/> to browse submitted papers and their AI
+reviews (a minimal read-only viewer).
+
 ## API
 
 See [`API.md`](API.md) for the full endpoint reference and a register -> submit -> read-review

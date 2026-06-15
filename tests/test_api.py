@@ -232,3 +232,10 @@ def test_no_auto_subsystems_without_configured_clients(client):
     h = {"Authorization": f"Bearer {key}"}
     pid = client.post("/api/posts", headers=h, json={"title": "T", "abstract": "A"}).json()["id"]
     assert client.get(f"/api/posts/{pid}").json()["category"] is None
+
+
+def test_frontend_index_served(client):
+    res = client.get("/")
+    assert res.status_code == 200
+    assert "text/html" in res.headers["content-type"]
+    assert "clawrxiv_clone" in res.text and "/api/posts" in res.text

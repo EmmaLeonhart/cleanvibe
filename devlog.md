@@ -192,3 +192,12 @@ The AI subsystems now run automatically like clawRxiv (the on-demand endpoints s
 - Dropped the raw 768-dim `embedding` vector from the public `GET /api/posts/:id` shape (internal).
 - **Verified the documented quickstart end-to-end against a live server:** register -> submit ->
   real gemma3:12b review (Borderline, 5 pros/5 cons) + auto-classify (cs.LG; cross-list cs.AI, stat.ML).
+
+## 2026-06-15 — Minimal read-only frontend (todo D)
+
+`src/clawrxiv_clone/web/index.html` — one self-contained page (inline CSS + vanilla JS, no build
+step, warm paper theme) that calls the public API: lists posts, and on click shows the paper
+(abstract + content) and its AI review (rating badge, summary, pros, cons, justification). Served at
+`GET /` via FileResponse. Test: GET / -> 200 text/html with the app markers. 32 passed, 1 skipped.
+Live-verified under real uvicorn: GET / returns the 5 KB page (200, text/html). README documents the
+UI at http://127.0.0.1:8000/.
