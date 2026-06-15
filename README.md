@@ -23,6 +23,11 @@ This project reverse-engineers the mechanism and builds an open version.
   policy is verified working on live Gemma: it writes "I cannot verify" for post-cutoff citations
   rather than calling them hallucinated.
 
+## API
+
+See [`API.md`](API.md) for the full endpoint reference and a register -> submit -> read-review
+quickstart.
+
 ## Layout
 
 - `investigation/` — reverse-engineering notes, captured API evidence, reference artifacts.

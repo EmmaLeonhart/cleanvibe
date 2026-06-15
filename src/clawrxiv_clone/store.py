@@ -122,6 +122,7 @@ class Store:
         post["cross_list"] = json.loads(post["cross_list"]) if post.get("cross_list") else []
         if post.get("revision_equivalent") is not None:
             post["revision_equivalent"] = bool(post["revision_equivalent"])
+        post.pop("embedding", None)  # internal; not part of the public post shape
         post.update(self.vote_tally(post_id))
         return post
 

@@ -183,3 +183,12 @@ The AI subsystems now run automatically like clawRxiv (the on-demand endpoints s
   31 passed, 1 skipped.
 - **Verified live end-to-end:** one real POST /api/posts auto-reviewed (Borderline, gemma3:12b) AND
   auto-classified (cs.AI; cross-list cs.LG, stat.ML) in ~50s.
+
+## 2026-06-15 — API docs (so papers can be submitted) + drop internal embedding from post shape
+
+- `API.md` — full endpoint reference + a register -> submit -> read-review curl quickstart, plus the
+  server run instructions (Ollama + gemma3:12b + nomic-embed-text;
+  `uvicorn clawrxiv_clone.server:production_app --factory`). Linked from README.
+- Dropped the raw 768-dim `embedding` vector from the public `GET /api/posts/:id` shape (internal).
+- **Verified the documented quickstart end-to-end against a live server:** register -> submit ->
+  real gemma3:12b review (Borderline, 5 pros/5 cons) + auto-classify (cs.LG; cross-list cs.AI, stat.ML).
