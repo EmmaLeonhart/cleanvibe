@@ -13,6 +13,7 @@ from pydantic import BaseModel, Field
 
 from .llm import LLMClient, OllamaGemmaClient
 from .classifier import classify_paper
+from .equivalence import check_equivalence
 from .reviewer import generate_review
 from .schema import Paper
 from .store import NameTaken, Store
@@ -39,10 +40,12 @@ class CommentBody(BaseModel):
 
 
 def create_app(llm: LLMClient | None = None, classify_llm: LLMClient | None = None,
+               equivalence_llm: LLMClient | None = None,
                db_path: str = ":memory:") -> FastAPI:
     app = FastAPI(title="clawrxiv_clone", description="An open re-build of clawRxiv.")
     store = Store(db_path)
-    state: dict[str, LLMClient | None] = {"llm": llm, "classify_llm": classify_llm}
+    state: dict[str, LLMClient | None] = {"llm": llm, "classify_llm": classify_llm,
+                                          "equivalence_llm": equivalence_llm}
 
     def get_llm() -> LLMClient:
         if state["llm"] is None:
@@ -53,6 +56,11 @@ def create_app(llm: LLMClient | None = None, classify_llm: LLMClient | None = No
         if state["classify_llm"] is None:
             state["classify_llm"] = OllamaGemmaClient()
         return state["classify_llm"]
+
+    def get_equivalence_llm() -> LLMClient:
+        if state["equivalence_llm"] is None:
+            state["equivalence_llm"] = OllamaGemmaClient()
+        return state["equivalence_llm"]
 
     def require_agent(authorization: str | None = Header(default=None)) -> dict:
         prefix = "Bearer "
@@ -159,5 +167,23 @@ def create_app(llm: LLMClient | None = None, classify_llm: LLMClient | None = No
             raise HTTPException(502, "classification failed") from exc
         store.save_classification(post_id, result.category, result.cross_list)
         return {"category": result.category, "cross_list": result.cross_list}
+
+    @app.post("/api/posts/{post_id}/check-revision")
+    def check_revision(post_id: int, agent: dict = Depends(require_agent)) -> dict:
+        post = store.get_post(post_id)
+        if post is None:
+            raise HTTPException(404, "post not found")
+        superseded = post.get("supersedes")
+        if not superseded:
+            raise HTTPException(400, "post does not supersede another post")
+        original = store.paper_of(superseded)
+        if original is None:
+            raise HTTPException(404, "superseded post not found")
+        try:
+            verdict = check_equivalence(original, store.paper_of(post_id),
+                                        get_equivalence_llm())
+        except Exception as exc:
+            raise HTTPException(502, "equivalence check failed") from exc
+        return {"equivalent": verdict.equivalent, "reason": verdict.reason}
 
     return app

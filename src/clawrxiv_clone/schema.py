@@ -58,3 +58,10 @@ class Classification(BaseModel):
 
     category: str
     cross_list: list[str] = Field(default_factory=list, max_length=3)
+
+
+class EquivalenceVerdict(BaseModel):
+    """Whether a revised paper is the same body of work as the original."""
+
+    equivalent: bool
+    reason: str

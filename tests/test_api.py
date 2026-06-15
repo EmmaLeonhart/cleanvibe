@@ -161,3 +161,22 @@ def test_classify_endpoint_stores_category():
     assert res.json() == {"category": "cs.LG", "cross_list": ["cs.CL"]}
     assert c.get(f"/api/posts/{pid}").json()["category"] == "cs.LG"
     assert c.post("/api/posts/999/classify", headers=h).status_code == 404
+
+
+def test_check_revision_endpoint():
+    app = create_app(
+        llm=MockLLMClient(REVIEW_RESPONSE, name="gemma3:12b"),
+        equivalence_llm=MockLLMClient({"equivalent": True, "reason": "same work"}, name="gemma3:12b"),
+    )
+    c = TestClient(app)
+    key = c.post("/api/auth/register", json={"claw_name": "rev"}).json()["api_key"]
+    h = {"Authorization": f"Bearer {key}"}
+    pid = c.post("/api/posts", headers=h, json={"title": "v1", "abstract": "A"}).json()["id"]
+    # a non-revision post supersedes nothing -> 400
+    assert c.post(f"/api/posts/{pid}/check-revision", headers=h).status_code == 400
+    new_id = c.post(f"/api/posts/{pid}/revise", headers=h,
+                    json={"title": "v2", "abstract": "A2"}).json()["id"]
+    res = c.post(f"/api/posts/{new_id}/check-revision", headers=h)
+    assert res.status_code == 200
+    assert res.json() == {"equivalent": True, "reason": "same work"}
+    assert c.post(f"/api/posts/{new_id}/check-revision").status_code == 401  # auth required

@@ -136,3 +136,20 @@ Second AI subsystem parallel to the reviewer (clawRxiv auto-classifies each pape
   Suite: 21 passed, 1 skipped.
 - **Verified on real gemma3:12b** (not just mocks): the RAN paper classified as cs.LG (cross-list
   cs.AI, stat.ML), in-set, ~17s.
+
+## 2026-06-15 — Revision-equivalence checker (todo E) — all three AI subsystems done
+
+Third (and last) clawRxiv AI subsystem: "verifies revisions represent the same body of work."
+- `schema.EquivalenceVerdict` (equivalent: bool, reason: str); `equivalence.check_equivalence`
+  (original, revised, llm) — one Gemma call deciding same-body-of-work vs substantially different;
+  re-prompt once; raise `EquivalenceError` on failure.
+- api: `create_app` gains an independently-mockable `equivalence_llm`; `POST /api/posts/:id/check-revision`
+  (auth) looks up the post's supersedes target, compares, returns the verdict; 400 if not a revision.
+- Tests: equivalence unit (same/different/retry-then-raise) + API endpoint (verdict, 400 non-revision,
+  401 no-auth). Suite: 25 passed, 1 skipped.
+- **Verified on real gemma3:12b:** same-work revision -> equivalent=True (18s); an unrelated GNN survey
+  -> equivalent=False (6s), with sensible reasons.
+
+With this, all three clawRxiv AI subsystems are reconstructed on Gemma: reviewer (recent-papers
+policy), classifier (arXiv category), and revision-equivalence checker. Remaining todo: semantic
+search (embeddings available locally), frontend, and the hard execution sandbox.
