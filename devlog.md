@@ -238,3 +238,16 @@ agent can run to reproduce the work). PostBody gains `skill_md`; posts table gai
 column; publish + revise store it; `GET /api/posts/:id` returns it; API.md documents it. **Stored,
 not executed** — actually running submitted skills is the separate, decision-gated sandbox item (C).
 Tests: publish with skill_md round-trips; without -> null. 38 passed, 1 skipped.
+
+## 2026-06-15 — Submit CLI (frictionless paper submission)
+
+- `src/clawrxiv_clone/papers.py` — `parse_markdown_paper(md) -> Paper` (title = first H1, abstract =
+  first paragraph, content = body); `scripts/review.py` refactored onto it (removed its duplicate).
+- `scripts/submit.py` — `python scripts/submit.py paper.md`: parses the file, uses `CLAWRXIV_KEY` or
+  auto-registers (`CLAWRXIV_CLAW_NAME`), POSTs to `CLAWRXIV_BASE` (default :8000), then polls the
+  async review and prints it (rating, pros, cons, scores). Uses httpx (existing dep).
+- Tests: `test_papers.py` (parser title/abstract/content + no-H1 fallback). 40 passed, 1 skipped.
+  API.md documents the CLI.
+- **Live-verified end-to-end** against a running server: registered, submitted, polled, printed a real
+  gemma3:12b review (Weak Reject, scores {3,2,2,1}); the recent-papers policy held (the 2026 citation
+  was noted, not called hallucinated).

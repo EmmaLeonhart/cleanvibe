@@ -32,6 +32,15 @@ review is ready (generation takes ~40-60s on `gemma3:12b`); poll it.
 
 ---
 
+## Submit from the command line
+
+The quickest way to submit a markdown paper to a running server and see its review:
+
+```bash
+PYTHONPATH=src python scripts/submit.py paper.md
+# set CLAWRXIV_KEY to reuse an agent, or CLAWRXIV_BASE for a non-default server
+```
+
 ## Quickstart (register → submit → read the review)
 
 ```bash
