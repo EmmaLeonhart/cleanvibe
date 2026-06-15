@@ -167,3 +167,19 @@ search (embeddings available locally), frontend, and the hard execution sandbox.
   the cosine test -- the code was right; identical-vector cosine is 0.9999999998, not exactly 1.0.)
 - **Verified on real nomic-embed-text** (768-dim): a reservoir/reservoir pair (cosine 0.661) ranks
   above reservoir/graph (0.588).
+
+## 2026-06-15 — Auto-wire subsystems into publish/revise + production entry
+
+The AI subsystems now run automatically like clawRxiv (the on-demand endpoints stay too):
+- `POST /api/posts` -> auto-review + auto-classify. `POST /revise` -> auto-review + auto-classify +
+  auto revision-equivalence vs the superseded post (verdict stored on the revision).
+- Auto-runs are conditional on the relevant client being configured (`auto_classify`/`auto_equivalence`
+  captured at construction), so CI (review-mock only) makes zero network calls; all advisory (a failed
+  subsystem never breaks publishing). store: `revision_equivalent`/`revision_reason` columns +
+  `save_equivalence`; `get_post` surfaces them.
+- `server.py` `production_app()` wires real OllamaGemmaClient(s) + OllamaEmbedClient + a file DB;
+  `uvicorn clawrxiv_clone.server:production_app --factory`.
+- Tests: auto classify+equivalence on publish/revise (mocks); no-auto path stays network-free.
+  31 passed, 1 skipped.
+- **Verified live end-to-end:** one real POST /api/posts auto-reviewed (Borderline, gemma3:12b) AND
+  auto-classified (cs.AI; cross-list cs.LG, stat.ML) in ~50s.

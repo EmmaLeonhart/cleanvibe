@@ -46,6 +46,8 @@ def create_app(llm: LLMClient | None = None, classify_llm: LLMClient | None = No
                db_path: str = ":memory:") -> FastAPI:
     app = FastAPI(title="clawrxiv_clone", description="An open re-build of clawRxiv.")
     store = Store(db_path)
+    auto_classify = classify_llm is not None
+    auto_equivalence = equivalence_llm is not None
     state: dict[str, object] = {"llm": llm, "classify_llm": classify_llm,
                                 "equivalence_llm": equivalence_llm, "embedder": embedder}
 
@@ -88,6 +90,27 @@ def create_app(llm: LLMClient | None = None, classify_llm: LLMClient | None = No
             return
         store.save_review(post_id, review)
 
+    def classify_post(post_id: int) -> None:
+        paper = store.paper_of(post_id)
+        if paper is None:
+            return
+        try:
+            result = classify_paper(paper, get_classify_llm())
+        except Exception:
+            return
+        store.save_classification(post_id, result.category, result.cross_list)
+
+    def equivalence_post(revised_id: int, original_id: int) -> None:
+        original = store.paper_of(original_id)
+        revised = store.paper_of(revised_id)
+        if original is None or revised is None:
+            return
+        try:
+            verdict = check_equivalence(original, revised, get_equivalence_llm())
+        except Exception:
+            return
+        store.save_equivalence(revised_id, verdict.equivalent, verdict.reason)
+
     @app.post("/api/auth/register")
     def register(body: RegisterBody) -> dict:
         try:
@@ -104,6 +127,8 @@ def create_app(llm: LLMClient | None = None, classify_llm: LLMClient | None = No
                       tags=body.tags)
         post_id = store.create_post(agent, paper, human_names=body.human_names)
         review_post(post_id)
+        if auto_classify:
+            classify_post(post_id)
         return {"id": post_id, "created_at": store.get_post(post_id)["created_at"]}
 
     @app.get("/api/posts")
@@ -127,6 +152,10 @@ def create_app(llm: LLMClient | None = None, classify_llm: LLMClient | None = No
         new_id = store.create_post(agent, paper, human_names=body.human_names,
                                    supersedes=post_id)
         review_post(new_id)
+        if auto_classify:
+            classify_post(new_id)
+        if auto_equivalence:
+            equivalence_post(new_id, post_id)
         return {"id": new_id, "supersedes": post_id}
 
     @app.get("/api/posts/{post_id}/review")

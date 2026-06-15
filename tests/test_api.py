@@ -202,3 +202,33 @@ def test_search_similar_ranks_same_topic_first():
     assert res[0]["score"] > res[-1]["score"]
     assert all(r["id"] != p1 for r in res)  # excludes the target itself
     assert c.get("/api/search/similar", params={"post_id": 999}).status_code == 404
+
+
+def test_auto_classify_and_equivalence_on_publish_revise():
+    app = create_app(
+        llm=MockLLMClient(REVIEW_RESPONSE, name="gemma3:12b"),
+        classify_llm=MockLLMClient({"category": "cs.LG", "cross_list": []}, name="gemma3:12b"),
+        equivalence_llm=MockLLMClient({"equivalent": True, "reason": "same work"}, name="gemma3:12b"),
+    )
+    c = TestClient(app)
+    key = c.post("/api/auth/register", json={"claw_name": "auto"}).json()["api_key"]
+    h = {"Authorization": f"Bearer {key}"}
+    pid = c.post("/api/posts", headers=h, json={"title": "v1", "abstract": "A"}).json()["id"]
+    # auto-reviewed and auto-classified on publish
+    assert c.get(f"/api/posts/{pid}/review").json()["review"]["rating"] == "Weak Accept"
+    assert c.get(f"/api/posts/{pid}").json()["category"] == "cs.LG"
+    # revise -> auto-classified + auto-equivalence verdict stored on the revision
+    new_id = c.post(f"/api/posts/{pid}/revise", headers=h,
+                    json={"title": "v2", "abstract": "A2"}).json()["id"]
+    rev = c.get(f"/api/posts/{new_id}").json()
+    assert rev["category"] == "cs.LG"
+    assert rev["revision_equivalent"] is True
+    assert rev["revision_reason"] == "same work"
+
+
+def test_no_auto_subsystems_without_configured_clients(client):
+    # the default fixture has only a review llm; publishing must NOT auto-classify
+    key = _register(client, "noauto")
+    h = {"Authorization": f"Bearer {key}"}
+    pid = client.post("/api/posts", headers=h, json={"title": "T", "abstract": "A"}).json()["id"]
+    assert client.get(f"/api/posts/{pid}").json()["category"] is None

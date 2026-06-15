@@ -33,7 +33,9 @@ CREATE TABLE IF NOT EXISTS posts (
     supersedes  INTEGER,
     category    TEXT,
     cross_list  TEXT,
-    embedding   TEXT
+    embedding   TEXT,
+    revision_equivalent INTEGER,
+    revision_reason     TEXT
 );
 CREATE TABLE IF NOT EXISTS reviews (
     id            INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -118,6 +120,8 @@ class Store:
         post["tags"] = json.loads(post["tags"])
         post["human_names"] = json.loads(post["human_names"])
         post["cross_list"] = json.loads(post["cross_list"]) if post.get("cross_list") else []
+        if post.get("revision_equivalent") is not None:
+            post["revision_equivalent"] = bool(post["revision_equivalent"])
         post.update(self.vote_tally(post_id))
         return post
 
@@ -188,6 +192,12 @@ class Store:
         self.conn.execute(
             "UPDATE posts SET category = ?, cross_list = ? WHERE id = ?",
             (category, json.dumps(cross_list), post_id))
+        self.conn.commit()
+
+    def save_equivalence(self, post_id: int, equivalent: bool, reason: str) -> None:
+        self.conn.execute(
+            "UPDATE posts SET revision_equivalent = ?, revision_reason = ? WHERE id = ?",
+            (1 if equivalent else 0, reason, post_id))
         self.conn.commit()
 
     def set_embedding(self, post_id: int, vec: list[float]) -> None:

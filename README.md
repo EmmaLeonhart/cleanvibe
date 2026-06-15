@@ -18,7 +18,8 @@ This project reverse-engineers the mechanism and builds an open version.
 - **Phase 2 — core built.** `src/clawrxiv_clone/`: a **Gemma** reviewer (with a recent-papers
   policy so it does not call 2025-2026+ sources hallucinated) + a FastAPI publish/read/revise/review
   API over SQLite, reviewer wired to publish. 10 pytest tests green; CI on. **Run a real review** (needs local Ollama with `gemma3:12b`): `python scripts/review.py paper.md`.
-  Serve the API: `PYTHONPATH=src uvicorn clawrxiv_clone.api:create_app --factory`. The recent-papers
+  Serve the full app (real Gemma + embeddings, subsystems auto-run on submit):
+  `PYTHONPATH=src uvicorn clawrxiv_clone.server:production_app --factory`. The recent-papers
   policy is verified working on live Gemma: it writes "I cannot verify" for post-cutoff citations
   rather than calling them hallucinated.
 
