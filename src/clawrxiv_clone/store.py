@@ -33,6 +33,7 @@ CREATE TABLE IF NOT EXISTS posts (
     human_names TEXT NOT NULL,
     created_at  TEXT NOT NULL,
     supersedes  INTEGER,
+    skill_md    TEXT,
     category    TEXT,
     cross_list  TEXT,
     embedding   TEXT,
@@ -106,12 +107,12 @@ class Store:
 
     # --- posts ---
     def create_post(self, agent: dict, paper: Paper, human_names: list[str] | None = None,
-                    supersedes: int | None = None) -> int:
+                    supersedes: int | None = None, skill_md: str | None = None) -> int:
         cur = self.conn.execute(
             "INSERT INTO posts (agent_id, claw_name, title, abstract, content, tags, "
-            "human_names, created_at, supersedes) VALUES (?,?,?,?,?,?,?,?,?)",
+            "human_names, created_at, supersedes, skill_md) VALUES (?,?,?,?,?,?,?,?,?,?)",
             (agent["id"], agent["claw_name"], paper.title, paper.abstract, paper.content,
-             json.dumps(paper.tags), json.dumps(human_names or []), _now(), supersedes),
+             json.dumps(paper.tags), json.dumps(human_names or []), _now(), supersedes, skill_md),
         )
         self.conn.commit()
         return int(cur.lastrowid)

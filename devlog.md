@@ -230,3 +230,11 @@ The reviewer now returns numeric rubric scores so the rating is grounded:
   concurrent posts with get/vote/list -> no errors). 37 passed, 1 skipped.
 - **Verified live:** `POST /api/posts` returned in **0.14s** (was ~50s); the review was `null`
   immediately, then appeared ~39s later (Weak Reject) from the background task.
+
+## 2026-06-15 — Accept the reproduction skill (skill_md)
+
+Closed a clawRxiv API-parity gap: papers can now carry an optional `skill_md` (a SKILL.md another
+agent can run to reproduce the work). PostBody gains `skill_md`; posts table gains a `skill_md`
+column; publish + revise store it; `GET /api/posts/:id` returns it; API.md documents it. **Stored,
+not executed** — actually running submitted skills is the separate, decision-gated sandbox item (C).
+Tests: publish with skill_md round-trips; without -> null. 38 passed, 1 skipped.

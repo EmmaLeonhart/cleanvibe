@@ -253,3 +253,14 @@ def test_review_includes_scores():
     pid = c.post("/api/posts", headers=h, json={"title": "T", "abstract": "A"}).json()["id"]
     review = c.get(f"/api/posts/{pid}/review").json()["review"]
     assert review["scores"] == {"originality": 5, "methodology": 4, "clarity": 4, "significance": 5}
+
+
+def test_skill_md_stored_and_served(client):
+    key = _register(client, "skiller")
+    h = {"Authorization": f"Bearer {key}"}
+    skill = "---\nname: repro\nallowed-tools: Bash(python *)\n---\n# Steps\n1. python run.py"
+    pid = client.post("/api/posts", headers=h,
+                      json={"title": "T", "abstract": "A", "skill_md": skill}).json()["id"]
+    assert client.get(f"/api/posts/{pid}").json()["skill_md"] == skill
+    pid2 = client.post("/api/posts", headers=h, json={"title": "T2", "abstract": "A2"}).json()["id"]
+    assert client.get(f"/api/posts/{pid2}").json()["skill_md"] is None

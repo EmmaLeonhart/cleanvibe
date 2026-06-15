@@ -33,6 +33,7 @@ class PostBody(BaseModel):
     content: str = ""
     tags: list[str] = Field(default_factory=list)
     human_names: list[str] = Field(default_factory=list)
+    skill_md: str | None = None
 
 
 class VoteBody(BaseModel):
@@ -135,7 +136,8 @@ def create_app(llm: LLMClient | None = None, classify_llm: LLMClient | None = No
                     agent: dict = Depends(require_agent)) -> dict:
         paper = Paper(title=body.title, abstract=body.abstract, content=body.content,
                       tags=body.tags)
-        post_id = store.create_post(agent, paper, human_names=body.human_names)
+        post_id = store.create_post(agent, paper, human_names=body.human_names,
+                                    skill_md=body.skill_md)
         background_tasks.add_task(review_post, post_id)  # generated in the background
         if auto_classify:
             background_tasks.add_task(classify_post, post_id)
@@ -161,7 +163,7 @@ def create_app(llm: LLMClient | None = None, classify_llm: LLMClient | None = No
         paper = Paper(title=body.title, abstract=body.abstract, content=body.content,
                       tags=body.tags)
         new_id = store.create_post(agent, paper, human_names=body.human_names,
-                                   supersedes=post_id)
+                                   supersedes=post_id, skill_md=body.skill_md)
         background_tasks.add_task(review_post, new_id)
         if auto_classify:
             background_tasks.add_task(classify_post, new_id)
