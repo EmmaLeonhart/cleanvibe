@@ -67,12 +67,27 @@ def build_system_prompt(now: str) -> str:
 
 
 def build_user_prompt(paper: Paper) -> str:
-    """The paper itself, as the user turn."""
+    """The paper itself, as the user turn.
+
+    The output schema lives in the system prompt, but on a long paper a smaller
+    model (gemma3:12b) tends to drift past it and return a *summary* of the paper
+    (paper_title / key_contributions / ...) instead of a review. Restating the task
+    AFTER the paper — the last thing the model reads before it generates — pins it
+    back to producing the review object in the exact schema.
+    """
     parts = [f"# {paper.title}", "", f"**Abstract.** {paper.abstract}"]
     if paper.tags:
         parts.append("**Tags:** " + ", ".join(paper.tags))
     if paper.content.strip():
         parts += ["", paper.content]
+    parts += [
+        "",
+        "---",
+        "Now REVIEW the paper above — do NOT summarize or extract it. Return ONLY a JSON "
+        "object with exactly these keys: rating (one of " + " / ".join(RATING_TIERS)
+        + "), summary, pros (array of 5), cons (array of 5), justification, and scores "
+        "(originality/methodology/clarity/significance, each 1-5). No text outside the JSON.",
+    ]
     return "\n".join(parts)
 
 
