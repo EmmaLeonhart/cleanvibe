@@ -2,4 +2,5 @@ fastapi
 pydantic>=2
 httpx
 uvicorn
+pypdf
 pytest

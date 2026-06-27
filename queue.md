@@ -31,61 +31,20 @@ and decompose those next.
 
 ---
 
-## CLI enablement — point the reviewer at an arbitrary paper PATH
+## CLI enablement — DONE 2026-06-26 (drained; see devlog)
 
-These make `scripts/review.py` usable as a command-line tool against any paper file, then run it
-on two specific papers. **Today `scripts/review.py` accepts exactly one arg — a path to a `.md`
-file** (read UTF-8, parsed by `parse_markdown_paper`: first `# H1` = title, first blank-line block
-= abstract, rest = body), runs one Gemma review via `OllamaGemmaClient` (Ollama at
-`$OLLAMA_HOST`, default `http://localhost:11434`, model `$CLAWRXIV_REVIEW_MODEL`, default
-`gemma3:12b`), and **prints the review JSON to stdout** (it does NOT save a file, does NOT accept
-`.tex`/`.pdf`, and exits 2 with usage text if argc != 2). Each step below is concrete.
+`scripts/review.py` now uses argparse (positional `paper_path` + `-o/--output`, resolves the
+path, exits 2 with `error: no such file:` on a missing file); `src/clawrxiv_clone/extract.py`
+adds `.tex`/`.pdf`/`.txt` extraction (pypdf added to deps, `tests/test_extract.py` green);
+`scripts/review_paper.py` saves the review next to the paper. Experiments run: the Sutra FV
+paper → Borderline (clarity 2) and latent-space-cartography → Borderline. Also fixed the
+reviewer drifting to a summary on long papers (restate-task-after-paper). History in devlog.
 
-1. **Make `scripts/review.py` argument handling robust.** In `scripts/review.py`: switch from the
-   bare `len(sys.argv) != 2` check to `argparse` with one positional `paper_path` and an optional
-   `-o/--output PATH`; resolve `paper_path` via `pathlib.Path(...).expanduser().resolve()`; if the
-   file does not exist print `error: no such file: <path>` to stderr and `return 2` (keep the exit
-   code so callers can detect failure). Update the module docstring to match. Keep the existing
-   stdout JSON print as the default behaviour.
-
-2. **Add `.tex` / `.pdf` text extraction so the path arg is not `.md`-only.** Add
-   `src/clawrxiv_clone/extract.py` with `extract_text(path: pathlib.Path) -> str` that dispatches
-   on suffix: `.md`/`.markdown`/`.txt` → `path.read_text(encoding="utf-8")`; `.tex` → read text and
-   strip the LaTeX preamble/commands enough to feed `parse_markdown_paper` (at minimum: take from
-   `\begin{document}` onward if present, drop comment lines starting `%`, convert `\section{X}` →
-   `# X` and `\title{X}` → `# X`); `.pdf` → extract text with `pypdf` (add `pypdf` to
-   `requirements.txt` and `pyproject.toml`), raising a clear `RuntimeError` if `pypdf` is not
-   installed. Unknown suffix → fall back to `read_text`. Wire `scripts/review.py` to call
-   `extract_text(paper_path)` instead of `.read_text(...)`. Add a `tests/test_extract.py` covering
-   the `.md` passthrough and the `.tex` `\section`→`#` conversion with a `MockLLMClient`-free pure
-   string test (no live model).
-
-3. **Add a `scripts/review_paper.py` wrapper that saves the review next to the paper.** It takes a
-   paper PATH (any of `.md`/`.tex`/`.pdf`), calls `extract_text` → `parse_markdown_paper` →
-   `generate_review(paper, OllamaGemmaClient())`, prints the JSON to stdout AND writes it to
-   `<paper_stem>.review.json` in the paper's own directory (e.g. `paper.md` →
-   `paper.review.json`), unless `-o/--output` overrides the destination. Print the saved path to
-   stderr so stdout stays pure JSON. This is the entry point Emma drives for experiments.
-
-4. **EXPERIMENT — run the reviewer on the Sutra formal-verification (FV) paper.** The FV paper is
-   `paper/formal-verification/paper.md` in **EmmaLeonhart/Sutra**; the local Sutra clone is ABSENT
-   (deleted in a workspace cleanup), so first fetch just that one file —
-   `gh api repos/EmmaLeonhart/Sutra/contents/paper/formal-verification/paper.md --jq .content | base64 -d > /tmp/fv_paper.md`
-   (or `gh repo clone EmmaLeonhart/Sutra` if the whole repo is wanted) — then with local Ollama
-   serving `gemma3:12b` run `python scripts/review_paper.py /tmp/fv_paper.md` and confirm a
-   structured review JSON is printed and `/tmp/fv_paper.review.json` is written. Record the
-   `rating` and `scores` in `devlog.md`.
-
-5. **EXPERIMENT — run the reviewer on the latent-space-cartography paper.** Its `paper.md` is at
-   the repo root of **EmmaLeonhart/latent-space-cartography**; the local clone is present at
-   `C:\Users\Immanuelle\Documents\Github\latent-space-cartography\paper.md` (else
-   `gh repo clone EmmaLeonhart/latent-space-cartography`). With local Ollama serving `gemma3:12b`
-   run `python scripts/review_paper.py ../latent-space-cartography/paper.md` and confirm the review
-   JSON prints and `../latent-space-cartography/paper.review.json` is written. NOTE: this paper
-   uses a `## Abstract` header rather than a blank-line abstract block, so `parse_markdown_paper`
-   currently treats the author line as the abstract — verify the review still reads as sensible, and
-   if not, file a follow-up queue item to teach `parse_markdown_paper` to recognise a `## Abstract`
-   section. Record the `rating` and `scores` in `devlog.md`.
+1. **Follow-up: teach `parse_markdown_paper` to recognise a `## Abstract` section.** The
+   latent-space-cartography paper uses a `## Abstract` header rather than a blank-line abstract
+   block, so `parse_markdown_paper` currently grabs the author line as the abstract. The review
+   still read sensibly (the body carries the content), but the `abstract` field handed to the
+   reviewer is wrong. Make the parser prefer a `## Abstract` section's text when present.
 
 ---
 

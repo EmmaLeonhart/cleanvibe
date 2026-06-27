@@ -268,3 +268,26 @@ member (its rating is the consensus; its text representative). k=1 is the single
 `CLAWRXIV_REVIEW_PANEL` (default 1). Cheap to adopt now that reviews run in the background.
 Tests: median consensus, a failed member is skipped, k=1 unchanged, and an in-app panel. 45 passed,
 1 skipped. Verified live: a k=2 real Gemma panel (75s) -> consensus Weak Reject. API.md documents it.
+
+## 2026-06-26 — CLI enablement + first real-paper experiments; fixed long-paper drift
+
+Made `scripts/review.py` a proper CLI: argparse with a positional `paper_path` + `-o/--output`,
+path resolution via `expanduser().resolve()`, and `error: no such file: <path>` -> exit 2 on a
+missing file. Added `src/clawrxiv_clone/extract.py` (`extract_text` dispatching on suffix: md/txt
+passthrough, `.tex` lightly de-LaTeXed — `\begin{document}` onward, drop `%` lines, `\section`->`#`,
+`\subsection`->`##` — and `.pdf` via pypdf with a clear RuntimeError when absent); wired both review
+scripts through it; added `pypdf` to requirements + pyproject; `tests/test_extract.py` covers the md
+passthrough and the tex section conversion. Added `scripts/review_paper.py` which saves the review
+to `<paper_stem>.review.json` next to the paper (or `-o`). 49 passed, 1 skipped.
+
+Also fixed a real bug found while running on a long paper: on the 77KB Sutra FV paper gemma3:12b
+drifted past the system-prompt schema and returned a *summary* of the paper instead of a review
+(validation failed, "rating field required"). The user prompt now restates the task after the
+paper, pinning the model back to the review schema.
+
+Experiments (local Ollama gemma3:12b):
+- Sutra formal-verification paper -> **Borderline**, scores originality 4 / methodology 3 /
+  clarity 2 / significance 4. (~30-80s per review, no clawRxiv round-trip.)
+- latent-space-cartography paper -> **Borderline**, scores 3 / 3 / 2 / 4. Review reads sensibly,
+  but it uses a `## Abstract` header so `parse_markdown_paper` grabs the author line as the
+  abstract — filed a follow-up queue item to teach the parser to prefer a `## Abstract` section.
