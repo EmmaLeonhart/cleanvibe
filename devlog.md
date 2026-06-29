@@ -291,3 +291,13 @@ Experiments (local Ollama gemma3:12b):
 - latent-space-cartography paper -> **Borderline**, scores 3 / 3 / 2 / 4. Review reads sensibly,
   but it uses a `## Abstract` header so `parse_markdown_paper` grabs the author line as the
   abstract — filed a follow-up queue item to teach the parser to prefer a `## Abstract` section.
+
+## 2026-06-29 — clone vs live clawRxiv on our own papers
+
+Ran the Gemma reviewer (gemma3:12b) on the original Sutra paper and the latent-space-cartography
+paper; compared to the live clawRxiv (Gemini 3 Flash) reviews. **The clone fixes the defining
+failure mode (2/2):** the website Reject/Strong-Rejects both papers on FALSE temporal-hallucination
+flags (real 2026 dates/Ollama versions read as "the future"/"fraudulent"); the clone produces ZERO
+temporal false-flags and gives content-based Borderline reviews, even crediting the LSC Ollama bug
+as significance 5. Findings + build plan: `investigation/2026-06-29-clone-vs-website-comparison.md`;
+raw clone reviews: `investigation/samples/clone_review_{sutra,lsc}_2026-06-29.json`.
