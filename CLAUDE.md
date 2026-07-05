@@ -1,5 +1,25 @@
 # cleanvibe
 
+## ⚠️ Repo history — do NOT merge this branch; fork instead
+
+This repo was originally the **cleanvibe framework/generator itself** (the Python
+package that scaffolds other projects). This branch (`claude/cleanvibe-data-lake-p96t1s`)
+threw all of that away and replaced it with a *fresh* `cleanvibe new` scaffold plus a
+`data_lake/` — because forking the framework was the only convenient way to pull in the
+skills in `.claude/skills/`. That's the "big fork for technical reasons" the work started
+from; the framework content lives on in `git log` and on the `main` branch.
+
+Consequences for future sessions:
+
+- **Do NOT merge this branch into `main`.** `main` is still the real cleanvibe framework;
+  merging would delete the generator. This branch is a *different project* that happens to
+  share history.
+- The right move is to **split this out into its own proper repository** (a real fork /
+  new repo), then develop the data-lake project there with a clean history. Until that
+  happens, treat this branch as a standalone project and keep working on it in place.
+- Everything before the "Convert repo into a fresh cleanvibe project" commit
+  (`b6fd9e2`) is framework history, not this project's history.
+
 ## Skills
 
 Workflow behaviors live as skills in `.claude/skills/` (auto-discovered by Claude Code):
