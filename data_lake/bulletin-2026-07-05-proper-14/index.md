@@ -53,10 +53,38 @@ Elizabeth Maina, James Conklin
 *(Names transcribed from a phone photo; spellings may be imperfect — verify against the
 saved webpage or Cathedral records before treating as authoritative.)*
 
+## Online sources (official PDFs)
+
+The QR/webpage is **not** the bulletin — it is an index page that links to the
+Cathedral's official download PDFs (hosted on CloudFront). Pulled directly:
+
+- `official-bulletin-proper-14.pdf` — **the official order of service, 12 pages.**
+  This is the online twin of the 12 photographed pages; its text matches the photos
+  (confirming the transcription above). Uploaded by the Cathedral 2026-06-30.
+- `official-readings-proper-14.pdf` — 8 pages: full text of the readings, psalm, and Gospel.
+- `official-sung-evening-prayer.pdf` — 8 pages: a *different* service the same day
+  (Sung Evening Prayer, July 5 2026) — useful as a contrast case.
+
+**Print vs. online:** the printed handout and the official PDF are the same 12-page
+document. Any print/online discrepancy is therefore subtle (e.g. a late edit after the
+"Final Copy" was uploaded, or the standalone Readings PDF differing from the in-bulletin
+citations) rather than a wholesale difference — a good place to look for the "bug".
+
 ## Provenance / source files
 
 - Photographs: iPhone captures `IMG_6841`–`IMG_6852` (12 spreads), renamed `page-01`…`page-12`.
 - `qr-scan-cover.png` — phone camera scanning the cover's "SCAN ME" QR sticker (orig `IMG_6839`).
-- `july-5-proper-14-webpage.html` — saved copy of the page that QR resolves to.
+- `july-5-proper-14-webpage.html` — saved copy of the index page the QR resolves to.
 - QR payload: <https://hovqr.me/4d624a79> →
   <https://www.thecathedral.ca/service-times-bulletins/service-bulletins/pages/july-5-proper-14>
+- `rendering-and-notes.pdf` / `.html` — my first-pass typeset reconstruction + structural notes.
+
+### Capture notes (how the online copy was obtained)
+
+A live **Playwright/Chromium render was attempted but does not work in this environment**:
+the egress proxy resets Chromium's many parallel connections (`ERR_CONNECTION_RESET`),
+though single-connection `curl` through the same proxy succeeds. It turned out not to
+matter — the page is a PDF-download index, so the authoritative online artifact is the
+official PDF fetched directly with `curl`, not a rendered screenshot. If a true DOM render
+is ever needed, drive a single-connection tool or a browser with parallel connections
+capped to 1.
