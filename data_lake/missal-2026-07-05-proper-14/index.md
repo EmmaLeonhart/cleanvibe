@@ -1,9 +1,10 @@
-# Bulletin — Proper 14, Sunday July 5, 2026
+# Missal — Proper 14, Sunday July 5, 2026
 
-Order of service (missal) for a **Choral Eucharist** at **Christ Church Cathedral**,
-Vancouver, BC (Anglican Church of Canada, Diocese of New Westminster). Photographed
-page-by-page and dropped into the data lake as source material for liturgical world
-modelling.
+**One missal.** The entire 12-page order of service for a **Choral Eucharist** at
+**Christ Church Cathedral**, Vancouver, BC (Anglican Church of Canada, Diocese of New
+Westminster) — a single missal, photographed page-by-page and dropped into the data
+lake as source material for liturgical world modelling. (The church labels its own file
+a "bulletin"; here the whole document is treated as one missal.)
 
 - **Occasion:** Proper 14 (Pentecost season, Revised Common Lectionary Year — Track 1)
 - **Date/time:** Sunday, July 5, 2026, 10:30 a.m. — In-Person & Livestream
@@ -55,10 +56,11 @@ saved webpage or Cathedral records before treating as authoritative.)*
 
 ## Online sources (official PDFs)
 
-The QR/webpage is **not** the bulletin — it is an index page that links to the
+The QR/webpage is **not** the missal — it is an index page that links to the
 Cathedral's official download PDFs (hosted on CloudFront). Pulled directly:
 
-- `official-bulletin-proper-14.pdf` — **the official order of service, 12 pages.**
+- `official-missal-proper-14.pdf` — **the official order of service, 12 pages** (the
+  church's own file is titled "Bulletin… Final Copy.pdf").
   This is the online twin of the 12 photographed pages; its text matches the photos
   (confirming the transcription above). Uploaded by the Cathedral 2026-06-30.
 - `official-readings-proper-14.pdf` — 8 pages: full text of the readings, psalm, and Gospel.
@@ -68,7 +70,7 @@ Cathedral's official download PDFs (hosted on CloudFront). Pulled directly:
 **Print vs. online:** the printed handout and the official PDF are the same 12-page
 document — so for modelling purposes they are one source (the missal), just captured
 two ways. The standalone Readings PDF is a *second, lower-compression* encoding of the
-same lections: where the bulletin gives only citations (`Genesis 24:34-38…`), the
+same lections: where the missal gives only citations (`Genesis 24:34-38…`), the
 Readings PDF carries the full text. That pairing is itself useful — it shows two
 compression levels of the same ritual content side by side.
 

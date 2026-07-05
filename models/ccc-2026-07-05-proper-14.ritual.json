@@ -1,0 +1,301 @@
+{
+  "id": "ccc-2026-07-05-proper-14",
+  "meta": {
+    "title": "Choral Eucharist — Proper 14",
+    "rite": "Choral Eucharist (BAS tradition, Eucharistic Prayer 3 / Enriching Our Worship)",
+    "tradition": "Anglican Church of Canada, Diocese of New Westminster",
+    "date": "2026-07-05",
+    "calendar": {
+      "season": "Season after Pentecost",
+      "proper_local": "Proper 14",
+      "proper_rcl": "Proper 9 (US/Episcopal RCL numbering; same Sunday, same readings)",
+      "lectionary_year": "Year A (Matthew)",
+      "track": "Track 1 (semicontinuous)"
+    },
+    "ministers": {
+      "presider": "The Rev. Claude St-Denis",
+      "preacher": "The Rev. Dr. Richard Topping",
+      "deacon": "The Rev. Kevin de la Mare",
+      "organist": "Neil Robertson (guest)",
+      "dean": "The Very Rev. Christopher A. Pappas"
+    },
+    "music_settings": [
+      "Gloria — New Plainsong, David Hurd",
+      "Sanctus — Hassler, Missa super Dixit Maria",
+      "Memorial Acclamation & Amen — Neil Cockburn",
+      "Lord's Prayer — McNeil Robinson",
+      "Agnus Dei (Lamb of God) — New Plainsong, David Hurd"
+    ],
+    "source_missal": {
+      "folder": "data_lake/missal-2026-07-05-proper-14",
+      "pages": 12,
+      "official_pdf": "official-missal-proper-14.pdf"
+    }
+  },
+
+  "roles": [
+    { "id": "presider", "label": "Presider (The Rev. Claude St-Denis)", "kind": "clergy" },
+    { "id": "preacher", "label": "Preacher (The Rev. Dr. Richard Topping)", "kind": "clergy" },
+    { "id": "deacon", "label": "Deacon (The Rev. Kevin de la Mare)", "kind": "clergy" },
+    { "id": "reader", "label": "Reader / Lector", "kind": "lay-minister" },
+    { "id": "intercessor", "label": "Intercessor (Jane Hope)", "kind": "lay-minister" },
+    { "id": "servers", "label": "Servers / Subdeacon / MC", "kind": "lay-minister" },
+    { "id": "lay_ministers", "label": "Lay Administrants of Communion", "kind": "lay-minister" },
+    { "id": "choir", "label": "The Cathedral Quartet / Choir", "kind": "musician" },
+    { "id": "organist", "label": "Organist (Neil Robertson)", "kind": "musician" },
+    { "id": "assembly", "label": "The assembly / congregation", "kind": "assembly" }
+  ],
+
+  "stations": [
+    { "id": "nave", "label": "Nave (where the assembly sits)" },
+    { "id": "chancel", "label": "Chancel / choir" },
+    { "id": "altar", "label": "Altar / Holy Table" },
+    { "id": "ambo", "label": "Ambo / lectern (readings & preaching)" },
+    { "id": "gospel_station", "label": "Gospel Station (Gospel read amid the assembly)" },
+    { "id": "presider_chair", "label": "Presider's chair" },
+    { "id": "west_alcove", "label": "West alcove (healing prayer during communion)" },
+    { "id": "door", "label": "West door / entrance (procession start & end)" }
+  ],
+
+  "events": [
+    { "seq": 1, "section": "gathering", "unit": "Prelude / Gathering music", "action": "music", "mode": "instrumental",
+      "actor": ["organist"], "assembly_posture": "sit", "station": "chancel",
+      "content": { "type": "none" },
+      "provenance": "inferred", "convention": "Universal custom: organ covers the gathering before the entrance; not printed in this missal.", "missal_source": null,
+      "notes": "The missal has no prelude line, but a Choral Eucharist gathers under music." },
+
+    { "seq": 2, "section": "gathering", "unit": "Entrance Procession", "action": "process", "mode": "physical",
+      "actor": ["servers", "deacon", "preacher", "presider"], "assembly_posture": "stand", "station": "door",
+      "content": { "type": "none" },
+      "provenance": "inferred", "convention": "BAS: the ministers enter in procession during the opening hymn; the assembly stands. Order (cross/servers → clergy → presider) is customary.", "missal_source": null,
+      "notes": "Decompressed: the printed 'Processional Hymn' presupposes a procession the text never describes." },
+
+    { "seq": 3, "section": "gathering", "unit": "Processional Hymn", "action": "sing", "mode": "sung",
+      "actor": ["assembly", "choir", "organist"], "assembly_posture": "stand", "station": "nave",
+      "content": { "type": "pointer", "pointer": { "kind": "hymn", "ref": "CP 425", "source": "Common Praise", "title": "Joyful, Joyful, We Adore Thee" } },
+      "provenance": "pointer", "missal_source": "page-03",
+      "notes": "Missal prints only title + number; the words/tune live in Common Praise." },
+
+    { "seq": 4, "section": "gathering", "unit": "Greeting", "action": "greet", "mode": "spoken",
+      "actor": ["presider", "assembly"], "assembly_posture": "stand", "station": "presider_chair",
+      "content": { "type": "dialogue", "dialogue": [
+        { "by": "presider", "says": "The grace of our Lord Jesus Christ… be with you all." },
+        { "by": "assembly", "says": "And also with you." } ] },
+      "provenance": "inferred", "convention": "BAS opening dialogue; the exact versicle is standard even where this missal compresses it.", "missal_source": "page-03",
+      "notes": "Apostolic greeting; dialogic primitive." },
+
+    { "seq": 5, "section": "gathering", "unit": "Land Acknowledgement", "action": "say", "mode": "spoken",
+      "actor": ["presider"], "assembly_posture": "stand", "station": "presider_chair",
+      "content": { "type": "text", "text": "Worship on the traditional, ancestral, and unceded territory of the xʷməθkʷəy̓əm (Musqueam), Sḵwx̱wú7mesh (Squamish), and Səl̓ílwətaʔɬ (Tsleil-Waututh) Nations." },
+      "provenance": "printed", "missal_source": "page-03" },
+
+    { "seq": 6, "section": "gathering", "unit": "Gloria", "action": "sing", "mode": "sung",
+      "actor": ["assembly", "choir", "organist"], "assembly_posture": "stand", "station": "nave",
+      "content": { "type": "pointer", "pointer": { "kind": "setting", "ref": "CP 686", "source": "Common Praise", "title": "Glory to God — New Plainsong, David Hurd" } },
+      "provenance": "pointer", "missal_source": "page-04",
+      "notes": "Sung ordinary; text printed, music by pointer to the Hurd setting." },
+
+    { "seq": 7, "section": "gathering", "unit": "The Collect of the Day", "action": "pray", "mode": "spoken",
+      "actor": ["presider"], "assembly_posture": "stand", "station": "presider_chair",
+      "content": { "type": "text", "text": "Almighty God, your Son Jesus Christ has taught us that what we do for the least of your children we do also for him…" },
+      "provenance": "printed", "missal_source": "page-04",
+      "notes": "The proper collect. 'Let us pray' + kept silence precede it (printed rubric)." },
+
+    { "seq": 8, "section": "gathering", "unit": "Collect — silence", "action": "silence", "mode": "silent",
+      "actor": ["assembly"], "assembly_posture": "stand", "station": "nave",
+      "content": { "type": "none" },
+      "provenance": "printed", "missal_source": "page-04", "notes": "'Silence is kept' — printed rubric; duration unspecified (a pacing decompression target)." },
+
+    { "seq": 9, "section": "word", "unit": "First Reading", "action": "proclaim", "mode": "spoken",
+      "actor": ["reader"], "assembly_posture": "sit", "station": "ambo",
+      "content": { "type": "pointer", "pointer": { "kind": "lection", "ref": "Genesis 24:34-38, 42-49, 58-67", "source": "RCL Track 1" } },
+      "provenance": "pointer", "missal_source": "page-05",
+      "notes": "Assembly sits for the readings (inferred posture). Concludes 'Word of God, word of life. / Thanks be to God.' (printed dialogue)." },
+
+    { "seq": 10, "section": "word", "unit": "Psalm 45:11-18", "action": "sing", "mode": "sung",
+      "actor": ["assembly", "choir"], "assembly_posture": "sit", "station": "nave",
+      "content": { "type": "pointer", "pointer": { "kind": "psalm", "ref": "Psalm 45:11-18", "source": "Gradual Psalms for the RCL (ed. Bruce E. Ford)", "title": "Refrain: 'Consider and listen closely for the voice of God'" } },
+      "provenance": "printed", "missal_source": "page-05", "notes": "Refrain + pointing printed; sung responsorially." },
+
+    { "seq": 11, "section": "word", "unit": "Second Reading", "action": "proclaim", "mode": "spoken",
+      "actor": ["reader"], "assembly_posture": "sit", "station": "ambo",
+      "content": { "type": "pointer", "pointer": { "kind": "lection", "ref": "Romans 7:15-25a", "source": "RCL" } },
+      "provenance": "pointer", "missal_source": "page-05",
+      "notes": "Concludes 'Hear what the Spirit is saying to the churches. / Thanks be to God.'" },
+
+    { "seq": 12, "section": "word", "unit": "Sequence Hymn", "action": "sing", "mode": "sung",
+      "actor": ["assembly", "choir", "organist"], "assembly_posture": "stand", "station": "nave",
+      "content": { "type": "pointer", "pointer": { "kind": "hymn", "ref": "CP 561", "source": "Common Praise", "title": "Lord, Your Word Shall Guide Us" } },
+      "provenance": "pointer", "missal_source": "page-06",
+      "notes": "Assembly stands for the Gospel; the sequence hymn covers the Gospel procession." },
+
+    { "seq": 13, "section": "word", "unit": "Gospel Procession", "action": "process", "mode": "physical",
+      "actor": ["deacon", "servers"], "assembly_posture": "stand", "station": "gospel_station",
+      "content": { "type": "none" },
+      "provenance": "inferred", "convention": "BAS/Western custom: the Gospel book is carried into the midst of the assembly; the back page names a 'Gospel Station', confirming the movement.", "missal_source": "page-12",
+      "notes": "Decompressed from the 'Gospel Station' role on the back page." },
+
+    { "seq": 14, "section": "word", "unit": "The Holy Gospel", "action": "proclaim", "mode": "spoken",
+      "actor": ["deacon"], "assembly_posture": "stand", "station": "gospel_station",
+      "content": { "type": "pointer", "pointer": { "kind": "lection", "ref": "Matthew 11:16-19, 25-30", "source": "RCL", "title": "'Come to me, all you that are weary…'" } },
+      "provenance": "pointer", "missal_source": "page-06",
+      "notes": "Framed by 'The Lord be with you' / Gospel acclamations (dialogic, printed in compressed form)." },
+
+    { "seq": 15, "section": "word", "unit": "The Sermon", "action": "preach", "mode": "spoken",
+      "actor": ["preacher"], "assembly_posture": "sit", "station": "ambo",
+      "content": { "type": "none" },
+      "provenance": "printed", "missal_source": "page-06",
+      "notes": "Content not in the missal (the maximal compression: an entire sermon reduced to one line). Assembly sits (inferred)." },
+
+    { "seq": 16, "section": "word", "unit": "The Apostles' Creed", "action": "say", "mode": "spoken",
+      "actor": ["assembly", "presider"], "assembly_posture": "stand", "station": "nave",
+      "content": { "type": "pointer", "pointer": { "kind": "prayer", "ref": "Apostles' Creed", "source": "BAS" } },
+      "provenance": "printed", "missal_source": "page-06", "notes": "Said by all; standing (inferred posture)." },
+
+    { "seq": 17, "section": "word", "unit": "The Prayers of the People", "action": "pray", "mode": "spoken",
+      "actor": ["intercessor", "assembly"], "assembly_posture": "kneel", "station": "nave",
+      "content": { "type": "text", "text": "Intercessions with congregational responses." },
+      "provenance": "printed", "missal_source": "page-06",
+      "notes": "Posture (kneel or stand) is a parish custom — inferred; the missal does not print it." },
+
+    { "seq": 18, "section": "word", "unit": "Confession and Absolution", "action": "pray", "mode": "spoken",
+      "actor": ["assembly", "presider"], "assembly_posture": "kneel", "station": "nave",
+      "content": { "type": "text", "text": "…We confess that we have sinned against you… in thought, and word, and deed… (All) … Almighty God have mercy upon you, pardon and deliver you… (Presider)." },
+      "provenance": "printed", "missal_source": "page-07",
+      "notes": "'Silence may be kept' (printed). Absolution pronounced by the presider." },
+
+    { "seq": 19, "section": "word", "unit": "The Peace", "action": "exchange", "mode": "physical",
+      "actor": ["presider", "assembly"], "assembly_posture": "stand", "station": "nave",
+      "content": { "type": "dialogue", "dialogue": [
+        { "by": "presider", "says": "The peace of the Lord be always with you." },
+        { "by": "assembly", "says": "And also with you." } ] },
+      "provenance": "printed", "missal_source": "page-07",
+      "notes": "'All may exchange a sign of peace' — printed rubric licenses movement/greeting among the assembly (the physical exchange itself is unscripted)." },
+
+    { "seq": 20, "section": "eucharist", "unit": "The Offertory", "action": "offer", "mode": "physical",
+      "actor": ["servers", "assembly"], "assembly_posture": "sit", "station": "altar",
+      "content": { "type": "text", "text": "Gifts of bread and wine + monetary offering presented; the altar is set." },
+      "provenance": "printed", "missal_source": "page-07",
+      "notes": "The offertory plate is passed / gifts brought forward (movement inferred); a stewardship note is printed." },
+
+    { "seq": 21, "section": "eucharist", "unit": "Offertory Hymn", "action": "sing", "mode": "sung",
+      "actor": ["assembly", "choir", "organist"], "assembly_posture": "stand", "station": "nave",
+      "content": { "type": "pointer", "pointer": { "kind": "hymn", "ref": "CP 374", "source": "Common Praise", "title": "Alleluia! Sing to Jesus (Hyfrydol)" } },
+      "provenance": "pointer", "missal_source": "page-07" },
+
+    { "seq": 22, "section": "eucharist", "unit": "Prayer over the Gifts", "action": "pray", "mode": "spoken",
+      "actor": ["presider"], "assembly_posture": "stand", "station": "altar",
+      "content": { "type": "text", "text": "God of heaven and earth, receive our sacrifice of praise, and strengthen us… through our Saviour Jesus Christ. Amen." },
+      "provenance": "printed", "missal_source": "page-08" },
+
+    { "seq": 23, "section": "eucharist", "unit": "Great Thanksgiving — Sursum corda", "action": "acclaim", "mode": "spoken",
+      "actor": ["presider", "assembly"], "assembly_posture": "stand", "station": "altar",
+      "content": { "type": "dialogue", "dialogue": [
+        { "by": "presider", "says": "The Lord be with you." }, { "by": "assembly", "says": "And also with you." },
+        { "by": "presider", "says": "Lift up your hearts." }, { "by": "assembly", "says": "We lift them to the Lord." },
+        { "by": "presider", "says": "Let us give thanks to the Lord our God." }, { "by": "assembly", "says": "It is right to give our thanks and praise." } ] },
+      "provenance": "printed", "missal_source": "page-08",
+      "notes": "Opens Eucharistic Prayer 3 (Enriching Our Worship). Canonical dialogic primitive." },
+
+    { "seq": 24, "section": "eucharist", "unit": "Preface", "action": "pray", "mode": "spoken",
+      "actor": ["presider"], "assembly_posture": "stand", "station": "altar",
+      "content": { "type": "text", "text": "…And so, as the morning stars sing your praises… we join the heavenly beings and all creation as we shout with joy:" },
+      "provenance": "printed", "missal_source": "page-08" },
+
+    { "seq": 25, "section": "eucharist", "unit": "Sanctus & Benedictus", "action": "sing", "mode": "sung",
+      "actor": ["assembly", "choir"], "assembly_posture": "stand", "station": "nave",
+      "content": { "type": "pointer", "pointer": { "kind": "setting", "ref": "Missa super Dixit Maria", "source": "Hans Leo Hassler (1564–1612)", "title": "Sanctus" } },
+      "provenance": "pointer", "missal_source": "page-08",
+      "notes": "Renaissance polyphonic setting — carried by the choir; the ordinary is thus split across idioms." },
+
+    { "seq": 26, "section": "eucharist", "unit": "Institution Narrative & Epiclesis", "action": "pray", "mode": "spoken",
+      "actor": ["presider"], "assembly_posture": "kneel", "station": "altar",
+      "content": { "type": "text", "text": "The words of institution over bread and wine; invocation of the Spirit." },
+      "provenance": "inferred", "convention": "The body of Eucharistic Prayer 3 continues here (Enriching Our Worship); the missal compresses the prayer's core, and the manual acts (taking bread/cup, elevations) are unprinted ceremonial.", "missal_source": "page-08",
+      "notes": "Assembly commonly kneels from the Sanctus (parish custom, inferred)." },
+
+    { "seq": 27, "section": "eucharist", "unit": "Memorial Acclamation & Great Amen", "action": "acclaim", "mode": "sung",
+      "actor": ["assembly", "choir"], "assembly_posture": "kneel", "station": "nave",
+      "content": { "type": "pointer", "pointer": { "kind": "setting", "ref": "Memorial Acclamation & Amen", "source": "Neil Cockburn" } },
+      "provenance": "pointer", "missal_source": "page-09" },
+
+    { "seq": 28, "section": "eucharist", "unit": "The Lord's Prayer", "action": "sing", "mode": "sung",
+      "actor": ["assembly", "presider"], "assembly_posture": "kneel", "station": "nave",
+      "content": { "type": "pointer", "pointer": { "kind": "setting", "ref": "Lord's Prayer", "source": "McNeil Robinson" } },
+      "provenance": "pointer", "missal_source": "page-09" },
+
+    { "seq": 29, "section": "eucharist", "unit": "The Breaking of the Bread (Fraction)", "action": "gesture", "mode": "physical",
+      "actor": ["presider"], "assembly_posture": "kneel", "station": "altar",
+      "content": { "type": "dialogue", "dialogue": [
+        { "by": "presider", "says": "Behold the mystery of your salvation laid out before you. / The gifts of God for the people of God." },
+        { "by": "assembly", "says": "Thanks be to God." } ] },
+      "provenance": "printed", "missal_source": "page-10",
+      "notes": "The physical breaking of the bread (the gesture) is unprinted; only the accompanying words are. A key ceremonial decompression." },
+
+    { "seq": 30, "section": "eucharist", "unit": "Fraction Anthem — Lamb of God", "action": "sing", "mode": "sung",
+      "actor": ["assembly", "choir"], "assembly_posture": "kneel", "station": "nave",
+      "content": { "type": "pointer", "pointer": { "kind": "setting", "ref": "CP 690", "source": "Common Praise", "title": "Lamb of God — New Plainsong, David Hurd" } },
+      "provenance": "pointer", "missal_source": "page-10" },
+
+    { "seq": 31, "section": "eucharist", "unit": "The Communion — administration", "action": "distribute", "mode": "physical",
+      "actor": ["presider", "deacon", "lay_ministers", "assembly"], "assembly_posture": "process", "station": "altar",
+      "content": { "type": "text", "text": "Approach the altar, hands extended for the Bread; guide the chalice to your lips (no intinction, for public health). A blessing is available; healing prayer is offered in the west alcove." },
+      "provenance": "printed", "missal_source": "page-10",
+      "notes": "Rare case where the missal DOES decompress the choreography (a full rubric of movement) — because visitors need it. Contrast with the unprinted processions elsewhere." },
+
+    { "seq": 32, "section": "eucharist", "unit": "Communion Motet", "action": "sing", "mode": "sung",
+      "actor": ["choir"], "assembly_posture": "process", "station": "chancel",
+      "content": { "type": "pointer", "pointer": { "kind": "setting", "ref": "If Ye Love Me", "source": "Thomas Tallis (1505?–1585)" } },
+      "provenance": "pointer", "missal_source": "page-10" },
+
+    { "seq": 33, "section": "eucharist", "unit": "Communion Hymn", "action": "sing", "mode": "sung",
+      "actor": ["assembly", "organist"], "assembly_posture": "process", "station": "nave",
+      "content": { "type": "pointer", "pointer": { "kind": "hymn", "ref": "CP 60", "source": "Common Praise", "title": "I Come with Joy (Land of Rest)" } },
+      "provenance": "pointer", "missal_source": "page-10" },
+
+    { "seq": 34, "section": "eucharist", "unit": "Prayer after Communion", "action": "pray", "mode": "spoken",
+      "actor": ["presider", "assembly"], "assembly_posture": "stand", "station": "presider_chair",
+      "content": { "type": "none" },
+      "provenance": "printed", "missal_source": "page-11" },
+
+    { "seq": 35, "section": "eucharist", "unit": "The Doxology", "action": "say", "mode": "spoken",
+      "actor": ["assembly"], "assembly_posture": "stand", "station": "nave",
+      "content": { "type": "text", "text": "Glory to God, whose power, working in us, can do infinitely more than we can ask or imagine…" },
+      "provenance": "printed", "missal_source": "page-11" },
+
+    { "seq": 36, "section": "sending", "unit": "Commissioning of Lay Ministers", "action": "say", "mode": "spoken",
+      "actor": ["presider", "lay_ministers"], "assembly_posture": "stand", "station": "chancel",
+      "content": { "type": "text", "text": "Lay administrants sent to carry communion to those absent / sick." },
+      "provenance": "printed", "missal_source": "page-11",
+      "notes": "Occasional unit — present this week; not a fixed part of every Eucharist." },
+
+    { "seq": 37, "section": "sending", "unit": "The Blessing", "action": "gesture", "mode": "spoken",
+      "actor": ["presider"], "assembly_posture": "stand", "station": "presider_chair",
+      "content": { "type": "none" },
+      "provenance": "printed", "missal_source": "page-11",
+      "notes": "The presider makes the sign of the cross over the assembly (gesture inferred; only 'The Blessing' is printed)." },
+
+    { "seq": 38, "section": "sending", "unit": "Closing Hymn", "action": "sing", "mode": "sung",
+      "actor": ["assembly", "choir", "organist"], "assembly_posture": "stand", "station": "nave",
+      "content": { "type": "pointer", "pointer": { "kind": "hymn", "ref": "CP 584", "source": "Common Praise", "title": "The Church of Christ in Every Age" } },
+      "provenance": "pointer", "missal_source": "page-11" },
+
+    { "seq": 39, "section": "sending", "unit": "Recessional Procession", "action": "process", "mode": "physical",
+      "actor": ["servers", "deacon", "preacher", "presider"], "assembly_posture": "stand", "station": "door",
+      "content": { "type": "none" },
+      "provenance": "inferred", "convention": "The ministers recess during the closing hymn; assembly stands. Not printed.", "missal_source": null },
+
+    { "seq": 40, "section": "sending", "unit": "The Dismissal", "action": "dismiss", "mode": "spoken",
+      "actor": ["deacon", "assembly"], "assembly_posture": "stand", "station": "door",
+      "content": { "type": "dialogue", "dialogue": [
+        { "by": "deacon", "says": "Go in peace to love and serve the Lord." },
+        { "by": "assembly", "says": "Thanks be to God." } ] },
+      "provenance": "printed", "missal_source": "page-11",
+      "notes": "Dismissal customarily by the deacon (role inferred; missal prints the text)." },
+
+    { "seq": 41, "section": "sending", "unit": "Postlude", "action": "music", "mode": "instrumental",
+      "actor": ["organist"], "assembly_posture": "sit", "station": "chancel",
+      "content": { "type": "pointer", "pointer": { "kind": "setting", "ref": "Finale from Suite 3 for Organ", "source": "Léon Boëllmann (1862–1897)" } },
+      "provenance": "printed", "missal_source": "page-11" }
+  ]
+}

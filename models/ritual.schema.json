@@ -1,0 +1,161 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://cleanvibe.local/schemas/ritual.schema.json",
+  "title": "Ritual",
+  "description": "A decompressed model of a liturgy: the enacted service a missal encodes. A missal is a lossy, high-compression cue-sheet; this schema is the target it decompresses into. Every event carries a `provenance` marking whether it was printed in the missal, is a pointer the missal prints (resolved elsewhere), or was inferred from convention (never printed, but it happens).",
+  "type": "object",
+  "required": ["id", "meta", "roles", "stations", "events"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string", "description": "Stable slug, e.g. 'ccc-2026-07-05-proper-14'." },
+    "meta": {
+      "type": "object",
+      "required": ["title", "rite", "date", "source_missal"],
+      "additionalProperties": true,
+      "properties": {
+        "title": { "type": "string" },
+        "rite": { "type": "string", "description": "e.g. 'Choral Eucharist (BAS tradition)'." },
+        "tradition": { "type": "string", "description": "e.g. 'Anglican Church of Canada'." },
+        "date": { "type": "string", "description": "ISO date of the service." },
+        "calendar": {
+          "type": "object",
+          "description": "Where in the liturgical calendar. The 'proper' label is itself a compressed pointer that only resolves via a calendar table the missal assumes.",
+          "additionalProperties": true,
+          "properties": {
+            "season": { "type": "string" },
+            "proper_local": { "type": "string", "description": "The label as printed, e.g. 'Proper 14' (Canadian BAS numbering)." },
+            "proper_rcl": { "type": "string", "description": "Equivalent in US/Episcopal RCL numbering, if different, e.g. 'Proper 9'." },
+            "lectionary_year": { "type": "string" },
+            "track": { "type": "string" }
+          }
+        },
+        "ministers": { "type": "object", "additionalProperties": { "type": "string" },
+          "description": "role -> name(s), from the missal." },
+        "music_settings": { "type": "array", "items": { "type": "string" },
+          "description": "Named settings for the sung ordinary etc." },
+        "source_missal": {
+          "type": "object",
+          "description": "Provenance of the source document(s) this model was decompressed from.",
+          "additionalProperties": true,
+          "properties": {
+            "folder": { "type": "string" },
+            "pages": { "type": "integer" },
+            "official_pdf": { "type": "string" }
+          }
+        }
+      }
+    },
+    "roles": {
+      "type": "array",
+      "description": "The liturgical actors present. `id` is referenced by events.",
+      "items": {
+        "type": "object",
+        "required": ["id", "label"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string" },
+          "label": { "type": "string" },
+          "kind": { "type": "string", "enum": ["clergy", "lay-minister", "musician", "assembly", "other"] }
+        }
+      }
+    },
+    "stations": {
+      "type": "array",
+      "description": "Named locations in the worship space. The missal's back-page 'stations' (Gospel Station, Presider Station, …) imply these; most are otherwise unprinted.",
+      "items": {
+        "type": "object",
+        "required": ["id", "label"],
+        "additionalProperties": false,
+        "properties": {
+          "id": { "type": "string" },
+          "label": { "type": "string" }
+        }
+      }
+    },
+    "events": {
+      "type": "array",
+      "description": "The ordered sequence of ritual events. This is the ritual.",
+      "items": { "$ref": "#/$defs/event" }
+    }
+  },
+  "$defs": {
+    "event": {
+      "type": "object",
+      "required": ["seq", "section", "unit", "action", "provenance"],
+      "additionalProperties": false,
+      "properties": {
+        "seq": { "type": "integer", "description": "Order in the enacted service (1-based)." },
+        "section": {
+          "type": "string",
+          "enum": ["gathering", "word", "eucharist", "sending"],
+          "description": "The fourfold ecumenical ordo movement."
+        },
+        "unit": { "type": "string", "description": "Liturgical unit name, e.g. 'Processional Hymn', 'The Peace'." },
+        "action": {
+          "type": "string",
+          "enum": ["process", "posture", "greet", "sing", "say", "pray", "proclaim", "preach",
+                   "acclaim", "gesture", "silence", "music", "exchange", "offer", "distribute", "dismiss"],
+          "description": "Controlled verb for what physically/verbally happens."
+        },
+        "mode": {
+          "type": "string",
+          "enum": ["spoken", "sung", "silent", "instrumental", "physical"],
+          "description": "How it is carried."
+        },
+        "actor": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Role ids performing this event."
+        },
+        "assembly_posture": {
+          "type": ["string", "null"],
+          "enum": ["stand", "sit", "kneel", "process", "bow", null],
+          "description": "Posture of the whole assembly during this event. Almost never printed; a primary decompression target."
+        },
+        "content": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "type": { "type": "string", "enum": ["text", "pointer", "dialogue", "none"] },
+            "text": { "type": "string", "description": "Literal text, or an incipit." },
+            "dialogue": {
+              "type": "array",
+              "description": "Versicle/response pairs for dialogic units.",
+              "items": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "by": { "type": "string" },
+                  "says": { "type": "string" }
+                }
+              }
+            },
+            "pointer": {
+              "type": "object",
+              "description": "A reference the missal prints whose target lives in an external book.",
+              "additionalProperties": false,
+              "properties": {
+                "kind": { "type": "string", "enum": ["hymn", "lection", "psalm", "setting", "prayer", "collect"] },
+                "ref": { "type": "string" },
+                "source": { "type": "string", "description": "External book, e.g. 'Common Praise', 'RCL', 'BAS'." },
+                "title": { "type": "string" }
+              }
+            }
+          }
+        },
+        "station": { "type": ["string", "null"], "description": "Station id where this happens." },
+        "provenance": {
+          "type": "string",
+          "enum": ["printed", "pointer", "inferred"],
+          "description": "printed = literal text/rubric in the missal; pointer = a reference the missal prints, resolved from an external book; inferred = NOT in the missal, supplied by decompressing convention."
+        },
+        "convention": {
+          "type": "string",
+          "description": "When provenance='inferred', the basis for the inference (e.g. 'BAS General Rubrics', 'universal Western custom')."
+        },
+        "missal_source": { "type": ["string", "null"], "description": "Where in the source it appears, e.g. 'page-03'; null when inferred." },
+        "notes": { "type": "string" }
+      }
+    }
+  }
+}

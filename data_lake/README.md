@@ -17,8 +17,10 @@ world knowledge the document assumes.
 
 ## Contents
 
-- `bulletin-2026-07-05-proper-14/` — a complete Choral Eucharist missal from Christ
-  Church Cathedral, Vancouver (Proper 14, July 5 2026): 12 photographed pages, the
-  official published PDFs (bulletin, readings, evening prayer), the cover-QR scan, and
+- `missal-2026-07-05-proper-14/` — one complete missal: the Choral Eucharist from Christ
+  Church Cathedral, Vancouver (Proper 14, July 5 2026). The entire 12-page order of
+  service is a single missal. Holds the 12 photographed pages, the official published
+  PDFs (the missal itself — which the church labels a "bulletin" — plus readings and
+  evening prayer), the cover-QR scan, and
   a first-pass structural model. See that folder's `index.md` for the liturgy outline,
   ministers, sources, and modelling notes.
