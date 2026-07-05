@@ -43,8 +43,13 @@ def content_html(c, roles):
         p = c.get("pointer", {})
         bits = [b for b in [p.get("title"), p.get("ref"), p.get("source")] if b]
         kind = p.get("kind", "ref")
-        return (f'<div class="pointer">▸ <span class="pk">{esc(kind)}</span> '
-                f'{esc(" · ".join(bits))}</div>')
+        out = (f'<div class="pointer">▸ <span class="pk">{esc(kind)}</span> '
+               f'{esc(" · ".join(bits))}</div>')
+        # full text decompressed from the QR-linked source, shown under the citation
+        if c.get("text"):
+            out += (f'<div class="fulltext"><span class="ft-tag">full text (via QR)</span>'
+                    f'{esc(c["text"])}</div>')
+        return out
     return ""
 
 def render(data):
@@ -117,6 +122,10 @@ def render(data):
  .text {{ margin-top:2px; }}
  .pointer {{ margin-top:2px; color:#1c5b8c; }}
  .pk {{ font-variant:small-caps; font-size:8.5pt; color:#555; }}
+ .fulltext {{ margin-top:4px; padding:5px 9px; background:#eef4f8; border-left:3px solid #1c5b8c;
+             color:#233; font-size:9pt; line-height:1.35; }}
+ .ft-tag {{ display:block; font-variant:small-caps; font-size:7.5pt; letter-spacing:.5px;
+           color:#1c5b8c; margin-bottom:2px; }}
  .dialogue {{ margin-top:2px; }}
  .vr {{ display:flex; gap:8px; margin:1px 0; }}
  .vr .by {{ min-width:64px; font-style:italic; color:#555; font-size:8.5pt; }}
