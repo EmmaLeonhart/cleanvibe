@@ -113,22 +113,34 @@ two-track structure: a stable frame with slots the day's Proper is plugged into.
 <div class="item"><span class="lead">The Dismissal.</span> <span class="rubric">&mdash; Thanks be to God.</span></div>
 <div class="item"><span class="lead">Postlude.</span> Finale from <i>Suite Gothique</i> / Suite 3 for Organ &mdash; L&eacute;on Bo&euml;llmann (1862&ndash;1897).</div>
 
-<h2>3 &middot; Structural notes &amp; open questions</h2>
+<h2>3 &middot; Modelling notes &mdash; what the missal compresses</h2>
+<p>A missal is a <b>lossy, high-compression encoding of a ritual</b>: it records only enough
+to cue people who already hold the conventions. Modelling it means <i>decompressing</i> &mdash;
+recovering the enacted service the document assumes. These notes flag where compression happens
+and what the decompression key is.</p>
 
-<div class="note"><span class="tag">DISCREPANCY</span>
-<b>Proper numbering (Canada vs. RCL/Episcopal).</b> The bulletin labels the day <b>&ldquo;Proper 14&rdquo;</b>,
-but the readings (Gen 24; Ps 45; Rom 7; Matt 11:16&ndash;30) are the Revised Common Lectionary set
-for the Sunday nearest July 6 &mdash; which the Episcopal/US RCL numbers <b>&ldquo;Proper 9&rdquo;</b>. The Canadian
-Anglican <i>BAS</i> uses its own Proper numbering offset from the American one, so the same
-Sunday carries two different &ldquo;Proper&rdquo; numbers. <i>To verify against BAS tables &mdash; but this
-print-label-vs-lectionary offset looks like exactly the kind of content/context mismatch worth logging.</i></p></div>
+<div class="note"><span class="tag">DECOMPRESSION TARGET</span>
+<b>What the missal omits (and the ritual has).</b> None of this is printed, yet all of it happens:
+<i>posture</i> (when the assembly stands / sits / kneels), <i>movement</i> (processions &mdash; entrance,
+Gospel, offertory, communion; who goes where), <i>ceremonial action</i> (censing, the fraction gesture,
+elevations, the exchange of peace), <i>timing &amp; pacing</i> (length of silences, when music covers action),
+<i>spatial staging</i> (the "stations" the back page names &mdash; Gospel Station, Presider Station &mdash; imply
+locations in the building), and <i>vesture / objects</i>. Decompressing this missal = filling these slots
+from Anglican/BAS convention. This is the core modelling work.</p></div>
 
-<div class="note"><span class="tag">DISCREPANCY</span>
-<b>Print vs. online.</b> The cover QR resolves to
-<span class="meta">thecathedral.ca/&hellip;/july-5-proper-14</span>, but that page is JavaScript-rendered;
-the saved HTML captured only the shell (its &lt;title&gt; came through as &ldquo;Facebook Icon&rdquo;), not the
-online order of service. A true print-vs-online diff needs the page rendered in a real browser
-&mdash; a concrete next step (Chromium is available in this environment).</p></div>
+<div class="note"><span class="tag">CONTEXT KEY</span>
+<b>Pointers that only resolve with external tables.</b> &ldquo;Proper 14&rdquo; is a single token that
+expands to a whole set of propers (collect + three lessons + psalm) &mdash; but <i>only</i> via the
+Canadian <i>BAS</i> calendar the missal assumes and does not include. (The same Sunday is numbered
+&ldquo;Proper 9&rdquo; in the US/Episcopal RCL &mdash; same readings, different label.) Likewise &ldquo;CP 425&rdquo; is a
+pointer into <i>Common Praise</i>, and the sung settings name composers, not notes. A large part of the
+missal is <i>references</i> whose targets live in external books &mdash; the model needs those lookup tables.</p></div>
+
+<div class="note"><span class="tag">COMPRESSION LEVELS</span>
+<b>The same content at two resolutions.</b> The lections appear twice: the bulletin prints only
+citations (<span class="meta">Genesis 24:34-38&hellip;</span>), while the separate Readings PDF carries the
+full text. That pairing is a worked example of the compression axis this project models &mdash; citation
+(pointer) vs. full text (expanded) &mdash; the same ritual content encoded at two levels.</p></div>
 
 <div class="note"><span class="tag">LECTIONARY</span>
 <b>Year A, Track 1.</b> July 2026 falls in RCL <b>Year A</b> (Matthew), which the Gospel confirms.

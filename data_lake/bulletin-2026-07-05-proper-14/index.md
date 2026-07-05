@@ -66,9 +66,11 @@ Cathedral's official download PDFs (hosted on CloudFront). Pulled directly:
   (Sung Evening Prayer, July 5 2026) — useful as a contrast case.
 
 **Print vs. online:** the printed handout and the official PDF are the same 12-page
-document. Any print/online discrepancy is therefore subtle (e.g. a late edit after the
-"Final Copy" was uploaded, or the standalone Readings PDF differing from the in-bulletin
-citations) rather than a wholesale difference — a good place to look for the "bug".
+document — so for modelling purposes they are one source (the missal), just captured
+two ways. The standalone Readings PDF is a *second, lower-compression* encoding of the
+same lections: where the bulletin gives only citations (`Genesis 24:34-38…`), the
+Readings PDF carries the full text. That pairing is itself useful — it shows two
+compression levels of the same ritual content side by side.
 
 ## Provenance / source files
 
