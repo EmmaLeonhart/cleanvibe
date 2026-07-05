@@ -54,25 +54,45 @@ Elizabeth Maina, James Conklin
 *(Names transcribed from a phone photo; spellings may be imperfect — verify against the
 saved webpage or Cathedral records before treating as authoritative.)*
 
-## Online sources (official PDFs)
+## The QR is part of the missal (it holds the full contents)
 
-The QR/webpage is **not** the missal — it is an index page that links to the
-Cathedral's official download PDFs (hosted on CloudFront). Pulled directly:
+**This is one missal in two forms.** The photographed pages are the cued, compressed
+form: they name the readings and speeches only by short citation (`Genesis 24:34-38…`).
+The **QR code uploaded first** (`qr-scan-cover.png`, the cover "SCAN ME" sticker) is the
+link to the **online full contents** — the full text of the readings and speeches that
+go into this same missal. Scanning it is how a worshipper gets the words the printed page
+leaves out.
 
-- `official-missal-proper-14.pdf` — **the official order of service, 12 pages** (the
-  church's own file is titled "Bulletin… Final Copy.pdf").
-  This is the online twin of the 12 photographed pages; its text matches the photos
-  (confirming the transcription above). Uploaded by the Cathedral 2026-06-30.
-- `official-readings-proper-14.pdf` — 8 pages: full text of the readings, psalm, and Gospel.
-- `official-sung-evening-prayer.pdf` — 8 pages: a *different* service the same day
-  (Sung Evening Prayer, July 5 2026) — useful as a contrast case.
+So the QR is not an add-on; it is the decompression pointer built into the missal:
 
-**Print vs. online:** the printed handout and the official PDF are the same 12-page
-document — so for modelling purposes they are one source (the missal), just captured
-two ways. The standalone Readings PDF is a *second, lower-compression* encoding of the
-same lections: where the missal gives only citations (`Genesis 24:34-38…`), the
-Readings PDF carries the full text. That pairing is itself useful — it shows two
-compression levels of the same ritual content side by side.
+- `qr-scan-cover.png` QR → `hovqr.me/4d624a79` → the Cathedral page for this service, which
+  carries the **full readings/speeches** as `official-readings-proper-14.pdf` (8 pages of
+  full lection text) alongside the official order of service.
+- `official-missal-proper-14.pdf` — the official 12-page order of service (church file
+  "Bulletin… Final Copy.pdf"); its text matches the photographed pages.
+- `official-readings-proper-14.pdf` — **the contents the cover QR leads to**: full text of
+  the readings, psalm, and Gospel that the printed missal only cites.
+
+`official-sung-evening-prayer.pdf` is a *separate service* (Sung Evening Prayer, same
+evening) that also happens to sit on that page — **not part of this missal.** Kept in the
+folder for reference only.
+
+## QR codes in the missal (all decoded)
+
+The missal is a hub of outward pointers. Every QR on the pages, decoded from the photos:
+
+| Page | QR → resolves to | What it is |
+|---|---|---|
+| Cover (p.1) | `hovqr.me/4d624a79` → `…/pages/july-5-proper-14` | **the full readings/speeches contents of this missal** |
+| Welcome (p.2) | Google Form | "Cathedral Connection" newcomer form |
+| Back (p.12) | `hovqr.me/818f61cc` → `…/pages/prayer-cycles` | **the Prayers of the People** — the actual intercessions, not printed |
+| Back (p.12) | `…/newsletters/latest` | the Chronicle newsletter |
+| Back (p.12) | `tithe.ly/…give-one-time/169356` | online giving |
+
+Note the two content-bearing QRs: the cover QR gives the **readings/speeches**, and the
+back QR gives the **Prayers of the People**. Both are ritual content the printed missal
+externalizes rather than prints — the clearest evidence of how compressed the printed
+document is.
 
 ## Provenance / source files
 
