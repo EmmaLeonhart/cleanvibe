@@ -14,18 +14,32 @@ folder holds the low-compression target (the enacted service, made explicit).
   - `pointer` — a reference the missal prints (hymn no., lection citation, named setting)
     whose target lives in an external book;
   - `inferred` — **not in the missal at all**, supplied by decompressing convention
-    (with a `convention` field naming the basis).
-- `ccc-2026-07-05-proper-14.ritual.json` — first worked example: the Proper 14 Choral
-  Eucharist (`data_lake/missal-2026-07-05-proper-14/`) decompressed into 41 events.
+    (with a `convention` field naming the basis, now carrying BAS/EOW citations).
+  Each model's `meta.authorities` lists the rubric sources behind its inferences.
+- `ccc-2026-07-05-proper-14.ritual.json` — Proper 14 (July 5), 42 events.
+- `ccc-2026-06-28-proper-13.ritual.json` — Proper 13 (June 28), 40 events.
+- `render_ritual.py` — turns a `.ritual.json` into a human-readable **enacted script**,
+  provenance-annotated (printed / pointer / inferred colour-coded, inferred rows shaded
+  with their citation). Writes `.rendered.html` + `.rendered.pdf`.
+  Usage: `python3 models/render_ritual.py models/<file>.ritual.json`.
+- `comparison-proper-13-vs-14.md` — the two missals side by side: the fixed ordinary frame
+  vs. the proper, and how the missal's own compression varies week to week.
+- `../context/` — cited real-world grounding (parish practice + BAS/EOW rubrics).
 
-## What the first example shows
+## What the examples show
 
-Validated against the schema. Of 41 events: **21 printed, 14 pointer, 6 inferred.** The
-inferred events are exactly what the missal compresses out — the entrance and Gospel and
-recessional processions, the fraction gesture, the institution narrative's manual acts —
-none printed, all enacted. Posture (stand/sit/kneel/process) is filled on every event
-though the missal prints almost none of it. That gap between printed and inferred is the
-measure of the missal's compression, and reconstructing it is the modelling work.
+Both validate against the schema. Provenance split — Proper 14: **21 printed, 14 pointer,
+7 inferred** (42); Proper 13: **24 printed, 12 pointer, 4 inferred** (40). The inferred
+events are exactly what the missal compresses out — entrance/Gospel/recessional
+processions, the fraction gesture, the institution's manual acts, and (for Proper 14) the
+sacring bell. Posture is filled on every event though the missals print almost none of it.
+That gap between printed and inferred is the measure of a missal's compression, and
+reconstructing it is the modelling work.
+
+The pair is the real payoff: **Proper 13 prints the sacring bell that Proper 14 omits**, so
+one missal decompresses the other — the P14 bell is an `inferred` event whose `convention`
+cites the P13 missal. Comparing sibling missals is the cheapest decompression source there
+is.
 
 ## Validate
 

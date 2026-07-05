@@ -1,45 +1,39 @@
 {
-  "id": "ccc-2026-07-05-proper-14",
+  "id": "ccc-2026-06-28-proper-13",
   "meta": {
-    "title": "Choral Eucharist — Proper 14",
-    "rite": "Choral Eucharist (BAS tradition, Eucharistic Prayer 3 / Enriching Our Worship)",
+    "title": "Choral Eucharist — Proper 13",
+    "rite": "Choral Eucharist (BAS tradition, Eucharistic Prayer 1 / BAS p. 193)",
     "tradition": "Anglican Church of Canada, Diocese of New Westminster",
-    "date": "2026-07-05",
+    "date": "2026-06-28",
     "calendar": {
       "season": "Season after Pentecost",
-      "proper_local": "Proper 14",
-      "proper_rcl": "Proper 9 (US/Episcopal RCL numbering; same Sunday, same readings)",
+      "proper_local": "Proper 13",
+      "proper_rcl": "Proper 8 (US/Episcopal RCL numbering; same Sunday, same readings)",
       "lectionary_year": "Year A (Matthew)",
       "track": "Track 1 (semicontinuous)"
     },
     "ministers": {
-      "presider": "The Rev. Claude St-Denis",
-      "preacher": "The Rev. Dr. Richard Topping",
+      "presider": "The Very Rev. Christopher A. Pappas (Dean & Rector)",
+      "preacher": "The Rev. Claude St-Denis",
       "deacon": "The Rev. Kevin de la Mare",
-      "organist": "Neil Robertson (guest)",
-      "dean": "The Very Rev. Christopher A. Pappas"
+      "organist": "Dr. Neil Cockburn (Organist & Director of Music)",
+      "subdeacon": "Esther Aneke",
+      "mc": "Carol Cook"
     },
     "music_settings": [
       "Gloria — New Plainsong, David Hurd",
-      "Sanctus — Hassler, Missa super Dixit Maria",
-      "Memorial Acclamation & Amen — Neil Cockburn",
+      "Sanctus — Mass in G minor, Ralph Vaughan Williams",
       "Lord's Prayer — McNeil Robinson",
-      "Agnus Dei (Lamb of God) — New Plainsong, David Hurd"
+      "Agnus Dei (Fraction Anthem) — Mass in G minor, Ralph Vaughan Williams"
     ],
     "source_missal": {
-      "folder": "data_lake/missal-2026-07-05-proper-14",
+      "folder": "data_lake/missal-2026-06-28-proper-13",
       "pages": 12,
-      "official_pdf": "official-missal-proper-14.pdf"
+      "official_pdf": "official-missal-proper-13.pdf"
     },
-    "context_notes": [
-      "Preacher Richard Topping is not cathedral staff: Dr. Richard Topping, President of the Vancouver School of Theology, guest-preaching (see context/christ-church-cathedral-practice.md).",
-      "Neil Robertson is a GUEST organist and 'The Cathedral Quartet' is the reduced SUMMER music ensemble; the regular Director of Music is Dr. Neil Cockburn with the full Cathedral Choir (as in the June 28 / Proper 13 missal).",
-      "Churchmanship is Broad Church: incense and 'smells and bells' belong to the sung Compline, NOT the 10:30 Choral Eucharist. Incense/thurifer are therefore deliberately NOT inferred for this service.",
-      "The presider is 'The Rev. Claude St-Denis' (Canon Missioner, former Worship Animator) — note the first-name coincidence with the assistant compiling this model; unrelated."
-    ],
     "authorities": [
-      "Great Thanksgiving: Enriching Our Worship 1, Eucharistic Prayer 3, pp. 62–64 (Sursum corda identical to BAS p.192).",
-      "Manual acts around the institution: BCP 1979 Rite II rubric (EOW is supplemental to the 1979 BCP).",
+      "Great Thanksgiving: BAS Eucharistic Prayer 1, BAS p. 193 (Sursum corda BAS p.192).",
+      "Sacring bell 'Ringing of the bell. (x3)' is PRINTED in this missal (page-08) — the primary attestation that this parish rings the bell.",
       "BAS (Anglican Church of Canada), Holy Eucharist pp. 174–215 — see context/bas-eow-eucharist-rubrics.md",
       "Postures per BAS: 'All stand' at the Gathering (p.185), Gospel (p.187), Peace (p.191), and after Communion (p.213); sitting for readings/sermon and kneeling for confession/canon are custom (b), not rubric; communion posture is permissive 'either kneeling or standing' (p.180).",
       "Dismissal by the deacon — BAS p.214 (a).",
@@ -49,12 +43,12 @@
   "roles": [
     {
       "id": "presider",
-      "label": "Presider (The Rev. Claude St-Denis)",
+      "label": "Presider (The Very Rev. Christopher A. Pappas)",
       "kind": "clergy"
     },
     {
       "id": "preacher",
-      "label": "Preacher (The Rev. Dr. Richard Topping)",
+      "label": "Preacher (The Rev. Claude St-Denis)",
       "kind": "clergy"
     },
     {
@@ -69,7 +63,7 @@
     },
     {
       "id": "intercessor",
-      "label": "Intercessor (Jane Hope)",
+      "label": "Intercessor (Byron Jang)",
       "kind": "lay-minister"
     },
     {
@@ -84,12 +78,12 @@
     },
     {
       "id": "choir",
-      "label": "The Cathedral Quartet / Choir",
+      "label": "The Cathedral Choir",
       "kind": "musician"
     },
     {
       "id": "organist",
-      "label": "Organist (Neil Robertson)",
+      "label": "Organist & Director of Music (Dr. Neil Cockburn)",
       "kind": "musician"
     },
     {
@@ -136,6 +130,25 @@
     {
       "seq": 1,
       "section": "gathering",
+      "unit": "Announcements",
+      "action": "say",
+      "mode": "spoken",
+      "actor": [
+        "presider"
+      ],
+      "assembly_posture": "sit",
+      "station": "ambo",
+      "content": {
+        "type": "text",
+        "text": "Cathedral parish announcements commence shortly before 10:30 a.m."
+      },
+      "provenance": "printed",
+      "missal_source": "page-03",
+      "notes": "Printed this week (Proper 14 did not print an announcements line — a compression difference)."
+    },
+    {
+      "seq": 2,
+      "section": "gathering",
       "unit": "Prelude / Gathering music",
       "action": "music",
       "mode": "instrumental",
@@ -148,12 +161,11 @@
         "type": "none"
       },
       "provenance": "inferred",
-      "convention": "Universal custom: organ covers the gathering before the entrance; not printed in this missal. [organ covering the gathering = universal custom]",
-      "missal_source": null,
-      "notes": "The missal has no prelude line, but a Choral Eucharist gathers under music."
+      "convention": "Universal custom: organ covers the gathering before the entrance. [organ covering the gathering = universal custom]",
+      "missal_source": null
     },
     {
-      "seq": 2,
+      "seq": 3,
       "section": "gathering",
       "unit": "Entrance Procession",
       "action": "process",
@@ -170,12 +182,11 @@
         "type": "none"
       },
       "provenance": "inferred",
-      "convention": "BAS: the ministers enter in procession during the opening hymn; the assembly stands. Order (cross/servers → clergy → presider) is customary. [BAS p.185 'All stand'; entrance procession is general Anglican custom (b) — context/bas-eow-eucharist-rubrics.md]",
-      "missal_source": null,
-      "notes": "Decompressed: the printed 'Processional Hymn' presupposes a procession the text never describes."
+      "convention": "BAS: ministers enter in procession during the opening hymn; assembly stands. [BAS p.185 'All stand'; entrance procession is general Anglican custom (b) — context/bas-eow-eucharist-rubrics.md]",
+      "missal_source": null
     },
     {
-      "seq": 3,
+      "seq": 4,
       "section": "gathering",
       "unit": "Processional Hymn",
       "action": "sing",
@@ -191,19 +202,19 @@
         "type": "pointer",
         "pointer": {
           "kind": "hymn",
-          "ref": "CP 425",
+          "ref": "CP 434",
           "source": "Common Praise",
-          "title": "Joyful, Joyful, We Adore Thee"
+          "title": "The Love of Jesus Calls Us (Aurelia)"
         }
       },
       "provenance": "pointer",
       "missal_source": "page-03",
-      "notes": "Missal prints only title + number; the words/tune live in Common Praise."
+      "notes": "Full text printed in this missal (P14 printed only title+number for its processional — a compression difference)."
     },
     {
-      "seq": 4,
+      "seq": 5,
       "section": "gathering",
-      "unit": "Greeting",
+      "unit": "Gathering Dialogue / Land Acknowledgement",
       "action": "greet",
       "mode": "spoken",
       "actor": [
@@ -217,36 +228,41 @@
         "dialogue": [
           {
             "by": "presider",
-            "says": "The grace of our Lord Jesus Christ… be with you all."
+            "says": "In this time and place, we gather on the unceded ancestral lands of the Musqueam, Squamish, and Tsleil-Waututh nations."
           },
           {
             "by": "assembly",
-            "says": "And also with you."
+            "says": "From many places and peoples we come to this house of prayer."
+          },
+          {
+            "by": "presider",
+            "says": "In this time and place, we meet in the presence of the living God."
+          },
+          {
+            "by": "assembly",
+            "says": "The Creator who is the source of all that is, seen and unseen."
+          },
+          {
+            "by": "presider",
+            "says": "In this time and place, the risen Christ stands in our midst."
+          },
+          {
+            "by": "assembly",
+            "says": "Our Companion who walks with us and with all peoples on the path of reconciliation."
+          },
+          {
+            "by": "presider",
+            "says": "In this time and place, God's Holy Spirit breathes in and through us."
+          },
+          {
+            "by": "assembly",
+            "says": "We are being made new by the holy and life-giving Trinity, one God."
           }
         ]
       },
-      "provenance": "inferred",
-      "convention": "BAS opening dialogue; the exact versicle is standard even where this missal compresses it. [BAS opening greeting, p.185 (a)]",
-      "missal_source": "page-03",
-      "notes": "Apostolic greeting; dialogic primitive."
-    },
-    {
-      "seq": 5,
-      "section": "gathering",
-      "unit": "Land Acknowledgement",
-      "action": "say",
-      "mode": "spoken",
-      "actor": [
-        "presider"
-      ],
-      "assembly_posture": "stand",
-      "station": "presider_chair",
-      "content": {
-        "type": "text",
-        "text": "Worship on the traditional, ancestral, and unceded territory of the xʷməθkʷəy̓əm (Musqueam), Sḵwx̱wú7mesh (Squamish), and Səl̓ílwətaʔɬ (Tsleil-Waututh) Nations."
-      },
       "provenance": "printed",
-      "missal_source": "page-03"
+      "missal_source": "page-03",
+      "notes": "A full trinitarian gathering litany — much longer than Proper 14's one-line acknowledgement. The gathering rite is itself a 'proper' that varies week to week."
     },
     {
       "seq": 6,
@@ -272,7 +288,7 @@
       },
       "provenance": "pointer",
       "missal_source": "page-04",
-      "notes": "Sung ordinary; text printed, music by pointer to the Hurd setting."
+      "notes": "Same Gloria setting as Proper 14 — a fixed ordinary element."
     },
     {
       "seq": 7,
@@ -281,38 +297,21 @@
       "action": "pray",
       "mode": "spoken",
       "actor": [
-        "presider"
+        "presider",
+        "assembly"
       ],
       "assembly_posture": "stand",
       "station": "presider_chair",
       "content": {
         "type": "text",
-        "text": "Almighty God, your Son Jesus Christ has taught us that what we do for the least of your children we do also for him…"
+        "text": "Almighty God, you have taught us through your Son that love fulfils the law. May we love you with all our heart… and may we love our neighbour as ourselves; through Jesus Christ our Lord…"
       },
       "provenance": "printed",
       "missal_source": "page-04",
-      "notes": "The proper collect. 'Let us pray' + kept silence precede it (printed rubric)."
+      "notes": "'Let us pray' + kept silence precede it (printed)."
     },
     {
       "seq": 8,
-      "section": "gathering",
-      "unit": "Collect — silence",
-      "action": "silence",
-      "mode": "silent",
-      "actor": [
-        "assembly"
-      ],
-      "assembly_posture": "stand",
-      "station": "nave",
-      "content": {
-        "type": "none"
-      },
-      "provenance": "printed",
-      "missal_source": "page-04",
-      "notes": "'Silence is kept' — printed rubric; duration unspecified (a pacing decompression target)."
-    },
-    {
-      "seq": 9,
       "section": "word",
       "unit": "First Reading",
       "action": "proclaim",
@@ -326,23 +325,25 @@
         "type": "pointer",
         "pointer": {
           "kind": "lection",
-          "ref": "Genesis 24:34-38, 42-49, 58-67",
-          "source": "RCL Track 1"
+          "ref": "Genesis 22:1-14",
+          "source": "RCL Track 1",
+          "title": "The binding of Isaac (Aqedah)"
         }
       },
       "provenance": "pointer",
       "missal_source": "page-05",
-      "notes": "Assembly sits for the readings (inferred posture). Concludes 'Word of God, word of life. / Thanks be to God.' (printed dialogue)."
+      "notes": "Concludes 'Word of God, word of life. / Thanks be to God.'"
     },
     {
-      "seq": 10,
+      "seq": 9,
       "section": "word",
-      "unit": "Psalm 45:11-18",
+      "unit": "Psalm 13",
       "action": "sing",
       "mode": "sung",
       "actor": [
         "assembly",
-        "choir"
+        "choir",
+        "organist"
       ],
       "assembly_posture": "sit",
       "station": "nave",
@@ -350,17 +351,17 @@
         "type": "pointer",
         "pointer": {
           "kind": "psalm",
-          "ref": "Psalm 45:11-18",
-          "source": "Gradual Psalms for the RCL (ed. Bruce E. Ford)",
-          "title": "Refrain: 'Consider and listen closely for the voice of God'"
+          "ref": "Psalm 13",
+          "source": "metrical paraphrase, Christopher Idle; tune MARTYRDOM",
+          "title": "How Long Will You Forget Me, Lord"
         }
       },
-      "provenance": "printed",
+      "provenance": "pointer",
       "missal_source": "page-05",
-      "notes": "Refrain + pointing printed; sung responsorially."
+      "notes": "Note: this week the psalm is a metrical HYMN paraphrase (sung to a hymn tune), where Proper 14's psalm was a responsorial chant with refrain — two different psalm-forms across weeks."
     },
     {
-      "seq": 11,
+      "seq": 10,
       "section": "word",
       "unit": "Second Reading",
       "action": "proclaim",
@@ -374,7 +375,7 @@
         "type": "pointer",
         "pointer": {
           "kind": "lection",
-          "ref": "Romans 7:15-25a",
+          "ref": "Romans 6:12-23",
           "source": "RCL"
         }
       },
@@ -383,7 +384,7 @@
       "notes": "Concludes 'Hear what the Spirit is saying to the churches. / Thanks be to God.'"
     },
     {
-      "seq": 12,
+      "seq": 11,
       "section": "word",
       "unit": "Sequence Hymn",
       "action": "sing",
@@ -399,17 +400,17 @@
         "type": "pointer",
         "pointer": {
           "kind": "hymn",
-          "ref": "CP 561",
+          "ref": "CP 441",
           "source": "Common Praise",
-          "title": "Lord, Your Word Shall Guide Us"
+          "title": "Thee Will I Love, My Strength, My Tower (Surrey)"
         }
       },
       "provenance": "pointer",
       "missal_source": "page-06",
-      "notes": "Assembly stands for the Gospel; the sequence hymn covers the Gospel procession."
+      "notes": "Assembly stands for the Gospel; covers the Gospel procession."
     },
     {
-      "seq": 13,
+      "seq": 12,
       "section": "word",
       "unit": "Gospel Procession",
       "action": "process",
@@ -424,36 +425,56 @@
         "type": "none"
       },
       "provenance": "inferred",
-      "convention": "BAS/Western custom: the Gospel book is carried into the midst of the assembly; the back page names a 'Gospel Station', confirming the movement. [Episcopal Church glossary: Gospel procession into the midst of the assembly (b)]",
-      "missal_source": "page-12",
-      "notes": "Decompressed from the 'Gospel Station' role on the back page."
+      "convention": "BAS/Western custom; the back page names two ministers at the 'Gospel Station' (Rev. Stuart Mennigke, Donna Wong Juliani), confirming the Gospel is proclaimed amid the assembly. [Episcopal Church glossary: Gospel procession into the midst of the assembly (b)]",
+      "missal_source": "page-12"
     },
     {
-      "seq": 14,
+      "seq": 13,
       "section": "word",
       "unit": "The Holy Gospel",
       "action": "proclaim",
       "mode": "spoken",
       "actor": [
-        "deacon"
+        "deacon",
+        "assembly"
       ],
       "assembly_posture": "stand",
       "station": "gospel_station",
       "content": {
-        "type": "pointer",
-        "pointer": {
-          "kind": "lection",
-          "ref": "Matthew 11:16-19, 25-30",
-          "source": "RCL",
-          "title": "'Come to me, all you that are weary…'"
-        }
+        "type": "dialogue",
+        "dialogue": [
+          {
+            "by": "deacon",
+            "says": "The Lord be with you."
+          },
+          {
+            "by": "assembly",
+            "says": "And also with you."
+          },
+          {
+            "by": "deacon",
+            "says": "The Holy Gospel of our Saviour Jesus Christ according to Matthew (10:40-42)."
+          },
+          {
+            "by": "assembly",
+            "says": "Glory to you, Lord Jesus Christ."
+          },
+          {
+            "by": "deacon",
+            "says": "The Gospel of Christ."
+          },
+          {
+            "by": "assembly",
+            "says": "Praise to you, Lord Jesus Christ."
+          }
+        ]
       },
-      "provenance": "pointer",
+      "provenance": "printed",
       "missal_source": "page-06",
-      "notes": "Framed by 'The Lord be with you' / Gospel acclamations (dialogic, printed in compressed form)."
+      "notes": "Full Gospel acclamation dialogue printed this week (P14 compressed it)."
     },
     {
-      "seq": 15,
+      "seq": 14,
       "section": "word",
       "unit": "The Sermon",
       "action": "preach",
@@ -468,7 +489,24 @@
       },
       "provenance": "printed",
       "missal_source": "page-06",
-      "notes": "Content not in the missal (the maximal compression: an entire sermon reduced to one line). Assembly sits (inferred)."
+      "notes": "'A period of silent reflection follows the sermon' — the silence is PRINTED here (inferred/omitted in P14)."
+    },
+    {
+      "seq": 15,
+      "section": "word",
+      "unit": "Silence after the Sermon",
+      "action": "silence",
+      "mode": "silent",
+      "actor": [
+        "assembly"
+      ],
+      "assembly_posture": "sit",
+      "station": "nave",
+      "content": {
+        "type": "none"
+      },
+      "provenance": "printed",
+      "missal_source": "page-06"
     },
     {
       "seq": 16,
@@ -478,21 +516,17 @@
       "mode": "spoken",
       "actor": [
         "assembly",
-        "presider"
+        "deacon"
       ],
       "assembly_posture": "stand",
       "station": "nave",
       "content": {
-        "type": "pointer",
-        "pointer": {
-          "kind": "prayer",
-          "ref": "Apostles' Creed",
-          "source": "BAS"
-        }
+        "type": "text",
+        "text": "I believe in God, the Father almighty… (full text printed). Introduced by the Deacon: 'Let us confess our faith, as we say…'"
       },
       "provenance": "printed",
       "missal_source": "page-06",
-      "notes": "Said by all; standing (inferred posture)."
+      "notes": "Full creed text printed here; P14 gave it by pointer. Introduced by the Deacon (a role detail P14 left implicit)."
     },
     {
       "seq": 17,
@@ -508,11 +542,11 @@
       "station": "nave",
       "content": {
         "type": "text",
-        "text": "Intercessions with congregational responses."
+        "text": "Intercessions; the missal directs the assembly to a QR code for the prayer cycles."
       },
       "provenance": "printed",
       "missal_source": "page-06",
-      "notes": "Posture (kneel or stand) is a parish custom — inferred; the missal does not print it."
+      "notes": "Posture is parish custom (inferred)."
     },
     {
       "seq": 18,
@@ -522,17 +556,18 @@
       "mode": "spoken",
       "actor": [
         "assembly",
+        "deacon",
         "presider"
       ],
       "assembly_posture": "kneel",
       "station": "nave",
       "content": {
         "type": "text",
-        "text": "…We confess that we have sinned against you… in thought, and word, and deed… (All) … Almighty God have mercy upon you, pardon and deliver you… (Presider)."
+        "text": "Deacon: 'Let us confess our sins.' All: 'We confess that we have sinned against you and against one another…' Presider: 'Almighty God have mercy upon you, pardon and deliver you…'"
       },
       "provenance": "printed",
       "missal_source": "page-07",
-      "notes": "'Silence may be kept' (printed). Absolution pronounced by the presider."
+      "notes": "The Deacon bids the confession (printed role); 'Silence may be kept' (printed)."
     },
     {
       "seq": 19,
@@ -561,7 +596,7 @@
       },
       "provenance": "printed",
       "missal_source": "page-07",
-      "notes": "'All may exchange a sign of peace' — printed rubric licenses movement/greeting among the assembly (the physical exchange itself is unscripted)."
+      "notes": "'All may exchange a sign of peace' — printed rubric; the physical exchange is unscripted."
     },
     {
       "seq": 20,
@@ -577,11 +612,10 @@
       "station": "altar",
       "content": {
         "type": "text",
-        "text": "Gifts of bread and wine + monetary offering presented; the altar is set."
+        "text": "Offering plate passed; gifts of bread and wine presented at the altar. Stewardship note printed."
       },
       "provenance": "printed",
-      "missal_source": "page-07",
-      "notes": "The offertory plate is passed / gifts brought forward (movement inferred); a stewardship note is printed."
+      "missal_source": "page-07"
     },
     {
       "seq": 21,
@@ -600,9 +634,9 @@
         "type": "pointer",
         "pointer": {
           "kind": "hymn",
-          "ref": "CP 374",
+          "ref": "CP 438",
           "source": "Common Praise",
-          "title": "Alleluia! Sing to Jesus (Hyfrydol)"
+          "title": "O Jesus, I Have Promised (Wolvercote)"
         }
       },
       "provenance": "pointer",
@@ -615,13 +649,14 @@
       "action": "pray",
       "mode": "spoken",
       "actor": [
-        "presider"
+        "presider",
+        "assembly"
       ],
       "assembly_posture": "stand",
       "station": "altar",
       "content": {
         "type": "text",
-        "text": "God of heaven and earth, receive our sacrifice of praise, and strengthen us… through our Saviour Jesus Christ. Amen."
+        "text": "God of wisdom, receive all we offer you this day. (All) Enrich our lives with the gifts of your Spirit… We ask this in his name. Amen."
       },
       "provenance": "printed",
       "missal_source": "page-08"
@@ -669,7 +704,7 @@
       },
       "provenance": "printed",
       "missal_source": "page-08",
-      "notes": "Opens Eucharistic Prayer 3 (Enriching Our Worship). Canonical dialogic primitive."
+      "notes": "Opens Eucharistic Prayer 1 (BAS p. 193) — a DIFFERENT eucharistic prayer than Proper 14's Prayer 3 (Enriching Our Worship)."
     },
     {
       "seq": 24,
@@ -684,7 +719,7 @@
       "station": "altar",
       "content": {
         "type": "text",
-        "text": "…And so, as the morning stars sing your praises… we join the heavenly beings and all creation as we shout with joy:"
+        "text": "It is indeed right that we should praise you, gracious God… Therefore, with them, and with all your saints… we raise our voices to proclaim the glory of your name."
       },
       "provenance": "printed",
       "missal_source": "page-08"
@@ -705,19 +740,19 @@
         "type": "pointer",
         "pointer": {
           "kind": "setting",
-          "ref": "Missa super Dixit Maria",
-          "source": "Hans Leo Hassler (1564–1612)",
+          "ref": "Mass in G minor",
+          "source": "Ralph Vaughan Williams (1872-1958)",
           "title": "Sanctus"
         }
       },
       "provenance": "pointer",
       "missal_source": "page-08",
-      "notes": "Renaissance polyphonic setting — carried by the choir; the ordinary is thus split across idioms."
+      "notes": "Different setting than Proper 14 (Hassler). Same slot, different music-proper."
     },
     {
       "seq": 26,
       "section": "eucharist",
-      "unit": "Institution Narrative & Epiclesis",
+      "unit": "Institution Narrative, Anamnesis & Epiclesis",
       "action": "pray",
       "mode": "spoken",
       "actor": [
@@ -727,12 +762,11 @@
       "station": "altar",
       "content": {
         "type": "text",
-        "text": "The words of institution over bread and wine; invocation of the Spirit."
+        "text": "Holy God, source of life and goodness… Recalling his death, proclaiming his resurrection… Through Christ, with Christ, and in Christ… all glory is yours, almighty Father, now and for ever."
       },
-      "provenance": "inferred",
-      "convention": "The body of Eucharistic Prayer 3 continues here (Enriching Our Worship); the missal compresses the prayer's core, and the manual acts (taking bread/cup, elevations) are unprinted ceremonial. [manual acts: BCP Rite II rubric — celebrant holds/lays hand on bread and cup (a); EOW EP3 pp.62–64]",
+      "provenance": "printed",
       "missal_source": "page-08",
-      "notes": "Assembly commonly kneels from the Sanctus (parish custom, inferred)."
+      "notes": "The prayer's core is printed (compressed with […] in the missal). Manual acts (taking bread/cup, elevations) are unprinted ceremonial."
     },
     {
       "seq": 27,
@@ -747,38 +781,14 @@
       "station": "altar",
       "content": {
         "type": "text",
-        "text": "The sanctus/sacring bell is rung (customarily 3x) at the institution."
+        "text": "The sanctus/sacring bell is rung three times (x3)."
       },
-      "provenance": "inferred",
-      "convention": "This parish's own Proper 13 missal (2026-06-28) PRINTS 'Ringing of the bell. (x3)' at this point; the practice is therefore established and the P14 missal simply omits it. Cross-missal calibration of compression. [altar-bell custom: rung 3x, once before the Words of Institution and at each elevation — en.wikipedia.org/wiki/Altar_bell (c); confirmed printed in this parish's Proper 13 missal]",
-      "missal_source": null,
-      "notes": "Deepened decompression: recovered from the sibling missal, not from this one. A worked example of using one missal to decompress another."
+      "provenance": "printed",
+      "missal_source": "page-08",
+      "notes": "KEY CROSS-MISSAL FINDING: the bell is PRINTED here ('Ringing of the bell. (x3)'). Proper 14 omitted it entirely — but since this parish rings the bell, its absence from the P14 missal is compression, not a change in practice. This one line calibrates how lossy the P14 missal is."
     },
     {
       "seq": 28,
-      "section": "eucharist",
-      "unit": "Memorial Acclamation & Great Amen",
-      "action": "acclaim",
-      "mode": "sung",
-      "actor": [
-        "assembly",
-        "choir"
-      ],
-      "assembly_posture": "kneel",
-      "station": "nave",
-      "content": {
-        "type": "pointer",
-        "pointer": {
-          "kind": "setting",
-          "ref": "Memorial Acclamation & Amen",
-          "source": "Neil Cockburn"
-        }
-      },
-      "provenance": "pointer",
-      "missal_source": "page-09"
-    },
-    {
-      "seq": 29,
       "section": "eucharist",
       "unit": "The Lord's Prayer",
       "action": "sing",
@@ -798,16 +808,18 @@
         }
       },
       "provenance": "pointer",
-      "missal_source": "page-09"
+      "missal_source": "page-09",
+      "notes": "Same setting as Proper 14 — a fixed musical element."
     },
     {
-      "seq": 30,
+      "seq": 29,
       "section": "eucharist",
       "unit": "The Breaking of the Bread (Fraction)",
       "action": "gesture",
       "mode": "physical",
       "actor": [
-        "presider"
+        "presider",
+        "assembly"
       ],
       "assembly_posture": "kneel",
       "station": "altar",
@@ -816,7 +828,15 @@
         "dialogue": [
           {
             "by": "presider",
-            "says": "Behold the mystery of your salvation laid out before you. / The gifts of God for the people of God."
+            "says": "Behold what you are."
+          },
+          {
+            "by": "assembly",
+            "says": "May we become what we receive."
+          },
+          {
+            "by": "presider",
+            "says": "The gifts of God for the people of God."
           },
           {
             "by": "assembly",
@@ -825,13 +845,13 @@
         ]
       },
       "provenance": "printed",
-      "missal_source": "page-10",
-      "notes": "The physical breaking of the bread (the gesture) is unprinted; only the accompanying words are. A key ceremonial decompression."
+      "missal_source": "page-09",
+      "notes": "Different fraction sentence than Proper 14 ('Behold the mystery…'). The physical breaking gesture is unprinted."
     },
     {
-      "seq": 31,
+      "seq": 30,
       "section": "eucharist",
-      "unit": "Fraction Anthem — Lamb of God",
+      "unit": "Fraction Anthem — Agnus Dei",
       "action": "sing",
       "mode": "sung",
       "actor": [
@@ -844,16 +864,15 @@
         "type": "pointer",
         "pointer": {
           "kind": "setting",
-          "ref": "CP 690",
-          "source": "Common Praise",
-          "title": "Lamb of God — New Plainsong, David Hurd"
+          "ref": "Agnus Dei (from Mass in G minor)",
+          "source": "Ralph Vaughan Williams"
         }
       },
       "provenance": "pointer",
-      "missal_source": "page-10"
+      "missal_source": "page-09"
     },
     {
-      "seq": 32,
+      "seq": 31,
       "section": "eucharist",
       "unit": "The Communion — administration",
       "action": "distribute",
@@ -868,36 +887,14 @@
       "station": "altar",
       "content": {
         "type": "text",
-        "text": "Approach the altar, hands extended for the Bread; guide the chalice to your lips (no intinction, for public health). A blessing is available; healing prayer is offered in the west alcove."
+        "text": "Approach the altar, hands extended for the Bread; guide the chalice to your lips (no intinction). A blessing is available (arms crossed); you may remain seated. Healing prayer in the west alcove."
       },
       "provenance": "printed",
-      "missal_source": "page-10",
-      "notes": "Rare case where the missal DOES decompress the choreography (a full rubric of movement) — because visitors need it. Contrast with the unprinted processions elsewhere."
+      "missal_source": "page-09",
+      "notes": "Same reception rubric as Proper 14 — a fixed pastoral instruction printed each week."
     },
     {
-      "seq": 33,
-      "section": "eucharist",
-      "unit": "Communion Motet",
-      "action": "sing",
-      "mode": "sung",
-      "actor": [
-        "choir"
-      ],
-      "assembly_posture": "process",
-      "station": "chancel",
-      "content": {
-        "type": "pointer",
-        "pointer": {
-          "kind": "setting",
-          "ref": "If Ye Love Me",
-          "source": "Thomas Tallis (1505?–1585)"
-        }
-      },
-      "provenance": "pointer",
-      "missal_source": "page-10"
-    },
-    {
-      "seq": 34,
+      "seq": 32,
       "section": "eucharist",
       "unit": "Communion Hymn",
       "action": "sing",
@@ -912,16 +909,17 @@
         "type": "pointer",
         "pointer": {
           "kind": "hymn",
-          "ref": "CP 60",
+          "ref": "CP 85",
           "source": "Common Praise",
-          "title": "I Come with Joy (Land of Rest)"
+          "title": "Shepherd of Souls, Refresh and Bless (St. Agnes)"
         }
       },
       "provenance": "pointer",
-      "missal_source": "page-10"
+      "missal_source": "page-10",
+      "notes": "This week there is no separate choir motet printed at communion (P14 had Tallis 'If Ye Love Me') — only a congregational hymn."
     },
     {
-      "seq": 35,
+      "seq": 33,
       "section": "eucharist",
       "unit": "Prayer after Communion",
       "action": "pray",
@@ -933,18 +931,20 @@
       "assembly_posture": "stand",
       "station": "presider_chair",
       "content": {
-        "type": "none"
+        "type": "text",
+        "text": "God of power, we are nourished by the riches of your grace. (All) Raise us to new life in your Son Jesus Christ… that all the world may call him Lord. Amen."
       },
       "provenance": "printed",
-      "missal_source": "page-11"
+      "missal_source": "page-10"
     },
     {
-      "seq": 36,
+      "seq": 34,
       "section": "eucharist",
       "unit": "The Doxology",
       "action": "say",
       "mode": "spoken",
       "actor": [
+        "presider",
         "assembly"
       ],
       "assembly_posture": "stand",
@@ -954,30 +954,40 @@
         "text": "Glory to God, whose power, working in us, can do infinitely more than we can ask or imagine…"
       },
       "provenance": "printed",
-      "missal_source": "page-11"
+      "missal_source": "page-10"
     },
     {
-      "seq": 37,
+      "seq": 35,
       "section": "sending",
       "unit": "Commissioning of Lay Ministers",
       "action": "say",
       "mode": "spoken",
       "actor": [
         "presider",
-        "lay_ministers"
+        "lay_ministers",
+        "assembly"
       ],
       "assembly_posture": "stand",
       "station": "chancel",
       "content": {
-        "type": "text",
-        "text": "Lay administrants sent to carry communion to those absent / sick."
+        "type": "dialogue",
+        "dialogue": [
+          {
+            "by": "presider",
+            "says": "In the name of this congregation, I send you forth bearing Holy gifts, that those to whom you go may share with us in the body and blood of Christ."
+          },
+          {
+            "by": "assembly",
+            "says": "We who are many are one body, because we share one bread, one cup."
+          }
+        ]
       },
       "provenance": "printed",
-      "missal_source": "page-11",
-      "notes": "Occasional unit — present this week; not a fixed part of every Eucharist."
+      "missal_source": "page-10",
+      "notes": "Printed in brackets (occasional). Present both weeks — but here with its full dialogue, where P14 gave only a summary line."
     },
     {
-      "seq": 38,
+      "seq": 36,
       "section": "sending",
       "unit": "The Blessing",
       "action": "gesture",
@@ -991,11 +1001,11 @@
         "type": "none"
       },
       "provenance": "printed",
-      "missal_source": "page-11",
-      "notes": "The presider makes the sign of the cross over the assembly (gesture inferred; only 'The Blessing' is printed)."
+      "missal_source": "page-10",
+      "notes": "The presider signs the cross over the assembly (gesture inferred; only 'The Blessing' printed)."
     },
     {
-      "seq": 39,
+      "seq": 37,
       "section": "sending",
       "unit": "Closing Hymn",
       "action": "sing",
@@ -1011,16 +1021,16 @@
         "type": "pointer",
         "pointer": {
           "kind": "hymn",
-          "ref": "CP 584",
+          "ref": "CP 371",
           "source": "Common Praise",
-          "title": "The Church of Christ in Every Age"
+          "title": "To God Be the Glory"
         }
       },
       "provenance": "pointer",
       "missal_source": "page-11"
     },
     {
-      "seq": 40,
+      "seq": 38,
       "section": "sending",
       "unit": "Recessional Procession",
       "action": "process",
@@ -1037,11 +1047,11 @@
         "type": "none"
       },
       "provenance": "inferred",
-      "convention": "The ministers recess during the closing hymn; assembly stands. Not printed. [general custom; BAS assumes but does not choreograph the procession]",
+      "convention": "Ministers recess during the closing hymn; assembly stands. Not printed. [general custom; BAS assumes but does not choreograph the procession]",
       "missal_source": null
     },
     {
-      "seq": 41,
+      "seq": 39,
       "section": "sending",
       "unit": "The Dismissal",
       "action": "dismiss",
@@ -1067,10 +1077,10 @@
       },
       "provenance": "printed",
       "missal_source": "page-11",
-      "notes": "Dismissal customarily by the deacon (role inferred; missal prints the text)."
+      "notes": "By the Deacon (role printed this week)."
     },
     {
-      "seq": 42,
+      "seq": 40,
       "section": "sending",
       "unit": "Postlude",
       "action": "music",
@@ -1084,8 +1094,8 @@
         "type": "pointer",
         "pointer": {
           "kind": "setting",
-          "ref": "Finale from Suite 3 for Organ",
-          "source": "Léon Boëllmann (1862–1897)"
+          "ref": "Alla Marcia",
+          "source": "John Ireland (1879-1962)"
         }
       },
       "provenance": "printed",

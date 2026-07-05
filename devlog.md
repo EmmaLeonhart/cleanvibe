@@ -35,3 +35,23 @@ printed / pointer / inferred) and decompressed the Proper 14 missal into
 `models/ccc-2026-07-05-proper-14.ritual.json` — 41 events (21 printed, 14 pointer,
 6 inferred), validates against the schema. Renamed the folder bulletin→missal per
 the "entire thing is a single missal" framing.
+
+## 2026-07-05 — Second missal, renderer, agentic RAG, cross-missal comparison
+
+Expanded from one missal to a small corpus + tooling:
+- **Second missal:** pulled the Proper 13 (June 28) Choral Eucharist PDFs from the church
+  site into `data_lake/missal-2026-06-28-proper-13/`, and decompressed it into
+  `models/ccc-2026-06-28-proper-13.ritual.json` (40 events). Key finding: this missal
+  PRINTS "Ringing of the bell. (x3)" — the sacring bell Proper 14 omits — so one missal
+  decompresses another.
+- **Renderer:** `models/render_ritual.py` turns any `.ritual.json` into a provenance-
+  annotated enacted script (HTML + PDF), inferred rows shaded with their citation.
+- **Agentic RAG:** two research agents gathered cited context, saved under `context/`:
+  parish practice (Broad Church → incense at Compline not the Eucharist; Topping is a VST
+  guest preacher; Robertson/Quartet are summer stand-ins for Cockburn/Cathedral Choir) and
+  BAS/EOW rubrics (page-cited postures, processions, manual acts, fraction, dismissal).
+  Folded citations into each model's inferred `convention` fields + `meta.authorities`.
+- **Deepened Proper 14:** added the sacring bell as a justified `inferred` event (cites the
+  P13 missal) → 42 events. Corrected attributions from the RAG findings.
+- **Comparison:** `models/comparison-proper-13-vs-14.md` separates the fixed ordinary frame
+  from the proper and documents how the missal's compression varies week to week.
