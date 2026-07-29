@@ -30,7 +30,7 @@ _BASE_BACKOFF = 3.0
 # traceback (the v1.11.0 user report).
 _TIMEOUT_ERRORS = (TimeoutError, socket.timeout)
 ATOM_NS = {"atom": "http://www.w3.org/2005/Atom"}
-USER_AGENT = f"cleanvibe-replicate/{__version__} (+https://github.com/Immanuelle/cleanvibe)"
+USER_AGENT = f"cleanvibe-replicate/{__version__} (+https://github.com/EmmaLeonhart/cleanvibe)"
 
 
 @dataclass(frozen=True)

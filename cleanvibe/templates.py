@@ -75,7 +75,7 @@ Today's date is {date}.
 def readme_md(project_name: str) -> str:
     return f"""# {project_name}
 
-> Scaffolded with [cleanvibe](https://github.com/Immanuelle/cleanvibe).
+> Scaffolded with [cleanvibe](https://github.com/EmmaLeonhart/cleanvibe).
 
 ## About
 
@@ -1663,7 +1663,7 @@ def replication_manual_readme_md(folder: str, source_url: str | None = None) -> 
     if source_url:
         title = "# Replicating: _(downloaded from a URL — fill this in)_"
         subtitle = (
-            "> Scaffolded with [cleanvibe](https://github.com/Immanuelle/cleanvibe)\n"
+            "> Scaffolded with [cleanvibe](https://github.com/EmmaLeonhart/cleanvibe)\n"
             f"> `replicate` from a non-arXiv URL ({source_url}). The source was\n"
             "> downloaded into `replication_target/source/` (see `source.json`)."
         )
@@ -1684,7 +1684,7 @@ def replication_manual_readme_md(folder: str, source_url: str | None = None) -> 
     else:
         title = "# Replicating: _(paper supplied by hand — fill this in)_"
         subtitle = (
-            "> Scaffolded with [cleanvibe](https://github.com/Immanuelle/cleanvibe)\n"
+            "> Scaffolded with [cleanvibe](https://github.com/EmmaLeonhart/cleanvibe)\n"
             "> `replicate` in **manual drop-in mode**. No arXiv metadata was fetched."
         )
         paper_line = (
@@ -2558,7 +2558,7 @@ __REPORT_CSS__
 
 <footer>
   <p>
-    Scaffolded with <a href="https://github.com/Immanuelle/cleanvibe">cleanvibe</a>
+    Scaffolded with <a href="https://github.com/EmmaLeonhart/cleanvibe">cleanvibe</a>
     <code>research</code> &middot; generated __DATE__
   </p>
 </footer>
@@ -2655,7 +2655,7 @@ def research_readme_md(project_name: str, question: str | None = None) -> str:
     return f"""# {project_name}
 
 > A **research project** scaffolded with
-> [cleanvibe](https://github.com/Immanuelle/cleanvibe) `research`.
+> [cleanvibe](https://github.com/EmmaLeonhart/cleanvibe) `research`.
 
 **Research question:** {q}
 
@@ -2870,7 +2870,7 @@ def original_readme_md(project_name: str, area: str | None = None) -> str:
     return f"""# {project_name}
 
 > An **original-research project** scaffolded with
-> [cleanvibe](https://github.com/Immanuelle/cleanvibe) `original`.
+> [cleanvibe](https://github.com/EmmaLeonhart/cleanvibe) `original`.
 
 **Focus area (seed for topic finding):** {a}
 **Research question:** {_ORIGINAL_QUESTION_PLACEHOLDER}

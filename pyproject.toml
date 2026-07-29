@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cleanvibe"
-version = "1.17.0"
+version = "1.17.1"
 description = "A workflow accelerator that scaffolds AI-assisted coding projects with opinionated documentation and launches Claude Code."
 readme = "README.md"
 license = "MIT"
@@ -32,8 +32,8 @@ classifiers = [
 cleanvibe = "cleanvibe.cli:main"
 
 [project.urls]
-Homepage = "https://github.com/Immanuelle/cleanvibe"
-Issues = "https://github.com/Immanuelle/cleanvibe/issues"
+Homepage = "https://github.com/EmmaLeonhart/cleanvibe"
+Issues = "https://github.com/EmmaLeonhart/cleanvibe/issues"
 
 # Explicit package list — without this, setuptools' flat-layout auto-discovery
 # also picks up sibling directories like `site/` and `pages/` (the static

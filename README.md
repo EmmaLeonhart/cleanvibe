@@ -15,7 +15,7 @@ pip install cleanvibe
 ### Developer install (working on cleanvibe itself)
 
 ```
-git clone https://github.com/Immanuelle/cleanvibe
+git clone https://github.com/EmmaLeonhart/cleanvibe
 cd cleanvibe
 pip install .         # or use !dev-install.bat on Windows
 ```

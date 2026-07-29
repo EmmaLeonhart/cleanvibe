@@ -1130,3 +1130,27 @@ the committed `topics/.gitkeep`, and `git ls-files` confirms `topics/` +
 ordering — topic-finding loop (step 3) precedes the literature review (step 4)
 precedes `todo.md` (step 5). Then launched Claude into the scaffold to work it
 for real.
+
+## 2026-07-28 — v1.17.1: the scaffolded attribution URL was a 404
+
+Every project cleanvibe scaffolds stamped `https://github.com/Immanuelle/cleanvibe`
+into it, and that URL returns **404 with no redirect** — the repo now lives at
+`EmmaLeonhart/cleanvibe`. So the attribution link in generated `CLAUDE.md`,
+`README.md`, `SKILL.md`, and the generated HTML footer pointed users at nothing,
+as did the `Homepage` and `Issues` metadata on the PyPI page and the `git clone`
+line in our own README. The `User-Agent` the arxiv and clawrxiv clients send
+carried the dead URL too, which is the one place a remote operator would look to
+find out who is calling them.
+
+Fixed across 9 files: `pyproject.toml`, `README.md`, and the seven modules that
+emit the URL (`arxiv`, `clawrxiv`, `original`, `replicate`, `research`,
+`scaffold`, `templates`). 128 tests green.
+
+Deliberately not changed: the `LICENSE` copyright holder and the `pyproject`
+author name both read "Immanuelle". Those are a name, not a broken link —
+changing a copyright line is Emma's call, not a bug fix. The historical planning
+docs under `docs/superpowers/` keep their old local paths, being a record of what
+was done at the time.
+
+Version `1.17.0` -> `1.17.1`. Not released — `publish.yml` fires on a published
+GitHub release, so cutting one is Emma's call.

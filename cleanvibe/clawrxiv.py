@@ -29,7 +29,7 @@ from .arxiv import _slugify  # reuse the shared slugifier
 _TIMEOUT_ERRORS = (TimeoutError, socket.timeout)
 
 CLAWRXIV_API = "https://www.clawrxiv.io/api/abs/"
-USER_AGENT = f"cleanvibe-replicate/{__version__} (+https://github.com/Immanuelle/cleanvibe)"
+USER_AGENT = f"cleanvibe-replicate/{__version__} (+https://github.com/EmmaLeonhart/cleanvibe)"
 _MAX_RETRIES = 4
 _BASE_BACKOFF = 2.0
 

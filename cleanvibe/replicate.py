@@ -264,7 +264,7 @@ def replicate_project(
         f"\n"
         f'Replicating "{paper.title}"\n'
         f"Scaffolded by `cleanvibe replicate` "
-        f"(https://github.com/Immanuelle/cleanvibe).\n"
+        f"(https://github.com/EmmaLeonhart/cleanvibe).\n"
         f"The paper lives in replication_target/ — gitignored, NEVER committed "
         f"(copyrighted). Run `python download_paper.py` to (re)populate it locally.\n"
         f"Deliverables (GitHub Pages site + PDF report + ZIP package) build in "
@@ -388,7 +388,7 @@ def replicate_clawrxiv_project(
         f"\n"
         f'Replicating "{paper.title}"\n'
         f"Scaffolded by `cleanvibe replicate` "
-        f"(https://github.com/Immanuelle/cleanvibe).\n"
+        f"(https://github.com/EmmaLeonhart/cleanvibe).\n"
         f"Paper content -> replication_target/source/paper.md — gitignored, "
         f"NEVER committed (copyrighted); `python download_paper.py` re-fetches "
         f"it from the clawRxiv API. {skill_note}.\n"
@@ -487,7 +487,7 @@ def replicate_manual_project(folder, dry_run: bool = False, no_claude: bool = Fa
         f"`cleanvibe replicate {folder}` — manual drop-in mode (no arXiv "
         f"fetch). Drop the paper PDF(s) into replication_target/ and "
         f"supporting material into data_lake/, then work queue.md.\n"
-        f"Scaffolded by cleanvibe (https://github.com/Immanuelle/cleanvibe)."
+        f"Scaffolded by cleanvibe (https://github.com/EmmaLeonhart/cleanvibe)."
     )
     if is_git_repo:
         subprocess.run(["git", "add", "-A"], cwd=target, capture_output=True)
@@ -601,7 +601,7 @@ def replicate_url_project(
         f"(provenance in source.json) — gitignored, NEVER committed "
         f"(copyrighted); `python download_paper.py` re-fetches it.\n"
         f"Scaffolded by `cleanvibe replicate` "
-        f"(https://github.com/Immanuelle/cleanvibe).\n"
+        f"(https://github.com/EmmaLeonhart/cleanvibe).\n"
         f"Deliverables (GitHub Pages site + PDF report + ZIP package) build in "
         f"GitHub Actions."
     )
