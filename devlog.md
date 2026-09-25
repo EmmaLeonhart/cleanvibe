@@ -20,3 +20,10 @@ See `CLAUDE.md` § "Workflow Rules" and `queue.md`'s preamble.
 
 Scaffolded with `cleanvibe new` (cleanvibe v1.17.0). Future entries
 land here as queue items get deleted.
+
+## 2026-09-25 — Three-cron playbook started
+
+Scheduled the three session-local crons via `CronCreate`: work-loop at
+`:03`, auto-flush at `:15`, status-report at `:42`. They are session-only and
+auto-expire after 7 days. No GitHub remote exists yet (that is bootstrap
+step "Go live"), so pushes are a no-op until then.
