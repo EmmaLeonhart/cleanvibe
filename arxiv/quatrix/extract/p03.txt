@@ -1,0 +1,47 @@
+Q-Compass
+Q(s, a) = softmax(
+(Wsx)(Wax) ⊤
+√r
+)
+three projections  •  no  WV
+Text
+QCompass
+(causal)
+Vision
+QCompass-Bi
+(bidirectional)
+Audio
+QCompass-Bi
+(bidirectional)
+World
+QCompass-Bi
+(state × action)
+WikiText-103
+MS-COCO captions
+LibriSpeech clean-100
+MiniGrid 3D navigation
+One mechanism, four modalities — shared Ws, Wa, Wo parameters
+Fig. 1. One mechanism, four modalities. The same Q-Compass-Bi block implements routing for text, vision,
+audio, and world-model pipelines. Text uses the causal variant (Q-Compass); all other modalities use the bidi-
+rectional variant (Q-Compass-Bi). The 𝑊𝑠, 𝑊𝑎, 𝑊𝑜projection matrices are structurally identical across pipelines;
+only dimensionality and layer count vary per modality.
+Multimodal architectures.
+Current systems compose modality-specific encoders: ViT 2 and CLIP 10
+for vision; Whisper 3 for audio; GPT-class decoders 4 for text. Flamingo 11 fuses them via learned
+cross-attention. Perceiver IO 12 introduces a shared latent bottleneck but retains standard attention.
+Gato 13 tokenizes multiple modalities into a common embedding space for a single transformer decoder;
+the attention kernel inside Gato is still QKVO, and unification occurs at the tokenization layer rather than
+at the routing primitive.
+World models.
+Ha and Schmidhuber 14 and the Dreamer lineage 15 established the state–action–
+transition decomposition we adopt. We parameterize all three components (StateEncoder, Transition-
+Model, ActionHead) using Q-Compass-Bi blocks. Our objective here is to test that the routing primitive
+supports a world-model objective concurrently with text/vision/audio inside a single shared backbone —
+not to benchmark against dedicated world-model architectures, for which target-network EMAs, predictor
+heads, contrastive auxiliaries, and richer environments (DMLab, Habitat) are the standard ingredients.
+3 Method
+We use Q-Compass 1 as the routing primitive throughout.
+Given input 𝑥∈R𝐵×𝐿×𝐻, Q-Compass
+computes state = 𝑥𝑊𝑠, action = 𝑥𝑊𝑎(both ∈R𝐵×𝐿×𝑟), 𝑄(𝑠, 𝑎) = softmax((state · action⊤)/√𝑟+ 𝑀),
+and output = 𝑊𝑜(𝑄(𝑠, 𝑎) · 𝑥), where 𝑀is an optional causal mask. Mechanism, parameter accounting,
+3

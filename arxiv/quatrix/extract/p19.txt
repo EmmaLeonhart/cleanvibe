@@ -1,0 +1,41 @@
+• Differences. V4 wraps these primitives with a separate compression-weight stream 𝑍𝑎, 𝑍𝑏produc-
+ing softmax-normalised aggregation weights, top-𝑘sparse selection over the compressed entries
+(DSA), heavily-compressed dense attention (HCA), sliding-window KV branches, attention-sink
+logits, and partial RoPE on the last 64 dimensions. SAVO has none of these: it is the minimal
+rank-𝑟routing primitive without sparsification, hierarchical compression, or sink terms.
+• Empirical relationship.
+V4 demonstrates that the broader low-rank-routing-with-Hadamard-
+content family scales to 1.6T parameters, 1M context, with 10% of MHA’s KV cache and 27% of
+MHA’s per-token inference FLOPs at 1M context (V4 §1, Figure 1). The present paper provides
+the controlled-ablation, throughput, rank-ablation, and KV-cache analysis at 60m / 10,000-step
+budget for the minimal primitive in this family. The two characterisations are complementary: V4
+establishes that the family is viable at scale; the present paper characterises the minimal primitive’s
+behaviour at small scale where ablations are feasible.
+We do not claim that V4 validates SAVO specifically — the architectures differ in detail, and at
+60m with 10,000 steps SAVO is +12.33 ± 0.87 ppl above the rank-matched controlled ablation (4-seed
+paired difference, 𝑝< 10−3, Table 5). The point of this paragraph is the narrower one: independently of
+Q-Compass, V4 has converged on the same family of low-rank routing with Hadamard-product content
+gather, suggesting this family is a real point in the architecture space rather than a one-off curiosity.
+6.2 Cross-modal non-interference
+Unification is a structural claim; it does not automatically imply the shared parameters can absorb
+multiple objectives without harm.
+The 60m matched-text-compute observation (§5.5) is consistent
+with two interpretive readings: no cross-modal transfer (auxiliary modalities do not improve text), and
+no cross-modal interference (auxiliary modalities do not harm text). The second reading is the non-
+trivial finding — in shared-parameter multimodal architectures, interference is the default. The 180m
+multimodal text regression occurs in lock-step with the text-only 180m regression, so the joint training
+mix is not the source of the regression and the absence-of-interference observation extends through
+180m.
+6.3 The world-model branch
+The world-model branch trains stably as a fourth concurrent objective: world MSE drops from 1.125
+at initialisation to 0.287 at step 10,000 on the 60m training trajectory (Fig. 4); on held-out evaluation,
+the trained 180m StateEncoder reaches 0.071 (Table 3), an ∼16× reduction from initialisation in the
+encoded-state metric. To put 0.071 in context, we computed the predict-mean baseline post-hoc on
+the same trained 180m StateEncoder over the 1,000-triple held-out tail of world_episodes.jsonl:
+MSEpredict-mean = 0.033. The two numbers sit in the same band.
+The reading is environmental rather than architectural. MiniGrid-Empty-8x8-v0 is a deterministic
+8×8 grid in which frame𝑡+1 differs from frame𝑡by at most one agent-cell move or rotation; the encoded
+next-state distribution is consequently low-variance (per-element variance ∼0.033). On a low-variance
+target distribution, a constant-mean predictor is competitive with any noisy predictor, including a trained
+one — this is a known property of world-model evaluation on simple environments and is why standard
+19

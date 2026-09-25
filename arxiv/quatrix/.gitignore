@@ -1,0 +1,15 @@
+# LaTeX build products (main.pdf and the tarball are rebuilt by tools/build.sh / tar)
+*.aux
+*.log
+*.out
+*.stdout
+*.console
+*.toc
+build.log
+textdiff.txt
+_test_*
+_orig_*
+_t5.*
+main.pdf
+# Per-page span dumps are regenerable from original.pdf; the .txt extracts are kept
+extract/*.json

@@ -1,0 +1,120 @@
+Scale
+Variant
+In-dist (WT-103)
+Arxiv
+Pubmed
+OOD avg
+60m
+SAO (plain, ℎ=1)
+272
+1700
+1599
+1649
+60m
+SAVO (D.1, ℎ=1)
+263
+1783
+1673
+1728
+60m
+QKVO (Transformer, ℎ=1)
+252
+1730
+1626
+1678
+120m
+SAO (plain, ℎ=1)
+258
+1771
+1619
+1695
+120m
+SAVO (D.1, ℎ=1)
+239
+1748
+1609
+1679
+120m
+QKVO (Transformer, ℎ=1)
+230
+1751
+1569
+1660
+180m
+SAVO (D.1, ℎ=1)
+260
+1729
+1639
+1684
+180m
+SAVO+MH (ℎ=6)
+265
+1882
+1755
+1819
+180m
+QKVO (Transformer, ℎ=1)
+249
+1733
+1618
+1676
+180m
+QKVO+MH (ℎ=6)
+—
+1831
+1659
+1745
+Table 6. Out-of-distribution held-out perplexity (arxiv, pubmed). Bold = best per column at each scale. At
+60m the 𝑊𝑉-free SAO is the best OOD variant on both subsets and on the OOD average. At 120m and 180m:
+SAVO is marginally best on arxiv (within ∼3–5 ppl, inside noise), QKVO is best on pubmed and on the OOD
+average. The 60m SAO advantage does not replicate at scale. Multi-head variants are consistently worse OOD
+than ℎ=1 counterparts.
+60m
+120m
+180m
+Model scale (M parameters)
+230
+240
+250
+260
+270
+Validation perplexity  (lower is better)
+a.  In-distribution perplexity (WT-103 val)
+QKVO Transformer
+SAVO (D.1)
+SAO (plain Q-Compass)
+60m
+120m
+180m
+Model scale (M parameters)
+1650
+1660
+1670
+1680
+1690
+1700
+1710
+1720
+1730
+OOD perplexity  (lower is better)
+At 60m, WV-free SAO wins OOD.
+At 120m and 180m, QKVO recovers
+and the 60m OOD flip vanishes.
+b.  Out-of-distribution perplexity (arxiv + pubmed avg)
+QKVO Transformer
+SAVO (D.1)
+SAO (plain Q-Compass)
+Fig. 8. In-distribution vs out-of-distribution perplexity by scale. Panel (a): WT-103 validation perplexity; the
+rank-matched transformer is best at every scale. Panel (b): average OOD perplexity on arxiv + pubmed. The 60m
+𝑊𝑉-free SAO is best; at 120m and 180m, QKVO has the lowest OOD average; SAVO and QKVO sit within ∼5–20
+ppl on the average and within 3–5 ppl on arxiv (noise floor).
+5.5 Cross-modal non-interference: multimodal training does not degrade text
+Jointly training on multiple modalities typically degrades per-token unimodal performance: in standard
+multimodal stacks, the text loss at matched text-token budget is measurably higher under the joint
+schedule than under text-only training. At 60m we observe no measurable gap.
+At matched optimizer compute (10,000 steps), the multimodal model sees ∼229M text tokens (35%
+of 655M total) while the text-only model sees the full ∼655M. Interpolating the text-only training loss
+curve, the text-only model reaches loss ≈6.31 at step 3,500 — the point at which it has consumed
+the same ∼229M text tokens as the multimodal model at step 10,000 (text CE = 6.328). At matched
+text-compute, the two trajectories are indistinguishable at the per-architecture seed std measured
+13

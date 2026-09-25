@@ -1,0 +1,93 @@
+SAVO does not beat NNLS on its home turf, and we did not expect it to: signature decomposition
+is a convex non-negative least-squares problem for which NNLS is near-optimal when 𝑆is known. The
+architectural claim is invariance of the primitive across domains.
+Phase 2: pan-cancer classification from mutation signatures
+We classify primary tumour origin from a single SBS96 catalog across 27 TCGA projects (TCGA
+MC3 30, 7,098 patients after filtering). The model is a 17.6M-parameter SAVO stack (ℎ=6, 𝐻=384,
+𝑟=48, 8 encoder + 4 transition layers) with a softmax head over 27 classes; trained 8,000 steps with
+AdamW + cosine-decayed LR on an 85/15 random split, single seed.
+Result.
+Peak held-out top-1 accuracy is 0.517 at step 2,500; the final-step checkpoint drops to 0.487
+due to mild overfitting (val cross-entropy minimum is also at step 2,500). Top-5 accuracy is 0.838.
+Chance baseline is 1/27 = 0.037 and majority-class baseline is 0.087 — SAVO is 5.6× better than
+majority on a task whose only input is a 96-bin mutation-context histogram.
+SKCM
+LIHC
+COAD
+LUAD
+LUSC
+GBM
+CESC
+OV
+BRCA
+KIRC
+UCEC
+BLCA
+KIRP
+STAD
+SARC
+THCA
+HNSC
+ESCA
+LGG
+PRAD
+ACC
+PAAD
+MESO
+DLBC
+CHOL
+READ
+UCS
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+Per-class F1 on validation split
+n=77
+n=60
+n=56
+n=72
+n=68
+n=49
+n=44
+n=63
+n=91
+n=44
+n=70
+n=48
+n=30
+n=60
+n=30
+n=4
+n=70
+n=36
+n=18
+n=18
+n=4
+n=15
+n=3
+n=6
+n=3
+n=18
+n=7
+UV etiology
+aflatoxin/alcohol
+MMR smoking
+Phase 2: per-class F1 (overall acc = 0.490, macro-F1 = 0.326, weighted-F1 = 0.465)
+Fig. 12. Phase 2 per-class F1, sorted descending, with validation-set support (𝑛) annotated. Etiologically
+distinctive cancers (SKCM UV F1 = 0.90; LIHC aflatoxin 0.69; COAD MMR 0.60; LUAD smoking 0.57) are
+classified sharply; small-𝑛classes at the tail collapse to F1 = 0. Overall accuracy 0.490 at this checkpoint (step
+2,500); macro-F1 = 0.326; weighted-F1 = 0.465.
+Phase 3: drug-response regression on GDSC2
+We predict natural-log IC50 for a (cell line, drug) pair on GDSC2 31. After filtering cell lines with
+< 5 observations and drugs with < 5 observations: 566 cell lines × 280 drugs over 31 tissue types and
+∼133,000 assays. Inputs are three integer IDs (cell line, drug, tissue), each embedded to 𝐻=128, passed
+through a 2-layer bidirectional SAVO fusion block, and regressed via MSE; total ∼0.15M parameters.
+Built-in channel ablation re-evaluates the same checkpoint after masking the cell-line or drug channel.
+RMSE baseline: predict the global mean lnIC50.
+Result.
+Full-fusion validation Pearson is 𝑟= 0.903, Spearman 0.869, RMSE 1.182. The constant-
+mean baseline has RMSE 2.750; the fusion model cuts RMSE by 57%. Drug identity alone reaches
+24

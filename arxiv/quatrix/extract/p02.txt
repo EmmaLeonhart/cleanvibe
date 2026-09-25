@@ -1,0 +1,38 @@
+via learned projection layers at fusion points. Q-Compass 1 replaces the per-modality design with a sin-
+gle sequence-mixing primitive grounded in the reinforcement-learning 𝑄-function: the same primitive,
+differing only in whether a causal mask is applied, is used for all four modalities. Standard attention
+variants 5–9 retain the four-projection 𝑄𝐾𝑉𝑂structure and are typically optimized as a separate encoder
+per modality. Q-Compass drops the value projection 𝑊𝑉and scores attention via a 𝑄-function over
+learned state/action projections.
+This paper is the empirical follow-up to 1. It introduces two extensions deferred in that work and
+evaluates them at three parameter scales (57M, 121M, 179M) on four modalities. The central claims are:
+1. SAVO closes most of the SAO→QKVO 60m text-LM gap. The four-projection variant in which
+the 𝑉projects the state⊙action product reduces the perplexity gap from 20 ppl to +12.33 ± 0.87
+ppl at 60m (4-seed paired-difference vs the rank-matched controlled ablation, 𝑝= 7.6 × 10−4). A
+comparable ∼11-ppl gap holds at 120m and 180m (single seed each, magnitude consistent with
+the 60m multi-seed mean).
+2. Cross-modal non-interference is empirical, not assumed. At matched text compute, joint four-
+modality training at 60m reaches the same per-text-token loss as text-only training; the property
+holds through 180m.
+3. World-model concurrent with text/vision/audio. The world objective trains stably alongside the
+other three modalities (MSE 1.125 →0.071 over the 10,000-step budget); MiniGrid-Empty-8x8’s
+low next-state variance puts the predict-mean baseline (0.033) in the same band as the trained
+TransitionModel, so the routing primitive’s concurrent multimodal capacity — not world-model
+dominance — is what we report.
+4. Cross-field demonstration. The same SAVO block class trains on four computational-oncology
+tasks (signature decomposition, pan-cancer classification, drug-response regression, 5-year sur-
+vival prediction). Per-task performance ranges from competitive (Phase 3 GDSC drug-response,
+𝑟=0.903) to slightly below specialist baselines (Phase 1 NNLS, Phase 4 clinical-only), indicating
+the routing primitive trains and converges across these domains; per-domain superiority is not
+claimed.
+The work is purely empirical. The architectural primitive and its theoretical justification are estab-
+lished in 1; here we ask how it behaves at scale across modalities and where the boundaries of its current
+evaluation lie.
+2 Related Work
+Attention variants.
+Numerous works modify the attention mechanism while retaining the QKVO
+four-projection structure: linear attention 6, sparse attention 7, FlashAttention 8, and grouped-query
+attention 9. None eliminate 𝑊𝑉as an architectural decision. Q-Compass 1 does, grounding the removal
+in 𝑄-function theory; the four-projection variant introduced here (§3.1) reintroduces a 𝑉, but the 𝑉
+projects the state-action product, not the raw input.
+2

@@ -1,0 +1,20 @@
+[28] Ludmil B. Alexandrov, Jaegil Kim, Nicholas J. Haradhvala, Mi Ni Huang, Alvin W. Tian Ng, Yang
+Wu, Arnoud Boot, Kyle R. Covington, Dmitry A. Gordenin, Erik N. Bergstrom, S. M. Ashiqul
+Islam, et al. The repertoire of mutational signatures in human cancer. Nature, 578:94–101, 2020.
+[29] S. M. Ashiqul Islam, Marcos Díaz-Gay, Yang Wu, Mark Barnes, Raviteja Vangara, Erik N.
+Bergstrom, Yudou He, Mike Vella, Jingwei Wang, Jon W. Teague, Peter Clapham, et al. Uncovering
+novel mutational signatures by de novo extraction with SigProfilerExtractor. Cell Genomics, 2(11):
+100179, 2022.
+[30] Kyle Ellrott, Matthew H. Bailey, Gordon Saksena, Kyle R. Covington, Cyriac Kandoth, Chip
+Stewart, Julian Hess, Singer Ma, Kami E. Chiotti, Michael McLellan, et al. Scalable open science
+approach for mutation calling of tumor exomes using multiple genomic pipelines (MC3). Cell
+Systems, 6(3):271–281.e7, 2018.
+[31] Wanjuan Yang, Jorge Soares, Patricia Greninger, Elena J. Edelman, Howard Lightfoot, Simon
+Forbes, Nidhi Bindal, Dave Beare, James A. Smith, I. Richard Thompson, et al. Genomics of
+drug sensitivity in cancer (GDSC): a resource for therapeutic biomarker discovery in cancer cells.
+Nucleic Acids Research, 41(D1):D955–D961, 2013.
+[32] Jianfang Liu, Tara Lichtenberg, Katherine A. Hoadley, Laila M. Poisson, Alexander J. Lazar,
+Andrew D. Cherniack, Albert J. Kovatich, Christopher C. Benz, Douglas A. Levine, Adrian V. Lee,
+et al. An integrated TCGA pan-cancer clinical data resource to drive high-quality survival outcome
+analytics. Cell, 173(2):400–416.e11, 2018.
+32

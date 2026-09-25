@@ -1,0 +1,69 @@
+Text pipeline
+Tokens
+(L=1024)
+Token + pos embed
+x ∈ℝB×L×H
+SAVO blocks
+(L layers, causal)
+Logits over
+vocab (50257)
+Same block, only mask + I/O change
+Cancer genomics pipeline
+SBS96 counts
+(L=96)
+Context + log-count
+embed →ℝB×96×H
+SAVO blocks
+(L layers, bidirectional)
+Signature
+contributions (79)
+Phase 1 result (WT hold-out):  SAVO val cosine = 0.975  vs.  NNLS baseline = 0.987
+Same SAVO primitive, different modality: text ↔ cancer
+Fig. 10. Same SAVO primitive, different modality. Top: text pipeline with token + positional embeddings
+and 50,257-vocab logits. Bottom: cancer-genomics pipeline with mutation-context + log-count embeddings and a
+softmax over 79 COSMIC SBS signatures. Only the I/O layers and the causal mask differ; the SAVO block is the
+same class.
+0
+2000
+4000
+6000
+8000
+10000
+12000
+14000
+Training step
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+Validation cosine similarity  (higher is better)
+Final gap: 0.024 cosine
+Phase 1: SAVO approaches NNLS signature decomposition
+gap to NNLS
+NNLS (SigProfiler-style) = 0.987
+SAVO (14.86M params, from random init)
+0
+2000
+4000
+6000
+8000
+10000
+12000
+14000
+Training step
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+Signature agreement  (higher is better)
+Top-k signature agreement
+NNLS top-1 = 0.96
+SAVO top-1
+SAVO top-3 overlap
+Fig. 11. Phase 1 convergence. Left: validation cosine similarity over training steps (green) vs. the NNLS baseline
+(red dashed). Shaded area indicates the residual gap. Right: top-1 and top-3 signature agreement.
+23

@@ -1,0 +1,60 @@
+0
+2000
+4000
+6000
+8000
+10000
+Training step
+0
+2
+4
+6
+8
+10
+Loss
+Quatrix-60m multimodal: per-modality training loss
+Text (CE)
+Vision (CE)
+Audio (CE)
+World (MSE)
+Fig. 4.
+Quatrix-60m multimodal training loss (10,000 steps).
+Per-modality training cross-entropy
+(text/vision/audio) and world-model MSE on the unified 4-modality run. Mixture ratio 35/25/20/20. World-
+MSE drops from 1.125 at initialisation to 0.287 at step 10,000 in encoded-state space (the StateEncoder is trained
+jointly with the TransitionModel; the predict-mean baseline on the same encoder is reported in §6.3).
+Per-modality held-out evaluation across three scales.
+Held-out splits: WikiText-103 val (text, 1,038
+docs), MS-COCO captions 5% tail (vision, 1,250 docs), LibriSpeech 5% tail (audio, 500 utterances),
+MiniGrid 5% tail (world, 1,000 triples).
+Modality / loss
+60m SAO MM
+120m SAVO MM
+180m SAVO MM
+Best
+Text (CE, nats →ppl)
+6.238 →512
+6.064 →430
+6.119 →454
+120m
+Vision (CE, nats →ppl)
+5.166 →175
+4.870 →130
+4.858 →129
+180m
+Audio (CE, nats →ppl)
+7.552 →1,905
+7.582 →1,962
+7.610 →2,018
+60m
+World (MSE)
+0.406
+0.407
+0.071
+180m raw; predict-mean 0.033
+Table 3. Multimodal per-modality held-out evaluation. Different modalities show different scaling regimes at
+the 10,000-step training budget: vision improves monotonically; text regresses 120m→180m in lock-step with the
+text-only regression (§5.6); audio is in a saturated band. World MSE drops 5.7× from 60m to 180m in encoded-state
+space; the predict-mean baseline on the trained 180m StateEncoder sits in the same band (0.033 vs trained 0.071),
+reflecting MiniGrid-Empty-8x8’s low next-state variance (§6.3).
+8

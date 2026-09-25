@@ -33,3 +33,25 @@ step "Go live"), so pushes are a no-op until then.
 Checked the repo root for user-dropped material. The only non-scaffold file is
 `!runClaude.bat`, the launcher added in 3e8fc6d, which must stay at the root.
 `data_lake/` stays empty (just `.gitkeep`); no zips, no LFS-sized files.
+
+## 2026-09-25 — Quatrix LaTeX source rebuilt for arXiv (user-directed side task)
+
+Rebuilt LaTeX source for "Quatrix: An Empirical Evaluation of Q-Compass and
+SAVO" (Zenodo 10.5281/zenodo.19839718) from its PDF, because no source exists
+publicly (Zenodo and github.com/Abd0r/* checked; 30 commits of the quatrix
+repo contain only PDFs). Work is in `arxiv/quatrix/`, local only.
+
+- The 18 figures are cropped from the original PDF as vector PDFs (`figs/`), so they
+  match the original exactly. Text, equations, 11 tables and the 32 references are
+  transcribed by hand (split across parallel subagents by section).
+- `main.tex`: article 11pt A4, newtx, onehalfspacing, `[H]` floats (plus
+  `[t]`/`[tbp]` where the original floated), which reproduces the original's
+  32 pages. Figure/table pages match the original through p23; the rest are off by
+  at most one page.
+- Checked with `tools/ngramcheck.py`: every 8-word window of the original occurs
+  in the rebuild and vice versa, except float seams and extraction spacing.
+- `quatrix-arxiv.tar.gz` (main.tex, sections/, figs/, 00README.json)
+  compiles cleanly on its own in a fresh folder. `SUBMISSION.md` has the form
+  fields and a 1,754-char condensed metadata abstract (the original abstract,
+  ~2,480 chars, exceeds arXiv's 1,920 limit) for the author to approve.
+- The three hourly research crons were stopped for this task.

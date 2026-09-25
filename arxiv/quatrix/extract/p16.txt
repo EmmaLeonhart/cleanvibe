@@ -1,0 +1,82 @@
+optimizer steps.
+SAVO at 60m
+𝑟
+𝑟/𝐻
+WT-103 val ppl
+WT-103 test ppl
+𝑟= 𝐻/16
+24
+0.0625
+264.89
+263.54
+𝑟= 𝐻/8
+48
+0.125
+263.31
+262.46
+𝑟= 𝐻/4
+96
+0.25
+261.95
+260.66
+Table 9. SAVO rank ablation (60m, single seed each, 10,000 steps). Halving the compass rank from 𝑟=48 to
+𝑟=24 raises val perplexity by 1.6; doubling to 𝑟=96 lowers it by 1.4. The total range across 4× rank variation
+is ∼3 ppl. For comparison, the multi-seed per-architecture std measured at 𝑟=48 is 0.68 ppl (SAVO) and 0.40
+ppl (rank-matched MHA, Table 5); the rank-induced differences here (≤1.6 ppl per step) are larger than that
+single-architecture std but smaller than the architectural difference (∼12 ppl). SAVO appears robust to compass
+rank at this scale and budget; multi-seed replication of the rank ablation is deferred to future work. Bold = the
+𝑟= 𝐻/8 default used everywhere else in this paper.
+5.9 Throughput, FLOPs, and memory
+We measure forward + backward wall-clock, peak GPU memory, and analytical attention-block FLOPs
+for four attention variants at the 60m configuration (𝐻= 384, 𝐿= 1024, batch 𝐵= 4), 100 timed
+iterations after 5 warmup passes, on the same RTX 4050 laptop GPU used for all training in this paper.
+Attention variant
+Block params
+Forward (ms)
+Backward (ms)
+Peak GPU mem
+Analytical FLOPs
+Q-Compass (SAO, ℎ=1)
+184,704
+1.52 ± 0.04
+2.53 ± 0.10
+0.10 GB
+5.16 G
+SAVO (ℎ=1, 𝑊𝑐)
+203,136
+1.51 ± 0.01
+2.98 ± 0.01
+0.11 GB
+5.31 G
+Rank-matched MHA (𝑞𝑘𝑟=48, ℎ=1)
+74,112
+1.12 ± 0.01
+2.00 ± 0.02
+0.11 GB
+1.43 G
+Full-rank standard MHA (𝑞𝑘𝑟=𝐻, ℎ=8)
+590,208
+10.91 ± 0.02
+16.28 ± 0.03
+0.57 GB
+11.44 G
+Table 10. Per-attention-block throughput at 60m config (RTX 4050, 𝐿=1024, 𝐵=4). Mean ± std over 100
+timed iterations after 5 warmup passes. Attention-block forward+backward only: this measures the routing +
+content-gather kernels in isolation; full-model wall-clock is dominated by FFN, embedding, and other components
+and is not measured here. SAVO has ∼2.9× the parameter count of the rank-matched controlled ablation but ∼2.9×
+fewer parameters than full-rank standard 8-head MHA, and runs ∼6× faster than full-rank MHA on the attention
+block alone (4.5 ms vs 27.2 ms total) at ∼5× less peak GPU memory. Analytical FLOPs follow the same ordering.
+The full-rank MHA’s quadratic-in-𝐻projection cost dominates the attention-block gap; SAVO’s rank-𝑟routing
+avoids that cost while still using the 𝑄-value content projection 𝑊𝑐to recover most of the SAO→QKVO perplexity
+gap.
+5.10 Autoregressive cache footprint: SAVO is structurally rank-𝑟
+Standard multi-head attention requires per-token caching of 𝐾𝑗= 𝑥𝑗𝑊𝐾∈R𝐻and 𝑉𝑗= 𝑥𝑗𝑊𝑉∈R𝐻for
+incremental decode, totalling 2𝐻floats per token per layer. SAVO admits a structurally smaller cache
+because both its routing key and its content are rank-𝑟quantities by construction.
+Derivation.
+Reading the SAVO forward pass (§3.1, code at quatrix/model.py:111–118), the only
+quantities required for incremental decode at a future token 𝑡are:
+1. Routing. The query computes softmax(state𝑡· action⊤
+𝑗/√𝑟) over cached past positions 𝑗≤𝑡. This
+requires only action𝑗∈R𝑟.
+16

@@ -1,0 +1,111 @@
+2000
+4000
+6000
+8000
+10000
+Training step
+5.5
+6.0
+6.5
+7.0
+7.5
+8.0
+8.5
+9.0
+Training loss (text CE, nats)
+60m text-LM: training loss vs step
+Transformer rank-matched (32.3M)
+Quatrix text-only (33.4M)
+Quatrix multimodal (57.7M; 35% text batches)
+Quatrix
+multimodal
+(57.7M)
+Quatrix SAO
+text-only
+(33.4M)
+Quatrix SAVO
+text-only
+(33.6M)
+Transformer
+QKVO
+(32.3M)
+0
+100
+200
+300
+400
+500
+600
+Perplexity (lower is better)
+560
+311
+295
+288
+512
+272
+263
+252
+516
+271
+262
+251
+60m held-out perplexity: SAVO closes the SAO→QKVO gap
+train
+WT-103 val
+WT-103 test
+Fig. 6. 60m text-LM head-to-head. Left: WikiText-103 training text-CE vs. optimizer step for three 60m-scale
+models. The dashed multimodal curve sees only 35% of its batches as text. Right: WikiText-103 train / val / test
+perplexity at step 10,000 (held-out CPU evaluation on standard splits). The rank-matched transformer reaches the
+lowest perplexity, text-only Q-Compass (SAO) is ∼8% behind, and the multimodal model is further behind on text
+because the text-token budget is 2.86× smaller.
+Model
+Params
+Train
+Val
+Test
+Δ (test −val)
+Quatrix-60m multimodal
+57.7M
+6.328∗
+6.238
+6.247
++0.009
+Quatrix-60m text-only
+33.4M
+5.739
+5.606
+5.602
+−0.004
+Transformer-60m (rank-matched)
+32.3M
+5.662
+5.529
+5.526
+−0.003
+Quatrix text-only −Transformer
++1.1M
++0.077
++0.077
++0.076
+—
+Quatrix MM −Quatrix TO
++24.3M
++0.589
++0.632
++0.645
+—
+Table 4. 60m text-LM comparison — WikiText-103. Cross-entropy (nats) on train / val / test splits. All three
+models trained for 10,000 steps with identical hyperparameters; only the attention primitive and training data
+composition differ. The multimodal run sees ∼229M text tokens vs. ∼655M for text-only at matched optimizer
+compute. ∗Multimodal training-loss column is final-1K-step text CE only.
+Parameter accounting.
+SAVO at 60m has 33.4M parameters; the rank-matched transformer has 32.3M
+(3.4% fewer). The ∼12-ppl gap is therefore not in SAVO’s favor on parameter efficiency — SAVO is
+paying a small parameter premium and still loses on val. We do not claim parameter efficiency as a
+contribution.
+Multi-seed replication.
+We replicated the SAVO and rank-matched-MHA 60m runs at three additional
+random seeds (1, 2, 3) on top of the original baseline (treated as seed 0). All eight runs use the identical
+recipe; only the seeds differ. Multi-seed mean ± std and the paired SAVO−rank-matched difference per
+seed appear in Table 5.
+10

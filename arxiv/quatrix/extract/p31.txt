@@ -1,0 +1,41 @@
+[15] Danijar Hafner, Jurgis Pasukonis, Jimmy Ba, and Timothy Lillicrap. Mastering diverse domains
+through world models. arXiv preprint arXiv:2301.04104, 2023.
+[16] Keller Jordan.
+Muon:
+An optimizer for the hidden layers of neural networks.
+https:
+//kellerjordan.github.io/posts/muon/, 2024.
+[17] Ilya Loshchilov and Frank Hutter. Decoupled weight decay regularization. In International Con-
+ference on Learning Representations (ICLR), 2019.
+[18] DeepSeek-AI. Deepseek-v4: Towards highly efficient million-token context intelligence. arXiv
+preprint, 2026. Preview release. Model checkpoints: https://huggingface.co/collections/
+deepseek-ai/deepseek-v4.
+[19] Stephen Merity, Caiming Xiong, James Bradbury, and Richard Socher. Pointer sentinel mixture
+models. In International Conference on Learning Representations (ICLR), 2017.
+[20] Tsung-Yi Lin, Michael Maire, Serge Belongie, James Hays, Pietro Perona, Deva Ramanan, Piotr
+Dollár, and C. Lawrence Zitnick. Microsoft COCO: Common objects in context. In European
+Conference on Computer Vision (ECCV), 2014.
+[21] Vassil Panayotov, Guoguo Chen, Daniel Povey, and Sanjeev Khudanpur. LibriSpeech: An ASR
+corpus based on public domain audio books. In IEEE International Conference on Acoustics,
+Speech and Signal Processing (ICASSP), 2015.
+[22] Maxime Chevalier-Boisvert, Bolun Dai, Mark Towers, Rodrigo de Lazcano, Lucas Willems, Salem
+Lahlou, Suman Pal, Pablo Samuel Castro, and Jordan Terry. Minigrid & miniworld: Modular
+& customizable reinforcement learning environments for goal-oriented tasks. https://github.
+com/Farama-Foundation/Minigrid, 2023. Gymnasium compatible RL benchmark.
+[23] DeepSeek-AI.
+Deepseek-v2: A strong, economical, and efficient mixture-of-experts language
+model. arXiv preprint arXiv:2405.04434, 2024.
+[24] Noam Shazeer.
+Fast transformer decoding: One write-head is all you need.
+arXiv preprint
+arXiv:1911.02150, 2019.
+[25] Edward J. Hu, Yelong Shen, Phillip Wallis, Zeyuan Allen-Zhu, Yuanzhi Li, Shean Wang, Lu Wang,
+and Weizhu Chen. LoRA: Low-rank adaptation of large language models. In International Con-
+ference on Learning Representations (ICLR), 2022.
+[26] Sinong Wang, Belinda Z. Li, Madian Khabsa, Han Fang, and Hao Ma. Linformer: Self-attention
+with linear complexity. arXiv preprint arXiv:2006.04768, 2020.
+[27] Krzysztof Choromanski, Valerii Likhosherstov, David Dohan, Xingyou Song, Andreea Gane,
+Tamas Sarlos, Peter Hawkins, Jared Davis, Afroz Mohiuddin, Lukasz Kaiser, David Belanger, Lucy
+Colwell, and Adrian Weller. Rethinking attention with Performers. In International Conference on
+Learning Representations (ICLR), 2021.
+31

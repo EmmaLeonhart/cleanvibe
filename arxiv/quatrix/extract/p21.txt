@@ -1,0 +1,40 @@
+4. The 60m text-LM head-to-head is replicated at 4 seeds (Table 5), giving measured per-architecture
+std 0.40–0.68 ppl — much smaller than the architectural difference. Other comparisons (rank
+ablation in §5.8, OOD subsets in §5.4, 120m / 180m text-only scaling, full-rank MHA Phase 3)
+are single-seed or two-seed; a future revision should expand to ≥3 seeds per cell to characterise
+per-comparison variance more tightly.
+5. The world-model branch is evaluated on MiniGrid-Empty-8x8-v0, whose low encoded next-
+state variance puts a predict-mean baseline in the same band as the trained TransitionModel
+(§6.3). Demanding environments (DMLab, Habitat, Atari) and dedicated world-model architec-
+tures (target-network EMA, predictor heads, contrastive auxiliaries, raw-pixel targets) are required
+to benchmark world-model learning in a stronger sense; both are out of scope here.
+6. OOD evaluation covers two scientific-prose subsets (arxiv, pubmed); dialogue and code OOD
+subsets and multi-seed replication are deferred.
+7. 1B-scale runs are deferred. Q-Compass has not yet been empirically validated at ≥1B parameters.
+6.6 What this paper does not establish
+We list the experiments that would be required to make stronger claims than those reported in this paper.
+Each item names the specific gap and the experiment that would close it.
+Already established in this revision.
+Four items previously listed under this heading are now closed:
+(i) multi-seed replication of the 60m text-LM head-to-head (Table 5, 4 seeds) gives a paired SAVO−rank-
+matched difference of +12.33 ± 0.87 ppl on val and +12.16 ± 0.54 ppl on test, both with 𝑝< 10−3;
+(ii) the SAVO compass-rank ablation across 𝑟∈{𝐻/16, 𝐻/8, 𝐻/4} shows ≤3 ppl variation across 4×
+rank change (Table 9); (iii) per-attention-block throughput, FLOPs, and peak GPU memory (Table 10)
+show SAVO running ∼6× faster than full-rank standard 8-head MHA at ∼5× less peak GPU memory;
+(iv) full-rank standard 8-head MHA perplexity (Table 5, 2 seeds, batch = 2, grad-accum= 32 to fit 6 GB
+VRAM) lands at 257.96 ± 2.12 val ppl. SAVO is +5.79 ppl above (worse than) full-rank MHA on val.
+The rank-matched controlled ablation is −6.54 ppl below (better than) full-rank MHA on val — the
+larger 8×-attn-block configuration (∼590k attn-block params/layer) is parameter-undertrained at 10,000
+steps relative to the rank-matched 1×-attn-block configuration (∼74k attn-block params/layer), which
+converges in the same budget. This is itself a substantive finding (§5.2). The remaining open items
+follow.
+1. 10,000-step training budget. The training budget here yields WikiText-103 val perplexity ∼250
+at 60m. Comparable-parameter-count Transformer baselines in the language-modelling literature
+reach substantially lower perplexity at substantially longer training budgets (105–106 optimizer
+steps, multi-epoch); whether the SAVO/QKVO gap survives, narrows, or reverses in that converged
+regime is not tested in this paper.
+2. No comparison to other parameter-efficient attention variants.
+LoRA 25, Linformer 26,
+Performer 27, and GQA 9 / MQA 24 are the natural reference points for any low-rank or projection-
+light attention proposal. None are compared empirically here. A side-by-side at matched parameter
+21

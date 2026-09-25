@@ -1,0 +1,72 @@
+60 M
+120 M
+180 M
+Model scale (M parameters, text-only)
+230
+240
+250
+260
+270
+280
+WikiText-103 validation perplexity  (lower is better)
+Δ = +11.8
+At every scale, SAVO sits inside the
+seed-to-seed noise band of QKVO.
+Both h=1 curves regress 120m→180m
+(compute-budget-starved at 10k steps).
+Text-LM scaling: SAVO tracks rank-matched QKVO across three scales
+SAVO ± seed-variance band (±12 ppl)
+Transformer QKVO (h=1)
+SAVO (h=1, D.1)
+Plain Q-Compass (SAO, h=1)
+SAVO+MH (h=6, 60m/180m only)
+Transformer QKVO (h=6, 180m only)
+Fig. 9. SAVO tracks QKVO across 60m / 120m / 180m. Held-out WikiText-103 val perplexity. SAVO (green
+diamonds) sits ∼11–12 ppl above the rank-matched MHA (red squares) at every scale; the 60m gap is the multi-seed
+paired difference +12.33 ± 0.87 ppl (𝑝< 10−3, Table 5), and the 120m / 180m points are single-seed at the same
+magnitude. Multi-head variants do not open a gap for either architecture at 180m. Both architectures regress
+120𝑚→180𝑚at a 10,000-step training budget — a compute-budget effect, not architecture-specific.
+5.7 60m text-LM exploratory ablation
+Given the 60m text-LM gap of 0.077 nats between single-head Q-Compass and the rank-matched
+transformer, we ran an ablation at 60m to isolate whether the gap is due to the single-head architecture,
+the content-gather choice, or both. Three additional 60m runs at 33M parameters and identical training
+budget: MH-QC (ℎ=6, no content projection), SAVO (ℎ=1, 𝑄-value content), and MH-QVC (ℎ=6 with
+𝑄-value content).
+Variant
+Heads
+𝑊𝑐
+WT-103 val ppl
+WT-103 test ppl
+Transformer rank-matched (QKVO)
+1
+—
+252
+251
+Q-Compass single-head (SAO)
+1
+—
+272
+271
+MH-Q-Compass (SAO)
+6
+—
+275
+274
+SAVO (single-head)
+1
+✓
+263
+262
+MH-QVC
+6
+✓
+266
+—
+Table 8. 60m text-LM exploratory ablation (WikiText-103). 𝑊𝑐closes most of the SAO→QKVO gap (20
+ppl →11). Multi-head contributes nothing at 60m: per-head rank 𝑟/ℎ= 8 is too small for heads to specialize.
+The 180m data (Table 7) confirms multi-head remains a nothing-knob at 𝑟/ℎ= 16. The structural ingredient that
+matters is the 𝑄-value content projection 𝑊𝑐, not the routing topology.
+5.8 SAVO compass-rank ablation at 60m
+We sweep the compass rank 𝑟at 60m, holding all other hyperparameters fixed. The base scale config
+sets 𝑟= 𝐻/8 = 48; we additionally train 𝑟= 𝐻/16 = 24 and 𝑟= 𝐻/4 = 96, single seed each, 10,000
+15
