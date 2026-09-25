@@ -27,3 +27,9 @@ Scheduled the three session-local crons via `CronCreate`: work-loop at
 `:03`, auto-flush at `:15`, status-report at `:42`. They are session-only and
 auto-expire after 7 days. No GitHub remote exists yet (that is bootstrap
 step "Go live"), so pushes are a no-op until then.
+
+## 2026-09-25 — Triage of user-supplied files (nothing to move)
+
+Checked the repo root for user-dropped material. The only non-scaffold file is
+`!runClaude.bat`, the launcher added in 3e8fc6d, which must stay at the root.
+`data_lake/` stays empty (just `.gitkeep`); no zips, no LFS-sized files.
