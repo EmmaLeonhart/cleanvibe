@@ -87,7 +87,7 @@ def research_project(
     _write(workflows / "pages.yml", templates.RESEARCH_PAGES_YML)
 
     if is_windows:
-        _write(path / "!runClaude.bat", templates.RUNCLAUDE_BAT)
+        _write(path / "!runClaude.bat", templates.runclaude_bat("research"))
 
     message = (
         f"Initial commit: research project scaffolded with cleanvibe v{__version__}\n"
@@ -107,4 +107,4 @@ def research_project(
     _git_init(path, message=message)
 
     if not no_claude:
-        _launch_claude(path)
+        _launch_claude(path, templates.starting_prompt("research"))

@@ -4,6 +4,8 @@ Creates project directories, writes template files, initializes git,
 and launches Claude Code.
 """
 
+from __future__ import annotations
+
 import os
 import platform
 import subprocess
@@ -47,12 +49,12 @@ def create_project(path: Path, dry_run: bool = False, no_claude: bool = False) -
     skills.write_skills(path)
 
     if is_windows:
-        _write(path / "!runClaude.bat", templates.RUNCLAUDE_BAT)
+        _write(path / "!runClaude.bat", templates.runclaude_bat("new"))
 
     _git_init(path)
 
     if not no_claude:
-        _launch_claude(path)
+        _launch_claude(path, templates.starting_prompt("new"))
 
 
 CLONE_BRANCH = "cleanvibe-onboarding"
@@ -122,7 +124,7 @@ def clone_project(repo: str, path: Path, dry_run: bool = False, no_claude: bool 
     if is_windows:
         runclaude = path / "!runClaude.bat"
         if not runclaude.exists():
-            _write(runclaude, templates.RUNCLAUDE_BAT)
+            _write(runclaude, templates.runclaude_bat("clone"))
             print(f"  Injected !runClaude.bat (was missing)")
 
     subprocess.run(["git", "add", "-A"], cwd=path, capture_output=True)
@@ -140,7 +142,7 @@ def clone_project(repo: str, path: Path, dry_run: bool = False, no_claude: bool 
     print(f"  Committed onboarding scaffold on {CLONE_BRANCH}")
 
     if not no_claude:
-        _launch_claude(path)
+        _launch_claude(path, templates.starting_prompt("clone"))
 
 
 def convert_project(path: Path, dry_run: bool = False, no_claude: bool = False) -> None:
@@ -202,7 +204,7 @@ def convert_project(path: Path, dry_run: bool = False, no_claude: bool = False) 
         print(f"  Committed scaffold files")
 
     if not no_claude:
-        _launch_claude(path)
+        _launch_claude(path, templates.starting_prompt("convert"))
 
 
 def _inject_scaffold(path: Path, project_name: str, is_windows: bool) -> bool:
@@ -255,7 +257,7 @@ def _inject_scaffold(path: Path, project_name: str, is_windows: bool) -> bool:
     if is_windows:
         runclaude = path / "!runClaude.bat"
         if not runclaude.exists():
-            _write(runclaude, templates.RUNCLAUDE_BAT)
+            _write(runclaude, templates.runclaude_bat("convert"))
             print(f"  Injected !runClaude.bat (was missing)")
             injected = True
 
@@ -349,24 +351,27 @@ def _git_init(path: Path, message=None) -> None:
     print(f"  Initialized git repo with initial commit")
 
 
-def _launch_claude(path: Path) -> None:
+def _launch_claude(path: Path, prompt: str | None = None) -> None:
     """Launch Claude Code in the project directory.
 
-    On Windows, opens a new cmd window. On Unix, replaces the current process.
+    ``prompt`` (a mode's ``templates.starting_prompt``) becomes the first
+    message of the session. On Windows, opens a new cmd window. On Unix,
+    replaces the current process.
     """
     print(f"  Launching Claude Code...")
+    command = ["claude"] + ([prompt] if prompt else [])
     system = platform.system()
     try:
         if system == "Windows":
             subprocess.Popen(["explorer", str(path)])
             subprocess.Popen(
-                ["cmd", "/k", "claude"],
+                ["cmd", "/k", *command],
                 cwd=str(path),
                 creationflags=subprocess.CREATE_NEW_CONSOLE,
             )
         else:
             os.chdir(path)
-            os.execlp("claude", "claude")
+            os.execlp("claude", *command)
     except FileNotFoundError:
         print(
             "  Could not launch 'claude'. Make sure Claude Code is installed and on your PATH.",

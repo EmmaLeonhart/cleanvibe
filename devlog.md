@@ -1186,3 +1186,23 @@ matched the code:
 - `queue.md`'s pointer said version `1.16.0`; now `1.17.1`.
 
 Docs only, no code change.
+
+## 2026-09-26 — Every mode launches Claude with a starting prompt
+
+Emma asked that every mode's session open with a prompt saying it was started
+with cleanvibe and what the mode is for. `templates.starting_prompt(mode)` builds
+it from a per-mode summary (`new`, `convert`, `clone`, `research`, `original`,
+`replicate`, `replicate-manual`, `chat`). Each prompt ends: read CLAUDE.md and
+queue.md, work item 1, and ask with AskUserQuestion first if the goal is
+unclear. The last clause follows Emma's stated direction that cleanvibe should
+lean toward asking the user.
+
+- `scaffold._launch_claude(path, prompt)` passes it as Claude's initial prompt:
+  `cmd /k claude "<prompt>"` on Windows, `execlp("claude", "claude", prompt)`
+  elsewhere. All nine launch sites pass their mode's prompt.
+- The single `RUNCLAUDE_BAT` constant is replaced by `runclaude_bat(mode)`. A
+  relaunch from `!runClaude.bat` re-orients the session the same way.
+- The prompt goes through cmd.exe and batch, so `starting_prompt` raises if a
+  summary contains `" % ^ & | < > !` or a newline.
+- Tests: `tests/test_starting_prompt.py` (7), plus a `.bat` content check in
+  `test_scaffold.py`. 135 passed.

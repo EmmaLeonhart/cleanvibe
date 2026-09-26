@@ -272,6 +272,8 @@ class TestCreateProject(unittest.TestCase):
             runclaude = proj / "!runClaude.bat"
             if IS_WINDOWS:
                 self.assertTrue(runclaude.is_file(), "!runClaude.bat should be created on Windows")
+                # The .bat relaunches with the mode's starting prompt.
+                self.assertIn("(new mode)", runclaude.read_text(encoding="utf-8"))
             else:
                 self.assertFalse(runclaude.exists(), "!runClaude.bat should NOT be created on Unix")
 

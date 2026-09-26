@@ -257,7 +257,7 @@ def replicate_project(
     _write(target / "report-theme.css", templates.CLEANVIBE_REPORT_CSS)
 
     if is_windows:
-        _write(target / "!runClaude.bat", templates.RUNCLAUDE_BAT)
+        _write(target / "!runClaude.bat", templates.runclaude_bat("replicate"))
 
     message = (
         f'Initial commit: replication scaffold for arXiv:{paper.arxiv_id}\n'
@@ -279,7 +279,7 @@ def replicate_project(
         _run_extraction(target)
 
     if not no_claude:
-        _launch_claude(target)
+        _launch_claude(target, templates.starting_prompt("replicate"))
 
 
 def replicate_clawrxiv_project(
@@ -376,7 +376,7 @@ def replicate_clawrxiv_project(
     _write(target / "report-theme.css", templates.CLEANVIBE_REPORT_CSS)
 
     if is_windows:
-        _write(target / "!runClaude.bat", templates.RUNCLAUDE_BAT)
+        _write(target / "!runClaude.bat", templates.runclaude_bat("replicate"))
 
     skill_note = (
         "replication_skill.md (clawRxiv skill recipe)"
@@ -399,7 +399,7 @@ def replicate_clawrxiv_project(
     _git_init(target, message=message)
 
     if not no_claude:
-        _launch_claude(target)
+        _launch_claude(target, templates.starting_prompt("replicate"))
 
 
 def replicate_manual_project(folder, dry_run: bool = False, no_claude: bool = False) -> None:
@@ -479,7 +479,7 @@ def replicate_manual_project(folder, dry_run: bool = False, no_claude: bool = Fa
     _write_if_missing(target / "report-theme.css", templates.CLEANVIBE_REPORT_CSS)
 
     if is_windows:
-        _write_if_missing(target / "!runClaude.bat", templates.RUNCLAUDE_BAT)
+        _write_if_missing(target / "!runClaude.bat", templates.runclaude_bat("replicate-manual"))
 
     message = (
         f"Add cleanvibe manual replication scaffold (cleanvibe v{__version__})\n"
@@ -502,7 +502,7 @@ def replicate_manual_project(folder, dry_run: bool = False, no_claude: bool = Fa
     )
 
     if not no_claude:
-        _launch_claude(target)
+        _launch_claude(target, templates.starting_prompt("replicate-manual"))
 
 
 def replicate_url_project(
@@ -580,7 +580,7 @@ def replicate_url_project(
     _write(target / "report-theme.css", templates.CLEANVIBE_REPORT_CSS)
 
     if is_windows:
-        _write(target / "!runClaude.bat", templates.RUNCLAUDE_BAT)
+        _write(target / "!runClaude.bat", templates.runclaude_bat("replicate"))
 
     # Download the source (best-effort, retry/backoff) and record provenance.
     saved = _download_source(url, target / "replication_target" / "source")
@@ -608,4 +608,4 @@ def replicate_url_project(
     _git_init(target, message=message)
 
     if not no_claude:
-        _launch_claude(target)
+        _launch_claude(target, templates.starting_prompt("replicate"))

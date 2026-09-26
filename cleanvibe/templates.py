@@ -354,10 +354,74 @@ current marching orders and reconcile it with the content preserved below it.
 """
 
 
-RUNCLAUDE_BAT = """@echo off
-cd /d "%~dp0"
-claude
-"""
+# ---------------------------------------------------------------------------
+# Starting prompts (v1.18.0)
+#
+# Every mode launches Claude with an initial prompt: the first message in the
+# session says the project was started with cleanvibe, which mode, what that
+# mode is for, and what to do first. The same prompt goes into the generated
+# `!runClaude.bat`, so a relaunch re-orients the session the same way.
+#
+# The prompt is passed as a command-line argument through `cmd /k` (Windows)
+# and a .bat file, so it must stay plain single-line text: none of the
+# characters in _PROMPT_UNSAFE, which cmd.exe or batch would interpret.
+# ---------------------------------------------------------------------------
+
+_PROMPT_UNSAFE = set('"%^&|<>!\n\r')
+
+_MODE_SUMMARIES = {
+    "new": "a fresh project. queue.md holds the bootstrap sequence that sets it up with me.",
+    "convert": (
+        "an existing directory that cleanvibe just turned into a project. "
+        "queue.md starts by catching the docs and devlog up to the existing code."
+    ),
+    "clone": (
+        "a cloned repo on the cleanvibe-onboarding branch. queue.md is the "
+        "onboarding sequence: document the repo, then hand off to its own backlog."
+    ),
+    "research": (
+        "an original-research project. The bootstrap pins down the research "
+        "question with me, then does a literature review before any building."
+    ),
+    "original": (
+        "an original-research project with no fixed question yet. The bootstrap "
+        "runs a topic-finding loop with me before the literature review."
+    ),
+    "replicate": (
+        "a replication of one paper. The paper is local-only under "
+        "replication_target (never committed). Running any third-party code "
+        "needs my explicit consent first."
+    ),
+    "replicate-manual": (
+        "a replication of a paper I supply by hand. If replication_target is "
+        "empty, stop and ask me for the paper. Running any third-party code "
+        "needs my explicit consent first."
+    ),
+    "chat": (
+        "a git-tracked conversation about one topic: research and discussion, "
+        "little coding. Session logs are saved into sessions/ and committed by "
+        "a hook. The first queue item is asking me what I am trying to do."
+    ),
+}
+
+
+def starting_prompt(mode: str) -> str:
+    """The initial prompt a freshly launched Claude session receives for ``mode``."""
+    prompt = (
+        f"This project was started with cleanvibe ({mode} mode): "
+        f"{_MODE_SUMMARIES[mode]} Read CLAUDE.md and queue.md, then work the "
+        f"first item in queue.md. If it is unclear what I am trying to do, ask "
+        f"me with AskUserQuestion before planning anything."
+    )
+    bad = _PROMPT_UNSAFE.intersection(prompt)
+    if bad:
+        raise ValueError(f"starting prompt for {mode!r} has cmd-unsafe characters: {sorted(bad)}")
+    return prompt
+
+
+def runclaude_bat(mode: str) -> str:
+    """`!runClaude.bat` that launches Claude with the ``mode``'s starting prompt."""
+    return f'@echo off\ncd /d "%~dp0"\nclaude "{starting_prompt(mode)}"\n'
 
 
 GITIGNORE = """# Python
