@@ -10,8 +10,7 @@
 
 Requested by Emma 2026-09-26 (voice note, then left for an IRL errand; she will say more later). Build it; record every interpretation call in `devlog.md` so she can correct it.
 
-1. **`cleanvibe chat [NAME]` — new mode.** A git-tracked, agentic conversation on one topic: research-heavy, little coding, private repo. `cleanvibe/chat.py` + `chat_*` templates + CLI subparser (NAME optional; defaults to `chat-YYYY-MM-DD`, auto-suffixed). The scaffold has a lightweight `queue.md`, `notes/`, `data_lake/`, `sessions/`. It opens as a conversation: the agent asks what the user is trying to do (AskUserQuestion) before planning anything. **Session logs are git-tracked:** `.claude/settings.json` wires a Stop hook plus a SessionEnd hook to a committed stdlib script `.claude/hooks/save_session_log.py`. The script copies the transcript into `sessions/` (raw `.jsonl` + readable `.md`) and commits only `sessions/`. SessionEnd also pushes if there is an upstream. Tests are network-free and exercise the script against a fake transcript.
-2. **Docs + version.** CLAUDE.md (architecture tree + Key Decisions), README.md, the pages site if it lists modes, version `1.17.1` -> `1.18.0` (not released; publishing is Emma's call).
+1. **Docs + version.** CLAUDE.md (architecture tree + Key Decisions), README.md, the pages site if it lists modes, version `1.17.1` -> `1.18.0` (not released; publishing is Emma's call).
 
 ---
 

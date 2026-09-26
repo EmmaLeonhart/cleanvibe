@@ -7,6 +7,7 @@ queue-driven planning, and thoughtful work tracking.
 
 from __future__ import annotations
 
+import json
 from datetime import datetime
 from string import Template
 
@@ -27,6 +28,23 @@ from .clawrxiv import ClawrxivPaper
 # removed in v1.14.0; the replication templates were already exempt from the
 # cron tail and are unaffected.
 # ---------------------------------------------------------------------------
+
+BEHAVIOR_RULES = """## Long command series run in strict order
+When the user gives a long series of commands, treat it as a long series of commands to be
+executed in relatively STRICT ORDER, one after another, EVEN IF the order seems not to make
+sense or seems inefficient. The sequencing is intentional — the user organizes the steps so
+states change in the order they want. Do not reorder, merge, or skip steps.
+
+## Not-done taxonomy (never "deliberately deferred")
+When work is NOT done, tag it with exactly ONE of: **NEEDS-DECISION** (name the decision +
+who decides), **BLOCKED-ON-USER-ACTION** (a real-world action only the user can take — name
+it), **BLOCKED-ON-EXTERNAL** (CI / a remote / a third party / another session's unpushed
+commit — name it + the unblock signal), **NEEDS-INVESTIGATION** (not understood yet — a
+to-do for the next tick, never a resting place), **UNSAFE-TO-GUESS** (could cause damage —
+name the risk + what makes it safe), or **OUT-OF-SCOPE** (another repo's job — name it).
+LOAD-BEARING DEFAULT: if it fits none of these with a specifically-named blocker, it is NOT
+deferred — DO IT NOW. Bare "deliberately not done" / "blocked on <person>" is banned."""
+
 
 SKILLS_POINTER = """## Skills
 
@@ -51,21 +69,7 @@ _TODO: Describe what this project is about._
 ## Architecture and Conventions
 _TODO: Document key decisions, file structure, and patterns as they emerge._
 
-## Long command series run in strict order
-When the user gives a long series of commands, treat it as a long series of commands to be
-executed in relatively STRICT ORDER, one after another, EVEN IF the order seems not to make
-sense or seems inefficient. The sequencing is intentional — the user organizes the steps so
-states change in the order they want. Do not reorder, merge, or skip steps.
-
-## Not-done taxonomy (never "deliberately deferred")
-When work is NOT done, tag it with exactly ONE of: **NEEDS-DECISION** (name the decision +
-who decides), **BLOCKED-ON-USER-ACTION** (a real-world action only the user can take — name
-it), **BLOCKED-ON-EXTERNAL** (CI / a remote / a third party / another session's unpushed
-commit — name it + the unblock signal), **NEEDS-INVESTIGATION** (not understood yet — a
-to-do for the next tick, never a resting place), **UNSAFE-TO-GUESS** (could cause damage —
-name the risk + what makes it safe), or **OUT-OF-SCOPE** (another repo's job — name it).
-LOAD-BEARING DEFAULT: if it fits none of these with a specifically-named blocker, it is NOT
-deferred — DO IT NOW. Bare "deliberately not done" / "blocked on <person>" is banned.
+{BEHAVIOR_RULES}
 
 # currentDate
 Today's date is {date}.
@@ -3070,3 +3074,335 @@ B. **Run the status-report action once more, independently** — an end-of-sessi
 - Completed work (chronological, with milestones): `devlog.md`.
 - Narrative history: `git log`.
 """
+
+
+# ---------------------------------------------------------------------------
+# `cleanvibe chat` (v1.18.0) — a git-tracked, agentic conversation on one topic
+#
+# Research-heavy, light on code, private repo. It opens as a conversation: the
+# first queue item is asking the user what they are trying to do. Session
+# transcripts are git-tracked: `.claude/settings.json` runs the stdlib script
+# CHAT_SAVE_SESSION_LOG_PY on the Stop hook (after each response) and the
+# SessionEnd hook, which copies the transcript into sessions/ (raw .jsonl +
+# readable .md) and commits only sessions/.
+# ---------------------------------------------------------------------------
+
+_CHAT_TOPIC_PLACEHOLDER = (
+    "_Not set yet. The first queue item asks the user what this conversation is "
+    "about and what they want out of it._"
+)
+
+
+def _chat_topic(topic: str | None) -> str:
+    return topic.strip() if topic and topic.strip() else _CHAT_TOPIC_PLACEHOLDER
+
+
+def chat_claude_md(project_name: str, topic: str | None = None) -> str:
+    date = datetime.now().strftime("%Y-%m-%d")
+    return f"""# {project_name}
+
+> A cleanvibe **chat**: a git-tracked conversation about one topic.
+
+{SKILLS_POINTER}
+
+## What this repo is
+This is a conversation between the user and Claude about one topic, kept in git so
+it can be resumed, searched, and shared. It is not a software project. Expect
+research (web search, reading sources, agentic RAG) and writing. Expect little
+code; a small script is fine when it serves the conversation (an analysis, a
+chart), and it goes under `scripts/`.
+
+**Topic:** {_chat_topic(topic)}
+
+## How to behave
+- **Ask before assuming.** At the start of the first session, and whenever the
+  direction is unclear, ask the user what they are trying to do with the
+  AskUserQuestion tool. Do not plan or research before you know the goal.
+- **Converse first, queue second.** Most turns are plain conversation and need no
+  queue item. When the user asks for something that takes several steps (a
+  research sweep, a comparison, a write-up), plan it into `queue.md` first, then
+  do it. Finished items are deleted from `queue.md` and logged in `devlog.md`.
+- **Keep what is worth keeping.** Conclusions, sources, and decisions go into
+  `notes/` as Markdown, one file per sub-topic. `README.md` holds a short current
+  summary of where the conversation stands. The transcript is saved
+  automatically, but a transcript is not a summary.
+- **Cite sources.** Anything researched gets a link or reference in the notes.
+- **Commit as you go** with messages that say what was found or decided, then
+  push.
+
+## Session logs (git-tracked)
+`.claude/settings.json` runs `.claude/hooks/save_session_log.py` on the **Stop**
+hook (after each response) and the **SessionEnd** hook. It copies the session
+transcript into `sessions/`, as `<date>_<session>.jsonl` (raw) and
+`<date>_<session>.md` (readable), and commits only `sessions/`. At SessionEnd it
+also pushes if the branch has an upstream. Do not edit `sessions/` by hand; it is
+rewritten every turn. Transcripts contain everything in the session, including
+tool output, which is one reason this repo is private.
+
+## Private repo
+This repo is private by default, like every cleanvibe mode. Making it public is
+the user's decision; ask, and never change visibility without an answer.
+
+{BEHAVIOR_RULES}
+
+# currentDate
+Today's date is {date}.
+"""
+
+
+def chat_readme_md(project_name: str, topic: str | None = None) -> str:
+    return f"""# {project_name}
+
+> A git-tracked conversation, scaffolded with [cleanvibe](https://github.com/EmmaLeonhart/cleanvibe) (`cleanvibe chat`).
+
+## Topic
+
+{_chat_topic(topic)}
+
+## Where things stand
+
+_Updated as the conversation goes: the current answer, open questions, next steps._
+
+## Layout
+
+- `notes/` — conclusions, sources, and decisions, one Markdown file per sub-topic.
+- `sessions/` — every session's transcript (`.jsonl` raw, `.md` readable),
+  saved and committed automatically by the hook in `.claude/settings.json`.
+- `data_lake/` — drop in files you want discussed (PDFs, datasets, exports).
+- `scripts/` — the occasional small script the conversation needs.
+- `queue.md` / `devlog.md` — multi-step asks in flight / what got done.
+
+## Resuming
+
+Start Claude in this folder (`claude`, or double-click `!runClaude.bat` on
+Windows). `claude --continue` picks up the most recent session instead of
+starting a new one.
+"""
+
+
+def chat_queue_md(project_name: str, topic: str | None = None) -> str:
+    seed = (
+        f"The user seeded the topic as: **{topic.strip()}**. Confirm it and ask "
+        f"what they want out of it."
+        if topic and topic.strip()
+        else "No topic was given at scaffold time, so start from the topic itself."
+    )
+    return f"""# {project_name} — Queue
+
+**This file is a queue, not a state snapshot.** Most of a chat is plain
+conversation and needs no queue item. Multi-step asks (a research sweep, a
+comparison, a write-up) are planned here first, then done. **When an item is
+done, delete it from this file AND append a dated entry to `devlog.md` in the
+same commit, then push.** Do not tick boxes in place.
+
+---
+
+## Active
+
+1. **Ask the user what they are trying to do.** Use the AskUserQuestion tool.
+   {seed} Ask what outcome they want (an answer to a question, a decision, a
+   written summary, a plan, or thinking out loud) and how deep the research
+   should go. Record the topic and goal in `README.md` and on the **Topic:**
+   line of `CLAUDE.md`. Commit.
+
+2. **Create the private GitHub repo and push.** `gh repo create --private
+   --source=. --push`. If `gh` is not installed or not logged in, tell the user
+   and carry on locally. From here on, commits push, and the SessionEnd hook
+   pushes the session log.
+
+3. **Have the conversation.** Replace this list with items only when a request
+   needs several steps. Keep `notes/` and the "Where things stand" section of
+   `README.md` current as conclusions land.
+"""
+
+
+_HOOK_SCRIPT = '"$CLAUDE_PROJECT_DIR/.claude/hooks/save_session_log.py"'
+
+
+def _hook_command(extra: str = "") -> str:
+    # `python3` first (macOS/Linux), `python` as the fallback (Windows).
+    return f"python3 {_HOOK_SCRIPT}{extra} || python {_HOOK_SCRIPT}{extra}"
+
+
+def chat_settings_json() -> str:
+    """`.claude/settings.json` wiring the session-log hook to Stop + SessionEnd."""
+    def hook(extra=""):
+        return [{"hooks": [{"type": "command", "command": _hook_command(extra)}]}]
+
+    return json.dumps(
+        {"hooks": {"Stop": hook(), "SessionEnd": hook(" --push")}}, indent=2
+    ) + "\n"
+
+
+# The hook script chat projects commit at .claude/hooks/save_session_log.py.
+# A plain raw string (no Template/f-string), so braces and backslashes are literal.
+CHAT_SAVE_SESSION_LOG_PY = r'''#!/usr/bin/env python3
+"""Save this Claude Code session's transcript into sessions/ and commit it.
+
+Written by `cleanvibe chat`. `.claude/settings.json` runs it on two hooks:
+
+* Stop (after every response): copy the transcript, render it, commit sessions/.
+* SessionEnd (with --push): the same, then push if the branch has an upstream.
+
+Claude Code passes the hook input as JSON on stdin; `transcript_path` and
+`session_id` are the fields used here. For each session this writes
+
+    sessions/<date>_<session8>.jsonl   the raw transcript (complete)
+    sessions/<date>_<session8>.md      a readable rendering of the conversation
+
+and commits ONLY sessions/ (anything else staged is left alone). Stdlib only.
+It never fails the hook: errors go to stderr and the exit code is always 0.
+"""
+
+import json
+import re
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+SESSIONS = ROOT / "sessions"
+
+_REMINDER = re.compile(r"<system-reminder>.*?</system-reminder>", re.S)
+_TOOL_HINT_KEYS = ("description", "command", "file_path", "pattern", "query", "url", "prompt")
+
+
+def _load(path):
+    entries = []
+    with open(path, encoding="utf-8") as fh:
+        for line in fh:
+            line = line.strip()
+            if not line:
+                continue
+            try:
+                entries.append(json.loads(line))
+            except ValueError:
+                continue
+    return entries
+
+
+def _clean(text):
+    return _REMINDER.sub("", text or "").strip()
+
+
+def _one_line(value, limit=120):
+    text = " ".join(str(value).split())
+    return text if len(text) <= limit else text[: limit - 3] + "..."
+
+
+def _result_text(content):
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        return "\n".join(b.get("text", "") for b in content if isinstance(b, dict))
+    return ""
+
+
+def render(entries, title):
+    """Render transcript entries as Markdown: user and Claude turns, tool calls
+    as one-line notes, AskUserQuestion questions and answers in full."""
+    out = [f"# {title}", ""]
+    speaker = None
+    ask_ids = set()
+
+    def say(who, text):
+        nonlocal speaker
+        if who != speaker:
+            out.extend([f"## {who}", ""])
+            speaker = who
+        out.extend([text, ""])
+
+    for e in entries:
+        if e.get("isMeta") or e.get("isSidechain"):
+            continue
+        kind = e.get("type")
+        if kind == "attachment":
+            att = e.get("attachment") or {}
+            if att.get("type") == "queued_command" and att.get("prompt"):
+                say("User", _clean(att["prompt"]))
+            continue
+        if kind not in ("user", "assistant"):
+            continue
+        content = (e.get("message") or {}).get("content")
+        who = "User" if kind == "user" else "Claude"
+        if isinstance(content, str):
+            text = _clean(content)
+            if text:
+                say(who, text)
+            continue
+        for block in content or []:
+            if not isinstance(block, dict):
+                continue
+            btype = block.get("type")
+            if btype == "text":
+                text = _clean(block.get("text"))
+                if text:
+                    say(who, text)
+            elif btype == "tool_use":
+                name = block.get("name", "tool")
+                args = block.get("input") or {}
+                if name == "AskUserQuestion":
+                    ask_ids.add(block.get("id"))
+                    qs = [q.get("question", "") for q in args.get("questions", [])]
+                    say("Claude", "**Asked:**\n" + "\n".join(f"- {q}" for q in qs))
+                else:
+                    hint = next((args[k] for k in _TOOL_HINT_KEYS if args.get(k)), "")
+                    note = f"> *{name}*" + (f": {_one_line(hint)}" if hint else "")
+                    say("Claude", note)
+            elif btype == "tool_result" and block.get("tool_use_id") in ask_ids:
+                say("User", "**Answered:** " + _clean(_result_text(block.get("content"))))
+    return "\n".join(out).rstrip() + "\n"
+
+
+def _stem(entries, session_id):
+    stamp = next((e["timestamp"] for e in entries if e.get("timestamp")), "")
+    date = stamp[:10] if re.match(r"\d{4}-\d{2}-\d{2}", stamp) else "undated"
+    return f"{date}_{(session_id or 'session')[:8]}"
+
+
+def save(hook):
+    transcript = Path(hook["transcript_path"]).expanduser()
+    entries = _load(transcript)
+    stem = _stem(entries, hook.get("session_id"))
+    SESSIONS.mkdir(exist_ok=True)
+    shutil.copyfile(transcript, SESSIONS / f"{stem}.jsonl")
+    (SESSIONS / f"{stem}.md").write_text(
+        render(entries, f"Session {stem}"), encoding="utf-8"
+    )
+    return stem
+
+
+def _git(*args):
+    return subprocess.run(
+        ["git", *args], cwd=ROOT, capture_output=True, text=True, timeout=120
+    )
+
+
+def commit(stem, push):
+    _git("add", "--", "sessions")
+    if _git("diff", "--cached", "--quiet", "--", "sessions").returncode != 0:
+        done = _git("commit", "-q", "-m", f"chat: session log {stem}", "--", "sessions")
+        if done.returncode != 0:
+            print(f"save_session_log: commit failed: {done.stderr.strip()}", file=sys.stderr)
+    if push and _git("rev-parse", "--abbrev-ref", "@{u}").returncode == 0:
+        pushed = _git("push", "-q")
+        if pushed.returncode != 0:
+            print(f"save_session_log: push failed: {pushed.stderr.strip()}", file=sys.stderr)
+
+
+def main(argv):
+    try:
+        hook = json.loads(sys.stdin.read() or "{}")
+        if not hook.get("transcript_path"):
+            return 0
+        stem = save(hook)
+        commit(stem, push="--push" in argv)
+    except Exception as exc:  # never break the session over a log
+        print(f"save_session_log: {exc}", file=sys.stderr)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))
+'''

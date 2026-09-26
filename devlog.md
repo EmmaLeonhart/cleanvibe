@@ -1234,3 +1234,42 @@ GitHub repo.
 
 Not verified: the workflow gate has not run on a real private repo yet. The
 expression and the `report` artifact are checked by unit tests only.
+
+## 2026-09-26 — `cleanvibe chat`: a git-tracked conversation mode
+
+Emma asked for a new mode: a git-tracked, agentic conversation about one topic,
+research-heavy and light on code, in a private repo. It should start by asking
+what the user is trying to do and keep the session logs in git.
+`cleanvibe chat [NAME] [--topic T]` (`cleanvibe/chat.py`).
+
+- **Scaffold:** ask-first `CLAUDE.md`; a `queue.md` whose item 1 is asking the
+  user what they are trying to do (AskUserQuestion) and item 2 is creating a
+  private repo; `devlog.md`, `notes/`, `sessions/`, `data_lake/`, skills, the
+  `chat` starting prompt. NAME is optional and defaults to `chat-YYYY-MM-DD`,
+  auto-suffixed.
+- **Session logs:** `.claude/settings.json` runs the committed stdlib script
+  `.claude/hooks/save_session_log.py` on Stop (after each response) and
+  SessionEnd (also pushes if there is an upstream). It saves the raw `.jsonl`
+  plus a readable `.md` into `sessions/` and commits only `sessions/`, leaving
+  anything else staged alone. It always exits 0.
+- The renderer was checked against this session's real transcript first.
+  Claude Code stores user messages sent mid-turn as `queued_command`
+  attachments, not `user` entries, so the script handles both.
+- The strict-order + not-done-taxonomy block is now a shared `BEHAVIOR_RULES`
+  constant used by both `new` and `chat`.
+- **Tests:** `tests/test_chat.py` (17). This includes running the hook script
+  for real against a fake transcript: rendering, commit contents, idempotence,
+  push without an upstream, and bad input. 152 passed under `unittest`.
+- **Live smoke test (Windows):** scaffolded `tests/scratch/chat-smoke` and ran
+  `claude -p "Reply with just the word pong."` in it. The Stop and SessionEnd
+  hooks each committed a session log, and the `.md` holds the exchange.
+
+Interpretation calls for Emma to confirm or correct:
+- The raw `.jsonl` is committed as well as the `.md`. It is complete but large
+  (this session's was 1.3 MB) and holds everything, including tool output and
+  environment details. Dropping the raw file is a one-line change.
+- Session logs are committed automatically by the hook, not by the agent.
+- "Remote control starts, no name needed": read as making NAME optional. No
+  remote-control launch flag was added.
+- Chat mode has no three-cron playbook (it is conversational, not extensive
+  autonomous work) and no Pages report.

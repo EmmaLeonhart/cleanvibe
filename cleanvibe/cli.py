@@ -4,6 +4,7 @@ Usage:
     cleanvibe new PATH          Create a new scaffolded project
     cleanvibe research PATH     Create an original-research project (literature-review-first + published report)
     cleanvibe original PATH     Create an original-research project with an uncertain topic (adds a topic-finding loop)
+    cleanvibe chat [PATH]       Create a git-tracked conversation (research-heavy, little code; session logs committed)
     cleanvibe clone REPO [PATH] Clone a repo and inject scaffolding
     cleanvibe convert [PATH]    Convert an existing directory into a cleanvibe project
     cleanvibe replicate REF     Scaffold a replication project: clawRxiv ref, arXiv/alphaxiv ref, a non-arXiv URL, or a drop-in folder
@@ -27,6 +28,7 @@ from .replicate import (
     replicate_project,
     replicate_url_project,
 )
+from .chat import chat_project, default_chat_path
 from .original import original_project
 from .research import research_project
 from .scaffold import clone_project, convert_project, create_project
@@ -81,6 +83,21 @@ def _do_original(args) -> None:
     original_project(
         path, area=area, dry_run=args.dry_run, no_claude=args.no_claude
     )
+
+
+def _do_chat(args) -> None:
+    """`cleanvibe chat [PATH]`: the name is optional (defaults to chat-YYYY-MM-DD).
+
+    With no name the user chose nothing, so a taken default is auto-suffixed,
+    like `replicate`. A named but non-empty target gets a free sibling name,
+    like `research`.
+    """
+    path = args.path if args.path is not None else default_chat_path()
+    if path.exists() and any(path.iterdir()) and not args.dry_run:
+        suggestion = _suggest_name(path)
+        print(f"{path} already exists and is not empty; using {suggestion} instead.")
+        path = suggestion
+    chat_project(path, topic=args.topic, dry_run=args.dry_run, no_claude=args.no_claude)
 
 
 def _suggest_name(path: Path) -> Path:
@@ -180,6 +197,29 @@ def main(argv: list[str] | None = None) -> None:
         "--no-claude", action="store_true", help="Skip launching Claude Code after scaffolding"
     )
 
+    # cleanvibe chat [PATH]
+    chat_parser = subparsers.add_parser(
+        "chat",
+        help="Create a git-tracked conversation about one topic: research-heavy, "
+        "little code, private repo; it starts by asking what you are trying to "
+        "do, and every session's transcript is saved into sessions/ and committed",
+    )
+    chat_parser.add_argument(
+        "path", nargs="?", type=Path, default=None,
+        help="Directory to create (defaults to chat-YYYY-MM-DD, auto-suffixed)",
+    )
+    chat_parser.add_argument(
+        "--topic", default=None,
+        help="What the conversation is about, if you already know (otherwise "
+        "the first session asks you)",
+    )
+    chat_parser.add_argument(
+        "--dry-run", action="store_true", help="Show what would be created without writing anything"
+    )
+    chat_parser.add_argument(
+        "--no-claude", action="store_true", help="Skip launching Claude Code after scaffolding"
+    )
+
     # cleanvibe clone REPO [PATH]
     clone_parser = subparsers.add_parser(
         "clone", help="Clone a repo and inject missing scaffolding"
@@ -250,6 +290,10 @@ def main(argv: list[str] | None = None) -> None:
 
     if args.command == "original":
         _do_original(args)
+        return
+
+    if args.command == "chat":
+        _do_chat(args)
         return
 
     if args.command == "new":
