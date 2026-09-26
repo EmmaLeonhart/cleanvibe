@@ -1206,3 +1206,31 @@ lean toward asking the user.
   summary contains `" % ^ & | < > !` or a newline.
 - Tests: `tests/test_starting_prompt.py` (7), plus a `.bat` content check in
   `test_scaffold.py`. 135 passed.
+
+## 2026-09-26 — Every mode defaults to a private repo
+
+Emma changed her mind on public-by-default. Every mode now assumes a private
+GitHub repo.
+
+- About 40 passages in `templates.py` across the replicate (arXiv, clawRxiv,
+  URL, manual), research and original templates no longer say "create a PUBLIC
+  repo (required for free Pages)". Every `gh repo create` is `--private`.
+  `new` was already private.
+- Research/original go-live step (bootstrap step 6) now has the agent ask the
+  user with AskUserQuestion whether to make the repo public now, later, or
+  never, and not change visibility without that answer.
+- **Workflow fix this change required.** On the free plan, a Pages deploy from
+  a private repo fails, so every push would have gone red. Both Pages workflows
+  now gate `configure-pages`, `upload-pages-artifact` and the `deploy` job on
+  `!github.event.repository.private || vars.CLEANVIBE_PAGES == 'true'`. They
+  always upload the built report as a plain `report` workflow artifact, so a
+  private repo still gets its PDF and site. A paid plan turns on Pages for a
+  private repo with the repo variable `CLEANVIBE_PAGES=true`.
+- Tests: new `tests/test_private_default.py` (no template text may say
+  `--public`; both workflows carry the gate 3 times and always upload the
+  report). The research/original "goes public" tests were rewritten to assert
+  `--private` and the AskUserQuestion step. 137 passed.
+- CLAUDE.md Key Decisions + README updated.
+
+Not verified: the workflow gate has not run on a real private repo yet. The
+expression and the `report` artifact are checked by unit tests only.

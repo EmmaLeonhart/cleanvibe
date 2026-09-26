@@ -107,11 +107,14 @@ class TestOriginalScaffold(unittest.TestCase):
         self.assertIn("42 * * * *", queue)
         self.assertIn("start the three-cron playbook", lower)
 
-    def test_queue_goes_public_for_pages(self):
+    def test_queue_creates_private_repo(self):
+        # Every mode defaults to a private repo (v1.18.0); going public for
+        # Pages is the user's call, asked via AskUserQuestion.
         proj, _ = _make()
         queue = (proj / "queue.md").read_text(encoding="utf-8")
-        self.assertIn("--public", queue)
-        self.assertIn("Pages", queue)
+        self.assertIn("gh repo create --private", queue)
+        self.assertNotIn("--public", queue)
+        self.assertIn("AskUserQuestion", queue)
 
     def test_docs_index_is_themed(self):
         proj, _ = _make(name="myoriginal", area="reservoir computing")

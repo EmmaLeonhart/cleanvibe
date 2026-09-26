@@ -89,8 +89,8 @@ does (`CLAUDE.md`, `README.md`, `queue.md`, `devlog.md`, `.gitignore`,
 
 The bootstrap sequence is **literature-review-first**: start the crons →
 triage `data_lake/` → **define the research question with you** → **literature
-review (agentic RAG)** → write the long-horizon `todo.md` → go **public** on
-GitHub (required for free Pages) → replace the bootstrap queue with the real
+review (agentic RAG)** → write the long-horizon `todo.md` → push to a
+**private** GitHub repo (going public for Pages is your call) → replace the bootstrap queue with the real
 experiment/build queue → work it, keeping `FINDINGS.md` + the `docs/` report
 current. Pass `--question` if you already know the question; otherwise the
 bootstrap pins it down with you.
@@ -119,7 +119,7 @@ one distinctive bootstrap step:
 The seed is `--area` (a field to explore), **not** `--question` — the question is
 what the loop discovers. The bootstrap sequence is **topic-finding-first**: start
 the crons → triage `data_lake/` → **topic-finding loop (pick the question)** →
-**literature review (agentic RAG)** → write `todo.md` → go **public** → replace
+**literature review (agentic RAG)** → write `todo.md` → push to a **private** repo → replace
 the bootstrap queue → work it. Use `original` when you want to investigate *some*
 area but haven't settled on the precise question; use [`research`](#research-a-question--your-own-investigation)
 when you already know what you're asking.
@@ -234,9 +234,11 @@ The generated scaffold is built around the **efficient, recipe-first path**:
   extracting a zip into `replication/`) and **run it first**, *before* any deep
   paper analysis — then verify its output against the paper, check **all** the
   paper's references, and only reimplement the gaps the recipe didn't cover.
-- **Go live early.** The agent is told to create a PUBLIC GitHub repo and push
-  near the start, so every commit pushes and Pages/CI build as the work goes —
-  not left local-only.
+- **Go live early.** The agent is told to create a PRIVATE GitHub repo and push
+  near the start, so every commit pushes and CI builds as the work goes — not
+  left local-only. Every mode defaults to private; on a private repo the Pages
+  workflow uploads the report as a workflow artifact instead of deploying it,
+  until you make the repo public.
 - **Themed report with a status badge.** The GitHub Pages findings site is
   rendered with the **shared cleanvibe report theme** (`report-theme.css` — the
   same warm "paper" + dark-mode theme `cleanvibe research` uses) and topped with

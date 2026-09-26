@@ -539,16 +539,18 @@ reusable, agent-executable replication methodology.
   **`scripts/run.py`** — the entry point CI invokes. **`results/`** — metrics
   JSON (gitignored). **`FINDINGS.md`** — the report (reproduced vs. reported,
   what the recipe covered vs. what you filled, gaps, divergences).
-- **Go live early.** Create a PUBLIC GitHub repo and push near the start so
-  every commit pushes and CI/Pages build as you go — don't leave it local-only.
+- **Go live early.** Create a PRIVATE GitHub repo and push near the start so
+  every commit pushes and CI builds as you go — don't leave it local-only.
 - **Deliverables are built by GitHub Actions, not committed.**
   `.github/workflows/pages.yml` publishes a **themed** GitHub Pages findings
   site (the shared `report-theme.css` cleanvibe report theme + a color-coded
   replication status badge driven by `paper.json` `status`) + PDF report;
   `.github/workflows/package.yml` builds the downloadable ZIP replication
-  package. Just make the repo **public** — `pages.yml` **auto-enables Pages**
-  itself (`actions/configure-pages` with `enablement: true`), so there is no
-  manual Settings toggle to do.
+  package. The repo is **private** by default, so `pages.yml` uploads the
+  findings site + PDF as a workflow artifact and skips the Pages deploy (free
+  GitHub Pages needs a public repo). Going public is the user's call; once it
+  is public (or the repo variable `CLEANVIBE_PAGES=true` is set on a paid
+  plan), `pages.yml` auto-enables Pages itself and deploys.
   Vision for the site shape: http://latent-space.emmaleonhart.com/
 
 ## Workflow Rules
@@ -618,9 +620,9 @@ it (and append to `devlog.md`).
    `python download_paper.py` to repopulate it (a plain download, not
    third-party code, so it is not gated). Do NOT commit the paper.
 
-3. **Create the GitHub repo and push — now, not at the end.** Create a PUBLIC
-   repo and push: `gh repo create --public --source=. --push` (public is
-   required for free GitHub Pages). From here on every commit pushes, so CI and
+3. **Create the GitHub repo and push — now, not at the end.** Create a PRIVATE
+   repo and push: `gh repo create --private --source=. --push` (private by
+   default; publishing the Pages site is a separate decision for the user). From here on every commit pushes, so CI and
    Pages build as you go. (This is the step the v1.4.0 flow missed — the
    replication ran entirely locally and never went live.)
 
@@ -684,8 +686,8 @@ it (and append to `devlog.md`).
     `replication_skill.md`, if you found one) truthful to what you actually did.
     **Stop / hand back** when `FINDINGS.md` reports at least one headline number
     with its reproduced value, `scripts/run.py` runs end-to-end from a clean
-    clone (or documents the un-automatable data step), the repo is public and
-    pushed, and the Pages deployment is green.
+    clone (or documents the un-automatable data step), the repo is pushed
+    (private by default), and the pages workflow is green.
 
 ---
 
@@ -739,8 +741,8 @@ gaps. Reimplementing from scratch is the fallback, not the default.
    (fresh clone / offline scaffold), run `python download_paper.py` to
    repopulate it; that is a plain download, not gated. Never commit the paper.
 
-2. **Go live early.** Create a PUBLIC GitHub repo and push
-   (`gh repo create --public --source=. --push`) so every later commit pushes
+2. **Go live early.** Create a PRIVATE GitHub repo and push
+   (`gh repo create --private --source=. --push`) so every later commit pushes
    and Pages/CI build as you go — don't leave it local-only.
 
 3. **Find the reproduction recipe in the source — before reading the whole
@@ -777,8 +779,8 @@ gaps. Reimplementing from scratch is the fallback, not the default.
 
 10. **Publish.** GitHub Pages deploys the findings + a transportable PDF report
     (`.github/workflows/pages.yml`); a ZIP replication package is built
-    (`.github/workflows/package.yml`). The repo must be public with Pages set to
-    Source: GitHub Actions.
+    (`.github/workflows/package.yml`). The repo is private by default, so the
+    report is a workflow artifact until the user makes the repo public.
 
 ## Budget guardrails
 
@@ -793,8 +795,8 @@ gaps. Reimplementing from scratch is the fallback, not the default.
   paper, with the reproduced value next to it.
 - `scripts/run.py` runs end-to-end from a clean clone (or documents the data
   step that can't be automated).
-- The repo is public and pushed; the GitHub Pages site and the ZIP package
-  build green in Actions.
+- The repo is pushed (private by default); the pages workflow and the ZIP
+  package build green in Actions.
 - This file still reflects how you actually did it — if you deviated, edit
   the plan above.
 """
@@ -848,8 +850,10 @@ Three compounding artifacts:
 
 ## Deliverables (GitHub Actions)
 
-To publish, **make this repo public** and set **Settings -> Pages -> Source:
-GitHub Actions**. Then `pages.yml` deploys the findings site + PDF report and
+This repo is **private** by default, so `pages.yml` uploads the findings site +
+PDF report as a workflow artifact. To publish them on GitHub Pages, **make the
+repo public** (or set the repo variable `CLEANVIBE_PAGES=true` on a paid
+plan); `pages.yml` then deploys them. `pages.yml` builds the report and
 `package.yml` builds a downloadable ZIP replication package. Site shape
 inspiration: http://latent-space.emmaleonhart.com/
 """
@@ -1126,10 +1130,13 @@ Thumbs.db
 # Static constant — contains ${{ }} expressions; never run through Template.
 REPLICATION_PAGES_YML = """# Publishes FINDINGS.md as a GitHub Pages site + a transportable PDF report.
 #
-# Pages is auto-enabled by the `actions/configure-pages` step below
-# (enablement: true), so there is NO manual "Settings -> Pages" toggle to do —
-# the only requirement is that the repo is PUBLIC. The first push that runs this
-# workflow turns Pages on and deploys.
+# Private repos (the cleanvibe default): GitHub's free plan cannot publish Pages
+# from a private repo, so there the Pages steps are skipped and the report is
+# uploaded as a plain workflow artifact ("report") instead. Pages runs when the
+# repo is public, or when the repo variable CLEANVIBE_PAGES is set to "true"
+# (a paid plan that allows Pages on private repos). In that case
+# `actions/configure-pages` auto-enables Pages (enablement: true), so there is
+# NO manual "Settings -> Pages" toggle to do.
 
 name: pages
 
@@ -1155,6 +1162,7 @@ jobs:
         with:
           submodules: recursive
       - name: Configure Pages (auto-enables Pages if not already on)
+        if: ${{ !github.event.repository.private || vars.CLEANVIBE_PAGES == 'true' }}
         uses: actions/configure-pages@v5
         with:
           enablement: true
@@ -1194,12 +1202,19 @@ jobs:
           } > site/index.html
 
           pandoc "$SRC" -o site/report.pdf || echo "PDF render skipped"
-      - uses: actions/upload-pages-artifact@v3
+      - name: Upload report as a workflow artifact (always; the only output on a private repo)
+        uses: actions/upload-artifact@v4
+        with:
+          name: report
+          path: site
+      - if: ${{ !github.event.repository.private || vars.CLEANVIBE_PAGES == 'true' }}
+        uses: actions/upload-pages-artifact@v3
         with:
           path: site
 
   deploy:
     needs: build
+    if: ${{ !github.event.repository.private || vars.CLEANVIBE_PAGES == 'true' }}
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -1430,8 +1445,8 @@ in the cleanvibe repo for the full framing.
   exports). Standard cleanvibe convention; this *is* committed. The paper is
   NOT here.
 {no_meta_bullet}
-- **Go live early.** Create a PUBLIC GitHub repo and push near the start so
-  every commit pushes and CI/Pages build as you go — don't leave it local-only.
+- **Go live early.** Create a PRIVATE GitHub repo and push near the start so
+  every commit pushes and CI builds as you go — don't leave it local-only.
 - **`src/`** — your reimplementation. **`scripts/run.py`** — the entry point
   CI invokes. **`results/`** — metrics JSON (gitignored). **`FINDINGS.md`** —
   the report (reproduced vs. reported, gaps, divergences).
@@ -1440,8 +1455,8 @@ in the cleanvibe repo for the full framing.
   site (the shared `report-theme.css` cleanvibe report theme + a color-coded
   replication status badge driven by `paper.json` `status`) + PDF report;
   `.github/workflows/package.yml` builds the downloadable ZIP replication
-  package. Make the repo public and set Settings -> Pages -> Source: GitHub
-  Actions. Vision for the site shape: http://latent-space.emmaleonhart.com/
+  package. The repo is private by default: the report is a workflow
+  artifact, and the Pages site deploys once the user makes the repo public. Vision for the site shape: http://latent-space.emmaleonhart.com/
 
 ## Workflow Rules
 
@@ -1539,7 +1554,7 @@ completes it (and append to `devlog.md`).
    the title, authors, venue/year, and any arXiv id / DOI; write that into
    `README.md` (replacing the "unknown" placeholders). Save a Markdown
    extraction of the paper to `replication_target/paper.md`. Then create a
-   PUBLIC GitHub repo and push (`gh repo create --public --source=. --push`) so
+   PRIVATE GitHub repo and push (`gh repo create --private --source=. --push`) so
    every later commit pushes and Pages/CI build as you go. Commit.
 
 3. **FIRST, before deep analysis: find the authors' code and an existing
@@ -1596,8 +1611,8 @@ completes it (and append to `devlog.md`).
     `replication_skill.md`, if found) truthful. **Stop / hand back** when
     `FINDINGS.md` reports at least one headline number with its reproduced
     value, `scripts/run.py` runs end-to-end from a clean clone (or documents the
-    un-automatable data step), the repo is public and pushed, and the Pages
-    deployment is green.
+    un-automatable data step), the repo is pushed (private by default), and the
+    pages workflow is green.
 
 ---
 
@@ -1663,8 +1678,8 @@ gaps. Reimplementing from scratch is the fallback.
 
 2. **Identify the paper + go live early.** Record title/authors/venue/year
    (and arXiv id / DOI if present) in `README.md`; extract the paper text to
-   `replication_target/paper.md`. Create a PUBLIC GitHub repo and push
-   (`gh repo create --public --source=. --push`) so commits push and Pages/CI
+   `replication_target/paper.md`. Create a PRIVATE GitHub repo and push
+   (`gh repo create --private --source=. --push`) so commits push and Pages/CI
    build as you go.
 
 3. **Find the authors' code and an existing replication recipe — before deep
@@ -1699,8 +1714,8 @@ gaps. Reimplementing from scratch is the fallback.
 
 10. **Publish.** GitHub Pages deploys the findings + a transportable PDF
     report (`.github/workflows/pages.yml`); a ZIP replication package is built
-    (`.github/workflows/package.yml`). The repo must be public with Pages
-    enabled.
+    (`.github/workflows/package.yml`). The repo is private by default, so the
+    report is a workflow artifact until the user makes the repo public.
 
 ## Budget guardrails
 
@@ -1715,8 +1730,8 @@ gaps. Reimplementing from scratch is the fallback.
   paper, with the reproduced value next to it.
 - `scripts/run.py` runs end-to-end from a clean clone (or documents the
   data step that can't be automated).
-- The repo is public and pushed; the GitHub Pages site and the ZIP package
-  build green in Actions.
+- The repo is pushed (private by default); the pages workflow and the ZIP
+  package build green in Actions.
 - This file still reflects how you actually did it — if you deviated, edit
   the plan above.
 """
@@ -1804,8 +1819,10 @@ Three compounding artifacts:
 
 ## Deliverables (GitHub Actions)
 
-To publish, **make this repo public** and set **Settings -> Pages -> Source:
-GitHub Actions**. Then `pages.yml` deploys the findings site + PDF report and
+This repo is **private** by default, so `pages.yml` uploads the findings site +
+PDF report as a workflow artifact. To publish them on GitHub Pages, **make the
+repo public** (or set the repo variable `CLEANVIBE_PAGES=true` on a paid
+plan); `pages.yml` then deploys them. `pages.yml` builds the report and
 `package.yml` builds a downloadable ZIP replication package. Site shape
 inspiration: http://latent-space.emmaleonhart.com/
 """
@@ -1993,15 +2010,15 @@ agent-executable replication methodology.
   **`scripts/run.py`** — the entry point CI invokes. **`results/`** — metrics
   JSON (gitignored). **`FINDINGS.md`** — the report (reproduced vs. reported,
   what the recipe covered vs. what you filled, gaps, divergences).
-- **Go live early.** Create a PUBLIC GitHub repo and push near the start so
-  every commit pushes and CI/Pages build as you go — don't leave it local-only.
+- **Go live early.** Create a PRIVATE GitHub repo and push near the start so
+  every commit pushes and CI builds as you go — don't leave it local-only.
 - **Deliverables are built by GitHub Actions, not committed.**
   `.github/workflows/pages.yml` publishes a **themed** GitHub Pages findings
   site (the shared `report-theme.css` cleanvibe report theme + a color-coded
   replication status badge driven by `paper.json` `status`) + PDF report;
   `.github/workflows/package.yml` builds the downloadable ZIP replication
-  package. Make the repo public and enable Pages (Settings -> Pages -> Source:
-  GitHub Actions). Vision for the site shape: http://latent-space.emmaleonhart.com/
+  package. The repo is private by default: the report is a workflow
+  artifact, and the Pages site deploys once the user makes the repo public. Vision for the site shape: http://latent-space.emmaleonhart.com/
 
 ## Workflow Rules
 
@@ -2060,9 +2077,9 @@ Work top to bottom. Delete each item in the same commit that completes it
    scan of the code before running is a future enhancement (see `todo.md`); for
    now, only proceed if the user trusts the source.
 
-2. **Create the GitHub repo and push — PUBLIC, early.** Create a public repo
-   and push: `gh repo create --public --source=. --push` (public is required
-   for free GitHub Pages). From here on every commit pushes, so CI and Pages
+2. **Create the GitHub repo and push — PRIVATE, early.** Create a private repo
+   and push: `gh repo create --private --source=. --push` (publishing the Pages
+   site is a separate decision for the user). From here on every commit pushes, so CI and Pages
    build as you go.
 
 3. **Run the skill recipe FIRST.** (Only after the user's consent from step 1.)
@@ -2105,8 +2122,8 @@ Work top to bottom. Delete each item in the same commit that completes it
    Source: GitHub Actions. Keep `SKILL.md` and `replication_skill.md` truthful.
    **Stop / hand back** when `FINDINGS.md` reports at least one headline number
    with its reproduced value, `scripts/run.py` runs end-to-end from a clean
-   clone (or documents the un-automatable data step), the repo is public and
-   pushed, and the Pages deployment is green.
+   clone (or documents the un-automatable data step), the repo is pushed
+   (private by default), and the pages workflow is green.
 
 ---
 
@@ -2151,8 +2168,8 @@ The efficient path: **run the shipped skill recipe FIRST**, then verify its
 output against the paper and fill only the gaps. Reimplementing from scratch is
 the fallback, not the default.
 
-1. **Go live early.** Create a PUBLIC GitHub repo and push
-   (`gh repo create --public --source=. --push`) so every later commit pushes
+1. **Go live early.** Create a PRIVATE GitHub repo and push
+   (`gh repo create --private --source=. --push`) so every later commit pushes
    and Pages/CI build as you go.
 
 2. **Run the skill recipe first.** Execute `replication_skill.md` (or the recipe
@@ -2179,8 +2196,8 @@ the fallback, not the default.
 
 9. **Publish.** GitHub Pages deploys the findings + a transportable PDF report
    (`.github/workflows/pages.yml`); a ZIP replication package is built
-   (`.github/workflows/package.yml`). The repo must be public with Pages set to
-   Source: GitHub Actions.
+   (`.github/workflows/package.yml`). The repo is private by default, so the
+   report is a workflow artifact until the user makes the repo public.
 
 ## Budget guardrails
 
@@ -2195,8 +2212,8 @@ the fallback, not the default.
   with the reproduced value next to it.
 - `scripts/run.py` runs end-to-end from a clean clone (or documents the data
   step that can't be automated).
-- The repo is public and pushed; the GitHub Pages site and the ZIP package
-  build green in Actions.
+- The repo is pushed (private by default); the pages workflow and the ZIP
+  package build green in Actions.
 - This file still reflects how you actually did it — if you deviated, edit the
   plan above.
 """
@@ -2247,8 +2264,10 @@ Three compounding artifacts:
 
 ## Deliverables (GitHub Actions)
 
-To publish, **make this repo public** and set **Settings -> Pages -> Source:
-GitHub Actions**. Then `pages.yml` deploys the findings site + PDF report and
+This repo is **private** by default, so `pages.yml` uploads the findings site +
+PDF report as a workflow artifact. To publish them on GitHub Pages, **make the
+repo public** (or set the repo variable `CLEANVIBE_PAGES=true` on a paid
+plan); `pages.yml` then deploys them. `pages.yml` builds the report and
 `package.yml` builds a downloadable ZIP replication package. Site shape
 inspiration: http://latent-space.emmaleonhart.com/
 """
@@ -2350,10 +2369,13 @@ Thumbs.db
 RESEARCH_PAGES_YML = """# Publishes the docs/ folder as a GitHub Pages site (the themed research
 # report) and builds a transportable PDF from FINDINGS.md into docs/report.pdf.
 #
-# Pages is auto-enabled by the `actions/configure-pages` step below
-# (enablement: true), so there is NO manual "Settings -> Pages" toggle to do —
-# the only requirement is that the repo is PUBLIC (free GitHub Pages). The first
-# push that runs this workflow turns Pages on and deploys.
+# Private repos (the cleanvibe default): GitHub's free plan cannot publish Pages
+# from a private repo, so there the Pages steps are skipped and the report is
+# uploaded as a plain workflow artifact ("report") instead. Pages runs when the
+# repo is public, or when the repo variable CLEANVIBE_PAGES is set to "true"
+# (a paid plan that allows Pages on private repos). In that case
+# `actions/configure-pages` auto-enables Pages (enablement: true), so there is
+# NO manual "Settings -> Pages" toggle to do.
 
 name: pages
 
@@ -2377,6 +2399,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Configure Pages (auto-enables Pages if not already on)
+        if: ${{ !github.event.repository.private || vars.CLEANVIBE_PAGES == 'true' }}
         uses: actions/configure-pages@v5
         with:
           enablement: true
@@ -2390,12 +2413,19 @@ jobs:
           else
             echo "No FINDINGS.md yet; skipping PDF build"
           fi
-      - uses: actions/upload-pages-artifact@v3
+      - name: Upload report as a workflow artifact (always; the only output on a private repo)
+        uses: actions/upload-artifact@v4
+        with:
+          name: report
+          path: docs
+      - if: ${{ !github.event.repository.private || vars.CLEANVIBE_PAGES == 'true' }}
+        uses: actions/upload-pages-artifact@v3
         with:
           path: docs
 
   deploy:
     needs: build
+    if: ${{ !github.event.repository.private || vars.CLEANVIBE_PAGES == 'true' }}
     runs-on: ubuntu-latest
     environment:
       name: github-pages
@@ -2699,13 +2729,13 @@ paper.
   and the built `report.pdf`). This is the legibility layer. The theme ships
   pre-styled (warm "paper" light theme + dark-mode variant); edit the content,
   keep the chrome. Site-shape inspiration: http://latent-space.emmaleonhart.com/
-- **Go live early.** Create a **PUBLIC** GitHub repo and push near the start so
-  every commit pushes and Pages/CI build as you go (public is required for free
-  GitHub Pages).
+- **Go live early.** Create a **PRIVATE** GitHub repo and push near the start so
+  every commit pushes and CI builds as you go. Private is the default in every
+  cleanvibe mode; going public (which free GitHub Pages needs) is the user's call.
 - **Deliverables are built by GitHub Actions.** `.github/workflows/pages.yml`
   deploys `docs/` (the report site) and builds `docs/report.pdf` from
-  `FINDINGS.md`. Make the repo public and set Settings -> Pages -> Source:
-  GitHub Actions.
+  `FINDINGS.md`. The repo is private by default: the report is a workflow
+  artifact, and the Pages site deploys once the user makes the repo public.
 
 {SKILLS_POINTER}
 
@@ -2750,13 +2780,14 @@ claude
 
 Then work `queue.md` top to bottom. The bootstrap sequence pins down the
 research question with you, runs the literature review, plans the experiments,
-takes the repo public, and keeps the report current as results land.
+pushes to a private repo, and keeps the report current as results land.
 
 ## Published report
 
-Once the repo is public with Pages set to **Source: GitHub Actions**,
-`.github/workflows/pages.yml` deploys `docs/` (the report site) and builds
-`docs/report.pdf`. Site-shape inspiration: http://latent-space.emmaleonhart.com/
+The repo is private by default, so `.github/workflows/pages.yml` builds
+`docs/report.pdf` and uploads `docs/` as a workflow artifact. Once the repo is
+public (or the repo variable `CLEANVIBE_PAGES=true` is set on a paid plan), it
+also deploys `docs/` as the GitHub Pages report site. Site-shape inspiration: http://latent-space.emmaleonhart.com/
 """
 
 
@@ -2790,7 +2821,7 @@ Work these top to bottom. **Delete each item from this file in the same commit t
 
 5. **Create `todo.md` — the long-horizon research plan.** Informed by the gap the literature review surfaced, write `todo.md` as the project's long-term horizon: the hypotheses to test, experiments to run / things to build, and the eventual shape of the report. Items here are *abstract destinations*, decomposed into concrete steps in `queue.md` later. Use the format in `CLAUDE.md` § "Queue and longer-horizon work". Commit `todo.md` on its own.
 
-6. **Go live: create a PUBLIC GitHub repo and push.** Public is required for free GitHub Pages. `gh repo create --public --source=. --push`. The `pages.yml` workflow **auto-enables Pages itself** (via `actions/configure-pages` with `enablement: true`) — there is no manual Settings toggle to do; just confirm the repo is public and CI (`.github/workflows/`) is wired, and on push `docs/` (the report site) + the built PDF deploy. From here every commit pushes and Pages/CI build as you go.
+6. **Go live: create a PRIVATE GitHub repo and push.** `gh repo create --private --source=. --push`. Private is the default in every cleanvibe mode. On a private repo `pages.yml` builds the report and uploads `docs/` + the PDF as a workflow artifact, but skips the Pages deploy (free GitHub Pages needs a public repo). Publishing is the user's decision: ask them (AskUserQuestion) whether to make the repo public now, later, or never, and do not change visibility without that answer. Once public, `pages.yml` auto-enables Pages itself (`actions/configure-pages` with `enablement: true`) and deploys. Confirm CI (`.github/workflows/`) is wired. From here every commit pushes and CI builds as you go.
 
 7. **Replace this bootstrap queue with the real research queue.** Pull the first item(s) from `todo.md` and decompose them into a concrete, ordered list of experiment / implementation tasks under a new `## Active` section (deleting this bootstrap section as part of the same edit). Mirror into the task tool. **Keep the `## Always last` section pinned at the very bottom.** The real queue's FIRST work item should **start the three crons** — unless this is a mid-session large-scale re-fill while they are already running, in which case the first item is instead to **kill them** (the pinned tail restarts them). Commit the new queue.
 
@@ -2915,12 +2946,12 @@ a themed **GitHub Pages site** (`docs/`) plus a transportable PDF — but the wo
   and the built `report.pdf`). The theme ships pre-styled (warm "paper" light
   theme + dark-mode variant); edit the content, keep the chrome. Site-shape
   inspiration: http://latent-space.emmaleonhart.com/
-- **Go live early.** Create a **PUBLIC** GitHub repo and push near the start so
-  every commit pushes and Pages/CI build as you go (public is required for free
-  GitHub Pages).
+- **Go live early.** Create a **PRIVATE** GitHub repo and push near the start so
+  every commit pushes and CI builds as you go. Private is the default in every
+  cleanvibe mode; going public (which free GitHub Pages needs) is the user's call.
 - **Deliverables are built by GitHub Actions.** `.github/workflows/pages.yml`
-  deploys `docs/` and builds `docs/report.pdf` from `FINDINGS.md`. Make the repo
-  public and set Settings -> Pages -> Source: GitHub Actions.
+  deploys `docs/` and builds `docs/report.pdf` from `FINDINGS.md`. The repo is private by default: the report is a workflow
+  artifact, and the Pages site deploys once the user makes the repo public.
 
 {SKILLS_POINTER}
 
@@ -2970,14 +3001,15 @@ claude
 
 Then work `queue.md` top to bottom. The bootstrap sequence runs the
 topic-finding loop to choose the question, runs the literature review on it,
-plans the experiments, takes the repo public, and keeps the report current as
+plans the experiments, pushes to a private repo, and keeps the report current as
 results land.
 
 ## Published report
 
-Once the repo is public with Pages set to **Source: GitHub Actions**,
-`.github/workflows/pages.yml` deploys `docs/` (the report site) and builds
-`docs/report.pdf`. Site-shape inspiration: http://latent-space.emmaleonhart.com/
+The repo is private by default, so `.github/workflows/pages.yml` builds
+`docs/report.pdf` and uploads `docs/` as a workflow artifact. Once the repo is
+public (or the repo variable `CLEANVIBE_PAGES=true` is set on a paid plan), it
+also deploys `docs/` as the GitHub Pages report site. Site-shape inspiration: http://latent-space.emmaleonhart.com/
 """
 
 
@@ -3013,7 +3045,7 @@ Work these top to bottom. **Delete each item from this file in the same commit t
 
 5. **Create `todo.md` — the long-horizon research plan.** Informed by the gap the literature review surfaced, write `todo.md` as the project's long-term horizon: the hypotheses to test, experiments to run / things to build, and the eventual shape of the report. Items here are *abstract destinations*, decomposed into concrete steps in `queue.md` later. Use the format in `CLAUDE.md` § "Queue and longer-horizon work". Commit `todo.md` on its own.
 
-6. **Go live: create a PUBLIC GitHub repo and push.** Public is required for free GitHub Pages. `gh repo create --public --source=. --push`. The `pages.yml` workflow **auto-enables Pages itself** (via `actions/configure-pages` with `enablement: true`) — there is no manual Settings toggle to do; just confirm the repo is public and CI (`.github/workflows/`) is wired, and on push `docs/` (the report site) + the built PDF deploy. From here every commit pushes and Pages/CI build as you go.
+6. **Go live: create a PRIVATE GitHub repo and push.** `gh repo create --private --source=. --push`. Private is the default in every cleanvibe mode. On a private repo `pages.yml` builds the report and uploads `docs/` + the PDF as a workflow artifact, but skips the Pages deploy (free GitHub Pages needs a public repo). Publishing is the user's decision: ask them (AskUserQuestion) whether to make the repo public now, later, or never, and do not change visibility without that answer. Once public, `pages.yml` auto-enables Pages itself (`actions/configure-pages` with `enablement: true`) and deploys. Confirm CI (`.github/workflows/`) is wired. From here every commit pushes and CI builds as you go.
 
 7. **Replace this bootstrap queue with the real research queue.** Pull the first item(s) from `todo.md` and decompose them into a concrete, ordered list of experiment / implementation tasks under a new `## Active` section (deleting this bootstrap section as part of the same edit). Mirror into the task tool. **Keep the `## Always last` section pinned at the very bottom.** The real queue's FIRST work item should **start the three crons** — unless this is a mid-session large-scale re-fill while they are already running, in which case the first item is instead to **kill them** (the pinned tail restarts them). Commit the new queue.
 
