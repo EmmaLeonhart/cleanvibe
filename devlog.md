@@ -1131,6 +1131,22 @@ ordering — topic-finding loop (step 3) precedes the literature review (step 4)
 precedes `todo.md` (step 5). Then launched Claude into the scaffold to work it
 for real.
 
+## 2026-07-01 — v1.17.0: not-done taxonomy + strict-order note in generated CLAUDE.md
+
+_(Backfilled 2026-09-26 from `git log`; the release shipped without a devlog
+entry.)_
+
+- `d332abf` — replaced the single-bucket "deliberately not done / blocked on
+  Emma" phrasing in the bundled `autonomous-loop` skill (`cleanvibe/skills.py`
+  + `.claude/skills/autonomous-loop/SKILL.md`) with six disjoint tags:
+  NEEDS-DECISION / BLOCKED-ON-USER-ACTION / BLOCKED-ON-EXTERNAL /
+  NEEDS-INVESTIGATION / UNSAFE-TO-GUESS / OUT-OF-SCOPE. The commit message also
+  says it appended the strict-order note to this repo's `CLAUDE.md`, but it did
+  not touch that file (fixed 2026-09-26, below).
+- `7211978` — `templates.py` now emits a "Long command series run in strict
+  order" section and the not-done taxonomy in every generated `CLAUDE.md`.
+- **v1.17.0** (`de736a3`) — version bump + tag.
+
 ## 2026-07-28 — v1.17.1: the scaffolded attribution URL was a 404
 
 Every project cleanvibe scaffolds stamped `https://github.com/Immanuelle/cleanvibe`
@@ -1154,3 +1170,19 @@ was done at the time.
 
 Version `1.17.0` -> `1.17.1`. Not released — `publish.yml` fires on a published
 GitHub release, so cutting one is Emma's call.
+
+## 2026-09-26 — Bookkeeping drift since v1.16.0
+
+The Active queue was empty, and checking it turned up records that no longer
+matched the code:
+
+- Backfilled the missing v1.17.0 devlog entry (above, in date order).
+- Added the "Long command series run in strict order" and "Not-done taxonomy"
+  sections to this repo's `CLAUDE.md`, using the text `templates.py` generates.
+  `d332abf` said it had done this and had not.
+- `CLAUDE.md`'s live-smoke paragraph still said `replication_target/source/` is
+  "(committed)". That has been wrong since v1.15.0, when the whole directory
+  became gitignored. It now says local-only.
+- `queue.md`'s pointer said version `1.16.0`; now `1.17.1`.
+
+Docs only, no code change.

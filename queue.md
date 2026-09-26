@@ -8,7 +8,7 @@
 
 ## Active
 
-_(empty — `cleanvibe original` shipped in v1.16.0 and was smoke-tested live in `tests/scratch/`; see `devlog.md`.)_
+_(empty — pull the next item from `todo.md`.)_
 
 ---
 
@@ -25,4 +25,4 @@ B. **Run the status-report action once more, independently** — an end-of-sessi
 
 - Completed work (chronological, with releases): `devlog.md`. Long-horizon backlog: `todo.md`.
 - Vision / framing: `docs/replication_framing.md`; reference corpus: `docs/replication-examples/`.
-- Narrative history: `git log`. Current version: `1.16.0`.
+- Narrative history: `git log`. Current version: `1.17.1`.

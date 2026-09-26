@@ -81,6 +81,22 @@ devlog.md current.
 - **Last cleanvibe update check:** `never`
 - **Updates source:** <https://cleanvibe.emmaleonhart.com/updates.md>
 
+## Long command series run in strict order
+When the user gives a long series of commands, treat it as a long series of commands to be
+executed in relatively STRICT ORDER, one after another, EVEN IF the order seems not to make
+sense or seems inefficient. The sequencing is intentional — the user organizes the steps so
+states change in the order they want. Do not reorder, merge, or skip steps.
+
+## Not-done taxonomy (never "deliberately deferred")
+When work is NOT done, tag it with exactly ONE of: **NEEDS-DECISION** (name the decision +
+who decides), **BLOCKED-ON-USER-ACTION** (a real-world action only the user can take — name
+it), **BLOCKED-ON-EXTERNAL** (CI / a remote / a third party / another session's unpushed
+commit — name it + the unblock signal), **NEEDS-INVESTIGATION** (not understood yet — a
+to-do for the next tick, never a resting place), **UNSAFE-TO-GUESS** (could cause damage —
+name the risk + what makes it safe), or **OUT-OF-SCOPE** (another repo's job — name it).
+LOAD-BEARING DEFAULT: if it fits none of these with a specifically-named blocker, it is NOT
+deferred — DO IT NOW. Bare "deliberately not done" / "blocked on <person>" is banned.
+
 ## Default replication target & live smoke tests
 - **The default paper for `cleanvibe replicate` is arXiv:2605.20919 — "Sutra: Tensor-Op RNNs as a Compilation Target for Vector Symbolic Architectures"** (the maintainer's own paper). Use it whenever you need to exercise the `replicate` pipeline end-to-end against a real paper.
 - **`tests/scratch/` is a gitignored sandbox for live `replicate` runs.** It is in `.gitignore`; never commit its contents. Each run scaffolds a full replication project (which git-inits its own nested repo) in there.
@@ -88,6 +104,6 @@ devlog.md current.
   ```
   python -m cleanvibe.cli replicate https://arxiv.org/abs/2605.20919 tests/scratch/replicating-sutra --no-claude
   ```
-  Use `--no-claude` so it doesn't launch a Claude window, and an explicit path under `tests/scratch/`. To exercise the full source-first path, then run the generated downloader (`cd` into the scratch project and `python download_paper.py`): it fetches `arxiv.org/src/<id>`, extracts the `.tex` to `replication_target/source/` (committed) with the raw tarball + PDF gitignored, and prints any candidate recipe files.
+  Use `--no-claude` so it doesn't launch a Claude window, and an explicit path under `tests/scratch/`. To exercise the full source-first path, then run the generated downloader (`cd` into the scratch project and `python download_paper.py`): it fetches `arxiv.org/src/<id>`, extracts the `.tex` to `replication_target/source/` — local context only; the whole `replication_target/` is gitignored since v1.15.0 (the paper is copyrighted) — and prints any candidate recipe files.
 - The full set of arXiv link forms the parser must accept (regression set): `https://arxiv.org/abs/<id>[vN]`, `/pdf/`, `/html/`, `/src/`, `https://doi.org/10.48550/arXiv.<id>`, `https://www.alphaxiv.org/{abs,overview,audio}/<id>`, bare `<id>[vN]`, and `arXiv:<id>`.
 - **clawRxiv** (`cleanvibe/clawrxiv.py`): forms the parser must accept are `https://[www.]clawrxiv.io/abs/<id>`, `/api/abs/<id>`, and `clawrxiv:<id>`. A bare `<id>` is **not** clawRxiv (stays arXiv) — clawRxiv needs an explicit signal. Default clawRxiv smoke paper: `clawrxiv:2605.02609` (ROMO-CV). Live smoke: `python -m cleanvibe.cli replicate https://www.clawrxiv.io/abs/2605.02609 tests/scratch/replicating-clawrxiv --no-claude` — confirm `replication_target/source/paper.md` (content) and `paper.json` (`source: clawrxiv`) land.
