@@ -189,6 +189,11 @@
           <span class="c-name">cleanvibe new</span>
           <p class="c-desc">Scaffold a fresh project: <code>CLAUDE.md</code>, <code>README.md</code>, <code>queue.md</code> (pre-seeded bootstrap), <code>todo.md</code>, <code>devlog.md</code>, <code>.gitignore</code> &mdash; an initial commit on a <code>main</code> branch, then launch Claude Code. Run in a non-empty directory and it prompts instead of erroring.</p>
         </div>
+        <div class="cmd cmd-a" data-cmd="chat conversation topic research session logs private">
+          <span class="c-emoji">&#128172;</span>
+          <span class="c-name">cleanvibe chat</span>
+          <p class="c-desc">A git-tracked conversation about one topic: research-heavy, light on code, in a private repo. It opens by asking what you are trying to do, keeps conclusions in <code>notes/</code>, and a hook commits every session&rsquo;s transcript into <code>sessions/</code>.</p>
+        </div>
         <div class="cmd cmd-b" data-cmd="clone onboard existing codebase branch">
           <span class="c-emoji">&#128279;</span>
           <span class="c-name">cleanvibe clone</span>
@@ -210,7 +215,7 @@
     <section class="section">
       <h2><span class="num">03 &mdash;</span> Stable, v1.x</h2>
       <div class="lead">
-        <p>Semantic versioning since v1.0.0 (currently v1.2.0). <code>new</code>, <code>clone</code>, <code>convert</code>, and <code>replicate</code> are stable within the 1.x line; the guaranteed injected set &mdash; <code>CLAUDE.md</code>, <code>README.md</code>, <code>queue.md</code>, <code>todo.md</code>, <code>devlog.md</code>, <code>.gitignore</code> &mdash; is fixed; new repos initialize on <code>main</code>; <code>clone</code>/<code>convert</code> never overwrite and <code>replicate</code> never errors on a name collision; zero runtime dependencies is a hard guarantee. Preview anything with <code>--dry-run</code>.</p>
+        <p>Semantic versioning since v1.0.0 (currently v1.18.0). <code>new</code>, <code>clone</code>, <code>convert</code>, and <code>replicate</code> are stable within the 1.x line; the guaranteed injected set &mdash; <code>CLAUDE.md</code>, <code>README.md</code>, <code>queue.md</code>, <code>todo.md</code>, <code>devlog.md</code>, <code>.gitignore</code> &mdash; is fixed; new repos initialize on <code>main</code>; <code>clone</code>/<code>convert</code> never overwrite and <code>replicate</code> never errors on a name collision; zero runtime dependencies is a hard guarantee. Preview anything with <code>--dry-run</code>.</p>
       </div>
       <div class="hero-actions">
         <a class="btn btn-primary" href="https://github.com/EmmaLeonhart/cleanvibe">Read on GitHub &rarr;</a>

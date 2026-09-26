@@ -1257,7 +1257,7 @@ what the user is trying to do and keep the session logs in git.
   attachments, not `user` entries, so the script handles both.
 - The strict-order + not-done-taxonomy block is now a shared `BEHAVIOR_RULES`
   constant used by both `new` and `chat`.
-- **Tests:** `tests/test_chat.py` (17). This includes running the hook script
+- **Tests:** `tests/test_chat.py` (15). This includes running the hook script
   for real against a fake transcript: rendering, commit contents, idempotence,
   push without an upstream, and bad input. 152 passed under `unittest`.
 - **Live smoke test (Windows):** scaffolded `tests/scratch/chat-smoke` and ran
@@ -1273,3 +1273,20 @@ Interpretation calls for Emma to confirm or correct:
   remote-control launch flag was added.
 - Chat mode has no three-cron playbook (it is conversational, not extensive
   autonomous work) and no Pages report.
+
+## 2026-09-26 — v1.18.0 docs + version
+
+- README: new "Chat — a git-tracked conversation" section, an "Every mode:
+  private repo, starting prompt" section, `chat` in Options and Stability
+  (plus its guaranteed files).
+- `pages/index.html`: a `cleanvibe chat` card; the stability blurb said
+  "currently v1.2.0", now v1.18.0. The site still has no `research` or
+  `original` cards; left for the wider refresh Emma mentioned.
+- `pages/updates.md`: a v1.18.0 entry. No skill bodies changed. It warns that
+  an older generated `pages.yml` on a private repo will fail its Pages deploy
+  until it gets the new `if:` gate.
+- Correction: the chat entry above first said `test_chat.py` has 17 tests; it
+  has 15.
+- Version `1.17.1` -> `1.18.0` (`cleanvibe/__init__.py`, `pyproject.toml`).
+  Not released: `publish.yml` fires on a published GitHub release, so that is
+  Emma's call. 152 tests pass.

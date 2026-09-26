@@ -124,6 +124,43 @@ the bootstrap queue → work it. Use `original` when you want to investigate *so
 area but haven't settled on the precise question; use [`research`](#research-a-question--your-own-investigation)
 when you already know what you're asking.
 
+### Chat — a git-tracked conversation
+
+```
+cleanvibe chat                                   # -> chat-YYYY-MM-DD/
+cleanvibe chat tea-notes --topic "oolong vs pu-erh"
+```
+
+`chat` is for a **conversation about one topic** rather than a software project:
+research-heavy, light on code, kept in a **private** git repo so you can resume,
+search and share it. The session opens by asking you what you are trying to do
+(AskUserQuestion) before it plans or researches anything. Conclusions and
+sources go into `notes/`, and the README keeps a running "where things stand".
+
+**Session logs are git-tracked.** The scaffold's `.claude/settings.json` runs a
+small stdlib script (`.claude/hooks/save_session_log.py`) after every response
+and at session end. It copies the transcript into `sessions/` as raw `.jsonl`
+plus a readable `.md`, and commits only `sessions/`. At session end it also
+pushes if the repo has a remote. Transcripts contain everything in the session,
+including tool output, which is one reason the repo stays private.
+
+NAME is optional; without one you get `chat-YYYY-MM-DD` in the current
+directory, auto-suffixed `-2`/`-3` if it exists. Chat mode has no three-cron
+playbook and no Pages report.
+
+### Every mode: private repo, starting prompt
+
+- **Private by default.** Every mode that creates a GitHub repo creates it with
+  `gh repo create --private`. Going public is your call. On a private repo the
+  research/replication Pages workflows upload the report as a workflow artifact
+  instead of deploying (GitHub's free plan cannot publish Pages from a private
+  repo). Make the repo public, or set the repo variable `CLEANVIBE_PAGES=true` on
+  a paid plan, to deploy the site.
+- **Starting prompt.** Claude launches with a first message saying the project
+  was started with cleanvibe, which mode, what that mode is for, and to work
+  `queue.md` item 1, asking you first if the goal is unclear. `!runClaude.bat`
+  relaunches with the same prompt.
+
 ### Clone an existing repo — codebase onboarding
 
 ```
@@ -291,6 +328,7 @@ cleanvibe new my-project --dry-run        # Preview what would be created
 cleanvibe new my-project --no-claude      # Skip launching Claude Code
 cleanvibe research my-study --dry-run     # Preview the research scaffold
 cleanvibe research my-study --no-claude   # Scaffold a research project without launching Claude
+cleanvibe chat --dry-run                  # Preview the chat scaffold
 cleanvibe clone REPO path --dry-run       # Preview what would be done
 cleanvibe replicate URL --dry-run         # Preview the arXiv replication scaffold
 cleanvibe replicate FOLDER --dry-run      # Preview the manual drop-in scaffold
@@ -323,13 +361,15 @@ project site (built from `pages/` and deployed by GitHub Actions):
 As of **v1.0.0**, cleanvibe commits to the following contract (semantic
 versioning from here on):
 
-- **Subcommands** `new`, `research`, `original`, `clone`, `convert`, and
-  `replicate` are stable. Their core behavior will not change incompatibly
+- **Subcommands** `new`, `research`, `original`, `chat`, `clone`, `convert`,
+  and `replicate` are stable. Their core behavior will not change incompatibly
   within the 1.x line.
 - **Injected files**: `new` guarantees `CLAUDE.md`, `README.md`, `queue.md`,
   `.gitignore`, and `data_lake/.gitkeep`. `research` guarantees all of those
   **plus** `literature/.gitkeep`, `docs/index.html` (the themed report site),
-  and `.github/workflows/pages.yml`. `replicate` always guarantees
+  and `.github/workflows/pages.yml`. `chat` guarantees `CLAUDE.md`, `README.md`,
+  `queue.md`, `devlog.md`, `.gitignore`, `notes/`, `sessions/`, `data_lake/`,
+  `.claude/settings.json` and `.claude/hooks/save_session_log.py`. `replicate` always guarantees
   `SKILL.md`, `CLAUDE.md`, `queue.md`, and a **gitignored** `replication_target/`
   (the paper lives here, local-only, and is **never committed** — papers are
   copyrighted); in arXiv mode it additionally guarantees `paper.json` and

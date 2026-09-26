@@ -8,9 +8,7 @@
 
 ## Active
 
-Requested by Emma 2026-09-26 (voice note, then left for an IRL errand; she will say more later). Build it; record every interpretation call in `devlog.md` so she can correct it.
-
-1. **Docs + version.** CLAUDE.md (architecture tree + Key Decisions), README.md, the pages site if it lists modes, version `1.17.1` -> `1.18.0` (not released; publishing is Emma's call).
+_(empty — the 2026-09-26 chat/private/starting-prompt work is done; see `devlog.md`. Pull the next item from `todo.md`.)_
 
 ---
 
@@ -27,4 +25,4 @@ B. **Run the status-report action once more, independently** — an end-of-sessi
 
 - Completed work (chronological, with releases): `devlog.md`. Long-horizon backlog: `todo.md`.
 - Vision / framing: `docs/replication_framing.md`; reference corpus: `docs/replication-examples/`.
-- Narrative history: `git log`. Current version: `1.17.1`.
+- Narrative history: `git log`. Current version: `1.18.0`.
