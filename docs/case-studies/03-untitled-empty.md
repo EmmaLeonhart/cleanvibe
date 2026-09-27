@@ -9,5 +9,12 @@
 
 ## Log
 
-_(Filled in as the session plays out: first message, INTENT.md, the intake at
-+30 minutes, and whether it started the loop.)_
+- **21:13:15** launched with the installed cleanvibe 2.0.1 (bare `cleanvibe` in
+  `Documents/GitHub/`, run from an agent session). Pre-trusted; its own
+  transcript; Remote Control on (`bridge-session`); no `--name` passed, and
+  Claude titled it "Untitled cleanvibe project intake".
+- It scheduled the intake at once: `43 21 26 9 *`, one-time, with the exact
+  `[cleanvibe cron]` prompt.
+- **Next:** at 21:43 the intake should report **NOTHING TO GO ON** (no
+  material, no engagement, generated name). The test is whether the agent then
+  waits instead of planning and starting the loop.

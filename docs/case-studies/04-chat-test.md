@@ -9,4 +9,11 @@
 
 ## Log
 
-_(Filled in as the session plays out.)_
+- **21:13:20** launched with the installed cleanvibe 2.0.1 (`cleanvibe new
+  chat-test` in `Documents/GitHub/`). Pre-trusted; its own transcript; Remote
+  Control on; session title `chat-test` (`customTitle`), from `--name`, which
+  is what Emma looks for in the app.
+- It scheduled the intake: `43 21 26 9 *`, one-time. It then read the folder
+  (listing, `.cleanvibe.json`, README, the `.bat`).
+- **Next:** Emma talks to it. At 21:43 the intake should see substantial
+  engagement and schedule the loop for about 22:43 instead of starting it.

@@ -1816,4 +1816,17 @@ itself. After Emma arrived it investigated beyond the project, kept going after
 - Tests: new verdict tests (nothing to go on, name only, material), naming and
   path tests. 225 pass. Version 2.0.1.
 
+## 2026-09-26 — 2.0.1 released and installed; case studies 03 and 04 launched
 
+- CI green on `2d02def` (6/6). Released **v2.0.1**; PyPI serves it; Emma's
+  local `cleanvibe` upgraded to 2.0.1 (from the published wheel again, since
+  pip's index lags a new upload).
+- With the installed command, from this agent session, in `Documents/GitHub/`:
+  - bare `cleanvibe` created `untitled-cleanvibe-project` (case 03: empty,
+    untitled, the low-information test);
+  - `cleanvibe new chat-test` created `chat-test` (case 04: Emma talks to it).
+- Both were pre-trusted, got their own transcripts with Remote Control on, and
+  scheduled the intake for 21:43. `chat-test` is titled `chat-test`; the
+  untitled one got no name, and Claude called it "Untitled cleanvibe project
+  intake". Details and what to watch for are in `docs/case-studies/03-*` and
+  `04-*`.
