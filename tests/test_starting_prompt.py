@@ -53,6 +53,39 @@ class TestStartingPrompt(unittest.TestCase):
             scaffold._launch_claude(Path("."), "hello there")
         execlp.assert_called_once_with("claude", "claude", "hello there")
 
+    def test_remote_control_flag_comes_after_prompt(self):
+        # `--remote-control [name]` takes an optional value; placed before the
+        # prompt it would swallow the prompt as the session name.
+        self.assertEqual(templates.claude_command("hi", True),
+                         ["claude", "hi", "--remote-control"])
+        self.assertEqual(templates.claude_command(None, True),
+                         ["claude", "--remote-control"])
+        self.assertEqual(templates.claude_command("hi"), ["claude", "hi"])
+
+    def test_only_chat_bat_uses_remote_control(self):
+        chat_bat = templates.runclaude_bat("chat")
+        self.assertTrue(chat_bat.rstrip().endswith('" --remote-control'))
+        for mode in templates._MODE_SUMMARIES:
+            if mode != "chat":
+                self.assertNotIn("--remote-control", templates.runclaude_bat(mode))
+
+    def test_launcher_remote_control_unix(self):
+        with mock.patch.object(scaffold.platform, "system", return_value="Linux"), \
+                mock.patch.object(scaffold.os, "chdir"), \
+                mock.patch.object(scaffold.os, "execlp") as execlp:
+            scaffold._launch_claude(Path("."), "hello", remote_control=True)
+        execlp.assert_called_once_with("claude", "claude", "hello", "--remote-control")
+
+    def test_chat_launches_with_remote_control(self):
+        import tempfile
+        from contextlib import redirect_stdout
+        import io
+        from cleanvibe import chat
+        proj = Path(tempfile.mkdtemp()) / "c"
+        with mock.patch.object(chat, "_launch_claude") as launch, redirect_stdout(io.StringIO()):
+            chat.chat_project(proj)
+        launch.assert_called_once_with(proj, templates.starting_prompt("chat"), remote_control=True)
+
     def test_launcher_without_prompt(self):
         with mock.patch.object(scaffold.platform, "system", return_value="Linux"), \
                 mock.patch.object(scaffold.os, "chdir"), \

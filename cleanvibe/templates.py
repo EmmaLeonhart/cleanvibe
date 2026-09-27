@@ -423,9 +423,30 @@ def starting_prompt(mode: str) -> str:
     return prompt
 
 
+# Modes whose sessions start with Remote Control on (unnamed), so they can be
+# picked up from the Claude app or web: a chat is meant to be continued anywhere.
+REMOTE_CONTROL_MODES = frozenset({"chat"})
+
+
+def claude_command(prompt: str | None = None, remote_control: bool = False) -> list:
+    """argv that launches Claude.
+
+    `--remote-control [name]` takes an OPTIONAL value, so it must come AFTER the
+    prompt: `claude --remote-control "<prompt>"` would read the prompt as the
+    session name.
+    """
+    command = ["claude"]
+    if prompt:
+        command.append(prompt)
+    if remote_control:
+        command.append("--remote-control")
+    return command
+
+
 def runclaude_bat(mode: str) -> str:
     """`!runClaude.bat` that launches Claude with the ``mode``'s starting prompt."""
-    return f'@echo off\ncd /d "%~dp0"\nclaude "{starting_prompt(mode)}"\n'
+    flag = " --remote-control" if mode in REMOTE_CONTROL_MODES else ""
+    return f'@echo off\ncd /d "%~dp0"\nclaude "{starting_prompt(mode)}"{flag}\n'
 
 
 GITIGNORE = """# Python

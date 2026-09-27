@@ -1359,3 +1359,20 @@ on a bad path.
   this repo: no drift.
 - Docs: README section + Options + Stability, a site card, CLAUDE.md
   architecture + Key Decision. Removed from `todo.md`.
+
+## 2026-09-26 — `cleanvibe chat` starts with Remote Control
+
+Asked what "remote control starts, you don't need a name" meant, Emma chose
+"launch with Remote Control". So a chat session now starts as
+`claude "<prompt>" --remote-control`, unnamed, and chat's `!runClaude.bat` does
+the same. Other modes are unchanged (`REMOTE_CONTROL_MODES = {"chat"}`).
+
+- The flag goes after the prompt. `--remote-control [name]` takes an optional
+  value, so `claude --remote-control "<prompt>"` would make the prompt the
+  session name. Checked against the real CLI (2.1.283):
+  `claude -p "Reply with just the word pong." --remote-control` answered
+  "pong". That covers argument parsing only; an interactive Remote Control
+  session was not opened from here.
+- Tests: 4 more in `tests/test_starting_prompt.py` (argv order, chat-only
+  `.bat` flag, launcher, `chat_project` passes `remote_control=True`). 170
+  pass.

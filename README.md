@@ -146,8 +146,10 @@ plus a readable `.md`, and commits only `sessions/`. At session end it also
 pushes if the repo has a remote. Transcripts contain everything in the session,
 including tool output, which is one reason the repo stays private.
 
-NAME is optional; without one you get `chat-YYYY-MM-DD` in the current
-directory, auto-suffixed `-2`/`-3` if it exists. Chat mode has no three-cron
+**It starts with Remote Control on** (`claude "<prompt>" --remote-control`,
+unnamed), so you can pick the conversation up from the Claude app or web.
+`!runClaude.bat` does the same. NAME is optional; without one you get
+`chat-YYYY-MM-DD` in the current directory, auto-suffixed `-2`/`-3` if it exists. Chat mode has no three-cron
 playbook and no Pages report.
 
 ### Every mode: private repo, starting prompt

@@ -10,9 +10,7 @@
 
 From Emma's 2026-09-26 AskUserQuestion answers. **Strict order, as she listed it:** the CLAUDE.md section first, then refresh → doctor → release. Remote Control (her answer to a separate question) goes just before the release so it ships in it. Raw `.jsonl` logs stay committed (no change). The general-purpose rework comes later today and is out of scope here.
 
-1. **`cleanvibe chat` launches with Remote Control.** Emma meant a Remote Control start, not only an optional folder name. `_launch_claude(..., remote_control=True)` for chat → `claude "<prompt>" --remote-control`, unnamed. The flag goes AFTER the prompt: `--remote-control [name]` takes an optional value and would swallow a following prompt as the session name. Same in chat's `!runClaude.bat`. Tests + CLAUDE.md/README.
-
-2. **Release v1.18.0.** Nothing after v1.18.0 has been released, so everything done today ships in it; no separate 1.19.0. After item 1 lands and CI is green: `gh release create v1.18.0` with notes from the devlog, then confirm `publish.yml` pushes it to PyPI.
+1. **Release v1.18.0.** Nothing after v1.18.0 has been released, so everything done today ships in it; no separate 1.19.0. When CI is green: `gh release create v1.18.0` with notes from the devlog, then confirm `publish.yml` pushes it to PyPI.
 
 ---
 

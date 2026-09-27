@@ -351,15 +351,18 @@ def _git_init(path: Path, message=None) -> None:
     print(f"  Initialized git repo with initial commit")
 
 
-def _launch_claude(path: Path, prompt: str | None = None) -> None:
+def _launch_claude(
+    path: Path, prompt: str | None = None, remote_control: bool = False
+) -> None:
     """Launch Claude Code in the project directory.
 
     ``prompt`` (a mode's ``templates.starting_prompt``) becomes the first
-    message of the session. On Windows, opens a new cmd window. On Unix,
-    replaces the current process.
+    message of the session. ``remote_control`` starts it with Remote Control on
+    (unnamed). On Windows, opens a new cmd window. On Unix, replaces the
+    current process.
     """
     print(f"  Launching Claude Code...")
-    command = ["claude"] + ([prompt] if prompt else [])
+    command = templates.claude_command(prompt, remote_control)
     system = platform.system()
     try:
         if system == "Windows":

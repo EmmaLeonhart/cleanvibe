@@ -71,7 +71,7 @@ def chat_project(
         print(f"[dry-run] Would run: git init")
         print(f"[dry-run] Would run: git add . && git commit")
         if not no_claude:
-            print(f"[dry-run] Would launch: claude")
+            print(f"[dry-run] Would launch: claude (with --remote-control)")
         return
 
     path.mkdir(parents=True, exist_ok=True)
@@ -112,4 +112,4 @@ def chat_project(
     _git_init(path, message=message)
 
     if not no_claude:
-        _launch_claude(path, templates.starting_prompt("chat"))
+        _launch_claude(path, templates.starting_prompt("chat"), remote_control=True)
