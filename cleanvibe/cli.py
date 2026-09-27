@@ -8,6 +8,7 @@ Usage:
     cleanvibe clone REPO [PATH] Clone a repo and inject scaffolding
     cleanvibe convert [PATH]    Convert an existing directory into a cleanvibe project
     cleanvibe replicate REF     Scaffold a replication project: clawRxiv ref, arXiv/alphaxiv ref, a non-arXiv URL, or a drop-in folder
+    cleanvibe doctor [PATH]     Read-only audit of a cleanvibe project for drift
     cleanvibe --version         Show version
 
 Zero dependencies. Just Python stdlib.
@@ -29,6 +30,7 @@ from .replicate import (
     replicate_url_project,
 )
 from .chat import chat_project, default_chat_path
+from .doctor import doctor
 from .original import original_project
 from .research import research_project
 from .scaffold import clone_project, convert_project, create_project
@@ -220,6 +222,18 @@ def main(argv: list[str] | None = None) -> None:
         "--no-claude", action="store_true", help="Skip launching Claude Code after scaffolding"
     )
 
+    # cleanvibe doctor [PATH]
+    doctor_parser = subparsers.add_parser(
+        "doctor",
+        help="Read-only audit of a cleanvibe project for drift (done markers left "
+        "in queue.md, releases missing from devlog.md, outdated skills, dangling "
+        "CLAUDE.md section references, ...). Exits 1 if anything is found",
+    )
+    doctor_parser.add_argument(
+        "path", nargs="?", type=Path, default=Path("."),
+        help="Project to audit (defaults to the current directory)",
+    )
+
     # cleanvibe clone REPO [PATH]
     clone_parser = subparsers.add_parser(
         "clone", help="Clone a repo and inject missing scaffolding"
@@ -295,6 +309,9 @@ def main(argv: list[str] | None = None) -> None:
     if args.command == "chat":
         _do_chat(args)
         return
+
+    if args.command == "doctor":
+        sys.exit(doctor(args.path))
 
     if args.command == "new":
         if args.original:

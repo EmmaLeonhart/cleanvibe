@@ -214,6 +214,11 @@
           <span class="c-name">cleanvibe convert</span>
           <p class="c-desc">In-place onboarding for a project you are already in: injects only the scaffold files that are missing. Non-destructive by contract.</p>
         </div>
+        <div class="cmd cmd-c" data-cmd="doctor audit drift check lint">
+          <span class="c-emoji">&#129658;</span>
+          <span class="c-name">cleanvibe doctor</span>
+          <p class="c-desc">A read-only audit for drift: done markers left in <code>queue.md</code>, releases missing from <code>devlog.md</code>, outdated skills, references to <code>CLAUDE.md</code> sections that no longer exist, tests with no CI. Exits non-zero if it finds anything.</p>
+        </div>
         <div class="cmd cmd-d" data-cmd="replicate paper arxiv alphaxiv reproduction">
           <span class="c-emoji">&#128218;</span>
           <span class="c-name">cleanvibe replicate</span>
@@ -225,7 +230,7 @@
     <section class="section">
       <h2><span class="num">03 &mdash;</span> Stable, v1.x</h2>
       <div class="lead">
-        <p>Semantic versioning since v1.0.0 (currently v1.18.0). <code>new</code>, <code>research</code>, <code>original</code>, <code>chat</code>, <code>clone</code>, <code>convert</code>, and <code>replicate</code> are stable within the 1.x line; the core injected set &mdash; <code>CLAUDE.md</code>, <code>README.md</code>, <code>queue.md</code>, <code>devlog.md</code>, <code>.gitignore</code> &mdash; is fixed; new repos initialize on <code>main</code>; <code>clone</code>/<code>convert</code> never overwrite and <code>replicate</code> never errors on a name collision; zero runtime dependencies is a hard guarantee. Preview anything with <code>--dry-run</code>.</p>
+        <p>Semantic versioning since v1.0.0 (currently v1.18.0). <code>new</code>, <code>research</code>, <code>original</code>, <code>chat</code>, <code>clone</code>, <code>convert</code>, <code>replicate</code>, and <code>doctor</code> are stable within the 1.x line; the core injected set &mdash; <code>CLAUDE.md</code>, <code>README.md</code>, <code>queue.md</code>, <code>devlog.md</code>, <code>.gitignore</code> &mdash; is fixed; new repos initialize on <code>main</code>; <code>clone</code>/<code>convert</code> never overwrite and <code>replicate</code> never errors on a name collision; zero runtime dependencies is a hard guarantee. Preview anything with <code>--dry-run</code>.</p>
       </div>
       <div class="hero-actions">
         <a class="btn btn-primary" href="https://github.com/EmmaLeonhart/cleanvibe">Read on GitHub &rarr;</a>

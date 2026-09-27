@@ -1329,3 +1329,33 @@ reworded; the wider general-purpose rework is later today.
 - **CLAUDE.md:** the website was described as `site/` with tabs; it is `pages/`
   with cards. The `research` decision named `_CLAUDE_CORE_RULES` helpers that
   v1.14.0 removed.
+
+## 2026-09-26 — `cleanvibe doctor`: read-only drift audit
+
+The `todo.md` item, which Emma picked after a session spent fixing drift by
+hand. `cleanvibe doctor [PATH]` (`cleanvibe/doctor.py`) runs eight read-only
+checks: `files`, `skills`, `queue-done`, `version`, `devlog-tags`,
+`section-refs`, `ci`, `pages-gate`. It exits 0 when clean, 1 with findings, 2
+on a bad path.
+
+- **It found a generator bug on its first run.** `new`, `research` and
+  `original` projects have pointed their `queue.md`/`todo.md` at CLAUDE.md
+  sections ("Workflow Rules", "Queue and longer-horizon work", "Autonomous
+  productivity loop") since v1.14.0, which moved those sections into skills.
+  The 17 references in `templates.py` (and this repo's own `queue.md`/`todo.md`)
+  now name the skill. `pages/updates.md` tells existing projects how to fix
+  theirs.
+- **First run also had false positives, all mine.** Every release tag was
+  reported missing, because the pattern rejected `v0.1.0` (the `v` counted as
+  a word character before the number). Fixed; the test covers `v1.10.0` vs
+  `1.10.0.1` and `v11.1.0`.
+- **Dogfooding found one more doctor bug.** Before commit, doctor flagged its
+  own documentation: the section-name pattern could span lines, so one stray
+  quote swallowed a paragraph. It is now single-line only, with a test.
+- No `--fix`: none of the findings has a fix safe to apply without a human
+  looking.
+- Tests: `tests/test_doctor.py` (14), including "a fresh scaffold of every mode
+  audits clean", which is what keeps the generator honest. 166 pass. Doctor on
+  this repo: no drift.
+- Docs: README section + Options + Stability, a site card, CLAUDE.md
+  architecture + Key Decision. Removed from `todo.md`.

@@ -118,7 +118,7 @@ When work begins, the typical move is: pull an item from `todo.md`, break it int
 
 **Session end condition:** the first session ends when `queue.md` is empty, the items remaining in `todo.md` are still too abstract to break down further, and the repository is online with green CI. At that point, stop and hand back.
 
-See `CLAUDE.md` § "Queue and longer-horizon work" for how `todo.md`, `queue.md`, and the task tool stay in sync.
+See the `queue-driven-workflow` skill (`.claude/skills/queue-driven-workflow/SKILL.md`) for how `todo.md`, `queue.md`, and the task tool stay in sync.
 
 ---
 
@@ -165,7 +165,7 @@ anything else worth a chronological trail. Newest entries at the bottom.
 This is the **same convention as the cleanvibe repo's own `devlog.md`** —
 every cleanvibe-scaffolded project gets one for the same reason.
 
-See `CLAUDE.md` § "Workflow Rules" and `queue.md`'s preamble.
+See the `queue-driven-workflow` skill (`.claude/skills/queue-driven-workflow/SKILL.md`) and `queue.md`'s preamble.
 
 ---
 
@@ -181,9 +181,9 @@ def queue_md(project_name: str) -> str:
 
 The purpose of this file is also to bound scope. If a task is not in this queue, it is not in scope for the current session. New ideas go at the bottom of the queue (or to `todo.md` if they are longer-term / architectural), not silently into whatever is being worked on.
 
-See `CLAUDE.md` § "Workflow Rules" for how this file, planning mode, and the task tool stay in sync.
+See the `queue-driven-workflow` skill (`.claude/skills/queue-driven-workflow/SKILL.md`) for how this file, planning mode, and the task tool stay in sync.
 
-**Three-cron playbook.** Extensive work runs under three local `CronCreate` jobs — **work-loop at :03** (the engine that drains `queue.md` and refills it from `todo.md`), **auto-flush at :15** (commit/push backstop), and **status-report at :42** (heartbeat). On a fresh session they are **started** as the opening step (bootstrap step 1 below); on a mid-session **large-scale re-fill** of this queue the FIRST item worked is instead to **kill** the already-running crons. Either way the **last two items are always pinned at the tail** — ensure the three crons are running, then run an end-of-session summary (see the `## Always last` section below and `CLAUDE.md` § "Autonomous productivity loop — the three-cron playbook"). Entering planning mode also disables the crons; their restart lives at the end of the queue.
+**Three-cron playbook.** Extensive work runs under three local `CronCreate` jobs — **work-loop at :03** (the engine that drains `queue.md` and refills it from `todo.md`), **auto-flush at :15** (commit/push backstop), and **status-report at :42** (heartbeat). On a fresh session they are **started** as the opening step (bootstrap step 1 below); on a mid-session **large-scale re-fill** of this queue the FIRST item worked is instead to **kill** the already-running crons. Either way the **last two items are always pinned at the tail** — ensure the three crons are running, then run an end-of-session summary (see the `## Always last` section below and the `autonomous-loop` skill (`.claude/skills/autonomous-loop/SKILL.md`)). Entering planning mode also disables the crons; their restart lives at the end of the queue.
 
 ---
 
@@ -191,7 +191,7 @@ See `CLAUDE.md` § "Workflow Rules" for how this file, planning mode, and the ta
 
 These items are the default opening sequence for a new cleanvibe project. Work them top to bottom. **Delete each item from this file in the same commit that completes it, and append a dated entry to `devlog.md` recording the step.** Push after every step. When this whole section is gone, the project has finished bootstrap and the queue is ready to be repopulated with real product work (see the final item).
 
-1. **Start the three-cron playbook.** Use the `CronCreate` tool to schedule three local crons (all `durable: false`): **work-loop at `3 * * * *`** (sync → take top actionable `queue.md` item / promote from `todo.md` → hold the hard rails → commit + push → one-line report), **auto-flush at `15 * * * *`** (commit + push pending work, no empty commits), and **status-report at `42 * * * *`** (reporting only, no code changes). Together they turn this bootstrap run into a self-sustaining hourly cadence so a long autonomous session can't silently lose the thread. (See `CLAUDE.md` § "Autonomous productivity loop — the three-cron playbook"; the `## Always last` section pinned at the tail keeps them running — starting them here, restarting them there if a later planning burst / queue re-fill kills them.)
+1. **Start the three-cron playbook.** Use the `CronCreate` tool to schedule three local crons (all `durable: false`): **work-loop at `3 * * * *`** (sync → take top actionable `queue.md` item / promote from `todo.md` → hold the hard rails → commit + push → one-line report), **auto-flush at `15 * * * *`** (commit + push pending work, no empty commits), and **status-report at `42 * * * *`** (reporting only, no code changes). Together they turn this bootstrap run into a self-sustaining hourly cadence so a long autonomous session can't silently lose the thread. (See the `autonomous-loop` skill (`.claude/skills/autonomous-loop/SKILL.md`); the `## Always last` section pinned at the tail keeps them running — starting them here, restarting them there if a later planning burst / queue re-fill kills them.)
 
 2. **Triage user-supplied files into `data_lake/`.** Look at everything in the repo that isn't part of the cleanvibe scaffold (i.e. anything the user dropped in: notes, exports, spec PDFs, sample data, mockups, etc.).
    - `data_lake/` already exists — the scaffold created it with a `.gitkeep` (so a user could drop files straight into it before this session). Move all such files into `data_lake/` so the project root stays clean. Only the scaffold (`CLAUDE.md`, `README.md`, `queue.md`, `.gitignore`, `LICENSE`, and any source/config files you have explicitly chosen to keep at the root) should live at the top level. Leave the `.gitkeep` in place.
@@ -211,7 +211,7 @@ These items are the default opening sequence for a new cleanvibe project. Work t
    - Commit once the picture is concrete enough to plan against.
 
 5. **Create `todo.md` — the long-horizon backlog.** This is the step before any concrete queue gets written. Based on the interview and inferred picture, write `todo.md` as the project's long-term horizon: every multi-session goal, architectural ambition, capability, integration, or future direction the user described. Items here are *abstract destinations*, not steps — they will be decomposed into concrete tasks in `queue.md` later, one at a time, as the work unfolds. `todo.md` is the *basis for* `queue.md`: work flows `todo.md` → `queue.md` → executed → deleted from both.
-   - Use the convention described in `CLAUDE.md` § "Queue and longer-horizon work" for the file format.
+   - Use the convention described in the `queue-driven-workflow` skill (`.claude/skills/queue-driven-workflow/SKILL.md`) for the file format.
    - Do NOT touch `queue.md` in this commit — populating the real queue is the *next* step.
    - Commit `todo.md` on its own so the long-horizon picture is a reviewable artifact, not buried inside a larger change.
 
@@ -227,7 +227,7 @@ These items are the default opening sequence for a new cleanvibe project. Work t
 
 ## Always last — restart the three crons and summarize
 
-**These two items stay pinned to the tail of the queue at all times** — below every bootstrap step and below every real work item. They are the closing half of the three-cron lifecycle described in `CLAUDE.md` § "Autonomous productivity loop — the three-cron playbook": the crons are **started** at the beginning of extensive work (a fresh session starts them as the opening item; a mid-session large-scale re-fill instead kills the already-running crons as its first item, and planning mode disables them), and these are always the LAST two, after everything else — they bring them back and sign off:
+**These two items stay pinned to the tail of the queue at all times** — below every bootstrap step and below every real work item. They are the closing half of the three-cron lifecycle described in the `autonomous-loop` skill (`.claude/skills/autonomous-loop/SKILL.md`): the crons are **started** at the beginning of extensive work (a fresh session starts them as the opening item; a mid-session large-scale re-fill instead kills the already-running crons as its first item, and planning mode disables them), and these are always the LAST two, after everything else — they bring them back and sign off:
 
 A. **Ensure the three crons are running** — start them if this session never did, restart them if a planning burst / queue re-fill killed them: work-loop (`3 * * * *`), auto-flush (`15 * * * *`), status-report (`42 * * * *`).
 B. **Run the status-report action once more, independently** — an end-of-session summary of everything that happened this session.
@@ -2805,9 +2805,9 @@ def research_queue_md(project_name: str, question: str | None = None) -> str:
 
 **Why this file exists:** when a planning step produces a plan, that plan is written here BEFORE execution starts, so an interrupted session can pick up from the queue rather than from chat context that may be gone.
 
-See `CLAUDE.md` § "Workflow Rules" and § "Research workflow" for how this file, planning mode, and the task tool stay in sync.
+See the `queue-driven-workflow` skill (`.claude/skills/queue-driven-workflow/SKILL.md`) and § "Research workflow" for how this file, planning mode, and the task tool stay in sync.
 
-**Three-cron playbook.** Research IS extensive work, so it runs under three local `CronCreate` jobs — **work-loop at :03** (the engine that drains `queue.md` and refills it from `todo.md`), **auto-flush at :15** (commit/push backstop), and **status-report at :42** (heartbeat). On a fresh session they are **started** as the opening step (bootstrap step 1 below); on a mid-session **large-scale re-fill** of this queue the FIRST item worked is instead to **kill** the already-running crons. Either way the **last two items are always pinned at the tail** (see `## Always last`). Entering planning mode also disables the crons; their restart lives at the end of the queue. (See `CLAUDE.md` § "Autonomous productivity loop — the three-cron playbook".)
+**Three-cron playbook.** Research IS extensive work, so it runs under three local `CronCreate` jobs — **work-loop at :03** (the engine that drains `queue.md` and refills it from `todo.md`), **auto-flush at :15** (commit/push backstop), and **status-report at :42** (heartbeat). On a fresh session they are **started** as the opening step (bootstrap step 1 below); on a mid-session **large-scale re-fill** of this queue the FIRST item worked is instead to **kill** the already-running crons. Either way the **last two items are always pinned at the tail** (see `## Always last`). Entering planning mode also disables the crons; their restart lives at the end of the queue. (See the `autonomous-loop` skill (`.claude/skills/autonomous-loop/SKILL.md`).)
 
 ---
 
@@ -2815,7 +2815,7 @@ See `CLAUDE.md` § "Workflow Rules" and § "Research workflow" for how this file
 
 Work these top to bottom. **Delete each item from this file in the same commit that completes it, and append a dated entry to `devlog.md`.** Push after every step. When this whole section is gone, the project has finished bootstrap and the queue is ready to be repopulated with the real research/experiment work (see the final item).
 
-1. **Start the three-cron playbook.** Use the `CronCreate` tool to schedule three local crons (all `durable: false`): **work-loop at `3 * * * *`** (sync → take top actionable `queue.md` item / promote from `todo.md` → hold the hard rails → commit + push → one-line report), **auto-flush at `15 * * * *`** (commit + push pending work, no empty commits), and **status-report at `42 * * * *`** (reporting only, no code changes). Together they turn this run into a self-sustaining hourly cadence so a long autonomous session can't silently lose the thread. (See `CLAUDE.md` § "Autonomous productivity loop"; the `## Always last` section keeps them running.)
+1. **Start the three-cron playbook.** Use the `CronCreate` tool to schedule three local crons (all `durable: false`): **work-loop at `3 * * * *`** (sync → take top actionable `queue.md` item / promote from `todo.md` → hold the hard rails → commit + push → one-line report), **auto-flush at `15 * * * *`** (commit + push pending work, no empty commits), and **status-report at `42 * * * *`** (reporting only, no code changes). Together they turn this run into a self-sustaining hourly cadence so a long autonomous session can't silently lose the thread. (See the `autonomous-loop` skill (`.claude/skills/autonomous-loop/SKILL.md`); the `## Always last` section keeps them running.)
 
 2. **Triage user-supplied files into `data_lake/`.** Move anything the user dropped in (notes, exports, datasets, spec PDFs, prior drafts) into `data_lake/` so the root stays clean; leave the `.gitkeep`. Extract any `.zip` into `data_lake/` and add the `.zip` to `.gitignore`. For anything large enough to need Git LFS (>50 MB, or large binary like video/audio/datasets), STOP and ask the user first. Commit, describing what moved.
 
@@ -2823,7 +2823,7 @@ Work these top to bottom. **Delete each item from this file in the same commit t
 
 4. **Literature review (agentic RAG) — BEFORE building anything.** This is the step that makes a `research` project different from a plain `new` one. Survey the prior work on the question: use whatever agentic search / RAG tooling is available (web search, `WebFetch`, and the `deep-research` skill if present). For each relevant source, write a short note (claim, method, what it contributes, citation) into `literature/` — one file per source, or a single `literature/sources.md`. Then synthesize `literature/REVIEW.md`: what is already known, where the gaps are, and what *this* project adds. Cite sources properly. Reflect the one-line "grounded in the literature" summary into `docs/index.html`. Commit `literature/` on its own so the review is a reviewable artifact.
 
-5. **Create `todo.md` — the long-horizon research plan.** Informed by the gap the literature review surfaced, write `todo.md` as the project's long-term horizon: the hypotheses to test, experiments to run / things to build, and the eventual shape of the report. Items here are *abstract destinations*, decomposed into concrete steps in `queue.md` later. Use the format in `CLAUDE.md` § "Queue and longer-horizon work". Commit `todo.md` on its own.
+5. **Create `todo.md` — the long-horizon research plan.** Informed by the gap the literature review surfaced, write `todo.md` as the project's long-term horizon: the hypotheses to test, experiments to run / things to build, and the eventual shape of the report. Items here are *abstract destinations*, decomposed into concrete steps in `queue.md` later. Use the format in the `queue-driven-workflow` skill (`.claude/skills/queue-driven-workflow/SKILL.md`). Commit `todo.md` on its own.
 
 6. **Go live: create a PRIVATE GitHub repo and push.** `gh repo create --private --source=. --push`. Private is the default in every cleanvibe mode. On a private repo `pages.yml` builds the report and uploads `docs/` + the PDF as a workflow artifact, but skips the Pages deploy (free GitHub Pages needs a public repo). Publishing is the user's decision: ask them (AskUserQuestion) whether to make the repo public now, later, or never, and do not change visibility without that answer. Once public, `pages.yml` auto-enables Pages itself (`actions/configure-pages` with `enablement: true`) and deploys. Confirm CI (`.github/workflows/`) is wired. From here every commit pushes and CI builds as you go.
 
@@ -2835,7 +2835,7 @@ Work these top to bottom. **Delete each item from this file in the same commit t
 
 ## Always last — restart the three crons and summarize
 
-**These two items stay pinned to the tail of the queue at all times** — below every bootstrap step and below every real work item. They are the closing half of the three-cron lifecycle in `CLAUDE.md` § "Autonomous productivity loop":
+**These two items stay pinned to the tail of the queue at all times** — below every bootstrap step and below every real work item. They are the closing half of the three-cron lifecycle in the `autonomous-loop` skill (`.claude/skills/autonomous-loop/SKILL.md`):
 
 A. **Ensure the three crons are running** — start them if this session never did, restart them if a planning burst / queue re-fill killed them: work-loop (`3 * * * *`), auto-flush (`15 * * * *`), status-report (`42 * * * *`).
 B. **Run the status-report action once more, independently** — an end-of-session summary of everything that happened this session.
@@ -3029,9 +3029,9 @@ def original_queue_md(project_name: str, area: str | None = None) -> str:
 
 **Why this file exists:** when a planning step produces a plan, that plan is written here BEFORE execution starts, so an interrupted session can pick up from the queue rather than from chat context that may be gone.
 
-See `CLAUDE.md` § "Workflow Rules" and § "Research workflow" for how this file, planning mode, and the task tool stay in sync.
+See the `queue-driven-workflow` skill (`.claude/skills/queue-driven-workflow/SKILL.md`) and § "Research workflow" for how this file, planning mode, and the task tool stay in sync.
 
-**Three-cron playbook.** Original research IS extensive work, so it runs under three local `CronCreate` jobs — **work-loop at :03** (the engine that drains `queue.md` and refills it from `todo.md`), **auto-flush at :15** (commit/push backstop), and **status-report at :42** (heartbeat). On a fresh session they are **started** as the opening step (bootstrap step 1 below); on a mid-session **large-scale re-fill** of this queue the FIRST item worked is instead to **kill** the already-running crons. Either way the **last two items are always pinned at the tail** (see `## Always last`). Entering planning mode also disables the crons; their restart lives at the end of the queue. (See `CLAUDE.md` § "Autonomous productivity loop — the three-cron playbook".)
+**Three-cron playbook.** Original research IS extensive work, so it runs under three local `CronCreate` jobs — **work-loop at :03** (the engine that drains `queue.md` and refills it from `todo.md`), **auto-flush at :15** (commit/push backstop), and **status-report at :42** (heartbeat). On a fresh session they are **started** as the opening step (bootstrap step 1 below); on a mid-session **large-scale re-fill** of this queue the FIRST item worked is instead to **kill** the already-running crons. Either way the **last two items are always pinned at the tail** (see `## Always last`). Entering planning mode also disables the crons; their restart lives at the end of the queue. (See the `autonomous-loop` skill (`.claude/skills/autonomous-loop/SKILL.md`).)
 
 ---
 
@@ -3039,7 +3039,7 @@ See `CLAUDE.md` § "Workflow Rules" and § "Research workflow" for how this file
 
 Work these top to bottom. **Delete each item from this file in the same commit that completes it, and append a dated entry to `devlog.md`.** Push after every step. When this whole section is gone, the project has finished bootstrap and the queue is ready to be repopulated with the real research/experiment work (see the final item).
 
-1. **Start the three-cron playbook.** Use the `CronCreate` tool to schedule three local crons (all `durable: false`): **work-loop at `3 * * * *`** (sync → take top actionable `queue.md` item / promote from `todo.md` → hold the hard rails → commit + push → one-line report), **auto-flush at `15 * * * *`** (commit + push pending work, no empty commits), and **status-report at `42 * * * *`** (reporting only, no code changes). Together they turn this run into a self-sustaining hourly cadence so a long autonomous session can't silently lose the thread. (See `CLAUDE.md` § "Autonomous productivity loop"; the `## Always last` section keeps them running.)
+1. **Start the three-cron playbook.** Use the `CronCreate` tool to schedule three local crons (all `durable: false`): **work-loop at `3 * * * *`** (sync → take top actionable `queue.md` item / promote from `todo.md` → hold the hard rails → commit + push → one-line report), **auto-flush at `15 * * * *`** (commit + push pending work, no empty commits), and **status-report at `42 * * * *`** (reporting only, no code changes). Together they turn this run into a self-sustaining hourly cadence so a long autonomous session can't silently lose the thread. (See the `autonomous-loop` skill (`.claude/skills/autonomous-loop/SKILL.md`); the `## Always last` section keeps them running.)
 
 2. **Triage user-supplied files into `data_lake/`.** Move anything the user dropped in (notes, exports, datasets, spec PDFs, prior drafts) into `data_lake/` so the root stays clean; leave the `.gitkeep`. Extract any `.zip` into `data_lake/` and add the `.zip` to `.gitignore`. For anything large enough to need Git LFS (>50 MB, or large binary like video/audio/datasets), STOP and ask the user first. Commit, describing what moved.
 
@@ -3047,7 +3047,7 @@ Work these top to bottom. **Delete each item from this file in the same commit t
 
 4. **Literature review (agentic RAG) — on the chosen question, BEFORE building anything.** Now that the topic is fixed, survey the prior work on it: use whatever agentic search / RAG tooling is available (web search, `WebFetch`, and the `deep-research` skill if present). For each relevant source, write a short note (claim, method, what it contributes, citation) into `literature/` — one file per source, or a single `literature/sources.md`. Then synthesize `literature/REVIEW.md`: what is already known, where the gaps are, and what *this* project adds. Cite sources properly. Reflect the one-line "grounded in the literature" summary into `docs/index.html`. Commit `literature/` on its own so the review is a reviewable artifact.
 
-5. **Create `todo.md` — the long-horizon research plan.** Informed by the gap the literature review surfaced, write `todo.md` as the project's long-term horizon: the hypotheses to test, experiments to run / things to build, and the eventual shape of the report. Items here are *abstract destinations*, decomposed into concrete steps in `queue.md` later. Use the format in `CLAUDE.md` § "Queue and longer-horizon work". Commit `todo.md` on its own.
+5. **Create `todo.md` — the long-horizon research plan.** Informed by the gap the literature review surfaced, write `todo.md` as the project's long-term horizon: the hypotheses to test, experiments to run / things to build, and the eventual shape of the report. Items here are *abstract destinations*, decomposed into concrete steps in `queue.md` later. Use the format in the `queue-driven-workflow` skill (`.claude/skills/queue-driven-workflow/SKILL.md`). Commit `todo.md` on its own.
 
 6. **Go live: create a PRIVATE GitHub repo and push.** `gh repo create --private --source=. --push`. Private is the default in every cleanvibe mode. On a private repo `pages.yml` builds the report and uploads `docs/` + the PDF as a workflow artifact, but skips the Pages deploy (free GitHub Pages needs a public repo). Publishing is the user's decision: ask them (AskUserQuestion) whether to make the repo public now, later, or never, and do not change visibility without that answer. Once public, `pages.yml` auto-enables Pages itself (`actions/configure-pages` with `enablement: true`) and deploys. Confirm CI (`.github/workflows/`) is wired. From here every commit pushes and CI builds as you go.
 
@@ -3059,7 +3059,7 @@ Work these top to bottom. **Delete each item from this file in the same commit t
 
 ## Always last — restart the three crons and summarize
 
-**These two items stay pinned to the tail of the queue at all times** — below every bootstrap step and below every real work item. They are the closing half of the three-cron lifecycle in `CLAUDE.md` § "Autonomous productivity loop":
+**These two items stay pinned to the tail of the queue at all times** — below every bootstrap step and below every real work item. They are the closing half of the three-cron lifecycle in the `autonomous-loop` skill (`.claude/skills/autonomous-loop/SKILL.md`):
 
 A. **Ensure the three crons are running** — start them if this session never did, restart them if a planning burst / queue re-fill killed them: work-loop (`3 * * * *`), auto-flush (`15 * * * *`), status-report (`42 * * * *`).
 B. **Run the status-report action once more, independently** — an end-of-session summary of everything that happened this session.

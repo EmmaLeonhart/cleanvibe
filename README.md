@@ -163,6 +163,27 @@ playbook and no Pages report.
   `queue.md` item 1, asking you first if the goal is unclear. `!runClaude.bat`
   relaunches with the same prompt.
 
+### Doctor — audit a project for drift
+
+```
+cleanvibe doctor            # audit the current directory
+cleanvibe doctor path/to/project
+```
+
+A **read-only** check of a cleanvibe project for the drift that builds up over
+time. It changes nothing, and exits `1` if it finds anything (so it can run in CI):
+
+| Check | Flags |
+|---|---|
+| `files` | a missing `CLAUDE.md`, `README.md`, `queue.md`, or `devlog.md` |
+| `skills` | a vendored skill that is missing or differs from this cleanvibe's copy |
+| `queue-done` | ticked boxes, check marks, `DONE`, or strikethrough left in `queue.md` |
+| `version` | `queue.md`'s "Current version" not matching `pyproject.toml` |
+| `devlog-tags` | a `v*` git tag with no `devlog.md` entry |
+| `section-refs` | a reference to a `CLAUDE.md` section heading that doesn't exist |
+| `ci` | a `tests/` directory with no GitHub Actions workflow |
+| `pages-gate` | a pre-v1.18.0 Pages workflow that fails on a private repo |
+
 ### Clone an existing repo — codebase onboarding
 
 ```
@@ -331,6 +352,7 @@ cleanvibe new my-project --no-claude      # Skip launching Claude Code
 cleanvibe research my-study --dry-run     # Preview the research scaffold
 cleanvibe research my-study --no-claude   # Scaffold a research project without launching Claude
 cleanvibe chat --dry-run                  # Preview the chat scaffold
+cleanvibe doctor                          # Audit the current project for drift (read-only)
 cleanvibe clone REPO path --dry-run       # Preview what would be done
 cleanvibe replicate URL --dry-run         # Preview the arXiv replication scaffold
 cleanvibe replicate FOLDER --dry-run      # Preview the manual drop-in scaffold
@@ -364,7 +386,7 @@ As of **v1.0.0**, cleanvibe commits to the following contract (semantic
 versioning from here on):
 
 - **Subcommands** `new`, `research`, `original`, `chat`, `clone`, `convert`,
-  and `replicate` are stable. Their core behavior will not change incompatibly
+  `replicate`, and `doctor` are stable. Their core behavior will not change incompatibly
   within the 1.x line.
 - **Injected files**: `new` guarantees `CLAUDE.md`, `README.md`, `queue.md`,
   `.gitignore`, and `data_lake/.gitkeep`. `research` guarantees all of those

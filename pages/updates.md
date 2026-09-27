@@ -39,6 +39,13 @@ No skill bodies changed; nothing in `.claude/skills/` needs refreshing.
   `cleanvibe research` scaffold, or make the repo public.
 - **Starting prompt.** New scaffolds launch Claude with a first message
   describing the mode; `!runClaude.bat` carries the same prompt.
+- **Dangling section references (fix in existing repos).** Projects generated
+  by `new`, `research` or `original` since v1.14.0 have `queue.md` / `todo.md`
+  lines like ``See `CLAUDE.md` § "Workflow Rules"``, pointing at CLAUDE.md
+  sections that moved into skills. Replace each one with a pointer to the
+  skill: "Workflow Rules" and "Queue and longer-horizon work" →
+  `queue-driven-workflow`; "Autonomous productivity loop" → `autonomous-loop`.
+  `cleanvibe doctor` lists them (check `section-refs`).
 
 ---
 
