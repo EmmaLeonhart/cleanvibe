@@ -1,41 +1,44 @@
-# scratch-2026-09-25
+# helping-with-arxiv
 
-> A **research project** scaffolded with
-> [cleanvibe](https://github.com/Immanuelle/cleanvibe) `research`.
+Getting a friend's paper onto arXiv:
+**"Quatrix: An Empirical Evaluation of Q-Compass and SAVO on Multimodal
+Sequence Modeling"** by Syed Abdur Rehman Ali
+([Zenodo 10.5281/zenodo.19839718](https://doi.org/10.5281/zenodo.19839718),
+code at [github.com/Abd0r/quatrix](https://github.com/Abd0r/quatrix)).
 
-**Research question:** _(not yet defined — the bootstrap queue's first research step pins this down with you)_
+The paper was only ever published as a PDF, and arXiv will not accept a PDF
+that was produced by LaTeX without its source. No source exists publicly, so
+this repo rebuilds it from the PDF.
 
-## About
+## What's here
 
-This is an original research project (not a replication). It poses a question,
-surveys the prior literature, runs experiments / builds something to answer it,
-and publishes the findings as a themed GitHub Pages report + a transportable PDF.
+- `arxiv/quatrix/quatrix-arxiv.tar.gz` — **the file to upload to arXiv**
+  (`main.tex`, `sections/`, `figs/`, `00README.json`). Compiles with pdfLaTeX to
+  the same 32 pages as the original.
+- `arxiv/quatrix/SUBMISSION.md` — values for the arXiv submission form, and a
+  1,754-character metadata abstract (the paper's own is ~2,480; arXiv's limit
+  is 1,920) for the author to approve.
+- `arxiv/quatrix/main.tex`, `sections/*.tex` — the rebuilt source.
+- `arxiv/quatrix/figs/` — the 18 figures, cropped from the original PDF as
+  vector PDFs (identical to the original, not redrawn).
+- `arxiv/quatrix/original.pdf` — the Zenodo PDF the rebuild is checked against.
+- `arxiv/quatrix/tools/` — build and verification scripts.
 
-The distinctive first move is a **literature review** (agentic RAG) *before* any
-building — see `literature/`.
+## Rebuilding and checking
 
-## How it's organized
-
-- `literature/` — the literature review (sources + `REVIEW.md`), built first.
-- `data_lake/` — datasets and supplied material.
-- `src/` — the research code; `scripts/run.py` — the run entry point.
-- `results/` — run outputs (gitignored). `FINDINGS.md` — the write-up.
-- `docs/` — the published GitHub Pages report site (themed) + built PDF.
-- `queue.md` / `todo.md` / `devlog.md` — the cleanvibe work loop.
-
-## Getting started
+Needs a LaTeX distribution (MiKTeX or TeX Live) and Python with PyMuPDF.
 
 ```
-cd scratch-2026-09-25
-claude
+bash arxiv/quatrix/tools/build.sh          # build main.pdf, report float pages that differ
+cd arxiv/quatrix/tools
+python ngramcheck.py ../original.pdf ../main.pdf   # wording check vs the original
+cd .. && tar -czf quatrix-arxiv.tar.gz 00README.json main.tex sections figs
 ```
 
-Then work `queue.md` top to bottom. The bootstrap sequence pins down the
-research question with you, runs the literature review, plans the experiments,
-takes the repo public, and keeps the report current as results land.
+`ngramcheck.py` reports any run of 8 words that appears in one PDF but not the
+other, so the check is independent of where figures and tables land.
 
-## Published report
+## History
 
-Once the repo is public with Pages set to **Source: GitHub Actions**,
-`.github/workflows/pages.yml` deploys `docs/` (the report site) and builds
-`docs/report.pdf`. Site-shape inspiration: http://latent-space.emmaleonhart.com/
+Scaffolded as a `cleanvibe research` project (`scratch-2026-09-25`) and
+repurposed for this task; `queue.md` / `devlog.md` keep the cleanvibe work log.

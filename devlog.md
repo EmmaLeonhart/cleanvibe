@@ -55,3 +55,12 @@ repo contain only PDFs). Work is in `arxiv/quatrix/`, local only.
   fields and a 1,754-char condensed metadata abstract (the original abstract,
   ~2,480 chars, exceeds arXiv's 1,920 limit) for the author to approve.
 - The three hourly research crons were stopped for this task.
+
+## 2026-09-27 — Online as private repo `helping-with-arxiv`
+
+Created the private GitHub repo `EmmaLeonhart/helping-with-arxiv`, pushed, and
+cloned it to `Documents/GitHub/helping-with-arxiv` so the project has a findable
+name. Rewrote `README.md` to describe the arXiv package in place of the
+scaffold placeholder. Restarted the three hourly crons. The Pages workflow
+fails on this repo because GitHub Pages is not available for private repos on
+the free plan.
