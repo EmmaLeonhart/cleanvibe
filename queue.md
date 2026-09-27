@@ -8,13 +8,17 @@
 
 ## Active
 
-From Emma's 2026-09-26 AskUserQuestion answers. Raw `.jsonl` logs stay committed (no change). The general-purpose rework comes later today and is out of scope here.
+From Emma's 2026-09-26 AskUserQuestion answers. **Strict order, as she listed it:** the CLAUDE.md section first, then refresh → doctor → release. Remote Control (her answer to a separate question) goes just before the release so it ships in it. Raw `.jsonl` logs stay committed (no change). The general-purpose rework comes later today and is out of scope here.
 
-1. **`cleanvibe chat` launches with Remote Control.** Emma meant a Remote Control start, not only an optional folder name. `_launch_claude(..., remote_control=True)` for chat → `claude "<prompt>" --remote-control`, unnamed. The flag goes AFTER the prompt: `--remote-control [name]` takes an optional value and would swallow a following prompt as the session name. Same in chat's `!runClaude.bat`. Tests + CLAUDE.md/README.
-2. **Write the missing "Hourly status-report cron for extensive work" section in CLAUDE.md.** `queue.md`'s header references it and it does not exist. Base it on the `autonomous-loop` skill's status-report cron and the lifecycle the queue header already describes.
-3. **Release v1.18.0.** After 1–2 land and CI is green: `gh release create v1.18.0` with notes from the devlog, then confirm `publish.yml` pushes it to PyPI.
-4. **Refresh stale bits.** Website (`pages/index.html`): add `research` + `original` cards and check every claim against the code. Check the `pages/updates.md` scope line, README and CLAUDE.md for outdated assumptions. Version bump to 1.19.0 if anything user-facing changes.
-5. **`cleanvibe doctor`** (from `todo.md`). A read-only audit of a cleanvibe repo for drift: ticked/"done" items left in queue.md, a queue.md version pointer that doesn't match the package, devlog missing releases that exist as git tags, missing CI workflow, missing scaffold files, CLAUDE.md references to sections that don't exist. `--fix` only for safe ones, if any. Tests, docs, remove from `todo.md`.
+1. **Write the missing "Hourly status-report cron for extensive work" section in CLAUDE.md.** `queue.md`'s header references it and it does not exist. Base it on the `autonomous-loop` skill's status-report cron and the lifecycle the queue header already describes.
+
+2. **Refresh stale bits.** Website (`pages/index.html`): add `research` + `original` cards and check every claim against the code. Check the `pages/updates.md` scope line, README and CLAUDE.md for outdated assumptions.
+
+3. **`cleanvibe doctor`** (from `todo.md`). A read-only audit of a cleanvibe repo for drift: ticked/"done" items left in queue.md, a queue.md version pointer that doesn't match the package, devlog missing releases that exist as git tags, missing CI workflow, missing scaffold files, CLAUDE.md references to sections that don't exist. `--fix` only for safe ones, if any. Tests, docs, remove from `todo.md`.
+
+4. **`cleanvibe chat` launches with Remote Control.** Emma meant a Remote Control start, not only an optional folder name. `_launch_claude(..., remote_control=True)` for chat → `claude "<prompt>" --remote-control`, unnamed. The flag goes AFTER the prompt: `--remote-control [name]` takes an optional value and would swallow a following prompt as the session name. Same in chat's `!runClaude.bat`. Tests + CLAUDE.md/README.
+
+5. **Release v1.18.0.** Nothing after v1.18.0 has been released, so items 2–4 ship in this release too; no separate 1.19.0. After items 1–4 land and CI is green: `gh release create v1.18.0` with notes from the devlog, then confirm `publish.yml` pushes it to PyPI.
 
 ---
 
