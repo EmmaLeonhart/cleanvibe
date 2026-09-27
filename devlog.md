@@ -1576,3 +1576,14 @@ agent (Claude Code runs them). What changed is the timing:
 - Tests: `test_skills` expects seven skills. The cron tests now assert the new
   invariants ("do not turn the crons off yourself", "an idle tick is normal",
   no kill step) instead of the old wording. 204 pass.
+
+## 2026-09-26 — v2 item 6: doctor understands cleanvibe 2 projects
+
+A v2 project is minimal by design (no `queue.md`/`devlog.md` until the work
+needs them), so doctor's `files` check would have flagged every fresh one. With
+the `.cleanvibe.json` marker present it now requires `CLAUDE.md`, `README.md`,
+`INTENT.md`, the marker, `.claude/settings.json` and
+`.claude/hooks/save_session_log.py` (without the hook, sessions go
+unrecorded). The other checks already skip files that don't exist. 1.x projects
+are checked as before. `test_doctor`'s "every fresh scaffold audits clean" now
+includes the v2 project; there is a new test for the v2 file set. 206 pass.

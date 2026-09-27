@@ -18,6 +18,7 @@ from cleanvibe import skills, templates
 from cleanvibe.chat import chat_project
 from cleanvibe.cli import main
 from cleanvibe.original import original_project
+from cleanvibe.project import new_project
 from cleanvibe.research import research_project
 from cleanvibe.scaffold import create_project
 
@@ -35,7 +36,7 @@ def _checks(findings):
 
 class TestFreshScaffoldsAreClean(unittest.TestCase):
     def test_every_mode_scaffolds_without_drift(self):
-        for fn in (create_project, research_project, original_project, chat_project):
+        for fn in (new_project, create_project, research_project, original_project, chat_project):
             with self.subTest(mode=fn.__name__):
                 proj = _scaffold(fn)
                 self.assertEqual([str(f) for f in doc.run_checks(proj)], [])
@@ -60,6 +61,14 @@ class TestChecks(unittest.TestCase):
     def test_missing_core_file(self):
         (self.proj / "devlog.md").unlink()
         self.assertIn("devlog.md: missing", [str(f).split("] ")[1] for f in doc.check_files(self.proj)])
+
+    def test_v2_project_needs_intent_and_hook_but_not_queue(self):
+        proj = _scaffold(new_project)
+        self.assertEqual(doc.check_files(proj), [])  # no queue.md/devlog.md: fine
+        (proj / "INTENT.md").unlink()
+        (proj / ".claude/hooks/save_session_log.py").unlink()
+        self.assertEqual(sorted(f.where for f in doc.check_files(proj)),
+                         [".claude/hooks/save_session_log.py", "INTENT.md"])
 
     def test_missing_and_edited_skills(self):
         slugs = list(skills.SKILLS)

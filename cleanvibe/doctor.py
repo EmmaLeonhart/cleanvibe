@@ -2,7 +2,9 @@
 
 Checks the conventions cleanvibe scaffolds, and that drift in practice:
 
-* ``files``        — the core files (CLAUDE.md, README.md, queue.md, devlog.md) exist.
+* ``files``        — the core files exist. 1.x: CLAUDE.md, README.md, queue.md,
+                      devlog.md. cleanvibe 2 (``.cleanvibe.json``): CLAUDE.md,
+                      README.md, INTENT.md, the marker, and the transcript hook.
 * ``skills``       — every vendored skill is present and matches this cleanvibe's copy.
 * ``queue-done``   — "done" markers left in queue.md (ticked boxes, ✓, DONE, strikethrough).
                       queue.md is delete-only; done lives in devlog.md.
@@ -27,6 +29,13 @@ from pathlib import Path
 from . import skills
 
 CORE_FILES = ("CLAUDE.md", "README.md", "queue.md", "devlog.md")
+# cleanvibe 2 projects start minimal: no queue.md/devlog.md until the work needs
+# them, but the transcript hook must be there or sessions go unrecorded.
+V2_MARKER = ".cleanvibe.json"
+V2_CORE_FILES = (
+    "CLAUDE.md", "README.md", "INTENT.md", V2_MARKER,
+    ".claude/settings.json", ".claude/hooks/save_session_log.py",
+)
 
 _DONE_MARKERS = (
     (re.compile(r"^\s*[-*]\s*\[[xX]\]"), "ticked checkbox"),
@@ -58,9 +67,10 @@ def _read(path: Path) -> str | None:
 
 
 def check_files(root: Path) -> list:
+    required = V2_CORE_FILES if (root / V2_MARKER).is_file() else CORE_FILES
     return [
         Finding("files", name, "missing")
-        for name in CORE_FILES
+        for name in required
         if not (root / name).is_file()
     ]
 
