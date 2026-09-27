@@ -183,9 +183,9 @@ class TestCreateProject(unittest.TestCase):
             )
 
     def test_claude_md_cron_lifecycle_mentions_start(self):
-        # The three-cron loop lives in the vendored autonomous-loop skill.
-        # v2.0.0 rewrote it: no start/kill/restart choreography (agents read it
-        # as licence to switch the loop off); only the user stops the crons.
+        # The loop lives in the vendored autonomous-loop skill. v2.0.2 (Emma):
+        # one cron every half hour that commits, pushes and keeps working the
+        # queue; no separate flush/status crons; only the user stops it.
         with tempfile.TemporaryDirectory() as tmp:
             proj = Path(tmp) / "myproj"
             buf = io.StringIO()
@@ -195,13 +195,13 @@ class TestCreateProject(unittest.TestCase):
                        / "SKILL.md").read_text(encoding="utf-8")
         lower = content.lower()
         self.assertIn("croncreate", lower)
-        # All three crons, staggered.
-        for schedule in ("3 * * * *", "15 * * * *", "42 * * * *"):
-            self.assertIn(schedule, content)
-        for name in ("**work,", "**flush,", "**status,"):
-            self.assertIn(name, lower)
-        # Only the user stops them; idle is fine; no kill choreography.
-        self.assertIn("do not turn the crons off yourself", lower)
+        self.assertIn("7,37 * * * *", content)
+        self.assertIn("Commit and push any and all changes, then\n  continue working on the queue.", content)
+        for gone in ("15 * * * *", "42 * * * *", "**flush,", "**status,"):
+            self.assertNotIn(gone, content)
+        # Only the user stops it; idle is fine; research queues refill; no kill step.
+        self.assertIn("do not turn the cron off yourself", lower)
+        self.assertIn("research/summary.md", lower)
         self.assertIn("an idle tick is normal", lower)
         self.assertNotRegex(lower, r"\bkill")  # ("skill" is fine)
 

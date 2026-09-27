@@ -55,6 +55,10 @@ the right call. In short:
    ask one short question first. It had read "concerned ... as the work loop
    would start" backwards.
 
+**Emma adopted all six (2026-09-27), shipped in 2.0.2.** On P1–P3 she added
+that the first run's problem "really was that it was unintentionally given too
+much context, not that it had context".
+
 It also left one open question: does "no strict instructions" cover the true
 zero case? Case 03 and Emma's earlier failure report (an idle session that
 starts a loop anyway) suggest not: zero input should still wait.

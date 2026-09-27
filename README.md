@@ -127,7 +127,7 @@ cleanvibe vendors these into every project's `.claude/skills/`:
 |---|---|
 | `queue-driven-workflow` | building software: `queue.md` → `devlog.md`, tests, CI |
 | `research-practice` | research on any topic: sources, notes with citations, a living summary |
-| `autonomous-loop` | long unattended stretches: three hourly crons (work, flush, status) that only you switch off |
+| `autonomous-loop` | long unattended stretches: one cron every half hour that commits, pushes and keeps working the queue; only you switch it off |
 | `writing-style` | prose without the "honestly" tic |
 | `cron-is-local` | "cron" means a local `CronCreate` job |
 | `emergency-stop` | "stop stop stop" halts everything |

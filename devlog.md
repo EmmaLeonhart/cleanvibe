@@ -1862,3 +1862,51 @@ Emma asked to go through all the sessions and write them up.
 - **03, untitled:** still nothing after 21:43, three hours on; the
   nothing-to-go-on wait holds.
 - Queued as NEEDS-DECISION for Emma: the P1–P6 proposals and the loop pace.
+
+## 2026-09-27 — 2.0.2: one simple work loop
+
+Emma: the loop should be one cron every half hour whose prompt just says to
+commit and push any and all changes and continue working on the queue. The
+hourly flush and status reports weren't useful. The more complicated loop
+helped earlier, when agents made up problems more and her work was
+well-defined but hard. Since then agents have gotten smarter and her work has
+become more routine.
+
+- `autonomous-loop` rewritten again: one recurring `CronCreate` at
+  `7,37 * * * *` (off the :00/:30 marks) with the prompt
+  `[cleanvibe cron] Commit and push any and all changes, then continue working
+  on the queue.` Each tick commits and pushes, then works the queue for as long
+  as it makes sense (not one item per tick, which is what made case 05 slow).
+  An empty research queue refills from `research/SUMMARY.md` (P4) before
+  idling. Kept: idle is normal; only the user stops it; replication is exempt.
+  Per Emma, not split for legacy (the frozen 1.x bootstrap queues still
+  describe three crons).
+- The v2 CLAUDE.md intake step 5 names the new loop. This repo's CLAUDE.md cron
+  section, the README skills table and this repo's vendored skill are updated.
+  `pages/updates.md` has a v2.0.2 entry with the full skill text for existing
+  repos.
+
+## 2026-09-27 — 2.0.2: adopt chat-test's six proposals
+
+Emma adopted all six (AskUserQuestion). On P1–P3 she added that the first run's
+problem was being given too much context by accident, not having context.
+
+- **P1** "Nothing to go on is a real state, and a narrow one": it applies only
+  when the user has said nothing at all. The intake gained a matching verdict:
+  **SOME ENGAGEMENT, no material** means what the user said is the subject;
+  plan research on it and start the loop. Before, one short message with an
+  empty folder could still read as "nothing to go on".
+- **P2** "No strict instructions is not no work": with a subject but no spec,
+  the loop researches it under `research-practice`.
+- **P3** "If the user *says* the tool or the chat is the subject, it is."
+- **P4** Research queues refill from `research/SUMMARY.md` open questions (in
+  the loop skill).
+- **P5** The intake verdict and CLAUDE.md say the user is **present**, not
+  "steering", since the intake counts messages.
+- **P6** Ask one short question when a present user's worry could point
+  either way.
+- Tests: new SOME ENGAGEMENT test, the "present" wording, the new CLAUDE.md
+  clauses, and the loop invariants (one `7,37` cron, the prompt, no flush or
+  status, "do not turn the cron off yourself", the SUMMARY.md refill). 226 pass.
+
+

@@ -3249,12 +3249,18 @@ the folder and dropped material into it, expecting you to get on with it.
   carry real information too. But **a guess about why the project exists is
   not a task.** Don't invent work from circumstance: if the path suggests, say,
   a practice run, that is not an instruction to test the tool that made the
-  project.
-- **Nothing to go on is a real state.** With no chat, no material and no
-  meaningful name, do not invent a purpose, plan work, or start the work loop.
-  Say plainly in `INTENT.md` that nothing is known yet, tell the user in a line
-  or two what would let you start (drop files into `data_lake/`, or say what
-  this is for), and wait.
+  project. But if the user *says* the tool or the chat is the subject, it is.
+- **Nothing to go on is a real state, and a narrow one.** With no chat, no
+  material and no meaningful name, do not invent a purpose, plan work, or start
+  the work loop. Say plainly in `INTENT.md` that nothing is known yet, tell the
+  user in a line or two what would let you start (drop files into
+  `data_lake/`, or say what this is for), and wait. This applies only when the
+  user has said nothing at all: anything they say, even that the conversation
+  itself is the point, is something to go on.
+- **No strict instructions is not no work.** If there is a subject (the chat, a
+  name the user chose, the material) but no spec or build task, the work loop
+  still runs: it researches and writes about the subject under
+  `research-practice`, with the question written down as an assumption.
 - **Stay inside this project.** Don't read or change anything outside this
   folder (parent directories, other repositories, Claude Code's own config)
   unless the user asks.
@@ -3270,6 +3276,9 @@ the folder and dropped material into it, expecting you to get on with it.
 - **AskUserQuestion only when the user is clearly here.** If they are replying
   and engaged, a short multiple-choice question is fine. If they are not, don't
   stop to ask: decide, record the assumption in `INTENT.md`, and keep working.
+  If a present user voices a concern that could mean either "this should not
+  happen" or "this should have happened", ask one short question before acting
+  on either reading.
 - **Practices come from skills.** Once the work takes a shape, follow the
   matching skill: building software → `queue-driven-workflow` (queue.md,
   todo.md, devlog.md, tests, CI); researching any topic → `research-practice`;
@@ -3316,19 +3325,23 @@ When it fires, do this:
    (`research-practice` for research, `queue-driven-workflow` for building) to
    put concrete first steps into `queue.md` / `todo.md`. Commit. Thin material
    is normal here and still worth acting on; an empty folder is not (step 5).
-5. **Start the work loop** (the `autonomous-loop` skill), depending on the
+5. **Start the work loop** (the `autonomous-loop` skill: one cron every half
+   hour that commits, pushes and keeps working the queue), depending on the
    report's verdict:
-   - **Nothing to go on** (no material, no engagement, generated name): do not
-     infer a purpose, plan, or start the loop. Write in `INTENT.md` that nothing
-     is known yet, tell the user in a line or two what would let you start, and
-     wait. Their next message (or files appearing in the next session) is where
-     work begins.
+   - **Nothing to go on** (the user has said nothing at all, no material,
+     generated name): do not infer a purpose, plan, or start the loop. Write in
+     `INTENT.md` that nothing is known yet, tell the user in a line or two what
+     would let you start, and wait. Their next message (or files appearing in
+     the next session) is where work begins.
+   - **The user said something, but no material:** what they said is the
+     subject. Plan research on it (`research-practice`) and start the loop now.
    - **Name only** (no material, no engagement, a name the user chose): start
      only if the name plainly states a task (say, `history-of-ai-research`);
      otherwise treat it as nothing to go on.
    - **Little or no engagement, with material:** assume the user is away and
      that the folder holds the context they meant to give. Start the loop now.
-   - **Substantial engagement:** the user is steering, so don't take over yet.
+   - **Substantial engagement:** the user is present (the intake counts
+     messages; it can't tell steering from chatting), so don't take over yet.
      Schedule another one-time `CronCreate` job 60 minutes from now with the
      prompt `[cleanvibe cron] Start the work loop: follow step 5 of the
      Thirty-minute intake in CLAUDE.md.`, and start the loop when it fires,
@@ -3971,8 +3984,12 @@ def main():
     print(f"- Material in {LAKE}/: {'yes' if lake_files else 'none'}; folder name: "
           f"{'generated (says nothing)' if marker.get('auto_named') else 'chosen by the user'}")
     if substantial:
-        print("- Verdict: SUBSTANTIAL engagement. The user is steering: schedule the "
-              "work loop to start in 60 minutes rather than now.")
+        print("- Verdict: SUBSTANTIAL engagement. The user is present (this counts "
+              "messages; it cannot tell steering from chatting): schedule the work loop "
+              "to start in 60 minutes rather than now.")
+    elif messages and not lake_files:
+        print("- Verdict: SOME ENGAGEMENT, no material. What the user said is the subject: "
+              "plan research on it and start the work loop now.")
     elif lake_files:
         print("- Verdict: LITTLE OR NO engagement, but there is material. Assume the user "
               "is away and that the folder holds the context they meant to give: start "

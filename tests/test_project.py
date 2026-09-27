@@ -89,6 +89,10 @@ class TestNewProject(unittest.TestCase):
                        "recurring: false", "data_lake_intake.py",
                        "Little or no engagement, with material", "60 minutes from now",
                        "Nothing to go on", "a guess about why the project exists",
+                       "No strict instructions is not no work",
+                       "the tool or the chat is the subject, it is",
+                       "applies only when the\n  user has said nothing at all",
+                       "ask one short question before acting",
                        "Stay inside this project", "mean stop now",
                        "queue-driven-workflow", "research-practice", "autonomous-loop",
                        "scratch/", "gh repo create --private", "sessions/",
@@ -274,6 +278,8 @@ class TestThirtyMinuteIntake(unittest.TestCase):
         out = _run_intake(self.proj).stdout
         self.assertIn("2 message(s)", out)
         self.assertIn("SUBSTANTIAL engagement", out)
+        self.assertIn("The user is present", out)
+        self.assertNotIn("steering:", out)
 
     def test_empty_folder_generated_name_is_nothing_to_go_on(self):
         proj = _new("cleanvibe-2026-09-26", auto_named=True)  # nothing dropped in
@@ -281,6 +287,14 @@ class TestThirtyMinuteIntake(unittest.TestCase):
         self.assertIn("Material in data_lake/: none", out)
         self.assertIn("NOTHING TO GO ON", out)
         self.assertNotIn("start the work loop now", out)
+
+    def test_something_said_without_material_is_the_subject(self):
+        # P1: anything the user says is something to go on.
+        proj = _new("cleanvibe-2026-09-26", auto_named=True)
+        _log(proj, "the history of chess engines")
+        out = _run_intake(proj).stdout
+        self.assertIn("SOME ENGAGEMENT, no material", out)
+        self.assertNotIn("NOTHING TO GO ON", out)
 
     def test_empty_folder_chosen_name_is_name_only(self):
         out = _run_intake(_new("history-of-ai-research")).stdout

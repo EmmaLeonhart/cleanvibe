@@ -105,24 +105,16 @@ devlog.md current.
 - **Updates source:** <https://cleanvibe.emmaleonhart.com/updates.md>
 
 ## Hourly status-report cron for extensive work
+(Heading kept for old links; the loop is no longer hourly or a status report.)
 The source of truth is the `autonomous-loop` skill (`.claude/skills/autonomous-loop/SKILL.md`,
-from `cleanvibe/skills.py`); this is the short version. "The hourly status-report
-cron" is this repo's older name; the status report is now the third of three crons.
-
-- **When:** the user wants a long stretch of autonomous work (hours, overnight,
-  while away). Not for a one-off fix or a single small item.
-- **What:** three session-local `CronCreate` jobs (`durable: false`), staggered:
-  **work** at `:03` (sync, do the top doable queue item or plan the next
-  unblocked `todo.md` item, commit and push; an idle tick is normal), **flush**
-  at `:15` (commit and push anything pending, no empty commits), **status** at
-  `:42` (report only: commits since last time, queue state, blockers with their
-  not-done tags, test health).
-- **Only the user turns them off.** Not an empty queue, a failed tick, a replan
-  or the end of a burst. Problems go in the next status tick. (v2.0.0 dropped the
-  old start/kill/restart choreography and the pinned tail items; agents found
-  them confusing and switched the loop off.)
-- The crons fire only while this machine and session are running. They are local,
-  not cloud jobs (see the `cron-is-local` skill).
+from `cleanvibe/skills.py`). Since v2.0.2 it is **one** session-local `CronCreate`
+job, `7,37 * * * *` (every half hour), whose prompt is just "commit and push any
+and all changes, then continue working on the queue". There are no separate
+flush or status crons: Emma found the reports and flushes weren't useful. An
+empty research queue refills from `research/SUMMARY.md`; an idle tick is
+normal; only the user turns the cron off. Use it when the user wants a long
+stretch of autonomous work. The history (the three-cron playbook, the
+kill/restart choreography, and why each was dropped) is in `devlog.md`.
 
 ## Long command series run in strict order
 When the user gives a long series of commands, treat it as a long series of commands to be
