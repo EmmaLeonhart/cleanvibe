@@ -27,12 +27,47 @@
   it loaded `research-practice` and planned research into how cleanvibe behaves
   from low information (`1559848`: `queue.md`, `research/`).
 
+- **22:43:** the one-time job fired on time and it started the loop (three
+  recurring crons, `:03` / `:15` / `:42`).
+- 22:43: map of the act-vs-wait rules in cleanvibe's instructions
+  (`d957ad1`). 23:31: turn-by-turn divergences in its own first session
+  (`40e7efe`). 00:31: **proposed wording changes to cleanvibe** (`b70a212`,
+  `research/notes/proposals.md`).
+- **Hourly session-log commits from the hook** landed at 22:43 and 23:44
+  (`session log 2026-09-26_80d4e825`). That was the first live confirmation of
+  the throttle.
+
+## Its proposals (P1–P6, for Emma to decide)
+
+It kept them as proposals ("editing them is the user's decision"), which is
+the right call. In short:
+
+1. **P1** "Nothing to go on" applies only when the user has said nothing at all.
+2. **P2** Write down the design: *no strict instructions is not no work*. With
+   a subject, the loop researches it under `research-practice`.
+3. **P3** If the user *says* the tool or chat is the subject, it is. (The
+   "practice run" example made cleanvibe feel off-limits here.)
+4. **P4** In a research project, an empty queue takes the top open question
+   from `research/SUMMARY.md` instead of idling.
+5. **P5** The intake verdict should say "the user is present", not "steering":
+   it counts messages without reading them.
+6. **P6** When a user's worry could point either way and they are replying,
+   ask one short question first. It had read "concerned ... as the work loop
+   would start" backwards.
+
+It also left one open question: does "no strict instructions" cover the true
+zero case? Case 03 and Emma's earlier failure report (an idle session that
+starts a loop anyway) suggest not: zero input should still wait.
+
+P2 and P4 match what case 05 showed independently: a research loop idles once
+its first plan is done.
+
 ## Result so far
 
 **Passed.** Session name findable in the app; it followed the user's lead;
 the substantial-engagement branch postponed the loop by 60 minutes. That branch
-had only been tested by unit tests until now. Still to watch: the loop at
-22:43.
+had only been tested by unit tests until now. The loop then ran on schedule
+and produced useful, self-critical research.
 
 ## Design signal from Emma
 

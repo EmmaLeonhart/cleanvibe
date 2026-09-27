@@ -12,4 +12,5 @@ led to.
 | [01](01-trust-prompt-stall.md) | `tests/scratch/cleanvibe-2026-09-26` | nothing | Never started: stuck at Claude Code's trust prompt. Led to pre-trusting new folders. |
 | [02](02-invented-smoke-test.md) | `tests/scratch/cleanvibe-2026-09-26-2` | nothing (auto-named, inside the cleanvibe repo) | Ran unattended, invented a "cleanvibe smoke test" purpose and tested cleanvibe itself. Led to 2.0.1. |
 | [03](03-untitled-empty.md) | `Documents/GitHub/untitled-cleanvibe-project` | nothing (untitled, neutral location) | **Passed:** intake said "nothing to go on"; it waited, invented nothing, started no loop. |
-| [04](04-chat-test.md) | `Documents/GitHub/chat-test` | a name, and Emma talking to it | **Passed so far:** named in the app; substantial engagement → loop postponed to 22:43; research planned from Emma's steer. |
+| [04](04-chat-test.md) | `Documents/GitHub/chat-test` | a name, and Emma talking to it | **Passed:** named in the app; substantial engagement → loop postponed to 22:43, then ran; produced proposals P1–P6 for cleanvibe. |
+| [05](05-ai-history-analysis.md) | `narrative_identity/submodules/ai-history-analysis` | a brief file (`AI-HISTORY-BRIEF.md`), named, nobody chatting | **Passed:** intake moved the brief into `data_lake/`, started the loop, and produced sourced, layered research. Loop pace is slow (one item an hour). |

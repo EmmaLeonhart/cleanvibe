@@ -22,6 +22,9 @@
   INTENT.md (`760fabe`) and stopped there: no plan, no `queue.md`, no work-loop
   crons.
 
+- Checked again at 01:00: still nothing after 21:43. No crons, no commits,
+  three hours of waiting. The "nothing to go on" state holds.
+
 ## Result
 
 **Passed.** Same input as case 02 (empty, untitled, nobody talking), opposite

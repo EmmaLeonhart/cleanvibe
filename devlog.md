@@ -1844,3 +1844,21 @@ itself. After Emma arrived it investigated beyond the project, kept going after
 - Session inspection is now a reusable helper in the gitignored `scratch/`
   (`inspect_session.py`: crons, verdict, user messages).
 - Details: `docs/case-studies/03-untitled-empty.md`, `04-chat-test.md`.
+
+## 2026-09-27 — Case studies 03–05: the 10 PM run, chat-test's loop, the long wait
+
+Emma asked to go through all the sessions and write them up.
+
+- **05, ai-history-analysis (new, the 10 PM run):** the first project started
+  from files. The brief dropped at creation was moved into `data_lake/` by the
+  22:54 intake. With material and no chat, it started the loop, planned from
+  the brief with `research-practice`, and wrote three layered, sourced research
+  notes by 00:18. At 00:31 it pushed to a private repo at Emma's request.
+  **Passed.** It exposed the loop's slow pace: one queue item per hourly tick.
+- **04, chat-test:** the postponed loop started at 22:43 on schedule. The
+  hook's hourly session-log commits landed live (22:43, 23:44). It wrote
+  research on cleanvibe's own act-vs-wait rules, ending in six proposals
+  (P1–P6) that it left for Emma to decide.
+- **03, untitled:** still nothing after 21:43, three hours on; the
+  nothing-to-go-on wait holds.
+- Queued as NEEDS-DECISION for Emma: the P1–P6 proposals and the loop pace.

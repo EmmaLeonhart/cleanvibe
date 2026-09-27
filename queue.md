@@ -6,7 +6,10 @@
 
 ## Active
 
-_(empty — 2.0.1 released; case studies 03 and 04 running, see `docs/case-studies/`.)_
+From the case studies (`docs/case-studies/`), waiting on Emma:
+
+1. **Decide on chat-test's proposals P1–P6** (`docs/case-studies/04-chat-test.md`; full text in `Documents/GitHub/chat-test/research/notes/proposals.md`): scope "nothing to go on" to real silence; "no strict instructions is not no work"; a user-named subject is fair game; research queues refill from `SUMMARY.md` open questions; "present", not "steering"; ask when a worry is ambiguous. NEEDS-DECISION: Emma.
+2. **Loop pace for unattended research** (case 05: one queue item per hourly tick, idle the rest of the hour). Options: a shorter work interval, or a tick that keeps taking items until a time budget runs out. NEEDS-DECISION: Emma.
 
 ---
 
