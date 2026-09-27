@@ -6,13 +6,13 @@ and launches Claude Code.
 
 from __future__ import annotations
 
-import os
 import platform
 import subprocess
 import sys
 from pathlib import Path
 
 from . import __version__, skills, templates
+from .launch import launch
 
 
 def create_project(path: Path, dry_run: bool = False, no_claude: bool = False) -> None:
@@ -354,29 +354,11 @@ def _git_init(path: Path, message=None) -> None:
 def _launch_claude(
     path: Path, prompt: str | None = None, remote_control: bool = False
 ) -> None:
-    """Launch Claude Code in the project directory.
+    """Launch Claude Code in the project directory as a top-level session.
 
-    ``prompt`` (a mode's ``templates.starting_prompt``) becomes the first
-    message of the session. ``remote_control`` starts it with Remote Control on
-    (unnamed). On Windows, opens a new cmd window. On Unix, replaces the
-    current process.
+    ``prompt`` (a mode's starting prompt) becomes the first message of the
+    session; ``remote_control`` starts it with Remote Control on (unnamed).
+    See ``cleanvibe.launch`` for how it avoids becoming a child of a Claude
+    session that ran cleanvibe.
     """
-    print(f"  Launching Claude Code...")
-    command = templates.claude_command(prompt, remote_control)
-    system = platform.system()
-    try:
-        if system == "Windows":
-            subprocess.Popen(["explorer", str(path)])
-            subprocess.Popen(
-                ["cmd", "/k", *command],
-                cwd=str(path),
-                creationflags=subprocess.CREATE_NEW_CONSOLE,
-            )
-        else:
-            os.chdir(path)
-            os.execlp("claude", *command)
-    except FileNotFoundError:
-        print(
-            "  Could not launch 'claude'. Make sure Claude Code is installed and on your PATH.",
-            file=sys.stderr,
-        )
+    launch(path, prompt, remote_control)

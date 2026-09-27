@@ -9,7 +9,7 @@ import unittest
 from unittest import mock
 from pathlib import Path
 
-from cleanvibe import scaffold, templates
+from cleanvibe import templates
 
 
 class TestStartingPrompt(unittest.TestCase):
@@ -38,21 +38,6 @@ class TestStartingPrompt(unittest.TestCase):
         self.assertIn('cd /d "%~dp0"', bat)
         self.assertIn(f'claude "{templates.starting_prompt("research")}"', bat)
 
-    def test_launcher_passes_prompt_windows(self):
-        with mock.patch.object(scaffold.platform, "system", return_value="Windows"), \
-                mock.patch.object(scaffold.subprocess, "Popen") as popen, \
-                mock.patch.object(scaffold.subprocess, "CREATE_NEW_CONSOLE", 16, create=True):
-            scaffold._launch_claude(Path("."), "hello there")
-        args = popen.call_args_list[-1][0][0]
-        self.assertEqual(args, ["cmd", "/k", "claude", "hello there"])
-
-    def test_launcher_passes_prompt_unix(self):
-        with mock.patch.object(scaffold.platform, "system", return_value="Linux"), \
-                mock.patch.object(scaffold.os, "chdir"), \
-                mock.patch.object(scaffold.os, "execlp") as execlp:
-            scaffold._launch_claude(Path("."), "hello there")
-        execlp.assert_called_once_with("claude", "claude", "hello there")
-
     def test_remote_control_flag_comes_after_prompt(self):
         # `--remote-control [name]` takes an optional value; placed before the
         # prompt it would swallow the prompt as the session name.
@@ -69,13 +54,6 @@ class TestStartingPrompt(unittest.TestCase):
             if mode != "chat":
                 self.assertNotIn("--remote-control", templates.runclaude_bat(mode))
 
-    def test_launcher_remote_control_unix(self):
-        with mock.patch.object(scaffold.platform, "system", return_value="Linux"), \
-                mock.patch.object(scaffold.os, "chdir"), \
-                mock.patch.object(scaffold.os, "execlp") as execlp:
-            scaffold._launch_claude(Path("."), "hello", remote_control=True)
-        execlp.assert_called_once_with("claude", "claude", "hello", "--remote-control")
-
     def test_chat_launches_with_remote_control(self):
         import tempfile
         from contextlib import redirect_stdout
@@ -85,13 +63,6 @@ class TestStartingPrompt(unittest.TestCase):
         with mock.patch.object(chat, "_launch_claude") as launch, redirect_stdout(io.StringIO()):
             chat.chat_project(proj)
         launch.assert_called_once_with(proj, templates.starting_prompt("chat"), remote_control=True)
-
-    def test_launcher_without_prompt(self):
-        with mock.patch.object(scaffold.platform, "system", return_value="Linux"), \
-                mock.patch.object(scaffold.os, "chdir"), \
-                mock.patch.object(scaffold.os, "execlp") as execlp:
-            scaffold._launch_claude(Path("."))
-        execlp.assert_called_once_with("claude", "claude")
 
 
 if __name__ == "__main__":

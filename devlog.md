@@ -1392,3 +1392,77 @@ Checked the published artifact rather than the checkout: in a fresh venv,
 `pip install cleanvibe==1.18.0` → `cleanvibe --version` is 1.18.0,
 `cleanvibe chat` scaffolds with `--remote-control` in its `.bat`, and
 `cleanvibe doctor` finds that fresh chat project clean.
+
+## 2026-09-26 — cleanvibe 2 — the spec (Emma, voice note)
+
+Recorded here so the design survives outside the chat. Paraphrased from a long
+speech-to-text note; the decisions are Emma's.
+
+- **Why.** Sessions often start without a clear goal, and cleanvibe sessions go
+  awry as a result. The 1.x modes are limited and constrained, so she ends up
+  fighting the project structure. Skills stayed too rigid over time, and
+  single-operation scripts pile up as crud.
+- **cleanvibe 2.** Every session starts as a conversation that behaves somewhat
+  like a chatbot. Assumptions are minimal at the start. The agent asks
+  (AskUserQuestion) whenever the user isn't clear about what they want, and in
+  the first session it asks a question based on the directory. It actively
+  analyzes what the user seems to be trying to accomplish and may write its own
+  documentation of that. Development and research practices are separate from
+  this core.
+- **CLI.** `cleanvibe new NAME` makes the directory and opens Claude in it.
+  `cleanvibe new` with no name auto-generates the directory. `cleanvibe` with no
+  arguments opens the current directory as a regular session if it is already a
+  cleanvibe repo, and otherwise makes a new auto-named project. The 1.x modes run
+  as `cleanvibe legacy <cmd>`, deprecated, with a clear flag/warning that saying
+  so. `replicate` is **not** deprecated: it is a core, intentionally rigid,
+  different use case and runs as before.
+- **Starting prompt.** The first session is told the project was started with
+  cleanvibe and that this is the first session in this path. It can guess the
+  purpose from the path, otherwise it figures it out through conversation. An
+  auto-generated name is flagged: the user gave no name, so the project is
+  fresh. A resumed session gets a different message.
+- **Sessions.** Always a proper session, never a child session, so transcripts
+  are saved. (When a Claude session ran cleanvibe, the new session ran as its
+  child and did not save its transcript.) Always Remote Control, so an agent can
+  start a session and the person can pick it up.
+- **Transcripts.** Copied into the repo persistently and always committed,
+  roughly hourly, in raw and processed-markdown form. Markdown is easier for the
+  agent to reference. Ideally this is done non-agentically, by a background
+  process rather than the agent. It lets you audit what went on.
+- **Repos.** Private, local git, committed regularly. By default it does not
+  even push to GitHub.
+- **Cron loop.** Needs updating. It is not split between legacy and v2; if it
+  suits legacy modes less well, that is accepted. Agents got anxious and
+  switched the hourly loop off, which should not happen.
+- **Research.** `cleanvibe research` got used for semi-permanent research on
+  topics that were not CS papers. The CS-paper-with-replication shape was too
+  specific.
+- **Practice.** Track the practice-project directory with a `.gitkeep`. Then
+  implement everything as perfectly as possible, make a project, and open a
+  session in it for Emma to experiment with.
+
+## 2026-09-26 — v2 item 1: the launcher always starts a real top-level session
+
+The bug Emma described, found in this session's own environment: every
+process a Claude session starts inherits `CLAUDE_CODE_CHILD_SESSION=1`, the
+session id, `CLAUDECODE`, `CLAUDE_PID`, the messaging socket, and the Remote
+Control bridge id (`CLAUDE_CODE_BRIDGE_SESSION_ID`). A `claude` that cleanvibe
+started from inside an agent therefore began life as that agent's child.
+
+- New `cleanvibe/launch.py`. `clean_env()` drops those variables by exact name,
+  plus any `CLAUDE_CODE_*` variable naming a session, socket, bridge, child,
+  parent, entrypoint or execpath. It keeps user configuration such as
+  `ANTHROPIC_API_KEY`, `CLAUDE_CONFIG_DIR`, `CLAUDE_CODE_GIT_BASH_PATH` and
+  `CLAUDE_CODE_USE_BEDROCK`.
+- Windows: a new console in a new process group that breaks away from the
+  caller's job object, so it outlives the agent's shell call. If breakaway is
+  refused, it falls back to a plain new console.
+- Unix with a terminal: `execvpe` with the clean environment. Without one (an
+  agent's shell), it writes a launch script that `unset`s the parent's session
+  variables and opens it in a new macOS Terminal window or the first Linux
+  terminal emulator found, otherwise prints the command.
+- `scaffold._launch_claude` delegates to it, so every mode (legacy and
+  `replicate` included) gets the fix.
+- Tests: `tests/test_launch.py` (8); the old launcher tests moved there. 174
+  pass. The real end-to-end check is item 9: launching Emma's practice session
+  from this agent session.
