@@ -6,11 +6,11 @@
 
 ## Active
 
-From the case studies (`docs/case-studies/`), waiting on Emma:
+Emma's decisions (2026-09-27, after the case studies):
 
-1. **Decide on chat-test's proposals P1–P6** (`docs/case-studies/04-chat-test.md`; full text in `Documents/GitHub/chat-test/research/notes/proposals.md`): scope "nothing to go on" to real silence; "no strict instructions is not no work"; a user-named subject is fair game; research queues refill from `SUMMARY.md` open questions; "present", not "steering"; ask when a worry is ambiguous. NEEDS-DECISION: Emma.
-2. **Loop pace for unattended research** (case 05: one queue item per hourly tick, idle the rest of the hour). Options: a shorter work interval, or a tick that keeps taking items until a time budget runs out. NEEDS-DECISION: Emma.
-
+1. **One simple loop: every 30 minutes, commit + push, keep working the queue.** Replace the three-cron `autonomous-loop` (hourly work, flush, status reports) with a single recurring cron every half hour whose prompt is just: commit and push any and all changes, then continue working on the queue. No status or flush crons (Emma: the reports and flushes weren't useful; the complicated loop helped earlier, when agents made up problems more and her work was hard and well-defined, but now it's worse). Keep: only the user stops it; an idle tick is fine; P4's research refill. Update the skill, the v2 CLAUDE.md intake step 5, this repo's CLAUDE.md cron section, tests.
+2. **Adopt all six chat-test proposals** (case study 04). P1: "nothing to go on" means the user has said nothing at all. P2: no strict instructions is not no work. P3: if the user says the tool or chat is the subject, it is (Emma: the first run's problem was being given too much context by accident, not having context). P4: a research queue refills from `research/SUMMARY.md` open questions. P5: the intake says the user is "present", not "steering". P6: ask one short question when a present user's worry could point either way.
+3. **Ship it:** tests, `pages/updates.md` (full new skill text), release 2.0.2, upgrade the local install, note the outcome in case study 04.
 ---
 
 ## Pointers
