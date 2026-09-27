@@ -140,6 +140,7 @@ deferred — DO IT NOW. Bare "deliberately not done" / "blocked on <person>" is 
 
 ## Default replication target & live smoke tests
 - **The default paper for `cleanvibe replicate` is arXiv:2605.20919 — "Sutra: Tensor-Op RNNs as a Compilation Target for Vector Symbolic Architectures"** (the maintainer's own paper). Use it whenever you need to exercise the `replicate` pipeline end-to-end against a real paper.
+- **`scratch/` (repo root, gitignored) holds a session's working files** (one-off edit scripts, drafts, release notes). Use it instead of Claude Code's temp scratchpad under `%LOCALAPPDATA%\Temp\claude\`, which Storage Sense deletes on its own schedule. Never commit it.
 - **`tests/scratch/` is the practice sandbox for live runs of any mode** (`cleanvibe new` practice projects, `replicate` smoke tests). Its contents are gitignored (`tests/scratch/*`); only `tests/scratch/.gitkeep` is tracked, so the directory always exists. Never commit anything else in it. Each run scaffolds a full project (with its own nested git repo) in there.
 - The committed unit tests in `tests/` are network-free (they monkeypatch `fetch_paper`). A **live** smoke test actually hits arXiv, e.g.:
   ```

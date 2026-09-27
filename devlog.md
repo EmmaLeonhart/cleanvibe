@@ -1770,3 +1770,10 @@ by a real agent rather than a test. Not exercised live: the
 substantial-engagement branch (loop postponed 60 minutes), which is covered by
 the intake tests' verdict only.
 
+## 2026-09-26 — Session working files live in a gitignored `scratch/` in this repo
+
+Emma was concerned that this session's working files (edit scripts, release
+notes, test folders) sat in Claude Code's temp scratchpad under
+`%LOCALAPPDATA%\Temp\claude\...`, which Storage Sense clears. `/scratch/` is
+now in `.gitignore`, CLAUDE.md says to use it, and a memory records the
+preference. Practice projects stay in `tests/scratch/`.

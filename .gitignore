@@ -34,3 +34,8 @@ Thumbs.db
 # ignored outright.
 tests/scratch/*
 !tests/scratch/.gitkeep
+
+# Working files for sessions on this repo (edit scripts, drafts, release notes).
+# Kept in the repo, not in Claude's temp scratchpad (Storage Sense clears that), and
+# never committed.
+/scratch/
