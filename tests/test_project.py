@@ -4,6 +4,7 @@ Stdlib unittest, no network, no Claude launch (launching is mocked).
 """
 
 import io
+import os
 import json
 import platform
 import subprocess
@@ -15,6 +16,14 @@ from unittest import mock
 
 from cleanvibe import project, skills, templates
 from cleanvibe.scaffold import create_project
+
+# Never let a launch-path test write the real ~/.claude.json (cleanvibe.trust
+# pre-trusts new project folders there). Set before any test runs, whether or
+# not tests/__init__.py was imported (`unittest discover -s tests` skips it).
+os.environ["CLEANVIBE_CLAUDE_CONFIG"] = os.path.join(
+    tempfile.mkdtemp(prefix="cleanvibe-tests-"), ".claude.json"
+)
+
 
 IS_WINDOWS = platform.system() == "Windows"
 

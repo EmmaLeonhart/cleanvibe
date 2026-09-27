@@ -13,6 +13,14 @@ from unittest import mock
 from cleanvibe import cli, project
 
 
+# Never let a launch-path test write the real ~/.claude.json (cleanvibe.trust
+# pre-trusts new project folders there). Set before any test runs, whether or
+# not tests/__init__.py was imported (`unittest discover -s tests` skips it).
+os.environ["CLEANVIBE_CLAUDE_CONFIG"] = os.path.join(
+    tempfile.mkdtemp(prefix="cleanvibe-tests-"), ".claude.json"
+)
+
+
 class _InTempDir(unittest.TestCase):
     def setUp(self):
         self.tmp = Path(tempfile.mkdtemp())

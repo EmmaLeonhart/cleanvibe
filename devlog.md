@@ -1598,3 +1598,48 @@ as `replication_target/`), so the directory exists in every clone and
 everything scaffolded into it stays out of git. CLAUDE.md now describes it as
 the sandbox for live runs of any mode, not only `replicate`. (Also corrected
 the previous entry's test count: 205, not 206.)
+
+## 2026-09-26 — Practice session hit Claude Code's trust prompt; pre-trust for new folders
+
+**What happened.** `cleanvibe` (bare) in `tests/scratch/` created
+`cleanvibe-2026-09-26` and launched its session from this agent session, the
+child-session case the launcher fix targets. The launch worked: a new
+`claude.exe` (PID 38744) started with the first-session prompt intact through
+`cmd /k` (visible in its command line). But the session stopped at Claude
+Code's "Is this a project you created or one you trust?" prompt, which blocks
+every new folder's first interactive session until someone answers at the
+machine (screenshot:
+`Documents/claude-screenshots/cleanvibe_2026-09-26/practice-session-console.png`).
+Until it is answered there is no transcript and no Remote Control. The earlier
+`claude -p` smoke tests never showed this, because `-p` skips the trust prompt.
+
+- Emma chose (AskUserQuestion) to have the prompt answered for her this time.
+  `AppActivate`/`SendKeys` failed: there was no foreground window, most
+  likely a locked screen. Writing the keypresses into the console input buffer
+  was **denied by the auto-mode classifier**, which blocks one session driving
+  another's terminal. Not pursued further. **The practice session is waiting
+  for Emma to press "Yes, I trust this folder".**
+- Emma also chose to have cleanvibe **pre-trust the folders it creates**. New
+  `cleanvibe/trust.py`: `mark_trusted(path)` sets
+  `projects[<abs path, forward slashes>].hasTrustDialogAccepted = true` in
+  Claude Code's config (`~/.claude.json`, `$CLAUDE_CONFIG_DIR/.claude.json`,
+  or `CLEANVIBE_CLAUDE_CONFIG`).
+  - It only runs from `new_project`, only when about to launch; never on
+    `open_project` or legacy modes.
+  - It never creates the config file, and leaves it untouched if it is
+    unreadable or an unexpected shape.
+  - It writes a `.cleanvibe-backup` first, then replaces the file atomically.
+  - A Claude session already running holds its own copy of the config and can
+    write it back later, dropping the flag. The worst case is that the prompt
+    appears as before.
+- **Not verified live:** that Claude Code accepts a minimal entry holding only
+  the trust flag (real trusted entries have 10+ fields). Deliberately not
+  exercised against the real config from this session; it is the practice
+  project's job, once Emma unblocks it or runs `cleanvibe new` herself.
+- Emma then confirmed in chat: "trust new folders". Committed on that.
+- Tests: new `tests/test_trust.py` (10), all on temporary config files. The
+  test package points `CLEANVIBE_CLAUDE_CONFIG` at a temp file, and the
+  launch-path test modules set it themselves too, because `unittest discover
+  -s tests` does not import `tests/__init__.py`. Checked: the real
+  `~/.claude.json` hash is identical before and after the full suite. 215
+  pass.

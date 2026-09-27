@@ -22,6 +22,7 @@ from pathlib import Path
 
 from . import __version__, skills, templates
 from .scaffold import _git_init, _launch_claude, _write, _write_gitkeep
+from .trust import mark_trusted
 
 MARKER = templates.V2_MARKER
 
@@ -116,6 +117,11 @@ def new_project(
     ))
 
     if not no_claude:
+        # A brand-new folder would stop the session at Claude Code's "trust this
+        # folder?" prompt; pre-trust it so an agent-started session can be picked
+        # up over Remote Control (see trust.py for the safeguards).
+        if mark_trusted(path):
+            print("  Marked the new folder as trusted in Claude Code's config")
         _launch_claude(path, templates.v2_first_prompt(path.resolve(), auto_named), remote_control=True)
 
 
