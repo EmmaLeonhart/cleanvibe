@@ -47,7 +47,7 @@ class TestDefault(_InTempDir):
         self.assertEqual(code, 0)
         made = [p for p in self.tmp.iterdir() if p.is_dir()]
         self.assertEqual(len(made), 1)
-        self.assertRegex(made[0].name, r"^cleanvibe-\d{4}-\d{2}-\d{2}$")
+        self.assertEqual(made[0].name, "untitled-cleanvibe-project")
         self.assertTrue(project.is_cleanvibe_repo(made[0]))
 
     def test_inside_a_project_opens_it_instead(self):
@@ -76,7 +76,7 @@ class TestNew(_InTempDir):
 
     def test_unnamed_is_auto_named(self):
         self.run_cli("new", "--no-claude")
-        auto = next(self.tmp.glob("cleanvibe-*"))
+        auto = self.tmp / "untitled-cleanvibe-project"
         self.assertIn("created without a name", (auto / "INTENT.md").read_text(encoding="utf-8"))
 
     def test_existing_project_is_opened_not_overwritten(self):

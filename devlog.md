@@ -1777,3 +1777,43 @@ notes, test folders) sat in Claude Code's temp scratchpad under
 `%LOCALAPPDATA%\Temp\claude\...`, which Storage Sense clears. `/scratch/` is
 now in `.gitignore`, CLAUDE.md says to use it, and a memory records the
 preference. Practice projects stay in `tests/scratch/`.
+
+## 2026-09-26 — 2.0.1: fixes from case study 02 (the invented smoke test)
+
+The first unattended practice session (`tests/scratch/cleanvibe-2026-09-26-2`;
+full write-up in `docs/case-studies/02-invented-smoke-test.md`) had no chat, no
+files and a generated name. It guessed "a cleanvibe smoke test" from its
+location inside the cleanvibe repo, and the intake verdict ("no engagement:
+start the loop now") pushed it to act. It spent the loop testing cleanvibe
+itself. After Emma arrived it investigated beyond the project, kept going after
+"Please don't", and argued with her plan.
+
+- **Nothing to go on.** The intake report now states whether `data_lake/` has
+  material and whether the name was generated. The verdicts are:
+  substantial engagement (loop in 60 minutes); no engagement but material
+  (loop now); **name only** (a chosen name, nothing else: start only if the
+  name plainly states a task); and **nothing to go on** (don't plan, don't loop,
+  say so in INTENT.md and wait). CLAUDE.md step 5 and the first prompt match.
+- **A guess about why the project exists is not a task.** In the first prompt
+  and CLAUDE.md. **The path stays in the prompts.** An earlier draft removed it
+  and declared location "never evidence". Emma corrected that: the path
+  carries real information, and the session's guess was accurate. The failure
+  was turning that guess into invented work. She reads it as poisoned by too
+  much self-referential information rather than too little.
+- **Scope and stopping** (CLAUDE.md): stay inside this project; "stop" and
+  "don't" mean stop now; follow the user's reading over your own.
+- **Session names.** Every session got the AI title "Cleanvibe project intake"
+  from the shared prompt, and Emma couldn't find hers in the app. A folder name
+  the user chose is now passed as `--name` (prompt box, `/resume`, terminal
+  title) and as the Remote Control session name (the real CLI accepted
+  `--name X --remote-control X`). Untitled projects get no name and Claude picks
+  one; the `.bat` follows the same rule.
+- **Untitled naming (Emma).** `untitled-cleanvibe-project`; if taken,
+  `untitled-cleanvibe-project-YYYY-MM-DD-HHMM`; only if that is also taken, a
+  number.
+- **Case studies** in `docs/case-studies/` (01 trust prompt, 02 invented smoke
+  test, 03 and 04 next), per Emma: keep watching sessions and recording them.
+- Tests: new verdict tests (nothing to go on, name only, material), naming and
+  path tests. 225 pass. Version 2.0.1.
+
+

@@ -43,10 +43,21 @@ def is_cleanvibe_repo(path: Path) -> bool:
     return mentions and has_workflow
 
 
+AUTO_NAME = "untitled-cleanvibe-project"
+
+
 def auto_project_path(base: Path | None = None) -> Path:
-    """``cleanvibe-YYYY-MM-DD`` under ``base`` (cwd), suffixed -2, -3, ... if taken."""
+    """Where an unnamed project goes under ``base`` (cwd).
+
+    ``untitled-cleanvibe-project`` if it is free; otherwise the same with a
+    timestamp (``untitled-cleanvibe-project-YYYY-MM-DD-HHMM``); only if that is
+    taken too, a number on the end (``-2``, ``-3``, ...).
+    """
     base = Path(".") if base is None else Path(base)
-    stem = f"cleanvibe-{datetime.now().strftime('%Y-%m-%d')}"
+    candidate = base / AUTO_NAME
+    if not candidate.exists():
+        return candidate
+    stem = f"{AUTO_NAME}-{datetime.now().strftime('%Y-%m-%d-%H%M')}"
     candidate = base / stem
     n = 2
     while candidate.exists():
@@ -105,7 +116,7 @@ def new_project(
     _write(scripts / "data_lake_intake.py", templates.V2_INTAKE_PY)
 
     if is_windows:
-        _write(path / "!runClaude.bat", templates.v2_runclaude_bat(path))
+        _write(path / "!runClaude.bat", templates.v2_runclaude_bat(path, auto_named))
 
     _git_init(path, message=(
         f"Initial commit: cleanvibe v{__version__} project\n"
@@ -126,7 +137,11 @@ def new_project(
         # up over Remote Control (see trust.py for the safeguards).
         if mark_trusted(path):
             print("  Marked the new folder as trusted in Claude Code's config")
-        _launch_claude(path, templates.v2_first_prompt(path.resolve(), auto_named), remote_control=True)
+        _launch_claude(
+            path, templates.v2_first_prompt(path.resolve(), auto_named),
+            # A generated name is a poor session name; let Claude pick one.
+            remote_control=True, name=None if auto_named else path.resolve().name,
+        )
 
 
 def open_project(path: Path, dry_run: bool = False, no_claude: bool = False) -> None:
@@ -142,4 +157,13 @@ def open_project(path: Path, dry_run: bool = False, no_claude: bool = False) -> 
     _launch_claude(
         path, templates.v2_resume_prompt(path.resolve()),
         remote_control=True, show_folder=False,
+        name=None if _auto_named(path) else path.resolve().name,
     )
+
+
+def _auto_named(path: Path) -> bool:
+    import json
+    try:
+        return bool(json.loads((Path(path) / MARKER).read_text(encoding="utf-8")).get("auto_named"))
+    except (OSError, ValueError):
+        return False

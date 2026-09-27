@@ -36,10 +36,16 @@ pip install .         # or use !dev-install.bat on Windows
 
 ```
 cleanvibe                  # in a cleanvibe project: open a new session there
-                           # anywhere else: create cleanvibe-YYYY-MM-DD/ here and open it
-cleanvibe new              # create an auto-named project and open it
+                           # anywhere else: create untitled-cleanvibe-project/ here and open it
+cleanvibe new              # create an untitled project and open it
 cleanvibe new ai-history   # create ai-history/ and open it
 ```
+
+An unnamed project is `untitled-cleanvibe-project`; if that exists, it gets a
+timestamp (`untitled-cleanvibe-project-2026-09-26-2104`), and only if that is
+taken too, a number. A name you choose is also the session's name in the Claude
+app and `/resume` (`--name`, and the Remote Control session name); untitled
+projects are left for Claude to name.
 
 A new project gets a git repo on `main` (local and private, with no remote
 unless you ask for one) and a Claude Code session in a new window. The session
@@ -72,7 +78,11 @@ touching it. On a non-empty folder that isn't a project it refuses (use
    nothing, it starts right away; if you've been actively steering, it waits
    another hour (90 minutes in).
 
-So you can create a project, drop a brief into it, and walk away.
+So you can create a project, drop a brief into it, and walk away. With no
+brief, no chat and no name there is **nothing to go on**: the agent says so in
+`INTENT.md` and waits instead of inventing a purpose. A guess about *why* a
+project exists is not a task. (Case studies of real sessions are in
+[`docs/case-studies/`](docs/case-studies/).)
 
 ### What a project contains
 

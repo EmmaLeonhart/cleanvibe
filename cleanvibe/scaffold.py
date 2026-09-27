@@ -356,6 +356,7 @@ def _launch_claude(
     prompt: str | None = None,
     remote_control: bool = False,
     show_folder: bool = True,
+    name: str | None = None,
 ) -> None:
     """Launch Claude Code in the project directory as a top-level session.
 
@@ -364,4 +365,4 @@ def _launch_claude(
     See ``cleanvibe.launch`` for how it avoids becoming a child of a Claude
     session that ran cleanvibe.
     """
-    launch(path, prompt, remote_control, show_folder)
+    launch(path, prompt, remote_control, show_folder, name)

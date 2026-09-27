@@ -87,7 +87,9 @@ class TestNewProject(unittest.TestCase):
                        "INTENT.md", "AskUserQuestion only when the user is clearly here",
                        "Material goes into `data_lake/`", "Thirty-minute intake",
                        "recurring: false", "data_lake_intake.py",
-                       "Little or no user engagement", "60 minutes from now",
+                       "Little or no engagement, with material", "60 minutes from now",
+                       "Nothing to go on", "a guess about why the project exists",
+                       "Stay inside this project", "mean stop now",
                        "queue-driven-workflow", "research-practice", "autonomous-loop",
                        "scratch/", "gh repo create --private", "sessions/",
                        "Not-done taxonomy"):
@@ -104,6 +106,7 @@ class TestNewProject(unittest.TestCase):
         args, kwargs = launch.call_args
         self.assertEqual(args[1], templates.v2_first_prompt(proj.resolve(), True))
         self.assertTrue(kwargs["remote_control"])
+        self.assertIsNone(kwargs["name"])  # auto-named: Claude picks the session name
 
     def test_dry_run_writes_nothing(self):
         proj = Path(tempfile.mkdtemp()) / "p"
@@ -125,12 +128,18 @@ class TestRecognizeAndOpen(unittest.TestCase):
         (plain / "queue.md").write_text("x\n", encoding="utf-8")
         self.assertFalse(project.is_cleanvibe_repo(plain))
 
-    def test_auto_project_path_suffixes(self):
+    def test_auto_project_path_untitled_then_timestamp_then_number(self):
         base = Path(tempfile.mkdtemp())
         first = project.auto_project_path(base)
-        self.assertRegex(first.name, r"^cleanvibe-\d{4}-\d{2}-\d{2}$")
+        self.assertEqual(first.name, "untitled-cleanvibe-project")
         first.mkdir()
-        self.assertEqual(project.auto_project_path(base).name, first.name + "-2")
+        second = project.auto_project_path(base)
+        self.assertRegex(second.name, r"^untitled-cleanvibe-project-\d{4}-\d{2}-\d{2}-\d{4}$")
+        second.mkdir()
+        with mock.patch.object(project, "datetime") as dt:
+            dt.now.return_value.strftime.return_value = second.name.rsplit("project-", 1)[1]
+            third = project.auto_project_path(base)
+        self.assertEqual(third.name, second.name + "-2")
 
     def test_open_uses_resume_prompt_without_explorer(self):
         proj = _new()
@@ -150,8 +159,12 @@ class TestV2Prompts(unittest.TestCase):
             self.assertIn("first ever session", prompt)
             self.assertIn("AskUserQuestion", prompt)
             self.assertIn("INTENT.md", prompt)
+        # The path carries real information and stays in. What an early session
+        # got wrong was turning "this is a practice run" into invented work.
         self.assertIn("at /home/e/oolong", named)
-        self.assertIn("directory name is a clue", named)
+        self.assertIn("I chose the folder name", named)
+        self.assertIn("a guess about why the project exists is not a task", named)
+        self.assertIn("if there is nothing to go on, say exactly that", auto)
         for prompt in (named, auto):
             self.assertIn("low information", prompt)
             self.assertIn("CronCreate", prompt)
@@ -165,13 +178,21 @@ class TestV2Prompts(unittest.TestCase):
             for ch in '"%^&|<>!\n\r':
                 self.assertNotIn(ch, prompt)
 
-    def test_unsafe_path_is_left_out(self):
-        prompt = templates.v2_first_prompt("/tmp/a&b", False)
-        self.assertNotIn("a&b", prompt)
-        self.assertIn("started with cleanvibe.", prompt)
+    def test_path_in_both_prompts_unless_cmd_unsafe(self):
+        for prompt in (templates.v2_first_prompt("/tmp/tests/scratch/x", False),
+                       templates.v2_resume_prompt("/tmp/tests/scratch/x")):
+            self.assertIn("at /tmp/tests/scratch/x", prompt)
+        self.assertNotIn("a&b", templates.v2_first_prompt("/tmp/a&b", False))
+
+    def test_bat_names_only_chosen_names(self):
+        self.assertIn("--name ai-history --remote-control ai-history",
+                      templates.v2_runclaude_bat("/x/ai-history"))
+        auto = templates.v2_runclaude_bat("/x/cleanvibe-project-2026-09-26-2104", auto_named=True)
+        self.assertNotIn("--name", auto)
+        self.assertTrue(auto.rstrip().endswith('" --remote-control'))
 
     def test_bat_resumes_with_remote_control(self):
-        bat = templates.v2_runclaude_bat("/x")
+        bat = templates.v2_runclaude_bat("/x", auto_named=True)
         self.assertIn(templates.v2_resume_prompt(""), bat)
         # The .bat names no path (%~dp0 is its folder): no dangling " at ".
         self.assertIn("existing cleanvibe project. Catch up", bat)
@@ -253,6 +274,22 @@ class TestThirtyMinuteIntake(unittest.TestCase):
         out = _run_intake(self.proj).stdout
         self.assertIn("2 message(s)", out)
         self.assertIn("SUBSTANTIAL engagement", out)
+
+    def test_empty_folder_generated_name_is_nothing_to_go_on(self):
+        proj = _new("cleanvibe-2026-09-26", auto_named=True)  # nothing dropped in
+        out = _run_intake(proj).stdout
+        self.assertIn("Material in data_lake/: none", out)
+        self.assertIn("NOTHING TO GO ON", out)
+        self.assertNotIn("start the work loop now", out)
+
+    def test_empty_folder_chosen_name_is_name_only(self):
+        out = _run_intake(_new("history-of-ai-research")).stdout
+        self.assertIn("NAME ONLY", out)
+
+    def test_material_without_engagement_starts_now(self):
+        out = _run_intake(self.proj).stdout  # setUp dropped files in
+        self.assertIn("but there is material", out)
+        self.assertIn("start the work loop now", out)
 
     def test_agent_work_already_committed_stays_put(self):
         (self.proj / "research").mkdir()

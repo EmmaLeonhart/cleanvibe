@@ -81,6 +81,7 @@ def launch(
     prompt: str | None = None,
     remote_control: bool = False,
     show_folder: bool = True,
+    name: str | None = None,
 ) -> None:
     """Start Claude Code in ``path`` as its own top-level session.
 
@@ -88,7 +89,7 @@ def launch(
     project always has.
     """
     path = Path(path)
-    command = templates.claude_command(prompt, remote_control)
+    command = templates.claude_command(prompt, remote_control, name)
     env = clean_env()
     print(f"  Launching Claude Code...")
     try:

@@ -47,6 +47,16 @@ class TestStartingPrompt(unittest.TestCase):
                          ["claude", "--remote-control"])
         self.assertEqual(templates.claude_command("hi"), ["claude", "hi"])
 
+    def test_session_name_for_title_and_remote_control(self):
+        self.assertEqual(
+            templates.claude_command("hi", True, "ai-history"),
+            ["claude", "hi", "--name", "ai-history", "--remote-control", "ai-history"])
+        self.assertEqual(templates.claude_command("hi", False, "ai-history"),
+                         ["claude", "hi", "--name", "ai-history"])
+        # A name cmd.exe would mangle is dropped, not passed.
+        self.assertEqual(templates.claude_command("hi", True, "a&b"),
+                         ["claude", "hi", "--remote-control"])
+
     def test_only_chat_bat_uses_remote_control(self):
         chat_bat = templates.runclaude_bat("chat")
         self.assertTrue(chat_bat.rstrip().endswith('" --remote-control'))

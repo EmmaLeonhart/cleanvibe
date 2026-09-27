@@ -402,7 +402,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     new_parser.add_argument(
         "name", nargs="?", type=Path, default=None,
-        help="Directory to create. Omit it to get cleanvibe-YYYY-MM-DD.",
+        help="Directory to create. Omit it to get untitled-cleanvibe-project.",
     )
     _add_run_flags(new_parser)
 

@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 from datetime import datetime
+from pathlib import Path
 from string import Template
 
 from . import __version__
@@ -429,18 +430,31 @@ def starting_prompt(mode: str) -> str:
 REMOTE_CONTROL_MODES = frozenset({"chat"})
 
 
-def claude_command(prompt: str | None = None, remote_control: bool = False) -> list:
+def claude_command(
+    prompt: str | None = None, remote_control: bool = False, name: str | None = None
+) -> list:
     """argv that launches Claude.
 
     `--remote-control [name]` takes an OPTIONAL value, so it must come AFTER the
     prompt: `claude --remote-control "<prompt>"` would read the prompt as the
     session name.
+
+    ``name`` (the project folder's name) becomes the session's display name
+    (`--name`: prompt box, /resume picker, terminal title) and the Remote Control
+    session name. Without it every cleanvibe session got a near-identical AI
+    title from the shared starting prompt. A name cmd.exe would mangle is dropped.
     """
     command = ["claude"]
     if prompt:
         command.append(prompt)
+    if name and not _PROMPT_UNSAFE.intersection(name):
+        command += ["--name", name]
+    else:
+        name = None
     if remote_control:
         command.append("--remote-control")
+        if name:
+            command.append(name)
     return command
 
 
@@ -3127,30 +3141,36 @@ def v2_first_prompt(path, auto_named: bool) -> str:
     """Starting prompt for the very first session in a new cleanvibe 2 project.
 
     This is the one message cleanvibe can put directly in front of the agent,
-    so it carries the operating instructions, not only a greeting.
+    so it carries the operating instructions, not only a greeting. The path is
+    included: it carries real information (Emma, 2026-09-26). What went wrong in
+    the first practice session was not the path but turning a guess about *why*
+    the project exists (a cleanvibe test run) into invented work (testing
+    cleanvibe); the prompt and CLAUDE.md now say so.
     """
     if auto_named:
         clue = (
-            "I created it without giving a name, so the directory name was "
-            "generated and says nothing about the purpose."
+            "I created it without giving a name, so the folder name was generated "
+            "and says nothing about the purpose."
         )
     else:
         clue = (
-            "The directory name is a clue to the purpose, sometimes enough to "
-            "start from, but do not over-read it."
+            "I chose the folder name; occasionally it plainly states the task, "
+            "usually it is at most a hint."
         )
     prompt = (
         f"This is the first ever session in a new project I started with "
         f"cleanvibe{_prompt_path(path)}. cleanvibe projects are built to work from "
         f"low information: I may say little or nothing, and I may not be here at "
-        f"all. {clue} Read CLAUDE.md first. Then, before anything else, use "
-        f"CronCreate to schedule the one-time Thirty-minute intake exactly as "
-        f"CLAUDE.md describes, for 30 minutes from now. Then look at everything "
-        f"already in the folder, write your first read of the purpose into "
-        f"INTENT.md, commit, and tell me briefly what you see and what you plan. "
-        f"Only use AskUserQuestion if I am clearly here and replying. If I say "
-        f"nothing, the intake assumes I am away and starts autonomous work from "
-        f"what is in the folder."
+        f"all. {clue} The path can tell you something too, but a guess about why "
+        f"the project exists is not a task: do not invent work from it. Read "
+        f"CLAUDE.md first. Then, before "
+        f"anything else, use CronCreate to schedule the one-time Thirty-minute "
+        f"intake exactly as CLAUDE.md describes, for 30 minutes from now. Then look "
+        f"at what is in this folder, write your first read of the purpose into "
+        f"INTENT.md (if there is nothing to go on, say exactly that; do not guess), "
+        f"commit, and tell me briefly what you see. Only use AskUserQuestion if I "
+        f"am clearly here and replying. If I say nothing, the intake decides what "
+        f"happens next from what is in the folder."
     )
     if not _prompt_safe(prompt):
         raise ValueError("v2 first-session prompt has cmd-unsafe characters")
@@ -3172,12 +3192,16 @@ def v2_resume_prompt(path) -> str:
     return prompt
 
 
-def v2_runclaude_bat(path) -> str:
+def v2_runclaude_bat(path, auto_named: bool = False) -> str:
     """`!runClaude.bat`: reopen this project as a new session (resume prompt)."""
     # %~dp0 is the .bat's own folder, so the prompt names no fixed path.
+    name = Path(str(path)).name if path and not auto_named else ""
+    tail = " --remote-control"
+    if name and not _PROMPT_UNSAFE.intersection(name) and " " not in name:
+        tail = f" --name {name} --remote-control {name}"
     return (
         '@echo off\ncd /d "%~dp0"\n'
-        f'claude "{v2_resume_prompt("")}" --remote-control\n'
+        f'claude "{v2_resume_prompt("")}"{tail}\n'
     )
 
 
@@ -3220,8 +3244,24 @@ the folder and dropped material into it, expecting you to get on with it.
   at the top level) is the user's context. Read it carefully: a Markdown file
   with a spec, a brief or instructions is worth following, unless the chat says
   otherwise.
-- **Then the directory name.** Sometimes it is enough to start from; usually it
-  is only a hint. Don't over-read it.
+- **Then the folder's name and path.** A name the user chose (see `auto_named`
+  in `.cleanvibe.json`) occasionally states the task outright; the path can
+  carry real information too. But **a guess about why the project exists is
+  not a task.** Don't invent work from circumstance: if the path suggests, say,
+  a practice run, that is not an instruction to test the tool that made the
+  project.
+- **Nothing to go on is a real state.** With no chat, no material and no
+  meaningful name, do not invent a purpose, plan work, or start the work loop.
+  Say plainly in `INTENT.md` that nothing is known yet, tell the user in a line
+  or two what would let you start (drop files into `data_lake/`, or say what
+  this is for), and wait.
+- **Stay inside this project.** Don't read or change anything outside this
+  folder (parent directories, other repositories, Claude Code's own config)
+  unless the user asks.
+- **"Stop" and "don't" mean stop now.** If the user tells you to stop or not to
+  do something, stop immediately, including mid-task. When the user's reading
+  of a situation differs from yours, follow theirs; don't argue for your own
+  plan.
 - **Keep `INTENT.md` current.** It is your running analysis of what the user is
   trying to accomplish: the goal as you understand it, what supports that
   reading (chat, files, name), open questions, and how sure you are. Update it
@@ -3274,13 +3314,20 @@ When it fires, do this:
    confidence. Commit.
 4. **If the purpose is clear enough to act on, plan it.** Use the matching skill
    (`research-practice` for research, `queue-driven-workflow` for building) to
-   put concrete first steps into `queue.md` / `todo.md`. Commit. If it is not
-   clear, write down the best interpretation you can in `INTENT.md` and plan
-   that; low information is the normal case here, not a reason to wait.
+   put concrete first steps into `queue.md` / `todo.md`. Commit. Thin material
+   is normal here and still worth acting on; an empty folder is not (step 5).
 5. **Start the work loop** (the `autonomous-loop` skill), depending on the
    report's verdict:
-   - **Little or no user engagement:** assume the user is away and that the
-     folder holds the context they meant to give. Start the loop now.
+   - **Nothing to go on** (no material, no engagement, generated name): do not
+     infer a purpose, plan, or start the loop. Write in `INTENT.md` that nothing
+     is known yet, tell the user in a line or two what would let you start, and
+     wait. Their next message (or files appearing in the next session) is where
+     work begins.
+   - **Name only** (no material, no engagement, a name the user chose): start
+     only if the name plainly states a task (say, `history-of-ai-research`);
+     otherwise treat it as nothing to go on.
+   - **Little or no engagement, with material:** assume the user is away and
+     that the folder holds the context they meant to give. Start the loop now.
    - **Substantial engagement:** the user is steering, so don't take over yet.
      Schedule another one-time `CronCreate` job 60 minutes from now with the
      prompt `[cleanvibe cron] Start the work loop: follow step 5 of the
@@ -3921,12 +3968,24 @@ def main():
         print(f"  - ... and {len(lake_files) - 200} more")
     print(f"- User engagement so far: {messages} message(s), {chars} characters "
           f"(not counting cleanvibe's own prompts)")
+    print(f"- Material in {LAKE}/: {'yes' if lake_files else 'none'}; folder name: "
+          f"{'generated (says nothing)' if marker.get('auto_named') else 'chosen by the user'}")
     if substantial:
         print("- Verdict: SUBSTANTIAL engagement. The user is steering: schedule the "
               "work loop to start in 60 minutes rather than now.")
+    elif lake_files:
+        print("- Verdict: LITTLE OR NO engagement, but there is material. Assume the user "
+              "is away and that the folder holds the context they meant to give: start "
+              "the work loop now.")
+    elif not marker.get("auto_named"):
+        print("- Verdict: NAME ONLY. No material and no engagement. Start work only if the "
+              "folder name plainly states a task; otherwise treat this as NOTHING TO GO ON.")
     else:
-        print("- Verdict: LITTLE OR NO engagement. Assume the user is away and that the "
-              "folder holds the context they meant to give: start the work loop now.")
+        print("- Verdict: NOTHING TO GO ON. No material, no engagement, and a generated "
+              "name. Do not invent work from circumstance (a guess about why the project "
+              "exists is not a task), do not plan, do not start the work loop. Say so in "
+              "INTENT.md and wait "
+              "for the user.")
     return 0
 
 
