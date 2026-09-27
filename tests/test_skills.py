@@ -7,13 +7,14 @@ from cleanvibe import skills
 
 EXPECTED = {
     "emergency-stop", "cron-is-local", "autonomous-loop",
-    "queue-driven-workflow", "writing-style", "cleanvibe-update-check",
+    "queue-driven-workflow", "research-practice", "writing-style",
+    "cleanvibe-update-check",
 }
 FM = re.compile(r"^---\nname: (?P<name>[a-z-]+)\ndescription: (?P<desc>.+?)\n---\n", re.S)
 
 
 class TestSkills(unittest.TestCase):
-    def test_all_six_present(self):
+    def test_all_seven_present(self):
         self.assertEqual(set(skills.SKILLS), EXPECTED)
 
     def test_frontmatter_valid_and_matches_slug(self):
@@ -27,7 +28,7 @@ class TestSkills(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             root = Path(d)
             written = skills.write_skills(root)
-            self.assertEqual(len(written), 6)
+            self.assertEqual(len(written), 7)
             for slug in EXPECTED:
                 p = root / ".claude" / "skills" / slug / "SKILL.md"
                 self.assertTrue(p.exists(), f"{p} not written")

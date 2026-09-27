@@ -46,68 +46,135 @@ description: Use when the user says "cron job", "cron", or asks to "schedule" a 
 
 _AUTONOMOUS_LOOP = """---
 name: autonomous-loop
-description: Use when starting any session of relatively extensive or large-scale autonomous work — above all any large-scale population of queue.md with created tasks — to run the three local-cron productivity playbook (work-loop, auto-flush, status-report).
+description: Use when the user wants a long stretch of autonomous work (hours, overnight, or while they are away) — set up three local hourly crons (work, flush, status) that keep the work moving, committed and readable. Also use when deciding whether those crons should keep running.
 ---
 
-# Autonomous productivity loop — the three-cron playbook
+# Autonomous loop — three hourly crons
 
-**For any session involving relatively extensive work — above all, any large-scale population of `queue.md` with created tasks — this is the default way of working.** It is three local `CronCreate` jobs that turn "barrel through `queue.md`, and when it's empty atomise the next `todo.md` item into it" into a self-sustaining hourly cadence with a commit/push backstop and a heartbeat. The crons are **session-local** (`durable: false` — they die when the session ends), so they are recreated at the start of every session.
+When the user wants you to keep working on your own for a long stretch (hours,
+overnight, while they are away), set up three local `CronCreate` jobs. They are
+session-local (`durable: false`): they fire only while this session runs and end
+with it, so a later session sets them up again if the user still wants
+autonomous work. Stagger the minutes so the ticks don't collide:
 
-Stagger the minutes so the three ticks don't collide:
+1. **Work, `3 * * * *`.** Each tick:
+   - **Sync.** `git fetch`, then fast-forward or rebase. Never force-push, never
+     `reset --hard`, never discard work from another machine or session.
+   - **Work.** Take the top item in `queue.md` that you can do, and do it. If
+     nothing in the queue is doable, take the next `todo.md` item that is
+     unblocked, bounded and checkable, plan it into `queue.md`, then do it.
+     If there is still nothing, the tick is **idle**: say so in one line and
+     stop there. An idle tick is normal, not a problem to solve.
+   - **Commit and push**, deleting finished items from `queue.md` and logging
+     them in `devlog.md` in the same commit.
+   - **Report** in one line: the commits, or `idle: <reason>`.
+2. **Flush, `15 * * * *`.** Commit and push anything left uncommitted. No empty
+   commits. (Session transcripts are committed by the session-log hook, not by
+   this cron.)
+3. **Status, `42 * * * *`.** Report only, no changes: what advanced since the
+   last report (commits), the queue as it stands, anything blocked (with its
+   not-done tag and the specific blocker), and test health.
 
-1. **Work-loop cron — `3 * * * *` (hourly at :03).** The engine. Each tick does, in order:
-   - **(a) SYNC** — `git fetch origin`; fast-forward or rebase the working branch (never force-push, never `reset --hard`, never discard a sibling machine's work).
-   - **(b) WORK** — take the top actionable item from `queue.md` and do it. If nothing in `queue.md` is actionable (all blocked / needs user / a product decision), promote the next *genuinely-unblocked, bounded, verifiable* `todo.md` item — **plan it into `queue.md` first**, mirror to the task tool, then execute.
-   - **(c) HARD RAILS** — never fake; never weaken / skip / delete a test to make it pass; never claim "works" / "verified" / "passes" without having actually RUN it and measured. A real defect → strict `xfail` or a precise documented blocker, never a loosened assertion. Don't implement what you don't 100% understand — write the spec / queue item instead. Name unbuilt or hard things plainly; don't paper over difficulty. Verify CI green, not just local — local-green does not imply CI-green.
-   - **(d) COMMIT** — commit early/often with *why*; update `queue.md` in the same commit (delete completed items); append the dated entry to `devlog.md`; mark task-tool items done; push.
-   - **(e) REPORT** — one line: the commit shas advanced, or `nothing actionable; <reason>`.
+## The work keeps the project's normal standards
+- Claim something works only after running it. Never weaken, skip or delete a
+  test to get green; record the defect instead. Check CI, not only local runs.
+- If you don't understand something well enough to build it, write the question
+  down (a queue item, or `INTENT.md`) instead of guessing.
 
-2. **Auto-flush cron — `15 * * * *` (hourly at :15).** The backstop. Commit + push all pending work so nothing sits uncommitted between manual pushes; report shas or "nothing pending". Only commit / push when something is actually pending — no empty commits.
+These are how the work is done, not reasons to stop the loop.
 
-3. **Status-report cron — `42 * * * *` (hourly at :42).** The heartbeat — **reporting only, no code changes.** Covers: what advanced since the last report (shas + one-line each); current `queue.md` state; how the work held the hard rails (and any place it brushed one); blockers, each tagged with exactly one of the disjoint not-done taxonomy — NEEDS-DECISION / BLOCKED-ON-USER-ACTION / BLOCKED-ON-EXTERNAL / NEEDS-INVESTIGATION / UNSAFE-TO-GUESS / OUT-OF-SCOPE — naming the specific decision / user-action / external signal / risk / owner (LOAD-BEARING DEFAULT: if a not-done item fits none of these with a specifically-named blocker, it is NOT deferred — DO IT NOW); test-suite health.
+## Keep the crons running
+- **Do not turn the crons off yourself.** Not because the queue is empty, not
+  because a tick failed, not because something looks risky, and not at the end
+  of a burst of work. Only the user stops them (directly, or through the
+  `emergency-stop` skill).
+- When something goes wrong, the loop is how the user finds out: report it in
+  the next status tick and carry on with whatever is still safe to do.
+- If the queue is replanned mid-session, leave the crons alone; the next work
+  tick picks up the new top item.
+- Not sure the user wants the loop at all? Ask with AskUserQuestion rather than
+  starting or stopping it on a guess.
 
-**Why this exists:** the most common autonomous-agent failure is doing a large amount of work and silently losing the thread of what it is doing. The work-loop forces steady, verifiable, committed progress; the auto-flush guarantees nothing is lost between ticks; the status-report keeps the thread legible.
+**Why:** long autonomous stretches usually fail by quietly losing the thread.
+The work tick keeps progress steady and committed, the flush makes sure nothing
+is lost, and the status tick keeps the thread readable for when the user comes
+back.
 
-**Lifecycle around a large-scale queue fill:**
-
-- **(a) START all three crons at the beginning of any extensive work session.** A fresh session has none of them running, so the opening move — the first queue item — is to *create them*.
-- **(b) On a mid-session large-scale queue RE-FILL** (a planning burst that repopulates the queue), the FIRST item of that fill **kills the running crons**, then the work items follow top to bottom, and the pinned tail restarts them.
-- **(c) Entering planning mode DISABLES the crons.** Their restart therefore lives at the **end** of the queue, not the beginning of the next burst.
-- **(d) The LAST TWO queue items, always kept pinned at the tail, are:**
-  1. **Ensure the three crons are running** — start them if this session never did, restart them if a planning burst / queue re-fill killed them.
-  2. **Run the status-report action once more, independently** — an end-of-session summary of everything that happened this session.
-
-In short: a fresh session **starts** the crons up front and the tail **ensures they are still running** + summarizes; a mid-session re-fill **kills** them up front and the tail **restarts** them + summarizes. Either way the queue both opens and closes on the cron set.
-
-**Replication projects are exempt.** This is for `new` / general extensive work only — a bounded paper replication does not get the hourly heartbeat.
+Replication projects (`cleanvibe replicate`) are bounded jobs and do not use
+the loop.
 """
 
 _QUEUE_DRIVEN_WORKFLOW = """---
 name: queue-driven-workflow
-description: Use when doing any multi-step or planning work in a cleanvibe-scaffolded project — enforces plan-into-queue.md-first, the todo.md→queue.md→devlog.md flow, delete-don't-check completion, task-tool mirroring, and tests/CI discipline.
+description: Use when the work in a cleanvibe project is software development or any other multi-step build — plan into queue.md first, the todo.md → queue.md → devlog.md flow, delete-don't-check completion, task-tool mirroring, and tests/CI discipline.
 ---
 
-# Queue-driven workflow
+# Queue-driven workflow (development practice)
+
+In a cleanvibe 2 project nothing is set up for this in advance. When the work
+turns into building something over several steps, create `queue.md`, `todo.md`
+and `devlog.md` if they don't exist yet, and work this way from then on.
 
 ## Workflow Rules
 - **Commit early and often.** Every meaningful change gets a commit with a clear message explaining *why*, not just what.
 - **Plan into `queue.md` first, then execute.** When entering planning mode (or doing any non-trivial multi-step work), the FIRST action is to write the plan into `queue.md` as concrete items. Only then begin executing. This means an interrupted session can resume from the queue — the plan does not live only in chat context.
-- **Finishing an item = delete from `queue.md` + append to `devlog.md`, then commit and push.** IMPORTANT: when a queue item is done, **delete the item from `queue.md`** and **append a dated entry to `devlog.md`** recording what was completed, in the *same commit as the work*, then push. NEVER mark an item done in place (no `[x]`, no "✓", no "DONE" — a checked box left in `queue.md` is the failure mode this rule exists to prevent). `queue.md` only ever holds not-yet-done work; `devlog.md` is where "done" lives.
+- **Finishing an item = delete from `queue.md` + append to `devlog.md`, then commit and push.** When a queue item is done, **delete the item from `queue.md`** and **append a dated entry to `devlog.md`** recording what was completed, in the *same commit as the work*, then push (if the repo has a remote). Never mark an item done in place (no `[x]`, no "✓", no "DONE"). `queue.md` only ever holds not-yet-done work; `devlog.md` is where "done" lives.
 - **Mirror `queue.md` into the task tool.** TaskCreate items as you add them to queue.md; mark `in_progress` when starting; `completed` when done. The two views must not drift.
 - **Keep CLAUDE.md up to date.** As the project takes shape, record architectural decisions, conventions, and anything needed to work effectively in this repo.
 - **Update README.md regularly.** It should always reflect the current state of the project for human readers.
 
 ## Queue and longer-horizon work
 - **`queue.md`** — what's being worked on right now. Items get deleted on completion; do not leave checkmarks or status indicators behind. If it's not in `queue.md`, it's not in scope for the current session.
-- **`todo.md`** — the **long-term horizon** of the project. Multi-session goals, architectural ambitions, future capabilities. Items in `todo.md` are *abstract*: they describe a destination, not a step. `todo.md` is the *basis for* `queue.md`: when work begins, an item is pulled from `todo.md`, decomposed into concrete executable steps in `queue.md`, mirrored into the task tool, and executed. As `queue.md` drains, refill it by pulling and decomposing the next `todo.md` item.
-- **`devlog.md`** — where **"done" lives**. Every queue item that is finished gets deleted from `queue.md` and appended as a dated entry here, in the same commit as the work. Releases (tag + one-line note) and notable milestones also go here. `devlog.md` exists so `queue.md` can stay strictly delete-only without losing the historical trail.
-- **Flow:** `todo.md` (abstract horizons) → `queue.md` (concrete steps) → task tool (in-flight work) → `devlog.md` + `git log` (history). Items only ever flow forward; do not leave done items behind in `todo.md` or `queue.md`.
-- **Session end condition:** the project's first session ends when `queue.md` is empty, the only items left in `todo.md` are still too abstract to break down further, and the repository is online with green CI. At that point, stop and hand back to the user.
+- **`todo.md`** — the **long-term horizon** of the project. Multi-session goals, architectural ambitions, future capabilities. Items in `todo.md` are *abstract*: they describe a destination, not a step. When work begins, an item is pulled from `todo.md`, decomposed into concrete executable steps in `queue.md`, mirrored into the task tool, and executed. As `queue.md` drains, refill it from the next `todo.md` item.
+- **`devlog.md`** — where **"done" lives**. Every finished queue item is deleted from `queue.md` and appended as a dated entry here, in the same commit as the work. Releases (tag + one-line note) and notable milestones also go here.
+- **Flow:** `todo.md` (abstract horizons) → `queue.md` (concrete steps) → task tool (in-flight work) → `devlog.md` + `git log` (history). Items only ever flow forward.
+- **When to stop and hand back:** `queue.md` is empty, what is left in `todo.md` is still too abstract to break down, and tests (and CI, if the project has a remote) pass.
 
 ## Testing
 - **Write unit tests early.** As soon as there is testable logic, create a test file. Use `pytest` for Python projects or the appropriate test framework for the language in use.
-- **Set up CI as soon as tests exist.** Create a `.github/workflows/ci.yml` GitHub Actions workflow that runs the test suite on push and pull request. Keep the workflow simple — install dependencies and run tests.
+- **Set up CI once the project has a GitHub remote.** A `.github/workflows/ci.yml` that runs the test suite on push and pull request. Keep it simple — install dependencies and run tests.
 - **Keep tests passing.** Do not commit code that breaks existing tests. If a change requires updating tests, update them in the same commit.
+"""
+
+_RESEARCH_PRACTICE = """---
+name: research-practice
+description: Use when the work in a project is research on any topic, not only computer science — pinning down the question, gathering and weighing sources, keeping notes with citations, and maintaining a living summary — whether it is a single question or a long-running inquiry.
+---
+
+# Research practice
+
+For research on any subject: history, a technical field, a market, a hobby, a
+health question, a policy debate. It suits a single question and a long-running
+inquiry that grows over months. (Replicating one specific paper is a different
+job; that is `cleanvibe replicate`.)
+
+## Layout (create it when the research starts, not before)
+- `research/SUMMARY.md`: the living answer. What is known now, how sure, what
+  is contested, what is still open. Rewrite it as understanding changes; it
+  should always make sense read on its own.
+- `research/sources.md`: one entry per source, with the citation or link, date
+  accessed, what kind of source it is (primary data, peer-reviewed, reporting,
+  opinion, vendor material), what it contributes, and how far to trust it.
+- `research/notes/`: one Markdown file per sub-question, with every claim tied
+  to a source.
+- Downloads and datasets go in `data_lake/`; throwaway fetches go in `scratch/`.
+
+## How to work
+- **Pin the question down with the user first.** If it is vague, ask with
+  AskUserQuestion: what they want to know, why, how deep to go, and what would
+  count as an answer. Record it at the top of `SUMMARY.md`.
+- **Survey wide, then go deep.** First map the main positions and the key
+  sources; then dig into what matters for the user's question.
+- **Every claim gets a source.** Keep what a source says separate from your own
+  inference, and label the inference.
+- **Weigh sources rather than counting them.** Prefer primary and established
+  sources, note dates and conflicts of interest, and when sources disagree,
+  record both positions and what would settle it instead of averaging them.
+- **Say how sure you are**, in `SUMMARY.md` and when you report back: lead with
+  the answer, then the confidence, then the evidence.
+- **Long-running inquiries** get a dated "What changed" entry in `SUMMARY.md`
+  each session, so the user can see how the picture moved.
+- **Link, don't copy.** Quote briefly; never commit whole copyrighted texts.
 """
 
 _WRITING_STYLE = """---
@@ -143,6 +210,7 @@ SKILLS = {
     "cron-is-local": _CRON_IS_LOCAL,
     "autonomous-loop": _AUTONOMOUS_LOOP,
     "queue-driven-workflow": _QUEUE_DRIVEN_WORKFLOW,
+    "research-practice": _RESEARCH_PRACTICE,
     "writing-style": _WRITING_STYLE,
     "cleanvibe-update-check": _CLEANVIBE_UPDATE_CHECK,
 }

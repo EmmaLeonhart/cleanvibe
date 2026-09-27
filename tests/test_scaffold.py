@@ -183,9 +183,9 @@ class TestCreateProject(unittest.TestCase):
             )
 
     def test_claude_md_cron_lifecycle_mentions_start(self):
-        # v1.14.0: the three-cron lifecycle now lives in the autonomous-loop
-        # skill, vendored into .claude/skills/. It must still say to START the
-        # crons at the beginning of extensive work — not only kill/restart them.
+        # The three-cron loop lives in the vendored autonomous-loop skill.
+        # v2.0.0 rewrote it: no start/kill/restart choreography (agents read it
+        # as licence to switch the loop off); only the user stops the crons.
         with tempfile.TemporaryDirectory() as tmp:
             proj = Path(tmp) / "myproj"
             buf = io.StringIO()
@@ -194,17 +194,16 @@ class TestCreateProject(unittest.TestCase):
             content = (proj / ".claude" / "skills" / "autonomous-loop"
                        / "SKILL.md").read_text(encoding="utf-8")
         lower = content.lower()
-        self.assertIn("three-cron playbook", lower)
         self.assertIn("croncreate", lower)
-        # All three crons named.
-        self.assertIn("work-loop", lower)
-        self.assertIn("auto-flush", lower)
-        self.assertIn("status-report", lower)
-        # Mentions starting at the beginning, not only killing/restarting.
-        self.assertIn("start all three crons at the beginning", lower)
-        # The lifecycle still covers kill-on-refill and planning-mode disable.
-        self.assertIn("kill", lower)
-        self.assertIn("planning mode", lower)
+        # All three crons, staggered.
+        for schedule in ("3 * * * *", "15 * * * *", "42 * * * *"):
+            self.assertIn(schedule, content)
+        for name in ("**work,", "**flush,", "**status,"):
+            self.assertIn(name, lower)
+        # Only the user stops them; idle is fine; no kill choreography.
+        self.assertIn("do not turn the crons off yourself", lower)
+        self.assertIn("an idle tick is normal", lower)
+        self.assertNotRegex(lower, r"\bkill")  # ("skill" is fine)
 
     def test_claude_md_has_weekly_update_check_section(self):
         # v1.14.0: every generated CLAUDE.md carries a Skills pointer naming the

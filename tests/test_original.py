@@ -167,7 +167,7 @@ class TestOriginalScaffold(unittest.TestCase):
         self.assertIn("## Skills", claude)
         self.assertIn("autonomous-loop", claude)
         loop = (proj / ".claude" / "skills" / "autonomous-loop" / "SKILL.md").read_text(encoding="utf-8")
-        self.assertIn("three-cron playbook", loop.lower())
+        self.assertIn("do not turn the crons off yourself", loop.lower())
 
     def test_area_placeholder_when_absent(self):
         proj, _ = _make()  # no area

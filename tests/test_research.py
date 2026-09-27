@@ -163,7 +163,7 @@ class TestResearchScaffold(unittest.TestCase):
         self.assertIn("## Skills", claude)
         self.assertIn("autonomous-loop", claude)
         loop = (proj / ".claude" / "skills" / "autonomous-loop" / "SKILL.md").read_text(encoding="utf-8")
-        self.assertIn("three-cron playbook", loop.lower())
+        self.assertIn("do not turn the crons off yourself", loop.lower())
         stop = (proj / ".claude" / "skills" / "emergency-stop" / "SKILL.md").read_text(encoding="utf-8")
         self.assertIn("Emergency Stop Mode", stop)
 

@@ -1544,3 +1544,35 @@ agent (Claude Code runs them). What changed is the timing:
   `_add_legacy_parsers`; `build_parser()` is separate from `main()`.
 - Tests: new `tests/test_cli.py` (12). The 1.x CLI tests (research,
   original, chat, legacy-new prompt) now call `cleanvibe legacy ...`. 204 pass.
+
+## 2026-09-26 — v2 item 5: skills — a calmer autonomous loop, a general research practice
+
+- **`autonomous-loop` rewritten.** Emma: agents got anxious and switched the
+  hourly loop off. The old text had a start / kill-on-refill /
+  disable-in-planning / restart choreography, two items pinned to the queue's
+  tail, and "HARD RAILS" / "LOAD-BEARING DEFAULT" language. The new text keeps
+  the same three staggered crons (work :03, flush :15, status :42) and the same
+  standards. It drops the choreography and says plainly: do not turn the crons
+  off yourself (not for an empty queue, a failed tick, a replan or risk); only
+  the user stops them; an idle tick is normal; problems go in the next status
+  tick. Per Emma it is one loop for everything, legacy included.
+- **New `research-practice` skill** for research on any topic, not only CS
+  papers (Emma's complaint about `cleanvibe research`). It covers pinning the
+  question down with the user, surveying wide then going deep, `research/SUMMARY.md` as
+  a living answer with stated confidence and a dated "What changed" log for
+  long-running inquiries, `research/sources.md` with source type and trust,
+  claims tied to sources, and inference labelled as inference.
+- **`queue-driven-workflow`** is now framed as the development practice. In a
+  v2 project it creates `queue.md`/`todo.md`/`devlog.md` when the work turns
+  into a multi-step build. CI arrives once the project has a remote, since v2
+  repos start without one.
+- The Skills pointer in every generated CLAUDE.md lists seven skills.
+- **This repo:** vendored skills refreshed. The CLAUDE.md cron section is
+  rewritten to match. `queue.md` loses its old lifecycle header note and the
+  pinned "Always last" items.
+- Known and accepted: the frozen 1.x bootstrap queues (`legacy new`,
+  `research`, `original`) still describe the old start/kill choreography. Emma
+  said the loop is not split for legacy, and legacy may fit it less well.
+- Tests: `test_skills` expects seven skills. The cron tests now assert the new
+  invariants ("do not turn the crons off yourself", "an idle tick is normal",
+  no kill step) instead of the old wording. 204 pass.
