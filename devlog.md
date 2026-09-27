@@ -1909,4 +1909,11 @@ problem was being given too much context by accident, not having context.
   clauses, and the loop invariants (one `7,37` cron, the prompt, no flush or
   status, "do not turn the cron off yourself", the SUMMARY.md refill). 226 pass.
 
+## 2026-09-27 — Released v2.0.2; local cleanvibe upgraded
 
+CI green on `0fc4083` (6/6). Released **v2.0.2**; PyPI serves it; Emma's local
+`cleanvibe` is now 2.0.2. Checked with the installed command: a fresh project's
+`autonomous-loop` skill has the `7,37` cron, its intake script has the
+SOME ENGAGEMENT verdict, and doctor reports no drift. Sessions already running
+(chat-test, ai-history-analysis) keep the crons they set up under 2.0.1 until
+they are restarted or told to switch.

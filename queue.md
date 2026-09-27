@@ -6,9 +6,8 @@
 
 ## Active
 
-Emma's decisions (2026-09-27, after the case studies):
+_(empty — 2.0.2 released; see `devlog.md` and `docs/case-studies/`.)_
 
-1. **Ship it:** tests, `pages/updates.md` (full new skill text), release 2.0.2, upgrade the local install, note the outcome in case study 04.
 ---
 
 ## Pointers
