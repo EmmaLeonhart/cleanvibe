@@ -6,11 +6,7 @@
 
 ## Active
 
-**Fixes from the first unattended practice session** (`tests/scratch/cleanvibe-2026-09-26-2`; its own `FAILURES.md` + Emma's review, 2026-09-26 ~20:50). With no chat and no files, the intake still said "start the loop now", and the agent invented a "cleanvibe smoke test" purpose from where the folder sits on disk (`tests/scratch/`). Then it kept investigating after "Please don't". The path is sometimes useful but rarely. Her 10 PM run uses the installed cleanvibe, so the fixes ship as 2.0.1 before then.
-
-1. **Release 2.0.1 and upgrade the local install** before 10 PM.
-
-
+_(empty — 2.0.1 released; case studies 03 and 04 running, see `docs/case-studies/`.)_
 
 ---
 
