@@ -1466,3 +1466,35 @@ started from inside an agent therefore began life as that agent's child.
 - Tests: `tests/test_launch.py` (8); the old launcher tests moved there. 174
   pass. The real end-to-end check is item 9: launching Emma's practice session
   from this agent session.
+
+## 2026-09-26 — v2 item 2: the default project (`cleanvibe/project.py`)
+
+- `new_project(path, auto_named)` writes a minimal scaffold: `CLAUDE.md`,
+  `README.md`, `INTENT.md`, the `.cleanvibe.json` marker, `.gitignore` with
+  `scratch/`, `sessions/`, `data_lake/`, all skills, the session-log hooks and,
+  on Windows, `!runClaude.bat`. It makes a local git repo on `main` with no
+  remote and opens the first session with Remote Control on. There is
+  deliberately no `queue.md`/`todo.md`/`devlog.md`; `queue-driven-workflow`
+  adds them if the work turns into development.
+- **CLAUDE.md (v2):** ask with AskUserQuestion when unclear; keep `INTENT.md`
+  as a running analysis of what the user is trying to do (not a transcript);
+  minimal assumptions; practices come from skills once the work takes a shape
+  (`queue-driven-workflow`, `research-practice`, `autonomous-loop`); one-off
+  scripts go in the gitignored `scratch/`, so they cannot pile up as crud;
+  commit regularly, private, no remote unless asked; transcripts are saved by
+  the hook, and the agent reads `sessions/*.md` to catch up.
+- **Starting prompts:** `v2_first_prompt` says this is the first session in a
+  new cleanvibe project at <path>, that the directory name is the main clue
+  (or, when auto-named, that it says nothing because the user gave no name),
+  to open by asking a question based on the directory with AskUserQuestion,
+  and to keep `INTENT.md` updated. `v2_resume_prompt` says to catch up from
+  `INTENT.md`, the newest session log and `queue.md`, then check what this
+  session is for. A path containing a character cmd.exe would mangle is left
+  out rather than breaking the launch.
+- `is_cleanvibe_repo()` recognizes the v2 marker and 1.x projects (a CLAUDE.md
+  that mentions cleanvibe, plus `queue.md` or vendored skills).
+  `open_project()` resumes without popping an Explorer window.
+  `auto_project_path()` gives `cleanvibe-YYYY-MM-DD`, suffixed `-2`, `-3`.
+- Caught before commit: the `.bat` resume prompt read "project at . Catch up"
+  (empty path). Fixed, with a test.
+- Tests: `tests/test_project.py` (16). 190 pass.

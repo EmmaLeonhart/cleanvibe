@@ -3098,6 +3098,204 @@ B. **Run the status-report action once more, independently** — an end-of-sessi
 
 
 # ---------------------------------------------------------------------------
+# cleanvibe 2 (v2.0.0) — the default project
+#
+# Every session starts as a conversation with minimal assumptions. The agent
+# asks (AskUserQuestion) when the goal is unclear, keeps INTENT.md as its
+# running read of what the user is trying to do, and picks up development or
+# research practices from skills only once the work takes that shape.
+# Transcripts are saved into sessions/ by a hook, not by the agent. The repo is
+# private and local (no remote unless the user asks). Sessions always start as
+# real top-level sessions with Remote Control on (see cleanvibe/launch.py).
+# ---------------------------------------------------------------------------
+
+V2_MARKER = ".cleanvibe.json"
+
+
+def _prompt_safe(text: str) -> bool:
+    return not _PROMPT_UNSAFE.intersection(text)
+
+
+def _prompt_path(path) -> str:
+    """The project path for a starting prompt, or "" if cmd.exe would mangle it."""
+    text = str(path) if path else ""
+    return f" at {text}" if text and _prompt_safe(text) else ""
+
+
+def v2_first_prompt(path, auto_named: bool) -> str:
+    """Starting prompt for the very first session in a new cleanvibe 2 project."""
+    if auto_named:
+        clue = (
+            "I created it without giving a name, so the directory name was "
+            "generated and says nothing about the purpose: this one is completely "
+            "fresh."
+        )
+    else:
+        clue = (
+            "The directory name is the main clue to what it is for, so start from "
+            "it, but do not assume."
+        )
+    prompt = (
+        f"This is the first ever session in a new project I started with "
+        f"cleanvibe{_prompt_path(path)}. Nothing has been decided about what it is "
+        f"for yet. {clue} Work out the purpose with me through conversation: open "
+        f"by asking me a question based on the directory, using AskUserQuestion, "
+        f"and keep INTENT.md updated with your read of what I am trying to do. "
+        f"CLAUDE.md explains how this project works."
+    )
+    if not _prompt_safe(prompt):
+        raise ValueError("v2 first-session prompt has cmd-unsafe characters")
+    return prompt
+
+
+def v2_resume_prompt(path) -> str:
+    """Starting prompt when an existing cleanvibe project is reopened."""
+    prompt = (
+        f"This is a new session in an existing cleanvibe project{_prompt_path(path)}. "
+        f"Catch up before doing anything: read INTENT.md and the newest session "
+        f"log in sessions/ if they exist, and queue.md if there is one. Then check "
+        f"with me what we are doing in this session, using AskUserQuestion if it "
+        f"is not obvious."
+    )
+    if not _prompt_safe(prompt):
+        raise ValueError("v2 resume prompt has cmd-unsafe characters")
+    return prompt
+
+
+def v2_runclaude_bat(path) -> str:
+    """`!runClaude.bat`: reopen this project as a new session (resume prompt)."""
+    # %~dp0 is the .bat's own folder, so the prompt names no fixed path.
+    return (
+        '@echo off\ncd /d "%~dp0"\n'
+        f'claude "{v2_resume_prompt("")}" --remote-control\n'
+    )
+
+
+def v2_marker_json(project_name: str, auto_named: bool) -> str:
+    return json.dumps(
+        {
+            "cleanvibe": __version__,
+            "name": project_name,
+            "created": datetime.now().strftime("%Y-%m-%d"),
+            "auto_named": auto_named,
+        },
+        indent=2,
+    ) + "\n"
+
+
+V2_GITIGNORE = GITIGNORE.rstrip("\n") + """
+
+# One-off scripts, throwaway experiments and temporary downloads. Never
+# committed, so they cannot pile up as crud. Promote a script out of here only
+# once it will be run again.
+scratch/
+"""
+
+
+def v2_claude_md(project_name: str) -> str:
+    date = datetime.now().strftime("%Y-%m-%d")
+    return f"""# {project_name}
+
+> A cleanvibe project: an open-ended, git-tracked working conversation.
+
+## How this project works
+Nothing was decided up front about what this project is. It starts as a
+conversation, and the purpose is worked out with the user as it goes.
+
+- **Ask when unclear.** When you are not sure what the user wants (the goal, the
+  scope, what "done" looks like), ask with the AskUserQuestion tool rather than
+  guessing. A short multiple-choice question beats a long explanation. Ask again
+  whenever the direction shifts.
+- **Keep `INTENT.md` current.** It is your running analysis of what the user is
+  trying to accomplish: the goal as you understand it, what supports that
+  reading, open questions, and how sure you are. Update it when an answer or a
+  request changes your understanding. It is analysis, not a transcript; say so
+  when you are guessing.
+- **Minimal assumptions.** Do not set up plans, backlogs, directory structures
+  or tooling before the purpose is clear. Add structure when the work needs it.
+- **Practices come from skills.** Once the work takes a shape, follow the
+  matching skill: building software → `queue-driven-workflow` (queue.md,
+  todo.md, devlog.md, tests, CI); researching any topic → `research-practice`;
+  a long autonomous stretch → `autonomous-loop`. Use them when they apply, not
+  before.
+- **No crud.** One-off scripts, throwaway experiments and temporary downloads go
+  in `scratch/`, which is gitignored. Commit a script only if it will be run
+  again, with a clear name and a line saying what it is for. Delete what is no
+  longer used.
+- **Commit regularly**, with messages that say what changed and why. This repo is
+  private and local: it has no GitHub remote unless the user asks for one, and
+  then it is private (`gh repo create --private --source=. --push`).
+
+## Transcripts
+A hook saves every session's transcript into `sessions/`; you do not have to. After
+each response it refreshes `sessions/<date>_<session>.jsonl` (raw) and `.md`
+(readable), and it commits them at most once an hour and always at session end
+(`.claude/settings.json` → `.claude/hooks/save_session_log.py`). To catch up on
+earlier sessions, read the `.md` files, newest first. Do not edit `sessions/` by
+hand.
+
+## Files
+- `INTENT.md`: your running read of what this project is for.
+- `README.md`: for people; fill it in once the purpose is clear.
+- `sessions/`: session transcripts (automatic).
+- `data_lake/`: files the user drops in to work with.
+- `scratch/`: one-off work, gitignored.
+
+{SKILLS_POINTER}
+
+{BEHAVIOR_RULES}
+
+# currentDate
+Today's date is {date}.
+"""
+
+
+def v2_readme_md(project_name: str) -> str:
+    date = datetime.now().strftime("%Y-%m-%d")
+    return f"""# {project_name}
+
+> Started with [cleanvibe](https://github.com/EmmaLeonhart/cleanvibe) on {date}.
+> What it is for has not been written down yet; see `INTENT.md`.
+
+## Working on it
+
+Run `cleanvibe` in this folder (or double-click `!runClaude.bat` on Windows) to
+open a new Claude session here. It starts with Remote Control on, so you can
+continue from the Claude app or web. Earlier sessions are in `sessions/`.
+"""
+
+
+def v2_intent_md(project_name: str, auto_named: bool) -> str:
+    if auto_named:
+        clue = (
+            f"The project was created without a name (`{project_name}` was "
+            f"generated), so the directory says nothing about its purpose."
+        )
+    else:
+        clue = f"The only clue so far is the directory name, `{project_name}`."
+    return f"""# What this project is for
+
+_Maintained by Claude: a running read of what the user is trying to do. It is
+analysis, not a transcript, and it changes as understanding improves._
+
+## Current understanding
+
+Not known yet. {clue}
+
+## What supports it
+
+_Nothing yet._
+
+## Open questions
+
+- What is this project for?
+
+## Confidence
+
+None yet.
+"""
+
+# ---------------------------------------------------------------------------
 # `cleanvibe chat` (v1.18.0) — a git-tracked, agentic conversation on one topic
 #
 # Research-heavy, light on code, private repo. It opens as a conversation: the

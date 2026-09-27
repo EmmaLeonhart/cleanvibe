@@ -352,7 +352,10 @@ def _git_init(path: Path, message=None) -> None:
 
 
 def _launch_claude(
-    path: Path, prompt: str | None = None, remote_control: bool = False
+    path: Path,
+    prompt: str | None = None,
+    remote_control: bool = False,
+    show_folder: bool = True,
 ) -> None:
     """Launch Claude Code in the project directory as a top-level session.
 
@@ -361,4 +364,4 @@ def _launch_claude(
     See ``cleanvibe.launch`` for how it avoids becoming a child of a Claude
     session that ran cleanvibe.
     """
-    launch(path, prompt, remote_control)
+    launch(path, prompt, remote_control, show_folder)

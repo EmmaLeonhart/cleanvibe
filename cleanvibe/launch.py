@@ -76,15 +76,24 @@ def clean_env(environ=None) -> dict:
     return {k: v for k, v in environ.items() if not is_session_var(k)}
 
 
-def launch(path: Path, prompt: str | None = None, remote_control: bool = False) -> None:
-    """Start Claude Code in ``path`` as its own top-level session."""
+def launch(
+    path: Path,
+    prompt: str | None = None,
+    remote_control: bool = False,
+    show_folder: bool = True,
+) -> None:
+    """Start Claude Code in ``path`` as its own top-level session.
+
+    ``show_folder`` also opens the folder in Explorer (Windows only), as a new
+    project always has.
+    """
     path = Path(path)
     command = templates.claude_command(prompt, remote_control)
     env = clean_env()
     print(f"  Launching Claude Code...")
     try:
         if platform.system() == "Windows":
-            _launch_windows(path, command, env)
+            _launch_windows(path, command, env, show_folder)
         elif _has_tty():
             os.chdir(path)
             os.execvpe("claude", command, env)
@@ -105,8 +114,9 @@ def _has_tty() -> bool:
         return False
 
 
-def _launch_windows(path: Path, command: list, env: dict) -> None:
-    subprocess.Popen(["explorer", str(path)])
+def _launch_windows(path: Path, command: list, env: dict, show_folder: bool = True) -> None:
+    if show_folder:
+        subprocess.Popen(["explorer", str(path)])
     flags = _CREATE_NEW_CONSOLE | _CREATE_NEW_PROCESS_GROUP
     try:
         subprocess.Popen(
