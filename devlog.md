@@ -1830,3 +1830,17 @@ itself. After Emma arrived it investigated beyond the project, kept going after
   untitled one got no name, and Claude called it "Untitled cleanvibe project
   intake". Details and what to watch for are in `docs/case-studies/03-*` and
   `04-*`.
+
+## 2026-09-26 — Case studies 03 and 04: both 2.0.1 branches passed live
+
+- **03, untitled and empty:** the 21:43 intake reported NOTHING TO GO ON. The
+  agent recorded that in INTENT.md and did nothing else: no plan, no loop.
+  Same input as case 02, opposite outcome.
+- **04, chat-test:** Emma chatted from 21:14 to 21:22. The intake reported
+  SUBSTANTIAL engagement, so the loop was postponed to a one-time job at 22:43,
+  as designed. This was the first live run of that branch. Following her steer
+  ("with no strict instructions, the loop monologues and researches the
+  subject"), it planned research with `research-practice`.
+- Session inspection is now a reusable helper in the gitignored `scratch/`
+  (`inspect_session.py`: crons, verdict, user messages).
+- Details: `docs/case-studies/03-untitled-empty.md`, `04-chat-test.md`.

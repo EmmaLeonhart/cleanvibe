@@ -15,6 +15,16 @@
   Claude titled it "Untitled cleanvibe project intake".
 - It scheduled the intake at once: `43 21 26 9 *`, one-time, with the exact
   `[cleanvibe cron]` prompt.
-- **Next:** at 21:43 the intake should report **NOTHING TO GO ON** (no
-  material, no engagement, generated name). The test is whether the agent then
-  waits instead of planning and starting the loop.
+- 21:13: its first INTENT.md read was "nothing to go on yet" (`49949d9`). It
+  did not guess from the path.
+- **21:43: the intake ran** (`aa55c8a` snapshot, `071a905` move) and reported
+  **NOTHING TO GO ON**. The agent recorded "still nothing to go on" in
+  INTENT.md (`760fabe`) and stopped there: no plan, no `queue.md`, no work-loop
+  crons.
+
+## Result
+
+**Passed.** Same input as case 02 (empty, untitled, nobody talking), opposite
+outcome. It waited instead of inventing a purpose. Two things changed together,
+so this doesn't separate them: the location was neutral (not inside the
+cleanvibe repo), and 2.0.1's verdict no longer pushes toward "start".

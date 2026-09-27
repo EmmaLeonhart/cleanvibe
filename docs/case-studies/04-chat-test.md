@@ -15,5 +15,27 @@
   is what Emma looks for in the app.
 - It scheduled the intake: `43 21 26 9 *`, one-time. It then read the folder
   (listing, `.cleanvibe.json`, README, the `.bat`).
-- **Next:** Emma talks to it. At 21:43 the intake should see substantial
-  engagement and schedule the loop for about 22:43 instead of starting it.
+- 21:14–21:22: Emma talked to it (six messages). She told it this is a chat
+  test and asked what INTENT.md is. She said an earlier session "had really
+  poisoned context" but this one was "working better than I thought". Her key
+  steer: *there will be a work loop, but with no strict instructions or
+  project it should monologue and research the subject matter.* It updated
+  INTENT.md twice (`94eb706`, `a96ae0b`).
+- **21:43: the intake ran** (`021ede3`, `4922660`) and reported
+  **SUBSTANTIAL** engagement. As designed, it did not start the loop. It
+  scheduled a one-time job for **22:43** to start it. Following Emma's steer,
+  it loaded `research-practice` and planned research into how cleanvibe behaves
+  from low information (`1559848`: `queue.md`, `research/`).
+
+## Result so far
+
+**Passed.** Session name findable in the app; it followed the user's lead;
+the substantial-engagement branch postponed the loop by 60 minutes. That branch
+had only been tested by unit tests until now. Still to watch: the loop at
+22:43.
+
+## Design signal from Emma
+
+"No strict instructions" is not the same as "nothing to go on". With a subject
+in hand (here, the chat), the loop should research that subject rather than
+wait. Case 03 (no subject at all) is where waiting is right.
