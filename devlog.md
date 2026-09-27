@@ -1748,4 +1748,25 @@ would open it rather than overwrite. Dropping `brief.md` and running the intake
 script produced both commits and moved `brief.md` into `data_lake/`. Legacy
 names point to `cleanvibe legacy`. Nothing is left uncommitted in this repo.
 
+## 2026-09-26 — Live: the thirty-minute intake and work loop ran unattended
+
+The practice session `tests/scratch/cleanvibe-2026-09-26-2` (started at 19:33
+from this agent session, nobody interacting) did the whole v2 flow on its own:
+
+- **20:03:** the one-time cron fired. The agent ran
+  `.claude/scripts/data_lake_intake.py`, which made both commits (`384cafa`
+  snapshot, `ab97cdc` move; nothing had been dropped in, so nothing moved).
+- **20:04:** it read the report and the skills, settled its read of the purpose
+  (a smoke test of the flow, given an empty folder and a generated name),
+  created `queue.md`/`todo.md`/`devlog.md`/`FINDINGS.md` and committed
+  (`e7fa51c`).
+- The engagement verdict was "little or none", so it started the work loop
+  **immediately**: three recurring crons at `3 * * * *`, `15 * * * *` and
+  `42 * * * *` with `[cleanvibe cron]` prompts, per the rewritten
+  `autonomous-loop` skill. It then kept working its queue.
+
+That covers every step of the unattended path Emma's 10 PM run depends on, run
+by a real agent rather than a test. Not exercised live: the
+substantial-engagement branch (loop postponed 60 minutes), which is covered by
+the intake tests' verdict only.
 
