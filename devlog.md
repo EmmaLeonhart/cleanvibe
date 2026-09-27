@@ -1498,3 +1498,24 @@ started from inside an agent therefore began life as that agent's child.
 - Caught before commit: the `.bat` resume prompt read "project at . Catch up"
   (empty path). Fixed, with a test.
 - Tests: `tests/test_project.py` (16). 190 pass.
+
+## 2026-09-26 — v2 item 3: transcripts committed hourly by the hook, not the agent
+
+Emma wanted transcripts committed roughly every hour, non-agentically, by a
+background process rather than the agent. The hooks already run outside the
+agent (Claude Code runs them). What changed is the timing:
+
+- **Stop** (after every response): still copies the raw `.jsonl` and
+  re-renders the `.md`, so `sessions/` on disk is always current. It commits
+  only if the last commit touching `sessions/` is at least an hour old.
+  `CLEANVIBE_LOG_COMMIT_SECONDS` overrides the interval.
+- **SessionEnd** (`--push`): always commits, then pushes if there is an
+  upstream (v2 projects have none by default).
+- Anything else the agent commits with `git add -A` in between sweeps
+  `sessions/` in too, so nothing is lost; the hook's own commit then has
+  nothing left to do.
+- Commit message is now `session log <stem>` (was `chat: session log`),
+  because every v2 project uses the hook, not only chats.
+- Tests: `test_chat.py` hook tests now run with interval 0, plus two new ones.
+  Within the hour a Stop refreshes the files but does not commit; SessionEnd
+  always commits.

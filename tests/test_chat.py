@@ -156,11 +156,16 @@ def _transcript(path):
 
 
 class TestSessionLogHook(unittest.TestCase):
-    def _run_hook(self, proj, transcript, *args):
+    def _run_hook(self, proj, transcript, *args, interval="0"):
+        # interval=None leaves the default hourly throttle in place.
         payload = json.dumps({"session_id": "abcdef123456", "transcript_path": str(transcript)})
+        env = dict(os.environ)
+        env.pop("CLEANVIBE_LOG_COMMIT_SECONDS", None)
+        if interval is not None:
+            env["CLEANVIBE_LOG_COMMIT_SECONDS"] = interval
         return subprocess.run(
             [sys.executable, str(proj / ".claude/hooks/save_session_log.py"), *args],
-            input=payload, capture_output=True, text=True,
+            input=payload, capture_output=True, text=True, env=env,
         )
 
     def test_saves_renders_and_commits_only_sessions(self):
@@ -189,7 +194,7 @@ class TestSessionLogHook(unittest.TestCase):
         self.assertIn("**Answered:** Deep dive", text)
         self.assertIn("Also cover pu-erh", text)  # mid-turn message
 
-        self.assertIn("chat: session log 2026-09-26_abcdef12", _git(proj, "log", "-1", "--format=%s"))
+        self.assertIn("session log 2026-09-26_abcdef12", _git(proj, "log", "-1", "--format=%s"))
         committed = _git(proj, "show", "--name-only", "--format=", "HEAD").split()
         self.assertEqual(sorted(committed), [
             "sessions/2026-09-26_abcdef12.jsonl", "sessions/2026-09-26_abcdef12.md"])
@@ -203,6 +208,28 @@ class TestSessionLogHook(unittest.TestCase):
         before = _git(proj, "rev-parse", "HEAD")
         self._run_hook(proj, transcript)
         self.assertEqual(_git(proj, "rev-parse", "HEAD"), before)
+
+    def test_stop_commits_at_most_hourly(self):
+        # Fresh project: its initial commit just touched sessions/, so a Stop
+        # within the hour refreshes the files but does not commit them.
+        proj = _make()
+        transcript = Path(tempfile.mkdtemp()) / "t.jsonl"
+        _transcript(transcript)
+        before = _git(proj, "rev-parse", "HEAD")
+        result = self._run_hook(proj, transcript, interval=None)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertTrue((proj / "sessions" / "2026-09-26_abcdef12.md").is_file())
+        self.assertEqual(_git(proj, "rev-parse", "HEAD"), before)
+        self.assertIn("sessions/", _git(proj, "status", "--porcelain"))
+
+    def test_session_end_always_commits(self):
+        proj = _make()
+        transcript = Path(tempfile.mkdtemp()) / "t.jsonl"
+        _transcript(transcript)
+        before = _git(proj, "rev-parse", "HEAD")
+        self._run_hook(proj, transcript, "--push", interval=None)
+        self.assertNotEqual(_git(proj, "rev-parse", "HEAD"), before)
+        self.assertEqual(_git(proj, "status", "--porcelain", "--", "sessions"), "")
 
     def test_push_without_upstream_is_harmless(self):
         proj = _make()

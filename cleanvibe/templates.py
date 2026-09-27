@@ -3458,10 +3458,14 @@ def chat_settings_json() -> str:
 CHAT_SAVE_SESSION_LOG_PY = r'''#!/usr/bin/env python3
 """Save this Claude Code session's transcript into sessions/ and commit it.
 
-Written by `cleanvibe chat`. `.claude/settings.json` runs it on two hooks:
+Written by cleanvibe. `.claude/settings.json` runs it on two hooks, so saving
+the transcript never depends on the agent remembering to:
 
-* Stop (after every response): copy the transcript, render it, commit sessions/.
-* SessionEnd (with --push): the same, then push if the branch has an upstream.
+* Stop (after every response): copy the transcript and render it. Commit
+  sessions/ only if the last commit touching it is at least an hour old
+  (override with CLEANVIBE_LOG_COMMIT_SECONDS).
+* SessionEnd (with --push): copy, render and always commit, then push if the
+  branch has an upstream.
 
 Claude Code passes the hook input as JSON on stdin; `transcript_path` and
 `session_id` are the fields used here. For each session this writes
@@ -3474,14 +3478,17 @@ It never fails the hook: errors go to stderr and the exit code is always 0.
 """
 
 import json
+import os
 import re
 import shutil
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 SESSIONS = ROOT / "sessions"
+COMMIT_EVERY = 3600  # seconds between session-log commits during a session
 
 _REMINDER = re.compile(r"<system-reminder>.*?</system-reminder>", re.S)
 _TOOL_HINT_KEYS = ("description", "command", "file_path", "pattern", "query", "url", "prompt")
@@ -3598,13 +3605,31 @@ def _git(*args):
     )
 
 
-def commit(stem, push):
+def _commit_interval():
+    try:
+        return max(0, int(os.environ.get("CLEANVIBE_LOG_COMMIT_SECONDS", COMMIT_EVERY)))
+    except ValueError:
+        return COMMIT_EVERY
+
+
+def _due():
+    """True when the last commit touching sessions/ is at least the interval old."""
+    last = _git("log", "-1", "--format=%ct", "--", "sessions").stdout.strip()
+    if not last.isdigit():
+        return True
+    return time.time() - int(last) >= _commit_interval()
+
+
+def commit(stem, final):
+    """Commit sessions/ if it changed: hourly during a session, always at its end."""
+    if not final and not _due():
+        return
     _git("add", "--", "sessions")
     if _git("diff", "--cached", "--quiet", "--", "sessions").returncode != 0:
-        done = _git("commit", "-q", "-m", f"chat: session log {stem}", "--", "sessions")
+        done = _git("commit", "-q", "-m", f"session log {stem}", "--", "sessions")
         if done.returncode != 0:
             print(f"save_session_log: commit failed: {done.stderr.strip()}", file=sys.stderr)
-    if push and _git("rev-parse", "--abbrev-ref", "@{u}").returncode == 0:
+    if final and _git("rev-parse", "--abbrev-ref", "@{u}").returncode == 0:
         pushed = _git("push", "-q")
         if pushed.returncode != 0:
             print(f"save_session_log: push failed: {pushed.stderr.strip()}", file=sys.stderr)
@@ -3616,7 +3641,8 @@ def main(argv):
         if not hook.get("transcript_path"):
             return 0
         stem = save(hook)
-        commit(stem, push="--push" in argv)
+        # --push is what SessionEnd passes (the name predates the hourly throttle).
+        commit(stem, final="--push" in argv)
     except Exception as exc:  # never break the session over a log
         print(f"save_session_log: {exc}", file=sys.stderr)
     return 0
