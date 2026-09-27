@@ -92,8 +92,8 @@ These are how the work is done, not reasons to stop the loop.
   the next status tick and carry on with whatever is still safe to do.
 - If the queue is replanned mid-session, leave the crons alone; the next work
   tick picks up the new top item.
-- Not sure the user wants the loop at all? Ask with AskUserQuestion rather than
-  starting or stopping it on a guess.
+- In a cleanvibe project, the thirty-minute intake in CLAUDE.md decides when
+  the loop starts. Elsewhere, start it when the user asks for autonomous work.
 
 **Why:** long autonomous stretches usually fail by quietly losing the thread.
 The work tick keeps progress steady and committed, the flush makes sure nothing
@@ -160,9 +160,11 @@ job; that is `cleanvibe replicate`.)
 - Downloads and datasets go in `data_lake/`; throwaway fetches go in `scratch/`.
 
 ## How to work
-- **Pin the question down with the user first.** If it is vague, ask with
-  AskUserQuestion: what they want to know, why, how deep to go, and what would
-  count as an answer. Record it at the top of `SUMMARY.md`.
+- **Pin the question down.** If the user is here and replying, ask them
+  (AskUserQuestion is fine then): what they want to know, why, how deep to go,
+  and what would count as an answer. If they are not, infer the question from
+  the chat, the material in `data_lake/` and the project name, write it at the
+  top of `SUMMARY.md` as a stated assumption, and start.
 - **Survey wide, then go deep.** First map the main positions and the key
   sources; then dig into what matters for the user's question.
 - **Every claim gets a source.** Keep what a source says separate from your own

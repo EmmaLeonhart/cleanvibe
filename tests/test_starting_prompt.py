@@ -19,7 +19,7 @@ class TestStartingPrompt(unittest.TestCase):
             self.assertIn("started with cleanvibe", prompt)
             self.assertIn(f"({mode} mode)", prompt)
             self.assertIn("queue.md", prompt)
-            self.assertIn("AskUserQuestion", prompt)
+            self.assertIn("make a reasonable assumption", prompt)
 
     def test_prompts_are_cmd_safe_single_line(self):
         for mode in templates._MODE_SUMMARIES:

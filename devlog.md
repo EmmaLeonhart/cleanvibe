@@ -1643,3 +1643,61 @@ Until it is answered there is no transcript and no Remote Control. The earlier
   -s tests` does not import `tests/__init__.py`. Checked: the real
   `~/.claude.json` hash is identical before and after the full suite. 215
   pass.
+
+## 2026-09-26 — v2: low-information operation and the thirty-minute intake
+
+Emma's 7:15 PM spec, for a scheduled job that runs cleanvibe unattended at
+10 PM (research on the history of AI). cleanvibe sessions assume a human may be
+there but must work from low information and cope with nobody being there.
+
+- **First-session prompt** (the one message cleanvibe can put straight in front
+  of the agent) now carries the operating instructions. The project works from
+  low information; the user may say nothing or be away. Read CLAUDE.md, then
+  immediately CronCreate the one-time thirty-minute intake. Then look at the
+  folder, write a first read into INTENT.md, commit, and say briefly what it
+  sees and plans. AskUserQuestion only if the user is clearly there and
+  replying.
+- **CLAUDE.md (v2)**: the chat comes first, then what is in the folder (specs or
+  instructions in the data lake are followed unless the chat says otherwise),
+  then the directory name (sometimes enough, usually a hint). New "The data lake"
+  rule: material goes into `data_lake/` and is committed as part of the
+  repository's history; stray material is committed where it landed first,
+  then `git mv`'d in. New "Thirty-minute intake" section with the exact cron
+  (one-time, pinned local time, `[cleanvibe cron]` prompt) and five steps: run
+  the intake script; investigate `data_lake/` thoroughly; update INTENT.md;
+  plan into queue.md/todo.md with the matching skill (low information is the
+  normal case, not a reason to wait); start the work loop now if engagement was
+  little or none, otherwise one-shot it 60 minutes later (90 minutes in).
+- **`.claude/scripts/data_lake_intake.py`** (stdlib, committed in every v2
+  project; `templates.V2_INTAKE_PY`) does the mechanical part without
+  judgment. Commit 1: "Intake: the repository 30 minutes in, before moving into
+  data_lake/", with everything as found. Commit 2: "Intake: move uncommitted
+  material into data_lake/", which `git mv`s every top-level entry that had
+  never been committed, except the project's own files and workflow
+  directories. It then prints a report: the moves, the data-lake file list, and
+  user engagement counted from `sessions/*.jsonl`. cleanvibe's own prompts and
+  `[cleanvibe cron]` messages are not counted. The verdict is substantial at 2+
+  messages or 300+ characters. It records `intake_at` in `.cleanvibe.json` and
+  runs once. The resume prompt reschedules it if the first session ended early.
+- Resume prompt: no AskUserQuestion. It says to tell the user where things
+  stand, follow their lead if they reply, and carry on with the planned work if
+  they don't.
+- doctor's v2 file set includes the intake script.
+- Tests: 5 end-to-end intake tests (real git: drops at the top level, a new
+  directory, a file already in data_lake/, an edited README; both commits and
+  their contents; runs once; engagement verdicts both ways; agent work
+  committed before intake stays put), plus updated prompt/CLAUDE.md tests.
+
+## 2026-09-26 — AskUserQuestion only when the user is clearly present
+
+Emma is leaning away from AskUserQuestion: use it only when the user is
+clearly present and replying; otherwise decide and write the assumption down.
+Applied to the v2 CLAUDE.md and prompts (above). The `research-practice` skill
+now infers the question from chat, data lake and name when the user is away,
+recording it as an assumption. In `autonomous-loop`, the "ask whether to start
+the loop" line is replaced: in a cleanvibe project the intake decides. The 1.x
+starting-prompt tail is now "if I am here, ask me; if not, make a reasonable
+assumption and write it down". This repo's vendored skills are refreshed.
+220 tests pass.
+
+

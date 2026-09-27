@@ -414,8 +414,9 @@ def starting_prompt(mode: str) -> str:
     prompt = (
         f"This project was started with cleanvibe ({mode} mode): "
         f"{_MODE_SUMMARIES[mode]} Read CLAUDE.md and queue.md, then work the "
-        f"first item in queue.md. If it is unclear what I am trying to do, ask "
-        f"me with AskUserQuestion before planning anything."
+        f"first item in queue.md. If it is unclear what I am trying to do and I "
+        f"am here, ask me; if I am not, make a reasonable assumption and write it "
+        f"down."
     )
     bad = _PROMPT_UNSAFE.intersection(prompt)
     if bad:
@@ -3123,25 +3124,33 @@ def _prompt_path(path) -> str:
 
 
 def v2_first_prompt(path, auto_named: bool) -> str:
-    """Starting prompt for the very first session in a new cleanvibe 2 project."""
+    """Starting prompt for the very first session in a new cleanvibe 2 project.
+
+    This is the one message cleanvibe can put directly in front of the agent,
+    so it carries the operating instructions, not only a greeting.
+    """
     if auto_named:
         clue = (
             "I created it without giving a name, so the directory name was "
-            "generated and says nothing about the purpose: this one is completely "
-            "fresh."
+            "generated and says nothing about the purpose."
         )
     else:
         clue = (
-            "The directory name is the main clue to what it is for, so start from "
-            "it, but do not assume."
+            "The directory name is a clue to the purpose, sometimes enough to "
+            "start from, but do not over-read it."
         )
     prompt = (
         f"This is the first ever session in a new project I started with "
-        f"cleanvibe{_prompt_path(path)}. Nothing has been decided about what it is "
-        f"for yet. {clue} Work out the purpose with me through conversation: open "
-        f"by asking me a question based on the directory, using AskUserQuestion, "
-        f"and keep INTENT.md updated with your read of what I am trying to do. "
-        f"CLAUDE.md explains how this project works."
+        f"cleanvibe{_prompt_path(path)}. cleanvibe projects are built to work from "
+        f"low information: I may say little or nothing, and I may not be here at "
+        f"all. {clue} Read CLAUDE.md first. Then, before anything else, use "
+        f"CronCreate to schedule the one-time Thirty-minute intake exactly as "
+        f"CLAUDE.md describes, for 30 minutes from now. Then look at everything "
+        f"already in the folder, write your first read of the purpose into "
+        f"INTENT.md, commit, and tell me briefly what you see and what you plan. "
+        f"Only use AskUserQuestion if I am clearly here and replying. If I say "
+        f"nothing, the intake assumes I am away and starts autonomous work from "
+        f"what is in the folder."
     )
     if not _prompt_safe(prompt):
         raise ValueError("v2 first-session prompt has cmd-unsafe characters")
@@ -3152,10 +3161,11 @@ def v2_resume_prompt(path) -> str:
     """Starting prompt when an existing cleanvibe project is reopened."""
     prompt = (
         f"This is a new session in an existing cleanvibe project{_prompt_path(path)}. "
-        f"Catch up before doing anything: read INTENT.md and the newest session "
-        f"log in sessions/ if they exist, and queue.md if there is one. Then check "
-        f"with me what we are doing in this session, using AskUserQuestion if it "
-        f"is not obvious."
+        f"Catch up before doing anything: read CLAUDE.md, INTENT.md and the newest "
+        f"session log in sessions/, and queue.md if there is one. If the "
+        f"Thirty-minute intake in CLAUDE.md has not run yet, schedule it again. "
+        f"Then tell me briefly where things stand. If I reply, follow my lead; if "
+        f"I say nothing, carry on with the work already planned."
     )
     if not _prompt_safe(prompt):
         raise ValueError("v2 resume prompt has cmd-unsafe characters")
@@ -3196,35 +3206,89 @@ def v2_claude_md(project_name: str) -> str:
     date = datetime.now().strftime("%Y-%m-%d")
     return f"""# {project_name}
 
-> A cleanvibe project: an open-ended, git-tracked working conversation.
+> A cleanvibe project: an open-ended, git-tracked working session.
 
 ## How this project works
-Nothing was decided up front about what this project is. It starts as a
-conversation, and the purpose is worked out with the user as it goes.
+Nothing was decided up front about what this project is. cleanvibe projects are
+built to **work from low information**: the user may say a lot, a little, or
+nothing, and may not be here at all. Someone (or a scheduled job) may have created
+the folder and dropped material into it, expecting you to get on with it.
 
-- **Ask when unclear.** When you are not sure what the user wants (the goal, the
-  scope, what "done" looks like), ask with the AskUserQuestion tool rather than
-  guessing. A short multiple-choice question beats a long explanation. Ask again
-  whenever the direction shifts.
+- **The chat comes first.** Anything the user says in the conversation takes
+  priority over everything else.
+- **Then what is in the folder.** Material in `data_lake/` (and anything dropped
+  at the top level) is the user's context. Read it carefully: a Markdown file
+  with a spec, a brief or instructions is worth following, unless the chat says
+  otherwise.
+- **Then the directory name.** Sometimes it is enough to start from; usually it
+  is only a hint. Don't over-read it.
 - **Keep `INTENT.md` current.** It is your running analysis of what the user is
   trying to accomplish: the goal as you understand it, what supports that
-  reading, open questions, and how sure you are. Update it when an answer or a
-  request changes your understanding. It is analysis, not a transcript; say so
-  when you are guessing.
-- **Minimal assumptions.** Do not set up plans, backlogs, directory structures
-  or tooling before the purpose is clear. Add structure when the work needs it.
+  reading (chat, files, name), open questions, and how sure you are. Update it
+  when your understanding changes. When you have to assume, write the
+  assumption down there and carry on.
+- **AskUserQuestion only when the user is clearly here.** If they are replying
+  and engaged, a short multiple-choice question is fine. If they are not, don't
+  stop to ask: decide, record the assumption in `INTENT.md`, and keep working.
 - **Practices come from skills.** Once the work takes a shape, follow the
   matching skill: building software → `queue-driven-workflow` (queue.md,
   todo.md, devlog.md, tests, CI); researching any topic → `research-practice`;
-  a long autonomous stretch → `autonomous-loop`. Use them when they apply, not
-  before.
+  long autonomous stretches → `autonomous-loop`.
 - **No crud.** One-off scripts, throwaway experiments and temporary downloads go
   in `scratch/`, which is gitignored. Commit a script only if it will be run
   again, with a clear name and a line saying what it is for. Delete what is no
   longer used.
-- **Commit regularly**, with messages that say what changed and why. This repo is
-  private and local: it has no GitHub remote unless the user asks for one, and
-  then it is private (`gh repo create --private --source=. --push`).
+- **Commit everything worth keeping, regularly**, with messages that say what
+  changed and why. This repo is private and local: it has no GitHub remote unless
+  the user asks for one, and then it is private
+  (`gh repo create --private --source=. --push`).
+
+## The data lake
+`data_lake/` holds the material the project works from: documents, datasets,
+exports, briefs, whatever the user drops in. **Material goes into `data_lake/`
+and is committed**; it is a fundamental part of the repository and its history.
+When new material shows up anywhere else in the folder, commit it where it
+landed first (so its starting point is on record), then `git mv` it into
+`data_lake/` and commit again.
+
+## Thirty-minute intake (first session only)
+In the very first session, before anything else, schedule this with
+`CronCreate`: a one-time job (`recurring: false`) at the local time 30 minutes
+from now, with minute, hour, day and month pinned, and this prompt:
+
+    [cleanvibe cron] Thirty-minute intake: follow the Thirty-minute intake section of CLAUDE.md, steps 1-5.
+
+When it fires, do this:
+
+1. **Run** `python .claude/scripts/data_lake_intake.py` (`python3` on macOS/Linux).
+   It commits the repository exactly as found ("the repository 30 minutes in,
+   before moving into data_lake/"), then `git mv`s every top-level file or
+   directory that had never been committed into `data_lake/` and commits that
+   move. It prints a report: what moved, what is in `data_lake/`, and how much
+   the user has said so far. It runs only once; it records `intake_at` in
+   `.cleanvibe.json`.
+2. **Investigate `data_lake/` thoroughly.** Read everything. Look especially for
+   specs, briefs, outlines or instructions. Put that together with the chat and
+   the directory name.
+3. **Update `INTENT.md`** with what the project is for, the evidence, and your
+   confidence. Commit.
+4. **If the purpose is clear enough to act on, plan it.** Use the matching skill
+   (`research-practice` for research, `queue-driven-workflow` for building) to
+   put concrete first steps into `queue.md` / `todo.md`. Commit. If it is not
+   clear, write down the best interpretation you can in `INTENT.md` and plan
+   that; low information is the normal case here, not a reason to wait.
+5. **Start the work loop** (the `autonomous-loop` skill), depending on the
+   report's verdict:
+   - **Little or no user engagement:** assume the user is away and that the
+     folder holds the context they meant to give. Start the loop now.
+   - **Substantial engagement:** the user is steering, so don't take over yet.
+     Schedule another one-time `CronCreate` job 60 minutes from now with the
+     prompt `[cleanvibe cron] Start the work loop: follow step 5 of the
+     Thirty-minute intake in CLAUDE.md.`, and start the loop when it fires,
+     unless the user has asked you not to by then.
+
+If the first session ended before the intake ran (`.cleanvibe.json` has no
+`intake_at`), the next session schedules it again.
 
 ## Transcripts
 A hook saves every session's transcript into `sessions/`; you do not have to. After
@@ -3236,10 +3300,11 @@ hand.
 
 ## Files
 - `INTENT.md`: your running read of what this project is for.
+- `data_lake/`: the material the project works from (committed).
 - `README.md`: for people; fill it in once the purpose is clear.
 - `sessions/`: session transcripts (automatic).
-- `data_lake/`: files the user drops in to work with.
 - `scratch/`: one-off work, gitignored.
+- `.claude/scripts/data_lake_intake.py`: the thirty-minute intake.
 
 {SKILLS_POINTER}
 
@@ -3650,4 +3715,211 @@ def main(argv):
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))
+'''
+
+
+# The thirty-minute intake every cleanvibe 2 project commits at
+# .claude/scripts/data_lake_intake.py. A plain raw string (no Template/f-string).
+V2_INTAKE_PY = r'''#!/usr/bin/env python3
+"""Thirty-minute data-lake intake for a cleanvibe project.
+
+The first session schedules this for 30 minutes after it starts (see CLAUDE.md,
+"Thirty-minute intake"). It runs once and does the mechanical part without
+judgment, so the history is exact:
+
+1. Commit everything in the repository as it is found: "the repository 30
+   minutes in, before moving into data_lake/". This records where every file
+   the user dropped in started out.
+2. `git mv` each top-level file or directory that had never been committed
+   (the user's drops, new directories), except the project's own files, into
+   `data_lake/`, and commit that move on its own.
+3. Print a report for the agent: the two commits, what moved where, the files
+   now in `data_lake/`, and how much the user has said in the chat so far
+   (counted from the transcripts in `sessions/`).
+
+It records `intake_at` in `.cleanvibe.json` and does nothing on later runs.
+Stdlib only. Exit code 0 on success, 1 if a git step failed.
+"""
+
+import json
+import subprocess
+import sys
+from datetime import datetime
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+MARKER = ROOT / ".cleanvibe.json"
+LAKE = "data_lake"
+
+# The project's own files and directories: never moved into the data lake.
+KEEP = {
+    ".git", ".claude", ".cleanvibe.json", ".gitignore", "!runClaude.bat",
+    "CLAUDE.md", "README.md", "INTENT.md",
+    "sessions", LAKE, "scratch",
+    "queue.md", "todo.md", "devlog.md", "research",
+}
+
+# Messages that come from cleanvibe itself, not from the user.
+_NOT_USER = (
+    "[cleanvibe",
+    "This is the first ever session in a new project",
+    "This is a new session in an existing cleanvibe project",
+)
+SUBSTANTIAL_MESSAGES = 2
+SUBSTANTIAL_CHARS = 300
+
+
+def git(*args):
+    return subprocess.run(["git", *args], cwd=ROOT, capture_output=True, text=True)
+
+
+def fail(step, result):
+    print(f"data_lake_intake: {step} failed: {result.stderr.strip() or result.stdout.strip()}")
+    sys.exit(1)
+
+
+def load_marker():
+    try:
+        return json.loads(MARKER.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        return {}
+
+
+def never_committed_entries():
+    """Top-level entries with nothing tracked under them, minus KEEP."""
+    status = git("status", "--porcelain", "-uall", "-z")
+    if status.returncode != 0:
+        fail("git status", status)
+    tops = set()
+    records = status.stdout.split("\0")
+    i = 0
+    while i < len(records):
+        rec = records[i]
+        i += 1
+        if len(rec) < 4:
+            continue
+        code, path = rec[:2], rec[3:]
+        if code[0] in "RC":  # rename/copy: the next record is the old path
+            i += 1
+        tops.add(path.split("/")[0])
+    out = []
+    for top in sorted(tops):
+        if top in KEEP:
+            continue
+        if git("ls-files", "--", top).stdout.strip():
+            continue  # something under it is already committed: leave it
+        out.append(top)
+    return out
+
+
+def _text(entry):
+    if entry.get("type") == "attachment":
+        att = entry.get("attachment") or {}
+        return att.get("prompt", "") if att.get("type") == "queued_command" else ""
+    if entry.get("type") != "user" or entry.get("isMeta"):
+        return ""
+    content = (entry.get("message") or {}).get("content")
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        return "\n".join(b.get("text", "") for b in content
+                         if isinstance(b, dict) and b.get("type") == "text")
+    return ""
+
+
+def engagement():
+    """(messages, characters) the user sent, from sessions/*.jsonl."""
+    messages = chars = 0
+    for log in sorted((ROOT / "sessions").glob("*.jsonl")):
+        try:
+            lines = log.read_text(encoding="utf-8").splitlines()
+        except (OSError, UnicodeDecodeError):
+            continue
+        for line in lines:
+            try:
+                text = _text(json.loads(line)).strip()
+            except ValueError:
+                continue
+            if not text or text.startswith("<") or text.startswith(_NOT_USER):
+                continue
+            messages += 1
+            chars += len(text)
+    return messages, chars
+
+
+def free_name(name):
+    dest = Path(LAKE) / name
+    n = 2
+    while (ROOT / dest).exists():
+        stem, dot, ext = name.partition(".")
+        dest = Path(LAKE) / (f"{stem}-{n}{dot}{ext}" if dot and stem else f"{name}-{n}")
+        n += 1
+    return dest.as_posix()
+
+
+def main():
+    marker = load_marker()
+    if marker.get("intake_at"):
+        print(f"Intake already done at {marker['intake_at']}; nothing to do.")
+        return 0
+
+    moving = never_committed_entries()
+    messages, chars = engagement()
+
+    git("add", "-A")
+    first = None
+    if git("diff", "--cached", "--quiet").returncode != 0:
+        body = "\n".join(f"- {name}" for name in moving) or "- (no new top-level files)"
+        done = git("commit", "-q", "-m",
+                   "Intake: the repository 30 minutes in, before moving into data_lake/\n\n"
+                   "Everything as found, so each file's starting point is recorded.\n"
+                   "Not yet committed before this, to be moved next:\n" + body)
+        if done.returncode != 0:
+            fail("first commit", done)
+        first = git("rev-parse", "--short", "HEAD").stdout.strip()
+
+    moves = []
+    (ROOT / LAKE).mkdir(exist_ok=True)
+    for name in moving:
+        dest = free_name(name)
+        moved = git("mv", "--", name, dest)
+        if moved.returncode != 0:
+            fail(f"git mv {name}", moved)
+        moves.append((name, dest))
+
+    marker["intake_at"] = datetime.now().isoformat(timespec="seconds")
+    MARKER.write_text(json.dumps(marker, indent=2) + "\n", encoding="utf-8")
+    git("add", "--", MARKER.name)
+    body = "\n".join(f"- {a} -> {b}" for a, b in moves) or "- (nothing to move)"
+    done = git("commit", "-q", "-m", "Intake: move uncommitted material into data_lake/\n\n" + body)
+    if done.returncode != 0:
+        fail("move commit", done)
+    second = git("rev-parse", "--short", "HEAD").stdout.strip()
+
+    lake_files = [p for p in git("ls-files", "--", LAKE).stdout.splitlines()
+                  if not p.endswith(".gitkeep")]
+    substantial = messages >= SUBSTANTIAL_MESSAGES or chars >= SUBSTANTIAL_CHARS
+
+    print("# Thirty-minute intake report\n")
+    print(f"- Snapshot commit: {first or '(nothing new to commit)'}")
+    print(f"- Move commit: {second}")
+    print(f"- Moved into {LAKE}/: " + (", ".join(f"{a} -> {b}" for a, b in moves) or "nothing"))
+    print(f"- Files in {LAKE}/ ({len(lake_files)}):")
+    for path in lake_files[:200]:
+        print(f"  - {path}")
+    if len(lake_files) > 200:
+        print(f"  - ... and {len(lake_files) - 200} more")
+    print(f"- User engagement so far: {messages} message(s), {chars} characters "
+          f"(not counting cleanvibe's own prompts)")
+    if substantial:
+        print("- Verdict: SUBSTANTIAL engagement. The user is steering: schedule the "
+              "work loop to start in 60 minutes rather than now.")
+    else:
+        print("- Verdict: LITTLE OR NO engagement. Assume the user is away and that the "
+              "folder holds the context they meant to give: start the work loop now.")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
 '''

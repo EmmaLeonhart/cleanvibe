@@ -73,6 +73,7 @@ def new_project(
             "sessions/.gitkeep", "data_lake/.gitkeep",
             ".claude/settings.json (session-log hooks)",
             ".claude/hooks/save_session_log.py",
+            ".claude/scripts/data_lake_intake.py",
             f".claude/skills/ ({len(skills.SKILLS)} skills)",
         ):
             print(f"[dry-run] Would write: {path / rel}")
@@ -99,6 +100,9 @@ def new_project(
     hooks = path / ".claude" / "hooks"
     hooks.mkdir(parents=True, exist_ok=True)
     _write(hooks / "save_session_log.py", templates.CHAT_SAVE_SESSION_LOG_PY)
+    scripts = path / ".claude" / "scripts"
+    scripts.mkdir(parents=True, exist_ok=True)
+    _write(scripts / "data_lake_intake.py", templates.V2_INTAKE_PY)
 
     if is_windows:
         _write(path / "!runClaude.bat", templates.v2_runclaude_bat(path))

@@ -44,7 +44,8 @@ class TestNewProject(unittest.TestCase):
         proj = _new()
         for rel in ("CLAUDE.md", "README.md", "INTENT.md", ".cleanvibe.json",
                     ".gitignore", "sessions/.gitkeep", "data_lake/.gitkeep",
-                    ".claude/settings.json", ".claude/hooks/save_session_log.py"):
+                    ".claude/settings.json", ".claude/hooks/save_session_log.py",
+                    ".claude/scripts/data_lake_intake.py"):
             self.assertTrue((proj / rel).is_file(), rel)
         for slug in skills.SKILLS:
             self.assertTrue((proj / ".claude/skills" / slug / "SKILL.md").is_file(), slug)
@@ -82,7 +83,11 @@ class TestNewProject(unittest.TestCase):
 
     def test_claude_md_rules(self):
         claude = (_new() / "CLAUDE.md").read_text(encoding="utf-8")
-        for needle in ("AskUserQuestion", "INTENT.md", "Minimal assumptions",
+        for needle in ("work from low information", "The chat comes first",
+                       "INTENT.md", "AskUserQuestion only when the user is clearly here",
+                       "Material goes into `data_lake/`", "Thirty-minute intake",
+                       "recurring: false", "data_lake_intake.py",
+                       "Little or no user engagement", "60 minutes from now",
                        "queue-driven-workflow", "research-practice", "autonomous-loop",
                        "scratch/", "gh repo create --private", "sessions/",
                        "Not-done taxonomy"):
@@ -146,7 +151,12 @@ class TestV2Prompts(unittest.TestCase):
             self.assertIn("AskUserQuestion", prompt)
             self.assertIn("INTENT.md", prompt)
         self.assertIn("at /home/e/oolong", named)
-        self.assertIn("directory name is the main clue", named)
+        self.assertIn("directory name is a clue", named)
+        for prompt in (named, auto):
+            self.assertIn("low information", prompt)
+            self.assertIn("CronCreate", prompt)
+            self.assertIn("Thirty-minute intake", prompt)
+            self.assertIn("Only use AskUserQuestion if I am clearly here", prompt)
         self.assertIn("without giving a name", auto)
 
     def test_prompts_are_cmd_safe(self):
@@ -166,6 +176,95 @@ class TestV2Prompts(unittest.TestCase):
         # The .bat names no path (%~dp0 is its folder): no dangling " at ".
         self.assertIn("existing cleanvibe project. Catch up", bat)
         self.assertTrue(bat.rstrip().endswith("--remote-control"))
+
+
+def _run_intake(proj):
+    import sys
+    return subprocess.run(
+        [sys.executable, str(proj / ".claude/scripts/data_lake_intake.py")],
+        capture_output=True, text=True,
+    )
+
+
+def _log(proj, *messages):
+    """A transcript in sessions/: cleanvibe's own prompt, then user messages."""
+    entries = [{"type": "user", "message": {"role": "user", "content":
+                templates.v2_first_prompt(proj, True)}},
+               {"type": "user", "message": {"role": "user", "content":
+                "[cleanvibe cron] Thirty-minute intake: follow CLAUDE.md"}}]
+    entries += [{"type": "user", "message": {"role": "user", "content": m}} for m in messages]
+    (proj / "sessions" / "2026-09-26_abc.jsonl").write_text(
+        "\n".join(json.dumps(e) for e in entries) + "\n", encoding="utf-8")
+
+
+class TestThirtyMinuteIntake(unittest.TestCase):
+    def setUp(self):
+        self.proj = _new("ai-history")
+        # The user drops material in: a loose brief, a new folder, a file
+        # straight into data_lake/, and an edit to a tracked file.
+        (self.proj / "brief.md").write_text("# Research the history of AI\n", encoding="utf-8")
+        (self.proj / "papers").mkdir()
+        (self.proj / "papers" / "turing-1950.txt").write_text("computing machinery", encoding="utf-8")
+        (self.proj / "data_lake" / "notes.txt").write_text("already here", encoding="utf-8")
+        with open(self.proj / "README.md", "a", encoding="utf-8") as fh:
+            fh.write("\nedited by the user\n")
+
+    def test_snapshot_then_move_then_report(self):
+        before = _git(self.proj, "rev-parse", "HEAD").strip()
+        result = _run_intake(self.proj)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        subjects = _git(self.proj, "log", "--format=%s", f"{before}..HEAD").splitlines()
+        self.assertEqual(subjects, [
+            "Intake: move uncommitted material into data_lake/",
+            "Intake: the repository 30 minutes in, before moving into data_lake/",
+        ])
+        # The snapshot commit holds every file where it was found.
+        snap = _git(self.proj, "show", "--name-only", "--format=", "HEAD~1").split()
+        for path in ("brief.md", "papers/turing-1950.txt", "data_lake/notes.txt", "README.md"):
+            self.assertIn(path, snap)
+        # The move commit moved only the never-committed top-level entries.
+        tracked = _git(self.proj, "ls-files").split()
+        for path in ("data_lake/brief.md", "data_lake/papers/turing-1950.txt", "data_lake/notes.txt"):
+            self.assertIn(path, tracked)
+        for path in ("brief.md", "papers/turing-1950.txt"):
+            self.assertNotIn(path, tracked)
+        for path in ("README.md", "CLAUDE.md", "INTENT.md", ".cleanvibe.json"):
+            self.assertIn(path, tracked)
+        self.assertEqual(_git(self.proj, "status", "--porcelain").strip(), "")
+        self.assertIn("data_lake/papers/turing-1950.txt", result.stdout)
+        self.assertIn("intake_at", (self.proj / ".cleanvibe.json").read_text(encoding="utf-8"))
+
+    def test_runs_only_once(self):
+        _run_intake(self.proj)
+        head = _git(self.proj, "rev-parse", "HEAD")
+        again = _run_intake(self.proj)
+        self.assertEqual(again.returncode, 0)
+        self.assertIn("already done", again.stdout)
+        self.assertEqual(_git(self.proj, "rev-parse", "HEAD"), head)
+
+    def test_no_engagement_starts_the_loop_now(self):
+        _log(self.proj)  # only cleanvibe's own prompts
+        out = _run_intake(self.proj).stdout
+        self.assertIn("0 message(s)", out)
+        self.assertIn("LITTLE OR NO engagement", out)
+
+    def test_substantial_engagement_postpones_the_loop(self):
+        _log(self.proj, "This is about the history of AI.", "Focus on the 1956 Dartmouth workshop.")
+        out = _run_intake(self.proj).stdout
+        self.assertIn("2 message(s)", out)
+        self.assertIn("SUBSTANTIAL engagement", out)
+
+    def test_agent_work_already_committed_stays_put(self):
+        (self.proj / "research").mkdir()
+        (self.proj / "research" / "SUMMARY.md").write_text("x", encoding="utf-8")
+        (self.proj / "notes-by-agent").mkdir()
+        (self.proj / "notes-by-agent" / "a.md").write_text("x", encoding="utf-8")
+        _git(self.proj, "add", "notes-by-agent")
+        _git(self.proj, "commit", "-q", "-m", "agent notes")
+        _run_intake(self.proj)
+        tracked = _git(self.proj, "ls-files").split()
+        self.assertIn("research/SUMMARY.md", tracked)          # a workflow directory
+        self.assertIn("notes-by-agent/a.md", tracked)          # committed before intake
 
 
 if __name__ == "__main__":

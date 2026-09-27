@@ -22,9 +22,11 @@ job; that is `cleanvibe replicate`.)
 - Downloads and datasets go in `data_lake/`; throwaway fetches go in `scratch/`.
 
 ## How to work
-- **Pin the question down with the user first.** If it is vague, ask with
-  AskUserQuestion: what they want to know, why, how deep to go, and what would
-  count as an answer. Record it at the top of `SUMMARY.md`.
+- **Pin the question down.** If the user is here and replying, ask them
+  (AskUserQuestion is fine then): what they want to know, why, how deep to go,
+  and what would count as an answer. If they are not, infer the question from
+  the chat, the material in `data_lake/` and the project name, write it at the
+  top of `SUMMARY.md` as a stated assumption, and start.
 - **Survey wide, then go deep.** First map the main positions and the key
   sources; then dig into what matters for the user's question.
 - **Every claim gets a source.** Keep what a source says separate from your own

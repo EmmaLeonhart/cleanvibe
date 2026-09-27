@@ -46,8 +46,8 @@ These are how the work is done, not reasons to stop the loop.
   the next status tick and carry on with whatever is still safe to do.
 - If the queue is replanned mid-session, leave the crons alone; the next work
   tick picks up the new top item.
-- Not sure the user wants the loop at all? Ask with AskUserQuestion rather than
-  starting or stopping it on a guess.
+- In a cleanvibe project, the thirty-minute intake in CLAUDE.md decides when
+  the loop starts. Elsewhere, start it when the user asks for autonomous work.
 
 **Why:** long autonomous stretches usually fail by quietly losing the thread.
 The work tick keeps progress steady and committed, the flush makes sure nothing
