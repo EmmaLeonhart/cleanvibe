@@ -85,6 +85,30 @@ devlog.md current.
 - **Last cleanvibe update check:** `never`
 - **Updates source:** <https://cleanvibe.emmaleonhart.com/updates.md>
 
+## Hourly status-report cron for extensive work
+`queue.md`'s header and its pinned `## Always last` items point here. The source of
+truth is the `autonomous-loop` skill (`.claude/skills/autonomous-loop/SKILL.md`);
+this section is the short version for this repo. "The hourly status-report cron"
+is the name this repo used before the playbook grew to three crons. It is now the
+third of them.
+
+- **When:** any session of relatively extensive work, above all one that fills
+  `queue.md` with many items. Not for a one-off fix or a single small item.
+- **What:** three session-local `CronCreate` jobs (`durable: false`; they die with
+  the session, so every session recreates them), staggered so they don't collide:
+  the **work-loop** at `:03` (sync, do the top actionable queue item, commit and
+  push), the **auto-flush** at `:15` (commit and push anything pending, no empty
+  commits), and the **status report** at `:42` (report only, no code changes:
+  what advanced with shas, queue state, the hard rails, blockers tagged with the
+  not-done taxonomy below, test health).
+- **Lifecycle:** a fresh session **starts** the crons as its first move. A
+  mid-session queue **re-fill** (a planning burst) makes its first item **kill**
+  them. Entering planning mode **disables** them. Either way the queue's pinned
+  tail closes the loop: (A) ensure the crons are running, starting or restarting
+  them, then (B) run the status report once more as an end-of-session summary.
+- The crons fire only while this machine and session are running. They are
+  local, not cloud jobs (see the `cron-is-local` skill).
+
 ## Long command series run in strict order
 When the user gives a long series of commands, treat it as a long series of commands to be
 executed in relatively STRICT ORDER, one after another, EVEN IF the order seems not to make

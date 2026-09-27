@@ -1290,3 +1290,14 @@ Interpretation calls for Emma to confirm or correct:
 - Version `1.17.1` -> `1.18.0` (`cleanvibe/__init__.py`, `pyproject.toml`).
   Not released: `publish.yml` fires on a published GitHub release, so that is
   Emma's call. 152 tests pass.
+
+## 2026-09-26 — CLAUDE.md: the missing "Hourly status-report cron" section
+
+`queue.md`'s header and its pinned "Always last" items pointed at a `CLAUDE.md`
+section, "Hourly status-report cron for extensive work", that did not exist.
+Emma chose to write it rather than drop the reference. It summarizes the
+`autonomous-loop` skill (the source of truth): when the crons apply, the three
+staggered crons (work-loop :03, auto-flush :15, status report :42), and the
+start / kill / disable / restart lifecycle. It also notes that "the hourly
+status-report cron" is this repo's older name for what is now the third of the
+three crons.
