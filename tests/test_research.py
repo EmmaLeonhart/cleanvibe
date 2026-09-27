@@ -204,7 +204,7 @@ class TestResearchCliDispatch(unittest.TestCase):
             proj = Path(tmp) / "proj"
             buf = io.StringIO()
             with redirect_stdout(buf):
-                main(["research", str(proj), "--no-claude"])
+                main(["legacy", "research", str(proj), "--no-claude"])
             self.assertTrue((proj / "docs" / "index.html").is_file())
             self.assertTrue((proj / "literature" / ".gitkeep").is_file())
 
@@ -213,7 +213,7 @@ class TestResearchCliDispatch(unittest.TestCase):
             proj = Path(tmp) / "proj"
             buf = io.StringIO()
             with redirect_stdout(buf):
-                main(["new", str(proj), "--research", "--no-claude"])
+                main(["legacy", "new", str(proj), "--research", "--no-claude"])
             # Routed to the research scaffold (has docs/ + literature/), not the
             # plain `new` one.
             self.assertTrue((proj / "docs" / "index.html").is_file())
@@ -224,7 +224,7 @@ class TestResearchCliDispatch(unittest.TestCase):
             proj = Path(tmp) / "proj"
             buf = io.StringIO()
             with redirect_stdout(buf):
-                main(["research", str(proj), "--question", "Why does Z happen?",
+                main(["legacy", "research", str(proj), "--question", "Why does Z happen?",
                       "--no-claude"])
             readme = (proj / "README.md").read_text(encoding="utf-8")
             html = (proj / "docs" / "index.html").read_text(encoding="utf-8")
@@ -238,7 +238,7 @@ class TestResearchCliDispatch(unittest.TestCase):
             proj = Path(tmp) / "proj"
             buf = io.StringIO()
             with redirect_stdout(buf):
-                main(["new", str(proj), "--no-claude"])
+                main(["legacy", "new", str(proj), "--no-claude"])
             self.assertFalse((proj / "docs").exists())
             self.assertFalse((proj / "literature").exists())
 

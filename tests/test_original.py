@@ -206,7 +206,7 @@ class TestOriginalCliDispatch(unittest.TestCase):
             proj = Path(tmp) / "proj"
             buf = io.StringIO()
             with redirect_stdout(buf):
-                main(["original", str(proj), "--no-claude"])
+                main(["legacy", "original", str(proj), "--no-claude"])
             self.assertTrue((proj / "docs" / "index.html").is_file())
             self.assertTrue((proj / "topics" / ".gitkeep").is_file())
             self.assertTrue((proj / "literature" / ".gitkeep").is_file())
@@ -216,7 +216,7 @@ class TestOriginalCliDispatch(unittest.TestCase):
             proj = Path(tmp) / "proj"
             buf = io.StringIO()
             with redirect_stdout(buf):
-                main(["new", str(proj), "--original", "--no-claude"])
+                main(["legacy", "new", str(proj), "--original", "--no-claude"])
             # Routed to the original scaffold (has topics/), not plain `new`.
             self.assertTrue((proj / "topics" / ".gitkeep").is_file())
             self.assertTrue((proj / "docs" / "index.html").is_file())
@@ -226,7 +226,7 @@ class TestOriginalCliDispatch(unittest.TestCase):
             proj = Path(tmp) / "proj"
             buf = io.StringIO()
             with redirect_stdout(buf):
-                main(["original", str(proj), "--area", "tensor network compilers",
+                main(["legacy", "original", str(proj), "--area", "tensor network compilers",
                       "--no-claude"])
             readme = (proj / "README.md").read_text(encoding="utf-8")
             claude = (proj / "CLAUDE.md").read_text(encoding="utf-8")
@@ -238,7 +238,7 @@ class TestOriginalCliDispatch(unittest.TestCase):
             proj = Path(tmp) / "proj"
             buf = io.StringIO()
             with redirect_stdout(buf):
-                main(["new", str(proj), "--no-claude"])
+                main(["legacy", "new", str(proj), "--no-claude"])
             self.assertFalse((proj / "topics").exists())
             self.assertFalse((proj / "docs").exists())
 

@@ -120,7 +120,7 @@ class TestChatCli(unittest.TestCase):
         tmp = tempfile.mkdtemp()
         proj = Path(tmp) / "mychat"
         with redirect_stdout(io.StringIO()):
-            main(["chat", str(proj), "--topic", "Tea", "--no-claude"])
+            main(["legacy", "chat", str(proj), "--topic", "Tea", "--no-claude"])
         self.assertIn("Tea", (proj / "README.md").read_text(encoding="utf-8"))
 
     def test_cli_without_name_uses_default(self):
@@ -128,7 +128,7 @@ class TestChatCli(unittest.TestCase):
         with mock.patch.object(chat, "default_chat_path", return_value=tmp / "chat-x"), \
                 mock.patch("cleanvibe.cli.default_chat_path", return_value=tmp / "chat-x"), \
                 redirect_stdout(io.StringIO()):
-            main(["chat", "--no-claude"])
+            main(["legacy", "chat", "--no-claude"])
         self.assertTrue((tmp / "chat-x" / "CLAUDE.md").is_file())
 
 

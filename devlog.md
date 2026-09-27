@@ -1519,3 +1519,28 @@ agent (Claude Code runs them). What changed is the timing:
 - Tests: `test_chat.py` hook tests now run with interval 0, plus two new ones.
   Within the hour a Stop refreshes the files but does not commit; SessionEnd
   always commits.
+
+## 2026-09-26 — v2 item 4: the cleanvibe 2 command line
+
+`cleanvibe/cli.py` rewritten around Emma's spec:
+
+- **`cleanvibe`** (no arguments): if the current directory is a cleanvibe
+  project (the v2 marker, or a 1.x project), it opens a new session there with
+  the resume prompt. Otherwise it creates an auto-named project in the current
+  directory (`cleanvibe-YYYY-MM-DD`) and opens its first session. `--dry-run`
+  and `--no-claude` work at the top level.
+- **`cleanvibe new [NAME]`**: no NAME means auto-named. An existing cleanvibe
+  project is opened, never overwritten. A non-empty directory that is not a
+  project is refused (exit 2) with a pointer to `cleanvibe legacy convert`
+  (no interactive prompt, so an agent calling it gets a clear answer). An
+  empty directory is used.
+- **`cleanvibe legacy {new,research,original,chat,clone,convert}`**: the 1.x
+  modes, unchanged. They print a `DEPRECATED:` warning to stderr on every run.
+- **The old top-level names** (`research`, `original`, `chat`, `clone`,
+  `convert`) exit 2 with a message naming `cleanvibe legacy <cmd>`; they are
+  hidden from `--help`.
+- **`replicate` and `doctor` stay top-level and unchanged.**
+- Legacy handlers and parsers moved into `_LEGACY_HANDLERS` /
+  `_add_legacy_parsers`; `build_parser()` is separate from `main()`.
+- Tests: new `tests/test_cli.py` (12). The 1.x CLI tests (research,
+  original, chat, legacy-new prompt) now call `cleanvibe legacy ...`. 204 pass.
