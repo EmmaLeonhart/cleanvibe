@@ -8,9 +8,7 @@
 
 ## Active
 
-From Emma's 2026-09-26 AskUserQuestion answers. **Strict order, as she listed it:** the CLAUDE.md section first, then refresh → doctor → release. Remote Control (her answer to a separate question) goes just before the release so it ships in it. Raw `.jsonl` logs stay committed (no change). The general-purpose rework comes later today and is out of scope here.
-
-1. **Release v1.18.0.** Nothing after v1.18.0 has been released, so everything done today ships in it; no separate 1.19.0. When CI is green: `gh release create v1.18.0` with notes from the devlog, then confirm `publish.yml` pushes it to PyPI.
+_(empty — v1.18.0 released 2026-09-26; see `devlog.md`. Emma's general-purpose rework is next, later today.)_
 
 ---
 

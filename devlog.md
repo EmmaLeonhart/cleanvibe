@@ -1376,3 +1376,19 @@ the same. Other modes are unchanged (`REMOTE_CONTROL_MODES = {"chat"}`).
 - Tests: 4 more in `tests/test_starting_prompt.py` (argv order, chat-only
   `.bat` flag, launcher, `chat_project` passes `remote_control=True`). 170
   pass.
+
+## 2026-09-26 — Released v1.18.0
+
+Emma chose to release. Created GitHub release **v1.18.0** on `c4d59fc` (CI
+green on all 6 OS/Python jobs). `publish.yml` succeeded, and PyPI now lists
+1.18.0.
+
+It ships everything since v1.17.0: chat mode (with Remote Control),
+`cleanvibe doctor`, starting prompts, private-by-default with the gated Pages
+workflows, the generated-reference fix, the site/README refresh, and the v1.17.1
+attribution-URL fix, which was never released on its own.
+
+Checked the published artifact rather than the checkout: in a fresh venv,
+`pip install cleanvibe==1.18.0` → `cleanvibe --version` is 1.18.0,
+`cleanvibe chat` scaffolds with `--remote-control` in its `.bat`, and
+`cleanvibe doctor` finds that fresh chat project clean.
