@@ -4,7 +4,7 @@
 
 A tiny Python CLI that scaffolds AI-assisted coding projects and launches Claude Code.
 
-`cleanvibe` is not a coding tool. It's a **state initializer** -- it removes the friction between "I want to build something" and "Claude is working inside a well-structured environment." The real value lives in the `CLAUDE.md` it injects: an opinionated behavior contract that enforces documentation discipline, meaningful commits, and iterative file-based thinking.
+`cleanvibe` is not a coding tool. It's a **state initializer** -- it removes the friction between "I want to build something" and "Claude is working inside a well-structured environment." The real value is the working contract it installs: a short `CLAUDE.md` plus six workflow skills in `.claude/skills/` that enforce documentation discipline, meaningful commits, and iterative file-based thinking. Repos are private by default, and Claude launches with a first message explaining which mode it is in.
 
 ## Install
 
@@ -35,10 +35,11 @@ This will:
 2. Write `CLAUDE.md` (a short pointer to the skills + project-specific notes)
 3. Write `README.md` (starter documentation)
 4. Write `queue.md` (active work queue, pre-seeded with a first-session bootstrap sequence that walks Claude through triaging dropped-in files, inferring the project, interviewing the user, creating `todo.md`, populating the real queue, and pushing to a private GitHub repo)
-5. Write `.gitignore` (sensible Python defaults)
-6. Vendor `.claude/skills/` (the six workflow skills — see below)
-7. Initialize a git repo with an initial commit
-8. Launch Claude Code inside the project
+5. Write `devlog.md` (where "done" lives) and `.gitignore` (sensible Python defaults)
+6. Create `data_lake/` (drop files in before the first session) and, on Windows, `!runClaude.bat`
+7. Vendor `.claude/skills/` (the six workflow skills — see below)
+8. Initialize a git repo on `main` with an initial commit
+9. Launch Claude Code inside the project, with the `new` starting prompt
 
 ### Skills (v1.14.0+)
 
@@ -54,7 +55,8 @@ standalone **skills**, auto-discovered by Claude Code from `.claude/skills/`:
 | `writing-style` | writing any prose (avoid the "honest"/"frank" tic) |
 | `cleanvibe-update-check` | session start, weekly (refresh skills from cleanvibe) |
 
-They're vendored into every `new` / `convert` / `clone` / `research` project and
+They're vendored into every `new` / `convert` / `clone` / `research` / `original` /
+`chat` project (not `replicate`, which is a bounded workflow) and
 kept current by the `cleanvibe-update-check` skill (which reads
 <https://cleanvibe.emmaleonhart.com/updates.md>). The single source of truth is
 `cleanvibe/skills.py`; `CLAUDE.md` keeps only a short `## Skills` pointer. To

@@ -1301,3 +1301,31 @@ staggered crons (work-loop :03, auto-flush :15, status report :42), and the
 start / kill / disable / restart lifecycle. It also notes that "the hourly
 status-report cron" is this repo's older name for what is now the third of the
 three crons.
+
+## 2026-09-26 — Refresh stale claims (site, README, CLAUDE.md, updates page)
+
+Emma picked "refresh stale bits". Each claim was checked against the code, not
+reworded; the wider general-purpose rework is later today.
+
+- **Website (`pages/index.html`)**
+  - Added the missing `research` and `original` cards.
+  - `new` card: it said `new` writes `todo.md`; it doesn't (the first session
+    writes it). It now also lists `data_lake/` and the skills.
+  - `replicate` card: it said the paper is "the submodule target". The paper is
+    downloaded locally and gitignored; the submodule is the authors' code. The
+    card now also covers clawRxiv, other URLs, drop-in folders and the consent
+    gate.
+  - Stability section: it listed four subcommands and included `todo.md` in the
+    guaranteed set, contradicting the README. Now all seven, and the set
+    matches.
+  - "What it is": it said the behavior lives in CLAUDE.md; it has lived in
+    skills since v1.14.0. It now also mentions private-by-default and the
+    starting prompt.
+- **README:** same fix to the intro. The `new` steps list now includes
+  `devlog.md`, `data_lake/`, `!runClaude.bat` and the starting prompt. The
+  skills paragraph now names `original`/`chat` and says `replicate` doesn't get
+  skills.
+- **`pages/updates.md`:** the scope line now includes `original` and `chat`.
+- **CLAUDE.md:** the website was described as `site/` with tabs; it is `pages/`
+  with cards. The `research` decision named `_CLAUDE_CORE_RULES` helpers that
+  v1.14.0 removed.

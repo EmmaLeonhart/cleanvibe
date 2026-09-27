@@ -17,8 +17,8 @@ with a message naming which skills were refreshed.
 sections and the check folded new *sections* into `CLAUDE.md`. The pre-v1.14.0
 entries below are kept as a record; their content now lives in the skills.)
 
-**Scope.** Skills are vendored into `cleanvibe new`, `convert`, `clone`, and
-`research` projects. `cleanvibe replicate` projects are a bounded
+**Scope.** Skills are vendored into `cleanvibe new`, `convert`, `clone`,
+`research`, `original`, and `chat` projects. `cleanvibe replicate` projects are a bounded
 paper-replication workflow with their own definition of done and are not
 auto-vendored the skill set. The `autonomous-loop` (three-cron) skill is itself
 self-exempting for replication-style bounded work.

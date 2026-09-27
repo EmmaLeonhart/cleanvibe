@@ -177,7 +177,7 @@
     <section class="section">
       <h2><span class="num">01 &mdash;</span> What it is</h2>
       <div class="lead">
-        <p>cleanvibe is not a coding tool &mdash; it is a state initializer. The real value lives in the <code>CLAUDE.md</code> it injects: a behavior contract that enforces documentation discipline, meaningful commits, and iterative file-based thinking. Alongside it every project gets a pre-seeded <code>queue.md</code> (concrete steps, delete-only), a <code>todo.md</code> (the abstract long horizon), and a <code>devlog.md</code> &mdash; finishing a queue item means deleting it <em>and</em> appending a dated devlog entry in the same commit, so <code>queue.md</code> can never rot into a status journal. Every project starts disciplined instead of as a blank-repo scramble. Zero runtime dependencies; Windows, Linux, macOS; Python 3.9+.</p>
+        <p>cleanvibe is not a coding tool &mdash; it is a state initializer. The real value is the working contract it installs: a short <code>CLAUDE.md</code> plus six workflow skills in <code>.claude/skills/</code> that enforce documentation discipline, meaningful commits, and iterative file-based thinking. Every project gets a pre-seeded <code>queue.md</code> (concrete steps, delete-only), a <code>devlog.md</code>, and, from the first session, a <code>todo.md</code> (the abstract long horizon) &mdash; finishing a queue item means deleting it <em>and</em> appending a dated devlog entry in the same commit, so <code>queue.md</code> can never rot into a status journal. Every project starts disciplined instead of as a blank-repo scramble, in a private repo by default, and Claude launches with a first message explaining the mode it is in. Zero runtime dependencies; Windows, Linux, macOS; Python 3.9+.</p>
       </div>
     </section>
 
@@ -187,7 +187,17 @@
         <div class="cmd cmd-a" data-cmd="new fresh project scaffold bootstrap">
           <span class="c-emoji">&#127793;</span>
           <span class="c-name">cleanvibe new</span>
-          <p class="c-desc">Scaffold a fresh project: <code>CLAUDE.md</code>, <code>README.md</code>, <code>queue.md</code> (pre-seeded bootstrap), <code>todo.md</code>, <code>devlog.md</code>, <code>.gitignore</code> &mdash; an initial commit on a <code>main</code> branch, then launch Claude Code. Run in a non-empty directory and it prompts instead of erroring.</p>
+          <p class="c-desc">Scaffold a fresh project: <code>CLAUDE.md</code>, <code>README.md</code>, <code>queue.md</code> (pre-seeded bootstrap), <code>devlog.md</code>, <code>.gitignore</code>, <code>data_lake/</code>, and the skills &mdash; an initial commit on a <code>main</code> branch, then launch Claude Code. Run in a non-empty directory and it prompts instead of erroring.</p>
+        </div>
+        <div class="cmd cmd-b" data-cmd="research question literature review report original investigation">
+          <span class="c-emoji">&#128300;</span>
+          <span class="c-name">cleanvibe research</span>
+          <p class="c-desc">Your own investigation of a question. The bootstrap pins the question down with you, runs a literature review into <code>literature/</code> before building anything, and keeps a themed report in <code>docs/</code> with a PDF built by CI.</p>
+        </div>
+        <div class="cmd cmd-c" data-cmd="original topic finding uncertain area research">
+          <span class="c-emoji">&#129517;</span>
+          <span class="c-name">cleanvibe original</span>
+          <p class="c-desc"><code>research</code> for when you don&rsquo;t have a question yet. Give it an area with <code>--area</code>; a topic-finding loop drafts and scores candidate questions with you, records them in <code>topics/</code>, and settles on one before the literature review.</p>
         </div>
         <div class="cmd cmd-a" data-cmd="chat conversation topic research session logs private">
           <span class="c-emoji">&#128172;</span>
@@ -207,7 +217,7 @@
         <div class="cmd cmd-d" data-cmd="replicate paper arxiv alphaxiv reproduction">
           <span class="c-emoji">&#128218;</span>
           <span class="c-name">cleanvibe replicate</span>
-          <p class="c-desc">Point it at an arXiv or alphaxiv URL and it scaffolds a standalone paper-replication project: <code>SKILL.md</code> plan, the paper as a submodule target, and CI that builds a findings site, a PDF report, and a ZIP package.</p>
+          <p class="c-desc">Point it at an arXiv, alphaxiv or clawRxiv paper, any other URL, or a folder you drop the paper into, and it scaffolds a standalone replication project: a <code>SKILL.md</code> plan, the paper downloaded locally (gitignored, never committed), the authors&rsquo; code as a submodule, and CI that builds a findings site, a PDF report, and a ZIP package. Running anyone else&rsquo;s code waits for your consent.</p>
         </div>
       </div>
     </section>
@@ -215,7 +225,7 @@
     <section class="section">
       <h2><span class="num">03 &mdash;</span> Stable, v1.x</h2>
       <div class="lead">
-        <p>Semantic versioning since v1.0.0 (currently v1.18.0). <code>new</code>, <code>clone</code>, <code>convert</code>, and <code>replicate</code> are stable within the 1.x line; the guaranteed injected set &mdash; <code>CLAUDE.md</code>, <code>README.md</code>, <code>queue.md</code>, <code>todo.md</code>, <code>devlog.md</code>, <code>.gitignore</code> &mdash; is fixed; new repos initialize on <code>main</code>; <code>clone</code>/<code>convert</code> never overwrite and <code>replicate</code> never errors on a name collision; zero runtime dependencies is a hard guarantee. Preview anything with <code>--dry-run</code>.</p>
+        <p>Semantic versioning since v1.0.0 (currently v1.18.0). <code>new</code>, <code>research</code>, <code>original</code>, <code>chat</code>, <code>clone</code>, <code>convert</code>, and <code>replicate</code> are stable within the 1.x line; the core injected set &mdash; <code>CLAUDE.md</code>, <code>README.md</code>, <code>queue.md</code>, <code>devlog.md</code>, <code>.gitignore</code> &mdash; is fixed; new repos initialize on <code>main</code>; <code>clone</code>/<code>convert</code> never overwrite and <code>replicate</code> never errors on a name collision; zero runtime dependencies is a hard guarantee. Preview anything with <code>--dry-run</code>.</p>
       </div>
       <div class="hero-actions">
         <a class="btn btn-primary" href="https://github.com/EmmaLeonhart/cleanvibe">Read on GitHub &rarr;</a>
