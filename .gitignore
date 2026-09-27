@@ -26,6 +26,11 @@ Thumbs.db
 .env
 .env.local
 
-# Live `cleanvibe replicate` smoke-test runs (default paper: arXiv:2605.20919,
-# "Sutra"). Each run scaffolds a full replication project here — never committed.
-tests/scratch/
+# Practice / smoke-test projects: live runs of any mode (`cleanvibe new`,
+# `cleanvibe replicate` against arXiv:2605.20919 "Sutra", ...). Each run
+# scaffolds a full project with its own nested git repo here; none of it is
+# committed. The directory itself is kept (via .gitkeep) so it always exists.
+# The /* form is needed: git cannot re-include a file under a directory that is
+# ignored outright.
+tests/scratch/*
+!tests/scratch/.gitkeep

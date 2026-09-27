@@ -125,7 +125,7 @@ deferred — DO IT NOW. Bare "deliberately not done" / "blocked on <person>" is 
 
 ## Default replication target & live smoke tests
 - **The default paper for `cleanvibe replicate` is arXiv:2605.20919 — "Sutra: Tensor-Op RNNs as a Compilation Target for Vector Symbolic Architectures"** (the maintainer's own paper). Use it whenever you need to exercise the `replicate` pipeline end-to-end against a real paper.
-- **`tests/scratch/` is a gitignored sandbox for live `replicate` runs.** It is in `.gitignore`; never commit its contents. Each run scaffolds a full replication project (which git-inits its own nested repo) in there.
+- **`tests/scratch/` is the practice sandbox for live runs of any mode** (`cleanvibe new` practice projects, `replicate` smoke tests). Its contents are gitignored (`tests/scratch/*`); only `tests/scratch/.gitkeep` is tracked, so the directory always exists. Never commit anything else in it. Each run scaffolds a full project (with its own nested git repo) in there.
 - The committed unit tests in `tests/` are network-free (they monkeypatch `fetch_paper`). A **live** smoke test actually hits arXiv, e.g.:
   ```
   python -m cleanvibe.cli replicate https://arxiv.org/abs/2605.20919 tests/scratch/replicating-sutra --no-claude

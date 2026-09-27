@@ -1586,4 +1586,15 @@ the `.cleanvibe.json` marker present it now requires `CLAUDE.md`, `README.md`,
 `.claude/hooks/save_session_log.py` (without the hook, sessions go
 unrecorded). The other checks already skip files that don't exist. 1.x projects
 are checked as before. `test_doctor`'s "every fresh scaffold audits clean" now
-includes the v2 project; there is a new test for the v2 file set. 206 pass.
+includes the v2 project; there is a new test for the v2 file set. 205 pass.
+
+## 2026-09-26 — v2 item 7: `tests/scratch/.gitkeep` is tracked
+
+Emma remembered the practice-project directory as "supposed to be git-kept";
+it was not. `.gitignore` ignored `tests/scratch/` outright, which also stops
+git from tracking a `.gitkeep` inside it. It now ignores
+`tests/scratch/*` and re-includes `!tests/scratch/.gitkeep` (the same pattern
+as `replication_target/`), so the directory exists in every clone and
+everything scaffolded into it stays out of git. CLAUDE.md now describes it as
+the sandbox for live runs of any mode, not only `replicate`. (Also corrected
+the previous entry's test count: 205, not 206.)
