@@ -1722,3 +1722,30 @@ case the rework targets. Checked from the outside:
 - **Found and fixed:** session-log files were dated from the transcript's UTC
   timestamps (`2026-09-27_...` for a 7:33 PM Pacific session). The hook now
   uses the local date.
+
+## 2026-09-26 — Released v2.0.0; local cleanvibe upgraded
+
+Emma gave full permission to release cleanvibe 2 and update her local install
+before her scheduled 10 PM run.
+
+- CI green on the release commit `6329203` (6/6: Python 3.9 and 3.13 on
+  Windows, macOS, Linux). GitHub release **v2.0.0** created on it; `publish.yml`
+  succeeded; PyPI serves `cleanvibe-2.0.0` (wheel + sdist).
+- PyPI's summary JSON and pip's index were still serving cached 1.18.0 data a
+  minute after publishing, so `pip install -U cleanvibe==2.0.0` found nothing.
+  Installed the published 2.0.0 wheel by its PyPI file URL instead (same
+  artifact) into Emma's per-user Python 3.13, which is where her `cleanvibe`
+  command lives (`AppData/Roaming/Python/Python313/Scripts`). It was **1.17.0**
+  before; `cleanvibe --version` now prints 2.0.0.
+
+## 2026-09-26 — 10 PM readiness check (installed 2.0.0, not the checkout)
+
+In a temp folder with the installed command: `cleanvibe new ai-history
+--no-claude` wrote the full v2 scaffold, including
+`.claude/scripts/data_lake_intake.py` and the hooks, and doctor reported no
+drift. `cleanvibe new ai-history --dry-run` on the existing project reported it
+would open it rather than overwrite. Dropping `brief.md` and running the intake
+script produced both commits and moved `brief.md` into `data_lake/`. Legacy
+names point to `cleanvibe legacy`. Nothing is left uncommitted in this repo.
+
+
