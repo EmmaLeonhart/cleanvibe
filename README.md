@@ -2,9 +2,17 @@
 
 **Website · [cleanvibe.emmaleonhart.com](https://cleanvibe.emmaleonhart.com)**
 
-A tiny Python CLI that scaffolds AI-assisted coding projects and launches Claude Code.
+A tiny, zero-dependency Python CLI that starts a Claude Code session in a
+git-tracked project and gets out of the way.
 
-`cleanvibe` is not a coding tool. It's a **state initializer** -- it removes the friction between "I want to build something" and "Claude is working inside a well-structured environment." The real value is the working contract it installs: a short `CLAUDE.md` plus six workflow skills in `.claude/skills/` that enforce documentation discipline, meaningful commits, and iterative file-based thinking. Repos are private by default, and Claude launches with a first message explaining which mode it is in.
+**cleanvibe 2** starts every project as an open-ended working session built to
+**work from low information**. You might explain exactly what you want, drop a
+few files in and say nothing, or not be at the computer at all (a scheduled job
+or another agent can start the session). The agent works out what the project is
+for from the chat, the files in the folder and the directory name. It writes its
+read of the goal into `INTENT.md` and gets on with it. Every session's transcript
+is saved into the repository, and sessions start with Remote Control on, so you
+can pick them up from the Claude app or web.
 
 ## Install
 
@@ -24,192 +32,99 @@ pip install .         # or use !dev-install.bat on Windows
 
 ## Usage
 
-### Create a new project
+### Start a project
 
 ```
-cleanvibe new my-project
+cleanvibe                  # in a cleanvibe project: open a new session there
+                           # anywhere else: create cleanvibe-YYYY-MM-DD/ here and open it
+cleanvibe new              # create an auto-named project and open it
+cleanvibe new ai-history   # create ai-history/ and open it
 ```
 
-This will:
-1. Create the directory `my-project/`
-2. Write `CLAUDE.md` (a short pointer to the skills + project-specific notes)
-3. Write `README.md` (starter documentation)
-4. Write `queue.md` (active work queue, pre-seeded with a first-session bootstrap sequence that walks Claude through triaging dropped-in files, inferring the project, interviewing the user, creating `todo.md`, populating the real queue, and pushing to a private GitHub repo)
-5. Write `devlog.md` (where "done" lives) and `.gitignore` (sensible Python defaults)
-6. Create `data_lake/` (drop files in before the first session) and, on Windows, `!runClaude.bat`
-7. Vendor `.claude/skills/` (the six workflow skills — see below)
-8. Initialize a git repo on `main` with an initial commit
-9. Launch Claude Code inside the project, with the `new` starting prompt
+A new project gets a git repo on `main` (local and private, with no remote
+unless you ask for one) and a Claude Code session in a new window. The session
+starts with a first message that tells the agent how cleanvibe works: this is the
+first session, the information may be thin, and the user may be away. When the
+name was generated, the message says so, so the agent doesn't read meaning into
+it.
 
-### Skills (v1.14.0+)
+`cleanvibe new NAME` on an existing cleanvibe project opens it instead of
+touching it. On a non-empty folder that isn't a project it refuses (use
+`cleanvibe legacy convert` to adopt a folder in place).
 
-The workflow behaviors that used to be inlined into `CLAUDE.md` now ship as six
-standalone **skills**, auto-discovered by Claude Code from `.claude/skills/`:
+### What happens in the first session
 
-| Skill | Fires when |
+1. The agent reads `CLAUDE.md` and **schedules a one-time intake 30 minutes out**
+   (`CronCreate`).
+2. It looks at what's already in the folder, writes a first read of the purpose
+   into `INTENT.md`, and says briefly what it sees. If you're there and talking,
+   it follows your lead; `AskUserQuestion` is only for when you are clearly
+   present.
+3. **At 30 minutes, the intake runs** (`.claude/scripts/data_lake_intake.py`):
+   - commit 1 records the repository exactly as found ("the repository 30
+     minutes in, before moving into data_lake/");
+   - commit 2 `git mv`s everything that had never been committed (files you
+     dropped in, new folders) into `data_lake/`;
+   - it reports what moved and how much you've said in the chat.
+4. The agent then **studies `data_lake/`** (a spec or brief in there is followed
+   unless the chat says otherwise), updates `INTENT.md`, plans the work with the
+   matching skill, and **starts the autonomous work loop**. If you said little or
+   nothing, it starts right away; if you've been actively steering, it waits
+   another hour (90 minutes in).
+
+So you can create a project, drop a brief into it, and walk away.
+
+### What a project contains
+
+| Path | What it is |
 |---|---|
-| `emergency-stop` | you repeatedly say "stop" / demand an immediate halt |
-| `cron-is-local` | you mention "cron" / "schedule" (means local `CronCreate`) |
-| `autonomous-loop` | starting extensive autonomous work (the three-cron playbook) |
-| `queue-driven-workflow` | any multi-step work (plan into `queue.md` first; the `todo`→`queue`→`devlog` flow) |
-| `writing-style` | writing any prose (avoid the "honest"/"frank" tic) |
-| `cleanvibe-update-check` | session start, weekly (refresh skills from cleanvibe) |
+| `CLAUDE.md` | How the project works: low-information operation, the data-lake rule, the intake |
+| `INTENT.md` | The agent's running read of what you're trying to do, with evidence and confidence |
+| `data_lake/` | The material the project works from, committed as part of its history |
+| `sessions/` | Every session's transcript, raw `.jsonl` plus readable `.md` |
+| `scratch/` | One-off scripts and downloads, gitignored so they don't pile up as crud |
+| `.claude/skills/` | Practices the agent picks up when the work takes a shape (below) |
+| `.claude/settings.json`, `.claude/hooks/` | The transcript hook |
+| `.cleanvibe.json` | Marks the folder as a cleanvibe project |
 
-They're vendored into every `new` / `convert` / `clone` / `research` / `original` /
-`chat` project (not `replicate`, which is a bounded workflow) and
-kept current by the `cleanvibe-update-check` skill (which reads
-<https://cleanvibe.emmaleonhart.com/updates.md>). The single source of truth is
-`cleanvibe/skills.py`; `CLAUDE.md` keeps only a short `## Skills` pointer. To
-back-fill these into an existing repo, run `migrate_repos_to_skills.py`.
+There is no `queue.md`, `todo.md` or `devlog.md` at the start. The
+`queue-driven-workflow` skill adds them if the work turns into building
+something.
 
-### Research a question — your own investigation
+### Transcripts are kept in git
 
-```
-cleanvibe research reservoiragent
-cleanvibe research reservoiragent --question "What is the memory capacity of a reservoir-computing agent?"
-cleanvibe new reservoiragent --research      # equivalent alias
-```
+A hook (not the agent) copies the session transcript into `sessions/` after every
+response and commits it at most once an hour and always when the session ends,
+so the repository is an audit trail of the whole conversation. The readable
+`.md` is what the agent reads to catch up in a later session.
 
-`research` is for an **original-research project** — *your own* investigation,
-not a [replication](#replicate-a-paper) of someone else's paper. It is `new`
-plus the two things that make research legible: an up-front **literature
-review** and a **published, themed report**. It scaffolds everything `new`
-does (`CLAUDE.md`, `README.md`, `queue.md`, `devlog.md`, `.gitignore`,
-`data_lake/`, the three-cron playbook) and adds:
+### Sessions are real top-level sessions
 
-- **`literature/`** — the literature review, built *before* any code. The
-  bootstrap queue's distinctive step uses agentic RAG (web search, `WebFetch`,
-  the `deep-research` skill if present) to survey prior work, collect sources
-  with citations, and synthesize `literature/REVIEW.md` (what's known, the
-  gaps, what *this* project adds). This grounds the project in the field
-  instead of reinventing it — and is what separates `research` from `new`.
-- **`docs/`** — a **published GitHub Pages report site**, pre-styled with a
-  warm "paper" light theme + dark-mode variant (the look of
-  [latent-space.emmaleonhart.com](http://latent-space.emmaleonhart.com/)), plus
-  a transportable PDF built from `FINDINGS.md`. `.github/workflows/pages.yml`
-  deploys it. The agent edits the content; the theme stays.
+A session started by an agent used to inherit that agent's identity
+(`CLAUDE_CODE_CHILD_SESSION` and friends) and ran as its child, without its own
+transcript. cleanvibe strips that before launching, so a session is its own
+session no matter who started it. On Windows it opens in a new console that
+outlives the caller; on macOS/Linux without a terminal it opens a new terminal
+window. New project folders are marked trusted in Claude Code's config
+(`~/.claude.json`, backed up first), so an unattended session doesn't stop at
+"Do you trust this folder?".
 
-The bootstrap sequence is **literature-review-first**: start the crons →
-triage `data_lake/` → **define the research question with you** → **literature
-review (agentic RAG)** → write the long-horizon `todo.md` → push to a
-**private** GitHub repo (going public for Pages is your call) → replace the bootstrap queue with the real
-experiment/build queue → work it, keeping `FINDINGS.md` + the `docs/` report
-current. Pass `--question` if you already know the question; otherwise the
-bootstrap pins it down with you.
+### Skills
 
-### Original research — when you don't have a topic yet
+cleanvibe vendors these into every project's `.claude/skills/`:
 
-```
-cleanvibe original driftprobe
-cleanvibe original driftprobe --area "reservoir computing"
-cleanvibe new driftprobe --original                          # equivalent alias
-```
-
-`original` is `research` for an **uncertain topic**: you don't yet have a fixed
-research question. It keeps everything `research` has — `literature/`,
-`data_lake/`, the three-cron playbook, the themed `docs/` report — and prepends
-one distinctive bootstrap step:
-
-- **`topics/`** — the **topic-finding loop**, run *before* the literature review.
-  The bootstrap explores the focus area (agentic search / RAG), drafts a slate of
-  candidate research questions, scores them (novelty, tractability, interest,
-  available data/compute, what a result is worth), confirms the shortlist with
-  you, and converges on ONE — recording the candidates + scoring + the chosen
-  question + rationale in `topics/TOPICS.md`. Then it proceeds exactly like
-  `research`.
-
-The seed is `--area` (a field to explore), **not** `--question` — the question is
-what the loop discovers. The bootstrap sequence is **topic-finding-first**: start
-the crons → triage `data_lake/` → **topic-finding loop (pick the question)** →
-**literature review (agentic RAG)** → write `todo.md` → push to a **private** repo → replace
-the bootstrap queue → work it. Use `original` when you want to investigate *some*
-area but haven't settled on the precise question; use [`research`](#research-a-question--your-own-investigation)
-when you already know what you're asking.
-
-### Chat — a git-tracked conversation
-
-```
-cleanvibe chat                                   # -> chat-YYYY-MM-DD/
-cleanvibe chat tea-notes --topic "oolong vs pu-erh"
-```
-
-`chat` is for a **conversation about one topic** rather than a software project:
-research-heavy, light on code, kept in a **private** git repo so you can resume,
-search and share it. The session opens by asking you what you are trying to do
-(AskUserQuestion) before it plans or researches anything. Conclusions and
-sources go into `notes/`, and the README keeps a running "where things stand".
-
-**Session logs are git-tracked.** The scaffold's `.claude/settings.json` runs a
-small stdlib script (`.claude/hooks/save_session_log.py`) after every response
-and at session end. It copies the transcript into `sessions/` as raw `.jsonl`
-plus a readable `.md`, and commits only `sessions/`. At session end it also
-pushes if the repo has a remote. Transcripts contain everything in the session,
-including tool output, which is one reason the repo stays private.
-
-**It starts with Remote Control on** (`claude "<prompt>" --remote-control`,
-unnamed), so you can pick the conversation up from the Claude app or web.
-`!runClaude.bat` does the same. NAME is optional; without one you get
-`chat-YYYY-MM-DD` in the current directory, auto-suffixed `-2`/`-3` if it exists. Chat mode has no three-cron
-playbook and no Pages report.
-
-### Every mode: private repo, starting prompt
-
-- **Private by default.** Every mode that creates a GitHub repo creates it with
-  `gh repo create --private`. Going public is your call. On a private repo the
-  research/replication Pages workflows upload the report as a workflow artifact
-  instead of deploying (GitHub's free plan cannot publish Pages from a private
-  repo). Make the repo public, or set the repo variable `CLEANVIBE_PAGES=true` on
-  a paid plan, to deploy the site.
-- **Starting prompt.** Claude launches with a first message saying the project
-  was started with cleanvibe, which mode, what that mode is for, and to work
-  `queue.md` item 1, asking you first if the goal is unclear. `!runClaude.bat`
-  relaunches with the same prompt.
-
-### Doctor — audit a project for drift
-
-```
-cleanvibe doctor            # audit the current directory
-cleanvibe doctor path/to/project
-```
-
-A **read-only** check of a cleanvibe project for the drift that builds up over
-time. It changes nothing, and exits `1` if it finds anything (so it can run in CI):
-
-| Check | Flags |
+| Skill | Used for |
 |---|---|
-| `files` | a missing `CLAUDE.md`, `README.md`, `queue.md`, or `devlog.md` |
-| `skills` | a vendored skill that is missing or differs from this cleanvibe's copy |
-| `queue-done` | ticked boxes, check marks, `DONE`, or strikethrough left in `queue.md` |
-| `version` | `queue.md`'s "Current version" not matching `pyproject.toml` |
-| `devlog-tags` | a `v*` git tag with no `devlog.md` entry |
-| `section-refs` | a reference to a `CLAUDE.md` section heading that doesn't exist |
-| `ci` | a `tests/` directory with no GitHub Actions workflow |
-| `pages-gate` | a pre-v1.18.0 Pages workflow that fails on a private repo |
+| `queue-driven-workflow` | building software: `queue.md` → `devlog.md`, tests, CI |
+| `research-practice` | research on any topic: sources, notes with citations, a living summary |
+| `autonomous-loop` | long unattended stretches: three hourly crons (work, flush, status) that only you switch off |
+| `writing-style` | prose without the "honestly" tic |
+| `cron-is-local` | "cron" means a local `CronCreate` job |
+| `emergency-stop` | "stop stop stop" halts everything |
+| `cleanvibe-update-check` | weekly refresh of these skills from <https://cleanvibe.emmaleonhart.com/updates.md> |
 
-### Clone an existing repo — codebase onboarding
-
-```
-cleanvibe clone https://github.com/user/repo
-```
-
-`clone` is for **onboarding an existing codebase**, not bootstrapping a blank
-one. It is deliberately different from `new`:
-
-1. `git clone` the repository
-2. Create and check out a dedicated `cleanvibe-onboarding` branch — **the
-   default branch is left untouched**
-3. *Prepend-or-write* an onboarding `CLAUDE.md` and `queue.md`: if the repo
-   already has them, the fresh block goes on top (newest first) and the
-   original content is preserved below — re-running just layers another block
-4. Inject `.gitignore` only if missing. **No `data_lake/`** (it is a real
-   codebase, nothing was dropped in) and **no README overwrite**
-5. Commit the onboarding scaffold on the branch
-6. Launch Claude Code inside the project
-
-The onboarding `queue.md` is small and focused: read & document the repo,
-make existing docs accurate, **rewrite `CLAUDE.md` to the repo's real
-development practices**, add tests/CI if sparse, then synthesize any existing
-planning artifacts and hand off to the repo's own `todo.md`.
+The single source of truth is `cleanvibe/skills.py`. To back-fill them into an
+older repo, run `migrate_repos_to_skills.py`.
 
 ### Replicate a paper
 
@@ -303,7 +218,7 @@ The generated scaffold is built around the **efficient, recipe-first path**:
   until you make the repo public.
 - **Themed report with a status badge.** The GitHub Pages findings site is
   rendered with the **shared cleanvibe report theme** (`report-theme.css` — the
-  same warm "paper" + dark-mode theme `cleanvibe research` uses) and topped with
+  same warm "paper" + dark-mode theme `cleanvibe legacy research` uses) and topped with
   a big color-coded **replication status badge** — 🟢 replicated / 🔴 failed /
   🟠 insufficient hardware / 🔵 in progress — driven by a `status` field in
   `paper.json` (defaults to in-progress). A transportable PDF is built too.
@@ -346,75 +261,222 @@ Every replication produces three compounding artifacts: the runnable
 replication, a published findings report, and the reusable `SKILL.md`
 methodology. See `docs/replication_framing.md` for the full vision.
 
+### Doctor — audit a project for drift
+
+```
+cleanvibe doctor            # audit the current directory
+cleanvibe doctor path/to/project
+```
+
+A **read-only** check of a cleanvibe project for the drift that builds up over
+time. It changes nothing, and exits `1` if it finds anything (so it can run in CI):
+
+| Check | Flags |
+|---|---|
+| `files` | a missing `CLAUDE.md`, `README.md`, `queue.md`, or `devlog.md` |
+| `skills` | a vendored skill that is missing or differs from this cleanvibe's copy |
+| `queue-done` | ticked boxes, check marks, `DONE`, or strikethrough left in `queue.md` |
+| `version` | `queue.md`'s "Current version" not matching `pyproject.toml` |
+| `devlog-tags` | a `v*` git tag with no `devlog.md` entry |
+| `section-refs` | a reference to a `CLAUDE.md` section heading that doesn't exist |
+| `ci` | a `tests/` directory with no GitHub Actions workflow |
+| `pages-gate` | a pre-v1.18.0 Pages workflow that fails on a private repo |
+
 ### Options
 
 ```
-cleanvibe new my-project --dry-run        # Preview what would be created
-cleanvibe new my-project --no-claude      # Skip launching Claude Code
-cleanvibe research my-study --dry-run     # Preview the research scaffold
-cleanvibe research my-study --no-claude   # Scaffold a research project without launching Claude
-cleanvibe chat --dry-run                  # Preview the chat scaffold
+cleanvibe --dry-run                       # Preview what bare `cleanvibe` would do here
+cleanvibe new NAME --dry-run              # Preview a new project
+cleanvibe new NAME --no-claude            # Create it without launching Claude
+cleanvibe replicate URL --dry-run         # Preview a replication scaffold
 cleanvibe doctor                          # Audit the current project for drift (read-only)
-cleanvibe clone REPO path --dry-run       # Preview what would be done
-cleanvibe replicate URL --dry-run         # Preview the arXiv replication scaffold
-cleanvibe replicate FOLDER --dry-run      # Preview the manual drop-in scaffold
-cleanvibe replicate URL --no-claude       # Scaffold without launching Claude
+cleanvibe legacy research NAME --dry-run  # Preview a 1.x mode (prints a deprecation warning)
 cleanvibe --version                       # Show version
 ```
 
+## Legacy modes (deprecated)
+
+The cleanvibe 1.x modes still work as `cleanvibe legacy <cmd>`. Each run prints a
+`DEPRECATED` warning; they are no longer developed. Their old top-level names
+(`cleanvibe research`, …) now just point here. The cleanvibe 2 default covers most
+of what they did: it starts from whatever you give it and picks up development or
+research practices as skills. All of them create private repos, and their
+sessions start with a first message explaining the mode.
+
+### `legacy new` — the 1.x bootstrap project
+
+```
+cleanvibe legacy new my-project
+```
+
+This will:
+1. Create the directory `my-project/`
+2. Write `CLAUDE.md` (a short pointer to the skills + project-specific notes)
+3. Write `README.md` (starter documentation)
+4. Write `queue.md` (active work queue, pre-seeded with a first-session bootstrap sequence that walks Claude through triaging dropped-in files, inferring the project, interviewing the user, creating `todo.md`, populating the real queue, and pushing to a private GitHub repo)
+5. Write `devlog.md` (where "done" lives) and `.gitignore` (sensible Python defaults)
+6. Create `data_lake/` (drop files in before the first session) and, on Windows, `!runClaude.bat`
+7. Vendor `.claude/skills/` (the workflow skills; see Skills above)
+8. Initialize a git repo on `main` with an initial commit
+9. Launch Claude Code inside the project, with the 1.x `new` starting prompt
+
+### Research a question — your own investigation
+
+```
+cleanvibe legacy research reservoiragent
+cleanvibe legacy research reservoiragent --question "What is the memory capacity of a reservoir-computing agent?"
+cleanvibe legacy new reservoiragent --research      # equivalent alias
+```
+
+`research` is for an **original-research project** — *your own* investigation,
+not a [replication](#replicate-a-paper) of someone else's paper. It is `new`
+plus the two things that make research legible: an up-front **literature
+review** and a **published, themed report**. It scaffolds everything `new`
+does (`CLAUDE.md`, `README.md`, `queue.md`, `devlog.md`, `.gitignore`,
+`data_lake/`, the three-cron playbook) and adds:
+
+- **`literature/`** — the literature review, built *before* any code. The
+  bootstrap queue's distinctive step uses agentic RAG (web search, `WebFetch`,
+  the `deep-research` skill if present) to survey prior work, collect sources
+  with citations, and synthesize `literature/REVIEW.md` (what's known, the
+  gaps, what *this* project adds). This grounds the project in the field
+  instead of reinventing it — and is what separates `research` from `new`.
+- **`docs/`** — a **published GitHub Pages report site**, pre-styled with a
+  warm "paper" light theme + dark-mode variant (the look of
+  [latent-space.emmaleonhart.com](http://latent-space.emmaleonhart.com/)), plus
+  a transportable PDF built from `FINDINGS.md`. `.github/workflows/pages.yml`
+  deploys it. The agent edits the content; the theme stays.
+
+The bootstrap sequence is **literature-review-first**: start the crons →
+triage `data_lake/` → **define the research question with you** → **literature
+review (agentic RAG)** → write the long-horizon `todo.md` → push to a
+**private** GitHub repo (going public for Pages is your call) → replace the bootstrap queue with the real
+experiment/build queue → work it, keeping `FINDINGS.md` + the `docs/` report
+current. Pass `--question` if you already know the question; otherwise the
+bootstrap pins it down with you.
+
+### Original research — when you don't have a topic yet
+
+```
+cleanvibe legacy original driftprobe
+cleanvibe legacy original driftprobe --area "reservoir computing"
+cleanvibe legacy new driftprobe --original                          # equivalent alias
+```
+
+`original` is `research` for an **uncertain topic**: you don't yet have a fixed
+research question. It keeps everything `research` has — `literature/`,
+`data_lake/`, the three-cron playbook, the themed `docs/` report — and prepends
+one distinctive bootstrap step:
+
+- **`topics/`** — the **topic-finding loop**, run *before* the literature review.
+  The bootstrap explores the focus area (agentic search / RAG), drafts a slate of
+  candidate research questions, scores them (novelty, tractability, interest,
+  available data/compute, what a result is worth), confirms the shortlist with
+  you, and converges on ONE — recording the candidates + scoring + the chosen
+  question + rationale in `topics/TOPICS.md`. Then it proceeds exactly like
+  `research`.
+
+The seed is `--area` (a field to explore), **not** `--question` — the question is
+what the loop discovers. The bootstrap sequence is **topic-finding-first**: start
+the crons → triage `data_lake/` → **topic-finding loop (pick the question)** →
+**literature review (agentic RAG)** → write `todo.md` → push to a **private** repo → replace
+the bootstrap queue → work it. Use `original` when you want to investigate *some*
+area but haven't settled on the precise question; use [`research`](#research-a-question--your-own-investigation)
+when you already know what you're asking.
+
+### Chat — a git-tracked conversation
+
+```
+cleanvibe legacy chat                                   # -> chat-YYYY-MM-DD/
+cleanvibe legacy chat tea-notes --topic "oolong vs pu-erh"
+```
+
+`chat` is for a **conversation about one topic** rather than a software project:
+research-heavy, light on code, kept in a **private** git repo so you can resume,
+search and share it. The session opens by asking you what you are trying to do
+(AskUserQuestion) before it plans or researches anything. Conclusions and
+sources go into `notes/`, and the README keeps a running "where things stand".
+
+**Session logs are git-tracked.** The scaffold's `.claude/settings.json` runs a
+small stdlib script (`.claude/hooks/save_session_log.py`) after every response
+and at session end. It copies the transcript into `sessions/` as raw `.jsonl`
+plus a readable `.md`, and commits only `sessions/`. At session end it also
+pushes if the repo has a remote. Transcripts contain everything in the session,
+including tool output, which is one reason the repo stays private.
+
+**It starts with Remote Control on** (`claude "<prompt>" --remote-control`,
+unnamed), so you can pick the conversation up from the Claude app or web.
+`!runClaude.bat` does the same. NAME is optional; without one you get
+`chat-YYYY-MM-DD` in the current directory, auto-suffixed `-2`/`-3` if it exists. Chat mode has no three-cron
+playbook and no Pages report.
+
+### Clone an existing repo — codebase onboarding
+
+```
+cleanvibe legacy clone https://github.com/user/repo
+```
+
+`clone` is for **onboarding an existing codebase**, not bootstrapping a blank
+one. It is deliberately different from `new`:
+
+1. `git clone` the repository
+2. Create and check out a dedicated `cleanvibe-onboarding` branch — **the
+   default branch is left untouched**
+3. *Prepend-or-write* an onboarding `CLAUDE.md` and `queue.md`: if the repo
+   already has them, the fresh block goes on top (newest first) and the
+   original content is preserved below — re-running just layers another block
+4. Inject `.gitignore` only if missing. **No `data_lake/`** (it is a real
+   codebase, nothing was dropped in) and **no README overwrite**
+5. Commit the onboarding scaffold on the branch
+6. Launch Claude Code inside the project
+
+The onboarding `queue.md` is small and focused: read & document the repo,
+make existing docs accurate, **rewrite `CLAUDE.md` to the repo's real
+development practices**, add tests/CI if sparse, then synthesize any existing
+planning artifacts and hand off to the repo's own `todo.md`.
+
 ## Why?
 
-Most people struggle with blank repo paralysis, poor commit hygiene, and AI assistants that ramble without producing durable artifacts. `cleanvibe` solves this by injecting a disciplined thinking contract into every project from the start.
-
-The `CLAUDE.md` template enforces:
-- Commit early and often with meaningful messages
-- No planning-only modes -- all thinking produces files and commits
-- Keep documentation up to date as the project evolves
-- Use `planning/` directories for exploration instead of internal planning modes
+Most sessions don't start with a well-defined goal, and a rigid scaffold that
+assumes one ends up being fought rather than used. cleanvibe 2 assumes as little
+as possible up front and makes the agent do the work of figuring out the goal,
+from the chat when you're there and from what's in the folder when you're not.
+It keeps two things fixed: everything is committed (including the transcript),
+and the agent writes down what it thinks you want (`INTENT.md`), so you can
+check and correct it.
 
 ## Cross-platform
 
-Works on Windows, Linux, and macOS. Zero dependencies beyond Python 3.9+.
+Works on Windows, Linux, and macOS. Zero dependencies beyond Python 3.9+. On
+Windows a session opens in its own console window; on macOS/Linux it takes over
+your terminal, or opens a new terminal window when there isn't one (for example
+when an agent runs cleanvibe).
 
 ## Website
 
-Full walkthrough — what cleanvibe is and what each subcommand does — at the
-project site (built from `pages/` and deployed by GitHub Actions):
-**https://cleanvibe.emmaleonhart.com/**
+Full walkthrough at the project site (built from `pages/` and deployed by GitHub
+Actions): **https://cleanvibe.emmaleonhart.com/**
 
 ## Stability
 
-As of **v1.0.0**, cleanvibe commits to the following contract (semantic
-versioning from here on):
+cleanvibe 2.0.0 is a new major version: the default `cleanvibe` / `cleanvibe new`
+behavior changed, and the 1.x modes moved under `cleanvibe legacy`. Within 2.x:
 
-- **Subcommands** `new`, `research`, `original`, `chat`, `clone`, `convert`,
-  `replicate`, and `doctor` are stable. Their core behavior will not change incompatibly
-  within the 1.x line.
-- **Injected files**: `new` guarantees `CLAUDE.md`, `README.md`, `queue.md`,
-  `.gitignore`, and `data_lake/.gitkeep`. `research` guarantees all of those
-  **plus** `literature/.gitkeep`, `docs/index.html` (the themed report site),
-  and `.github/workflows/pages.yml`. `chat` guarantees `CLAUDE.md`, `README.md`,
-  `queue.md`, `devlog.md`, `.gitignore`, `notes/`, `sessions/`, `data_lake/`,
-  `.claude/settings.json` and `.claude/hooks/save_session_log.py`. `replicate` always guarantees
-  `SKILL.md`, `CLAUDE.md`, `queue.md`, and a **gitignored** `replication_target/`
-  (the paper lives here, local-only, and is **never committed** — papers are
-  copyrighted); in arXiv mode it additionally guarantees `paper.json` and
-  `download_paper.py`; in clawRxiv mode it guarantees `paper.json`, a
-  `download_paper.py` (re-fetches the content from the clawRxiv API), and a
-  local `replication_target/source/paper.md` (plus `replication_skill.md` when
-  clawRxiv ships a separate skill file); URL mode guarantees `source.json` and a
-  `download_paper.py` (re-downloads from the recorded URL). `download_paper.py`
-  is absent only in manual drop-in mode — you supply the paper by hand, so there
-  is nothing to fetch.
-- **Non-destructive by contract**: `clone` and `convert` never overwrite
-  existing files — `clone` prepends; `convert` only injects what is missing.
-  `replicate` in arXiv mode never errors on a name collision (silent
-  `-2`/`-3` suffix); in folder mode it injects only what is missing so a
-  pre-dropped paper is never clobbered.
-- **Template wording** may evolve (improvements to the workflow contract are
-  not breaking); the *set* of guaranteed files and the subcommand contracts
-  above are what 1.x holds stable.
-- **Zero runtime dependencies** remains a hard guarantee for the 1.x line.
+- **Commands:** `cleanvibe`, `new`, `replicate`, `doctor` and `legacy` are
+  stable. `replicate` behaves exactly as in 1.x. The `legacy` modes keep working
+  but are frozen.
+- **A new project always has:** `CLAUDE.md`, `README.md`, `INTENT.md`,
+  `.cleanvibe.json`, `.gitignore` (with `scratch/`), `sessions/`, `data_lake/`,
+  `.claude/settings.json`, `.claude/hooks/save_session_log.py`,
+  `.claude/scripts/data_lake_intake.py` and the vendored skills, in a git repo on
+  `main` with no remote.
+- **Non-destructive:** `new` never overwrites an existing project (it opens it)
+  and refuses a non-empty folder that isn't one. `replicate` and the legacy modes
+  keep their 1.x guarantees (`clone`/`convert` never overwrite; the replication
+  paper is never committed).
+- **Template wording** may evolve; the file set and command contracts above are
+  what 2.x holds stable.
+- **Zero runtime dependencies** remains a hard guarantee.
 
 ## License
 

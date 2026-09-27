@@ -10,9 +10,8 @@
 
 **Deadline: Emma has a scheduled job that runs cleanvibe at 10 PM Pacific (2026-09-26) to research the history of AI, fully automatically. It must work by then.** Her spec from the 7:15 PM voice note: cleanvibe sessions work from low information and may have no human present; a 30-minute data-lake intake; AskUserQuestion only when the user is clearly present; release 2.0.0 and install it locally. No AskUserQuestion to Emma about any of this.
 
-1. **Practice project for Emma.** Scaffold a v2 project in `tests/scratch/` with the real CLI and launch its session via the new launcher from this (agent) session. That is the exact child-session case. Confirm it is not a child session, its transcript lands in `sessions/`, and Remote Control is on, so Emma can pick it up and experiment. (The first attempt stopped at Claude Code's trust prompt; the pre-trust feature now covers that.)
-2. **Docs + version 2.0.0.** README rewrite (v2 first, legacy section), CLAUDE.md (architecture + Key Decisions), site, `pages/updates.md` (skill changes for existing repos), memory. Then **release v2.0.0** (Emma gave full permission): GitHub release, confirm PyPI, and `pip install -U cleanvibe` so her local `cleanvibe` is 2.0.0.
-3. **10 PM readiness check.** `cleanvibe --version` on PATH is 2.0.0; a dry run of the exact v2 flow succeeds; nothing is left uncommitted.
+1. **Docs + version 2.0.0.** README rewrite (v2 first, legacy section), CLAUDE.md (architecture + Key Decisions), site, `pages/updates.md` (skill changes for existing repos), memory. Then **release v2.0.0** (Emma gave full permission): GitHub release, confirm PyPI, and `pip install -U cleanvibe` so her local `cleanvibe` is 2.0.0.
+2. **10 PM readiness check.** `cleanvibe --version` on PATH is 2.0.0; a dry run of the exact v2 flow succeeds; nothing is left uncommitted.
 
 ---
 

@@ -1700,4 +1700,25 @@ starting-prompt tail is now "if I am here, ask me; if not, make a reasonable
 assumption and write it down". This repo's vendored skills are refreshed.
 220 tests pass.
 
+## 2026-09-26 — v2 practice project: an agent-started session runs as a real session
 
+Bare `cleanvibe` in `tests/scratch/`, run from this agent session, created
+`cleanvibe-2026-09-26-2` at 19:33 and launched it. This is the child-session
+case the rework targets. Checked from the outside:
+
+- **Pre-trust worked.** Claude Code's config now has the folder with
+  `hasTrustDialogAccepted: true`, and the session went straight past the trust
+  prompt that stalled the first attempt (still open as PID 38744, left alone).
+- **A real top-level session.** Its transcript is under its own
+  `~/.claude/projects/...cleanvibe-2026-09-26-2/`, not this session's, and the
+  Stop hook copied it into the project's `sessions/` (`.jsonl` + `.md`).
+- **Remote Control on.** The transcript has `bridge-session` records.
+- **It followed the first-session prompt.** It loaded CronCreate and scheduled
+  the one-time intake (`3 20 26 9 *`, `recurring: false`, with the exact
+  `[cleanvibe cron] Thirty-minute intake...` prompt). It wrote a first read into
+  INTENT.md and committed it (`04c5c9f`): empty folder, generated name, "likely
+  a cleanvibe smoke test", low confidence. It reported what it would do if the
+  user stayed silent.
+- **Found and fixed:** session-log files were dated from the transcript's UTC
+  timestamps (`2026-09-27_...` for a 7:33 PM Pacific session). The hook now
+  uses the local date.

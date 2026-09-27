@@ -165,9 +165,9 @@
 
   <div class="container">
     <header class="hero">
-      <span class="eyebrow">Project scaffolding</span>
-      <h1>cleanvibe, <span class="serif">a state initializer</span></h1>
-      <p class="tagline">A tiny, zero-dependency Python CLI that removes the friction between <span class="em">&ldquo;I want to build something&rdquo;</span> and <span class="em">&ldquo;Claude is working inside a well-structured environment.&rdquo;</span> It scaffolds the project, injects an opinionated <strong>CLAUDE.md</strong> behavior contract, and launches Claude Code.</p>
+      <span class="eyebrow">cleanvibe 2</span>
+      <h1>cleanvibe, <span class="serif">start from anything</span></h1>
+      <p class="tagline">A tiny, zero-dependency Python CLI that starts a Claude Code session in a git-tracked project built to <span class="em">work from low information</span>. Say what you want, drop a few files in, or walk away: the agent works out the goal, keeps its transcript in git, and can carry on unattended.</p>
       <div class="hero-actions">
         <span class="install">pip install cleanvibe</span>
         <a class="btn btn-secondary" href="https://github.com/EmmaLeonhart/cleanvibe">GitHub</a>
@@ -177,60 +177,60 @@
     <section class="section">
       <h2><span class="num">01 &mdash;</span> What it is</h2>
       <div class="lead">
-        <p>cleanvibe is not a coding tool &mdash; it is a state initializer. The real value is the working contract it installs: a short <code>CLAUDE.md</code> plus six workflow skills in <code>.claude/skills/</code> that enforce documentation discipline, meaningful commits, and iterative file-based thinking. Every project gets a pre-seeded <code>queue.md</code> (concrete steps, delete-only), a <code>devlog.md</code>, and, from the first session, a <code>todo.md</code> (the abstract long horizon) &mdash; finishing a queue item means deleting it <em>and</em> appending a dated devlog entry in the same commit, so <code>queue.md</code> can never rot into a status journal. Every project starts disciplined instead of as a blank-repo scramble, in a private repo by default, and Claude launches with a first message explaining the mode it is in. Zero runtime dependencies; Windows, Linux, macOS; Python 3.9+.</p>
+        <p>Most sessions don&rsquo;t start with a clear goal, and a rigid scaffold that assumes one ends up being fought. A cleanvibe 2 project assumes as little as possible. Run <code>cleanvibe</code> (or <code>cleanvibe new [name]</code>) and Claude opens in a fresh private git repo with a first message that explains the deal: the user may say little or nothing and may not be there. The agent reads the chat first, then whatever is in the folder (<code>data_lake/</code>; a brief in there is followed), then the directory name, and keeps its read of the goal in <code>INTENT.md</code>. Thirty minutes in, an intake commits everything as found, moves new material into <code>data_lake/</code>, and the agent plans the work and starts an autonomous loop (straight away if you said nothing, an hour later if you are steering). Every session&rsquo;s transcript is committed by a hook; sessions are real top-level sessions with Remote Control on, even when an agent started them. Practices for building and researching arrive as skills when the work needs them. Zero runtime dependencies; Windows, Linux, macOS; Python 3.9+.</p>
       </div>
     </section>
 
     <section class="section">
       <h2><span class="num">02 &mdash;</span> The subcommands</h2>
       <div class="cmds" id="cmds">
-        <div class="cmd cmd-a" data-cmd="new fresh project scaffold bootstrap">
+        <div class="cmd cmd-a" data-cmd="new start project conversation low information intent transcript">
           <span class="c-emoji">&#127793;</span>
-          <span class="c-name">cleanvibe new</span>
-          <p class="c-desc">Scaffold a fresh project: <code>CLAUDE.md</code>, <code>README.md</code>, <code>queue.md</code> (pre-seeded bootstrap), <code>devlog.md</code>, <code>.gitignore</code>, <code>data_lake/</code>, and the skills &mdash; an initial commit on a <code>main</code> branch, then launch Claude Code. Run in a non-empty directory and it prompts instead of erroring.</p>
-        </div>
-        <div class="cmd cmd-b" data-cmd="research question literature review report original investigation">
-          <span class="c-emoji">&#128300;</span>
-          <span class="c-name">cleanvibe research</span>
-          <p class="c-desc">Your own investigation of a question. The bootstrap pins the question down with you, runs a literature review into <code>literature/</code> before building anything, and keeps a themed report in <code>docs/</code> with a PDF built by CI.</p>
-        </div>
-        <div class="cmd cmd-c" data-cmd="original topic finding uncertain area research">
-          <span class="c-emoji">&#129517;</span>
-          <span class="c-name">cleanvibe original</span>
-          <p class="c-desc"><code>research</code> for when you don&rsquo;t have a question yet. Give it an area with <code>--area</code>; a topic-finding loop drafts and scores candidate questions with you, records them in <code>topics/</code>, and settles on one before the literature review.</p>
-        </div>
-        <div class="cmd cmd-a" data-cmd="chat conversation topic research session logs private">
-          <span class="c-emoji">&#128172;</span>
-          <span class="c-name">cleanvibe chat</span>
-          <p class="c-desc">A git-tracked conversation about one topic: research-heavy, light on code, in a private repo. It opens by asking what you are trying to do, keeps conclusions in <code>notes/</code>, and a hook commits every session&rsquo;s transcript into <code>sessions/</code>.</p>
-        </div>
-        <div class="cmd cmd-b" data-cmd="clone onboard existing codebase branch">
-          <span class="c-emoji">&#128279;</span>
-          <span class="c-name">cleanvibe clone</span>
-          <p class="c-desc">Onboard an existing repo. Works on a dedicated <code>cleanvibe-onboarding</code> branch &mdash; the default branch is untouched. Prepends scaffold if files exist; never overwrites.</p>
-        </div>
-        <div class="cmd cmd-c" data-cmd="convert in-place inject missing">
-          <span class="c-emoji">&#9851;</span>
-          <span class="c-name">cleanvibe convert</span>
-          <p class="c-desc">In-place onboarding for a project you are already in: injects only the scaffold files that are missing. Non-destructive by contract.</p>
-        </div>
-        <div class="cmd cmd-c" data-cmd="doctor audit drift check lint">
-          <span class="c-emoji">&#129658;</span>
-          <span class="c-name">cleanvibe doctor</span>
-          <p class="c-desc">A read-only audit for drift: done markers left in <code>queue.md</code>, releases missing from <code>devlog.md</code>, outdated skills, references to <code>CLAUDE.md</code> sections that no longer exist, tests with no CI. Exits non-zero if it finds anything.</p>
+          <span class="c-name">cleanvibe / cleanvibe new</span>
+          <p class="c-desc">Bare <code>cleanvibe</code> reopens the project you are in, or creates an auto-named one here; <code>cleanvibe new [name]</code> creates one. A minimal scaffold (<code>CLAUDE.md</code>, <code>INTENT.md</code>, <code>data_lake/</code>, <code>sessions/</code>, skills), a local private repo, and a session with Remote Control on. Thirty minutes in, the data-lake intake runs and the agent gets to work.</p>
         </div>
         <div class="cmd cmd-d" data-cmd="replicate paper arxiv alphaxiv reproduction">
           <span class="c-emoji">&#128218;</span>
           <span class="c-name">cleanvibe replicate</span>
           <p class="c-desc">Point it at an arXiv, alphaxiv or clawRxiv paper, any other URL, or a folder you drop the paper into, and it scaffolds a standalone replication project: a <code>SKILL.md</code> plan, the paper downloaded locally (gitignored, never committed), the authors&rsquo; code as a submodule, and CI that builds a findings site, a PDF report, and a ZIP package. Running anyone else&rsquo;s code waits for your consent.</p>
         </div>
+        <div class="cmd cmd-c" data-cmd="doctor audit drift check lint">
+          <span class="c-emoji">&#129658;</span>
+          <span class="c-name">cleanvibe doctor</span>
+          <p class="c-desc">A read-only audit for drift: done markers left in <code>queue.md</code>, releases missing from <code>devlog.md</code>, outdated skills, references to <code>CLAUDE.md</code> sections that no longer exist, tests with no CI. Exits non-zero if it finds anything.</p>
+        </div>
+        <div class="cmd cmd-b" data-cmd="research question literature review report original investigation">
+          <span class="c-emoji">&#128300;</span>
+          <span class="c-name">cleanvibe legacy research</span>
+          <p class="c-desc"><em>Deprecated 1.x mode.</em> Your own investigation of a question. The bootstrap pins the question down with you, runs a literature review into <code>literature/</code> before building anything, and keeps a themed report in <code>docs/</code> with a PDF built by CI.</p>
+        </div>
+        <div class="cmd cmd-c" data-cmd="original topic finding uncertain area research">
+          <span class="c-emoji">&#129517;</span>
+          <span class="c-name">cleanvibe legacy original</span>
+          <p class="c-desc"><em>Deprecated 1.x mode.</em> <code>research</code> for when you don&rsquo;t have a question yet. Give it an area with <code>--area</code>; a topic-finding loop drafts and scores candidate questions with you, records them in <code>topics/</code>, and settles on one before the literature review.</p>
+        </div>
+        <div class="cmd cmd-a" data-cmd="chat conversation topic research session logs private">
+          <span class="c-emoji">&#128172;</span>
+          <span class="c-name">cleanvibe legacy chat</span>
+          <p class="c-desc"><em>Deprecated 1.x mode.</em> A git-tracked conversation about one topic: research-heavy, light on code, in a private repo. It opens by asking what you are trying to do, keeps conclusions in <code>notes/</code>, and a hook commits every session&rsquo;s transcript into <code>sessions/</code>.</p>
+        </div>
+        <div class="cmd cmd-b" data-cmd="clone onboard existing codebase branch">
+          <span class="c-emoji">&#128279;</span>
+          <span class="c-name">cleanvibe legacy clone</span>
+          <p class="c-desc"><em>Deprecated 1.x mode.</em> Onboard an existing repo. Works on a dedicated <code>cleanvibe-onboarding</code> branch &mdash; the default branch is untouched. Prepends scaffold if files exist; never overwrites.</p>
+        </div>
+        <div class="cmd cmd-c" data-cmd="convert in-place inject missing">
+          <span class="c-emoji">&#9851;</span>
+          <span class="c-name">cleanvibe legacy convert</span>
+          <p class="c-desc"><em>Deprecated 1.x mode.</em> In-place onboarding for a project you are already in: injects only the scaffold files that are missing. Non-destructive by contract.</p>
+        </div>
       </div>
     </section>
 
     <section class="section">
-      <h2><span class="num">03 &mdash;</span> Stable, v1.x</h2>
+      <h2><span class="num">03 &mdash;</span> Stable, v2.x</h2>
       <div class="lead">
-        <p>Semantic versioning since v1.0.0 (currently v1.18.0). <code>new</code>, <code>research</code>, <code>original</code>, <code>chat</code>, <code>clone</code>, <code>convert</code>, <code>replicate</code>, and <code>doctor</code> are stable within the 1.x line; the core injected set &mdash; <code>CLAUDE.md</code>, <code>README.md</code>, <code>queue.md</code>, <code>devlog.md</code>, <code>.gitignore</code> &mdash; is fixed; new repos initialize on <code>main</code>; <code>clone</code>/<code>convert</code> never overwrite and <code>replicate</code> never errors on a name collision; zero runtime dependencies is a hard guarantee. Preview anything with <code>--dry-run</code>.</p>
+        <p>Semantic versioning (currently v2.0.0). <code>cleanvibe</code>, <code>new</code>, <code>replicate</code>, <code>doctor</code> and <code>legacy</code> are stable within 2.x; <code>replicate</code> behaves as in 1.x and the <code>legacy</code> modes are frozen. A new project always has <code>CLAUDE.md</code>, <code>README.md</code>, <code>INTENT.md</code>, <code>.cleanvibe.json</code>, <code>sessions/</code>, <code>data_lake/</code>, the transcript hook and the intake script, in a repo on <code>main</code> with no remote. <code>new</code> never overwrites a project; zero runtime dependencies is a hard guarantee. Preview anything with <code>--dry-run</code>.</p>
       </div>
       <div class="hero-actions">
         <a class="btn btn-primary" href="https://github.com/EmmaLeonhart/cleanvibe">Read on GitHub &rarr;</a>

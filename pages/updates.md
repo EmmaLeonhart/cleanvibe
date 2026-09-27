@@ -17,11 +17,180 @@ with a message naming which skills were refreshed.
 sections and the check folded new *sections* into `CLAUDE.md`. The pre-v1.14.0
 entries below are kept as a record; their content now lives in the skills.)
 
-**Scope.** Skills are vendored into `cleanvibe new`, `convert`, `clone`,
-`research`, `original`, and `chat` projects. `cleanvibe replicate` projects are a bounded
+**Scope.** Skills are vendored into every cleanvibe 2 project and every
+`legacy` `new`, `convert`, `clone`, `research`, `original` and `chat` project. `cleanvibe replicate` projects are a bounded
 paper-replication workflow with their own definition of done and are not
 auto-vendored the skill set. The `autonomous-loop` (three-cron) skill is itself
 self-exempting for replication-style bounded work.
+
+---
+
+## v2.0.0 (2026-09-26) — cleanvibe 2: low-information sessions; skill revisions
+
+cleanvibe 2 changes how new projects start (see the README). For **existing
+repos**, what matters here is three skills:
+
+- **`autonomous-loop` — rewritten.** The same three staggered crons (work
+  `:03`, flush `:15`, status `:42`) and the same standards, without the
+  start / kill-on-refill / restart choreography and the pinned tail items.
+  Agents read those as licence to switch the loop off. Now only the user stops
+  the crons; an idle tick is normal. If your `queue.md` still has an
+  "Always last — restart the cron" section, you can delete it.
+- **`research-practice` — new.** Research on any topic (not only CS papers):
+  pin the question down (ask only if the user is present; otherwise infer and
+  record the assumption), survey wide then deep, `research/SUMMARY.md` as a
+  living answer with confidence, `research/sources.md`, claims tied to sources.
+- **`queue-driven-workflow` — revised.** Framed as the development practice;
+  in a cleanvibe 2 project it creates `queue.md`/`todo.md`/`devlog.md` when the
+  work turns into a build; CI once the project has a remote.
+
+Also: AskUserQuestion is for when the user is clearly present and replying;
+otherwise decide and write the assumption down. Add `research-practice` to the
+skill list in your `CLAUDE.md` `## Skills` section.
+
+`.claude/skills/autonomous-loop/SKILL.md`, full text:
+
+````markdown
+---
+name: autonomous-loop
+description: Use when the user wants a long stretch of autonomous work (hours, overnight, or while they are away) — set up three local hourly crons (work, flush, status) that keep the work moving, committed and readable. Also use when deciding whether those crons should keep running.
+---
+
+# Autonomous loop — three hourly crons
+
+When the user wants you to keep working on your own for a long stretch (hours,
+overnight, while they are away), set up three local `CronCreate` jobs. They are
+session-local (`durable: false`): they fire only while this session runs and end
+with it, so a later session sets them up again if the user still wants
+autonomous work. Stagger the minutes so the ticks don't collide:
+
+1. **Work, `3 * * * *`.** Each tick:
+   - **Sync.** `git fetch`, then fast-forward or rebase. Never force-push, never
+     `reset --hard`, never discard work from another machine or session.
+   - **Work.** Take the top item in `queue.md` that you can do, and do it. If
+     nothing in the queue is doable, take the next `todo.md` item that is
+     unblocked, bounded and checkable, plan it into `queue.md`, then do it.
+     If there is still nothing, the tick is **idle**: say so in one line and
+     stop there. An idle tick is normal, not a problem to solve.
+   - **Commit and push**, deleting finished items from `queue.md` and logging
+     them in `devlog.md` in the same commit.
+   - **Report** in one line: the commits, or `idle: <reason>`.
+2. **Flush, `15 * * * *`.** Commit and push anything left uncommitted. No empty
+   commits. (Session transcripts are committed by the session-log hook, not by
+   this cron.)
+3. **Status, `42 * * * *`.** Report only, no changes: what advanced since the
+   last report (commits), the queue as it stands, anything blocked (with its
+   not-done tag and the specific blocker), and test health.
+
+## The work keeps the project's normal standards
+- Claim something works only after running it. Never weaken, skip or delete a
+  test to get green; record the defect instead. Check CI, not only local runs.
+- If you don't understand something well enough to build it, write the question
+  down (a queue item, or `INTENT.md`) instead of guessing.
+
+These are how the work is done, not reasons to stop the loop.
+
+## Keep the crons running
+- **Do not turn the crons off yourself.** Not because the queue is empty, not
+  because a tick failed, not because something looks risky, and not at the end
+  of a burst of work. Only the user stops them (directly, or through the
+  `emergency-stop` skill).
+- When something goes wrong, the loop is how the user finds out: report it in
+  the next status tick and carry on with whatever is still safe to do.
+- If the queue is replanned mid-session, leave the crons alone; the next work
+  tick picks up the new top item.
+- In a cleanvibe project, the thirty-minute intake in CLAUDE.md decides when
+  the loop starts. Elsewhere, start it when the user asks for autonomous work.
+
+**Why:** long autonomous stretches usually fail by quietly losing the thread.
+The work tick keeps progress steady and committed, the flush makes sure nothing
+is lost, and the status tick keeps the thread readable for when the user comes
+back.
+
+Replication projects (`cleanvibe replicate`) are bounded jobs and do not use
+the loop.
+````
+
+`.claude/skills/research-practice/SKILL.md`, full text:
+
+````markdown
+---
+name: research-practice
+description: Use when the work in a project is research on any topic, not only computer science — pinning down the question, gathering and weighing sources, keeping notes with citations, and maintaining a living summary — whether it is a single question or a long-running inquiry.
+---
+
+# Research practice
+
+For research on any subject: history, a technical field, a market, a hobby, a
+health question, a policy debate. It suits a single question and a long-running
+inquiry that grows over months. (Replicating one specific paper is a different
+job; that is `cleanvibe replicate`.)
+
+## Layout (create it when the research starts, not before)
+- `research/SUMMARY.md`: the living answer. What is known now, how sure, what
+  is contested, what is still open. Rewrite it as understanding changes; it
+  should always make sense read on its own.
+- `research/sources.md`: one entry per source, with the citation or link, date
+  accessed, what kind of source it is (primary data, peer-reviewed, reporting,
+  opinion, vendor material), what it contributes, and how far to trust it.
+- `research/notes/`: one Markdown file per sub-question, with every claim tied
+  to a source.
+- Downloads and datasets go in `data_lake/`; throwaway fetches go in `scratch/`.
+
+## How to work
+- **Pin the question down.** If the user is here and replying, ask them
+  (AskUserQuestion is fine then): what they want to know, why, how deep to go,
+  and what would count as an answer. If they are not, infer the question from
+  the chat, the material in `data_lake/` and the project name, write it at the
+  top of `SUMMARY.md` as a stated assumption, and start.
+- **Survey wide, then go deep.** First map the main positions and the key
+  sources; then dig into what matters for the user's question.
+- **Every claim gets a source.** Keep what a source says separate from your own
+  inference, and label the inference.
+- **Weigh sources rather than counting them.** Prefer primary and established
+  sources, note dates and conflicts of interest, and when sources disagree,
+  record both positions and what would settle it instead of averaging them.
+- **Say how sure you are**, in `SUMMARY.md` and when you report back: lead with
+  the answer, then the confidence, then the evidence.
+- **Long-running inquiries** get a dated "What changed" entry in `SUMMARY.md`
+  each session, so the user can see how the picture moved.
+- **Link, don't copy.** Quote briefly; never commit whole copyrighted texts.
+````
+
+`.claude/skills/queue-driven-workflow/SKILL.md`, full text:
+
+````markdown
+---
+name: queue-driven-workflow
+description: Use when the work in a cleanvibe project is software development or any other multi-step build — plan into queue.md first, the todo.md → queue.md → devlog.md flow, delete-don't-check completion, task-tool mirroring, and tests/CI discipline.
+---
+
+# Queue-driven workflow (development practice)
+
+In a cleanvibe 2 project nothing is set up for this in advance. When the work
+turns into building something over several steps, create `queue.md`, `todo.md`
+and `devlog.md` if they don't exist yet, and work this way from then on.
+
+## Workflow Rules
+- **Commit early and often.** Every meaningful change gets a commit with a clear message explaining *why*, not just what.
+- **Plan into `queue.md` first, then execute.** When entering planning mode (or doing any non-trivial multi-step work), the FIRST action is to write the plan into `queue.md` as concrete items. Only then begin executing. This means an interrupted session can resume from the queue — the plan does not live only in chat context.
+- **Finishing an item = delete from `queue.md` + append to `devlog.md`, then commit and push.** When a queue item is done, **delete the item from `queue.md`** and **append a dated entry to `devlog.md`** recording what was completed, in the *same commit as the work*, then push (if the repo has a remote). Never mark an item done in place (no `[x]`, no "✓", no "DONE"). `queue.md` only ever holds not-yet-done work; `devlog.md` is where "done" lives.
+- **Mirror `queue.md` into the task tool.** TaskCreate items as you add them to queue.md; mark `in_progress` when starting; `completed` when done. The two views must not drift.
+- **Keep CLAUDE.md up to date.** As the project takes shape, record architectural decisions, conventions, and anything needed to work effectively in this repo.
+- **Update README.md regularly.** It should always reflect the current state of the project for human readers.
+
+## Queue and longer-horizon work
+- **`queue.md`** — what's being worked on right now. Items get deleted on completion; do not leave checkmarks or status indicators behind. If it's not in `queue.md`, it's not in scope for the current session.
+- **`todo.md`** — the **long-term horizon** of the project. Multi-session goals, architectural ambitions, future capabilities. Items in `todo.md` are *abstract*: they describe a destination, not a step. When work begins, an item is pulled from `todo.md`, decomposed into concrete executable steps in `queue.md`, mirrored into the task tool, and executed. As `queue.md` drains, refill it from the next `todo.md` item.
+- **`devlog.md`** — where **"done" lives**. Every finished queue item is deleted from `queue.md` and appended as a dated entry here, in the same commit as the work. Releases (tag + one-line note) and notable milestones also go here.
+- **Flow:** `todo.md` (abstract horizons) → `queue.md` (concrete steps) → task tool (in-flight work) → `devlog.md` + `git log` (history). Items only ever flow forward.
+- **When to stop and hand back:** `queue.md` is empty, what is left in `todo.md` is still too abstract to break down, and tests (and CI, if the project has a remote) pass.
+
+## Testing
+- **Write unit tests early.** As soon as there is testable logic, create a test file. Use `pytest` for Python projects or the appropriate test framework for the language in use.
+- **Set up CI once the project has a GitHub remote.** A `.github/workflows/ci.yml` that runs the test suite on push and pull request. Keep it simple — install dependencies and run tests.
+- **Keep tests passing.** Do not commit code that breaks existing tests. If a change requires updating tests, update them in the same commit.
+````
 
 ---
 

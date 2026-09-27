@@ -1,15 +1,18 @@
 # cleanvibe
 
 ## Project Description
-A pip-installable Python CLI (`cleanvibe`) that scaffolds AI-assisted coding projects and launches Claude Code. Zero dependencies -- just stdlib.
+A pip-installable Python CLI (`cleanvibe`) that starts Claude Code sessions in git-tracked projects. **cleanvibe 2** (v2.0.0): every project starts as an open-ended session that works from low information (the user may say little or be away); the agent infers the purpose, keeps `INTENT.md`, and transcripts are committed. The 1.x modes live under `cleanvibe legacy`. Zero dependencies -- just stdlib.
 
 ## Architecture
 ```
 cleanvibe/
 ├── cleanvibe/
 │   ├── __init__.py      # Version string
-│   ├── cli.py           # argparse-based CLI entry point (new/research/original/chat/clone/convert/replicate/doctor)
-│   ├── scaffold.py      # Core logic: create_project(), clone_project(), convert_project()
+│   ├── cli.py           # argparse CLI: bare `cleanvibe`, new, replicate, doctor, legacy {new,research,original,chat,clone,convert}
+│   ├── project.py       # cleanvibe 2: new_project(), open_project(), is_cleanvibe_repo(), auto_project_path()
+│   ├── launch.py        # launch Claude as a real top-level session (strip parent-session env, new console/terminal)
+│   ├── trust.py         # pre-trust folders cleanvibe creates in Claude Code's config (~/.claude.json)
+│   ├── scaffold.py      # 1.x core: create_project(), clone_project(), convert_project(); shared _write/_git_init/_launch_claude
 │   ├── research.py      # research_project(): original-research scaffold (lit-review-first + report)
 │   ├── original.py      # original_project(): research scaffold + topic-finding loop (uncertain topic)
 │   ├── chat.py          # chat_project(): git-tracked conversation (ask-first, session logs committed by hook)
@@ -17,7 +20,8 @@ cleanvibe/
 │   ├── arxiv.py         # stdlib arXiv/alphaxiv metadata fetch + parsing (zero-dep)
 │   ├── clawrxiv.py      # stdlib clawRxiv (clawrxiv.io) JSON API fetch + parsing (zero-dep)
 │   ├── replicate.py     # replicate_{project,clawrxiv_project,manual_project}(): per-paper replication
-│   └── templates.py     # scaffold + research + replication templates (shared CLAUDE.md blocks: _CLAUDE_CORE_RULES/_WRITING_SECTION/_common_claude_tail)
+│   ├── skills.py        # the vendored skills (single source of truth), write_skills()
+│   └── templates.py     # all generated text: v2 (v2_*, V2_INTAKE_PY), 1.x modes, replication, the session-log hook script
 ├── tests/               # stdlib unittest, run by CI on win/mac/linux
 ├── docs/                # replication_framing.md (vision) + replication-examples/ (reference corpus)
 ├── pages/                # static GitHub Pages site (index.html/identity.css/CNAME → cleanvibe.emmaleonhart.com)
@@ -34,8 +38,19 @@ cleanvibe/
 ```
 
 ## Key Decisions
+- **cleanvibe 2 (v2.0.0) — the general-purpose rework.** Emma's spec is recorded in `devlog.md` (2026-09-26, "cleanvibe 2 — the spec", plus the 7:15 PM low-information addendum). The essentials:
+  - **CLI:** bare `cleanvibe` opens the cwd's project (v2 marker `.cleanvibe.json` or a 1.x project) with the resume prompt, else creates an auto-named `cleanvibe-YYYY-MM-DD` project in the cwd. `new [NAME]` creates one (auto-named without NAME; an existing project is opened; a non-empty non-project folder is refused). `replicate` and `doctor` are unchanged top-level commands. The 1.x modes run as `cleanvibe legacy <cmd>` with a DEPRECATED warning; their old top-level names exit 2 pointing there.
+  - **Low information is the design point.** The user may say nothing or be away (Emma runs cleanvibe from a scheduled job). Priority: chat > what is in the folder (`data_lake/`; specs/instructions there are followed) > the directory name. The agent keeps `INTENT.md` (its analysis of the goal, evidence, confidence) and writes assumptions down instead of stopping to ask. **AskUserQuestion only when the user is clearly present and replying.**
+  - **The first-session prompt carries the operating instructions** (it is the one message cleanvibe can put directly in front of the agent): low information, read CLAUDE.md, CronCreate the one-time **thirty-minute intake**, write a first read into INTENT.md. The resume prompt reschedules the intake if it never ran.
+  - **Thirty-minute intake:** `.claude/scripts/data_lake_intake.py` (`templates.V2_INTAKE_PY`) commits the repo as found, `git mv`s never-committed top-level material into `data_lake/` and commits that, then reports user engagement from `sessions/*.jsonl` (cleanvibe's own `[cleanvibe cron]`/starting prompts excluded; substantial = 2+ messages or 300+ chars). The agent then studies the data lake, updates INTENT.md, plans with the matching skill, and starts the autonomous loop: immediately with little/no engagement, or via a one-shot 60 minutes later with substantial engagement. Runs once (`intake_at` in the marker).
+  - **Data-lake rule:** material goes into `data_lake/` and is committed as part of the repository's history (stray material: commit where it landed, then `git mv`).
+  - **Minimal scaffold:** CLAUDE.md, README.md, INTENT.md, marker, `.gitignore` (+`scratch/` for one-off crud), `sessions/`, `data_lake/`, skills, hooks, intake script. No queue/todo/devlog until `queue-driven-workflow` adds them. Local git on `main`, no remote (private if one is added).
+  - **Sessions are real top-level sessions with Remote Control** (`launch.clean_env` strips `CLAUDE_CODE_CHILD_SESSION`, the parent session id/socket/bridge id, etc.; `claude "<prompt>" --remote-control`, flag after the prompt because it takes an optional name). New folders are **pre-trusted** in Claude Code's config (`trust.mark_trusted`: only folders `new_project` just created and is launching; backup + atomic write; never creates or repairs the config) so an unattended session doesn't stall at the trust prompt. Emma approved this explicitly.
+  - **Transcripts:** the Stop hook refreshes `sessions/<local date>_<id>.{jsonl,md}` after every response and commits them at most hourly; SessionEnd always commits (and pushes if there is an upstream).
+  - **Skills:** `autonomous-loop` rewritten without the start/kill/restart choreography (only the user stops the crons; idle ticks are normal) and not split for legacy; new general `research-practice`; `queue-driven-workflow` is the development practice a v2 project adopts on demand.
+  - **Tests** never write the real `~/.claude.json`: launch-path test modules point `CLEANVIBE_CLAUDE_CONFIG` at a temp file (`unittest discover -s tests` does not import `tests/__init__.py`, so it is set per module too).
 - **Zero dependencies**: Uses only stdlib (argparse, pathlib, subprocess, platform). No click, no typer. Keeps install fast and reduces supply chain risk.
-- **Cross-platform**: Windows launches claude in a new cmd window via `subprocess.Popen`. Unix uses `os.execlp` to replace the process.
+- **Cross-platform launch** (`launch.py`): Windows opens a new console (`cmd /k`, new process group, breaking away from the caller's job object when allowed). Unix with a terminal `execvpe`s `claude`; without one (run by an agent) it opens a new terminal window from a generated script, or prints the command.
 - **Non-destructive cloning**: `cleanvibe clone` only injects files that are missing. Never overwrites.
 - **`--dry-run` flag**: Shows what would happen without writing anything. Builds trust.
 - **queue.md is part of the scaffold**: Every project gets a `queue.md` and a CLAUDE.md that enforces planning into queue.md before executing, mirroring it into the task tool, and updating it in the same commit as the work. See the reference repos at `../Sutra/`, `../SutraDB/`, `../shintowiki-scripts/` for the established convention.

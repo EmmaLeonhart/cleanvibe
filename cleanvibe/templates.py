@@ -3646,10 +3646,20 @@ def render(entries, title):
     return "\n".join(out).rstrip() + "\n"
 
 
+def _local_date(stamp):
+    """The local calendar date of a transcript timestamp (they are UTC)."""
+    if not re.match(r"\d{4}-\d{2}-\d{2}", stamp):
+        return "undated"
+    try:
+        from datetime import datetime
+        return datetime.fromisoformat(stamp.replace("Z", "+00:00")).astimezone().strftime("%Y-%m-%d")
+    except ValueError:
+        return stamp[:10]
+
+
 def _stem(entries, session_id):
     stamp = next((e["timestamp"] for e in entries if e.get("timestamp")), "")
-    date = stamp[:10] if re.match(r"\d{4}-\d{2}-\d{2}", stamp) else "undated"
-    return f"{date}_{(session_id or 'session')[:8]}"
+    return f"{_local_date(stamp)}_{(session_id or 'session')[:8]}"
 
 
 def save(hook):
