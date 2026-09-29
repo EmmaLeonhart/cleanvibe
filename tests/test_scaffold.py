@@ -196,7 +196,12 @@ class TestCreateProject(unittest.TestCase):
         lower = content.lower()
         self.assertIn("croncreate", lower)
         self.assertIn("7,37 * * * *", content)
-        self.assertIn("Commit and push any and all changes, then\n  continue working on the queue.", content)
+        self.assertIn("Commit and push any and all changes, then\n  continue working on the queue", content)
+        # v2.0.3 (case study 06): the tick prompt itself names the standing duties.
+        prompt = content.split("**Prompt:**", 1)[1].split("That's the whole loop", 1)[0]
+        for duty in ("refill it from the open questions", "Re-read INTENT.md",
+                     "fill in README.md", "Check the clock"):
+            self.assertIn(duty, prompt)
         for gone in ("15 * * * *", "42 * * * *", "**flush,", "**status,"):
             self.assertNotIn(gone, content)
         # Only the user stops it; idle is fine; research queues refill; no kill step.

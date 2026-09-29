@@ -151,6 +151,8 @@ def _transcript(path):
         ]}},
         {"type": "attachment", "attachment": {"type": "queued_command", "prompt": "Also cover pu-erh"}},
         {"type": "user", "isMeta": True, "message": {"role": "user", "content": "meta"}},
+        {"type": "user", "isMeta": True, "message": {"role": "user",
+         "content": "[cleanvibe cron] Commit and push any and all changes"}},
     ]
     path.write_text("\n".join(json.dumps(l) for l in lines) + "\nnot json\n", encoding="utf-8")
 
@@ -186,7 +188,8 @@ class TestSessionLogHook(unittest.TestCase):
         self.assertIn("What is oolong?", text)
         self.assertNotIn("noise", text)          # system reminders stripped
         self.assertNotIn("private", text)        # thinking not rendered
-        self.assertNotIn("meta", text)           # isMeta skipped
+        self.assertNotIn("meta", text)           # isMeta skipped...
+        self.assertIn("## Cron\n\n[cleanvibe cron] Commit and push", text)  # ...except cron prompts
         self.assertIn("A partly oxidized tea.", text)
         self.assertIn("*WebSearch*: oolong oxidation", text)
         self.assertNotIn("search output", text)  # ordinary tool output skipped

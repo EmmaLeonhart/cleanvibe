@@ -19,7 +19,9 @@ job; that is `cleanvibe replicate`.)
   opinion, vendor material), what it contributes, and how far to trust it.
 - `research/notes/`: one Markdown file per sub-question, with every claim tied
   to a source.
-- Downloads and datasets go in `data_lake/`; throwaway fetches go in `scratch/`.
+- Downloads and datasets you fetch for the research go in
+  `data_lake/downloads/` (committed, kept apart from the user's own material
+  in the rest of `data_lake/`); throwaway fetches go in `scratch/`.
 
 ## How to work
 - **Pin the question down.** If the user is here and replying, ask them

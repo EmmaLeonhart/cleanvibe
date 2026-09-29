@@ -1917,3 +1917,30 @@ CI green on `0fc4083` (6/6). Released **v2.0.2**; PyPI serves it; Emma's local
 SOME ENGAGEMENT verdict, and doctor reports no drift. Sessions already running
 (chat-test, ai-history-analysis) keep the crons they set up under 2.0.1 until
 they are restarted or told to switch.
+
+## 2026-09-29 — 2.0.3 on branch `research-fixes-2.0.3` (not pushed, not released)
+
+Applied the eight fixes from the ai-context-research study (case study 06),
+approved by Emma: "you can apply all the eight fixes".
+- **M1** The loop-tick prompt names the standing duties: refill an empty queue
+  from the open questions, re-read and update INTENT.md, fill in README.md,
+  check the clock. The skill gains step 4 (keep the standing files current),
+  and "blocked" no longer counts as "nothing to do".
+- **M2** The first and resume prompts name the cleanvibe-update-check skill.
+- **M3** CLAUDE.md: times come from `date`, not estimates or schedules.
+- **M4** CLAUDE.md: quote the user before recording their stance; ask if the
+  input was dictated or ambiguous.
+- **M5** research-practice downloads go in `data_lake/downloads/` (CLAUDE.md
+  agrees); Claude Code's memory directory is named as outside the project;
+  the update check verifies that skills and CLAUDE.md agree.
+- **M6** The session-log hook renders `[cleanvibe cron]` prompts under
+  `## Cron`.
+- **M7** CLAUDE.md: constraints the user gives in chat go in INTENT.md.
+- **M8** CLAUDE.md: prose goes through the file tools, dependent shell steps
+  are chained with `&&`, and an edit is checked before it is logged.
+- Case study 06; `pages/updates.md` v2.0.3 entry; version 2.0.3; this repo's
+  own vendored skills refreshed. Tests: one updated (the tick prompt changed
+  on purpose; it now also checks that the duties are named), cron rendering
+  in the hook test, and three new 2.0.3 tests. 229 pass.
+- **Not done:** push, CI, release, PyPI. Pushing publishes to the public repo
+  and the Pages site, so it waits for Emma (BLOCKED-ON-USER-ACTION).

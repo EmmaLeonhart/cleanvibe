@@ -57,7 +57,10 @@ overnight, while they are away), set up **one** local `CronCreate` job:
 - **Schedule:** `7,37 * * * *` (every half hour, off the busy :00/:30 marks),
   recurring.
 - **Prompt:** `[cleanvibe cron] Commit and push any and all changes, then
-  continue working on the queue.`
+  continue working on the queue (refill it from the open questions if it is
+  empty). Re-read INTENT.md and update it if your understanding has changed;
+  fill in README.md if the purpose is now clear. Check the clock before
+  writing any time down.`
 
 That's the whole loop. Each time it fires:
 
@@ -69,8 +72,20 @@ That's the whole loop. Each time it fires:
 3. **When the queue runs dry, refill it before idling.** In a research project,
    take the top open question in `research/SUMMARY.md`, plan it into
    `queue.md`, and work it. Otherwise take the next `todo.md` item that is
-   unblocked, bounded and checkable. If there is truly nothing, the tick is
-   **idle**: say so in one line. An idle tick is normal, not a problem to solve.
+   unblocked, bounded and checkable. "The remaining items are blocked" is not
+   the same as "nothing to do": look for other open questions first. If there
+   is truly nothing, the tick is **idle**: say so in one line.
+   An idle tick is normal, not a problem to solve.
+4. **Keep the standing files current.** Re-read `INTENT.md` and update it if
+   your understanding has changed (including constraints the user gave in
+   chat). Fill in `README.md` once the purpose is clear.
+
+**Why the prompt names these duties:** in the study of cleanvibe's own
+transcripts (case study 06), loop ticks did what the tick prompt named
+(commit, work the queue) and skipped everything it didn't: no tick in 22 read
+`INTENT.md`, which went stale for hours; the README stayed a stub; and an
+empty queue was reported idle instead of refilled. Naming a duty in the
+prompt is what makes it reliably happen.
 
 The job is session-local (`durable: false`): it fires only while this session
 runs, so a later session sets it up again if the user still wants autonomous
@@ -156,7 +171,9 @@ job; that is `cleanvibe replicate`.)
   opinion, vendor material), what it contributes, and how far to trust it.
 - `research/notes/`: one Markdown file per sub-question, with every claim tied
   to a source.
-- Downloads and datasets go in `data_lake/`; throwaway fetches go in `scratch/`.
+- Downloads and datasets you fetch for the research go in
+  `data_lake/downloads/` (committed, kept apart from the user's own material
+  in the rest of `data_lake/`); throwaway fetches go in `scratch/`.
 
 ## How to work
 - **Pin the question down.** If the user is here and replying, ask them
@@ -201,7 +218,8 @@ This repo's `.claude/skills/` were vendored by **cleanvibe**. cleanvibe ships ne
 
 1. **Fetch the current skill index** — `WebFetch https://cleanvibe.emmaleonhart.com/updates.md`. This is the canonical, hand-maintained page describing every skill cleanvibe ships, keyed by the cleanvibe version that introduced or revised it.
 2. **Compare against the skills currently in `.claude/skills/`.** If the page lists newer skills or revisions, update the corresponding `.claude/skills/<slug>/SKILL.md` files to match. Match the wording from `updates.md`; don't paraphrase.
-3. **Update the last-check date** in CLAUDE.md's `## Skills` section. Commit with a message describing which skills were refreshed.
+3. **Check that the parts agree.** Read the refreshed skills against CLAUDE.md and note any rule they state differently (loop schedule, where downloads go, what counts as outside the project). If they conflict, CLAUDE.md is the project's rule: say so in your report and add a line to `INTENT.md`, rather than following whichever text you read last.
+4. **Update the last-check date** in CLAUDE.md's `## Skills` section. Commit with a message describing which skills were refreshed.
 
 If the fetch fails (offline, DNS, page not yet up), leave the date alone and try next session — the check is opportunistic, not mandatory.
 """

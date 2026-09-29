@@ -222,6 +222,27 @@ def _log(proj, *messages):
         "\n".join(json.dumps(e) for e in entries) + "\n", encoding="utf-8")
 
 
+class TestResearchFixes203(unittest.TestCase):
+    """v2.0.3: fixes from the ai-context-research transcript study (case study 06)."""
+
+    def test_prompts_name_the_update_check(self):
+        self.assertIn("cleanvibe-update-check", templates.v2_resume_prompt("/home/e/p"))
+        self.assertIn("cleanvibe-update-check", templates.v2_first_prompt("/home/e/p", True))
+
+    def test_claude_md_states_the_new_rules(self):
+        md = templates.v2_claude_md("p")
+        self.assertIn("Times come from the clock", md)                  # M3
+        self.assertIn("quote their own words", md)                      # M4
+        self.assertIn("~/.claude/projects/.../memory/", md)             # M5: harness memory is outside
+        self.assertIn("data_lake/downloads/", md)                       # M5: agrees with research-practice
+        self.assertIn("Constraints the user gives in chat", md)         # M7
+        self.assertIn("confirm an edit landed", md)                     # M8
+
+    def test_skills_agree_with_claude_md(self):
+        self.assertIn("data_lake/downloads/", skills.SKILLS["research-practice"])
+        self.assertIn("Check that the parts agree", skills.SKILLS["cleanvibe-update-check"])
+
+
 class TestThirtyMinuteIntake(unittest.TestCase):
     def setUp(self):
         self.proj = _new("ai-history")

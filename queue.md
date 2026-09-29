@@ -6,7 +6,10 @@
 
 ## Active
 
-_(empty — 2.0.2 released; see `devlog.md` and `docs/case-studies/`.)_
+**2.0.3 is on branch `research-fixes-2.0.3`** (see devlog 2026-09-29).
+1. **BLOCKED-ON-USER-ACTION (Emma):** say whether to push, merge to `main`,
+   and release 2.0.3. Pushing updates the public repo and the Pages
+   `updates.md` that every project's update check reads.
 
 ---
 

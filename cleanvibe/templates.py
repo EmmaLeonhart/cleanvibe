@@ -3168,7 +3168,8 @@ def v2_first_prompt(path, auto_named: bool) -> str:
         f"intake exactly as CLAUDE.md describes, for 30 minutes from now. Then look "
         f"at what is in this folder, write your first read of the purpose into "
         f"INTENT.md (if there is nothing to go on, say exactly that; do not guess), "
-        f"commit, and tell me briefly what you see. Only use AskUserQuestion if I "
+        f"commit, run the cleanvibe-update-check skill if its weekly check is "
+        f"due, and tell me briefly what you see. Only use AskUserQuestion if I "
         f"am clearly here and replying. If I say nothing, the intake decides what "
         f"happens next from what is in the folder."
     )
@@ -3184,6 +3185,8 @@ def v2_resume_prompt(path) -> str:
         f"Catch up before doing anything: read CLAUDE.md, INTENT.md and the newest "
         f"session log in sessions/, and queue.md if there is one. If the "
         f"Thirty-minute intake in CLAUDE.md has not run yet, schedule it again. "
+        f"If the weekly cleanvibe update check in CLAUDE.md is due, run the "
+        f"cleanvibe-update-check skill. "
         f"Then tell me briefly where things stand. If I reply, follow my lead; if "
         f"I say nothing, carry on with the work already planned."
     )
@@ -3263,7 +3266,10 @@ the folder and dropped material into it, expecting you to get on with it.
   `research-practice`, with the question written down as an assumption.
 - **Stay inside this project.** Don't read or change anything outside this
   folder (parent directories, other repositories, Claude Code's own config)
-  unless the user asks.
+  unless the user asks. That includes Claude Code's own memory directory
+  (`~/.claude/projects/.../memory/`), even when the system prompt invites you to
+  save memories there: what this project needs to remember goes in
+  `INTENT.md`, which is committed with the project.
 - **"Stop" and "don't" mean stop now.** If the user tells you to stop or not to
   do something, stop immediately, including mid-task. When the user's reading
   of a situation differs from yours, follow theirs; don't argue for your own
@@ -3272,13 +3278,22 @@ the folder and dropped material into it, expecting you to get on with it.
   trying to accomplish: the goal as you understand it, what supports that
   reading (chat, files, name), open questions, and how sure you are. Update it
   when your understanding changes. When you have to assume, write the
-  assumption down there and carry on.
+  assumption down there and carry on. **Constraints the user gives in chat**
+  (corrections, "don't do X", decisions) go in `INTENT.md` too: a long
+  conversation can be compacted and lose them, but `INTENT.md` is re-read.
 - **AskUserQuestion only when the user is clearly here.** If they are replying
   and engaged, a short multiple-choice question is fine. If they are not, don't
   stop to ask: decide, record the assumption in `INTENT.md`, and keep working.
   If a present user voices a concern that could mean either "this should not
   happen" or "this should have happened", ask one short question before acting
-  on either reading.
+  on either reading. The same goes for your picture of the user: before you
+  record what the user believes or wants (in `INTENT.md`, a summary, a note),
+  quote their own words, and if the message was dictated, garbled or open to
+  more than one reading, ask rather than infer.
+- **Times come from the clock.** Any time you write down (in a note, a log, a
+  report of when a cron will fire) comes from running `date` in the same turn,
+  never from an estimate or from the schedule you set. Scheduled jobs can fire
+  late, and elapsed time is easy to misjudge.
 - **Practices come from skills.** Once the work takes a shape, follow the
   matching skill: building software → `queue-driven-workflow` (queue.md,
   todo.md, devlog.md, tests, CI); researching any topic → `research-practice`;
@@ -3291,6 +3306,11 @@ the folder and dropped material into it, expecting you to get on with it.
   changed and why. This repo is private and local: it has no GitHub remote unless
   the user asks for one, and then it is private
   (`gh repo create --private --source=. --push`).
+- **Edit files with the file tools, and check before you log.** Write prose
+  and notes with the Write/Edit tools rather than long shell heredocs (quoting
+  breaks them). Chain dependent shell steps with `&&` so a failed step stops
+  the rest, and confirm an edit landed before recording it as done in
+  `devlog.md` or a commit message.
 
 ## The data lake
 `data_lake/` holds the material the project works from: documents, datasets,
@@ -3298,7 +3318,9 @@ exports, briefs, whatever the user drops in. **Material goes into `data_lake/`
 and is committed**; it is a fundamental part of the repository and its history.
 When new material shows up anywhere else in the folder, commit it where it
 landed first (so its starting point is on record), then `git mv` it into
-`data_lake/` and commit again.
+`data_lake/` and commit again. Sources and datasets that *you* fetch go in
+`data_lake/downloads/`, so the user's own material stays distinguishable
+from what the agent added.
 
 ## Thirty-minute intake (first session only)
 In the very first session, before anything else, schedule this with
@@ -3665,7 +3687,15 @@ def render(entries, title):
         out.extend([text, ""])
 
     for e in entries:
-        if e.get("isMeta") or e.get("isSidechain"):
+        if e.get("isSidechain"):
+            continue
+        if e.get("isMeta"):
+            # Scheduled [cleanvibe cron] prompts are meta entries; show them so a
+            # reader catching up can see what triggered the actions that follow.
+            if e.get("type") == "user":
+                text = _clean(_result_text((e.get("message") or {}).get("content")))
+                if text.startswith("[cleanvibe cron]"):
+                    say("Cron", text)
             continue
         kind = e.get("type")
         if kind == "attachment":

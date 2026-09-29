@@ -25,6 +25,44 @@ self-exempting for replication-style bounded work.
 
 ---
 
+## v2.0.3 (2026-09-29) — name the standing duties; make the parts agree
+
+From the ai-context-research study of cleanvibe's own transcripts (case study
+06): loop ticks did exactly what the tick prompt named and skipped standing
+duties it didn't name.
+
+**`autonomous-loop` (existing repos: copy the text from a fresh project).**
+The tick prompt is now "commit and push any and all changes, then continue
+working on the queue (refill it from the open questions if it is empty).
+Re-read INTENT.md and update it if your understanding has changed; fill in
+README.md if the purpose is now clear. Check the clock before writing any
+time down." A new step 4 says to keep the standing files current, and
+"blocked" no longer counts as "nothing to do". If a session is running the
+2.0.2 cron, delete it and create one with the new prompt.
+
+**`research-practice`.** Downloads the agent fetches go in
+`data_lake/downloads/`, kept apart from the user's material.
+
+**`cleanvibe-update-check`.** A new step checks that the skills and CLAUDE.md
+agree, and says CLAUDE.md wins when they conflict.
+
+cleanvibe 2 projects also get new `CLAUDE.md` rules (copy them from a fresh
+project):
+- Times come from the clock (`date`), never from estimates or schedules.
+- Before recording the user's stance, quote them; ask if the input was
+  dictated or ambiguous.
+- Claude Code's memory directory is outside the project; project memory goes
+  in INTENT.md.
+- Constraints the user gives in chat go in INTENT.md, so they survive
+  compaction.
+- Edit prose with the file tools, chain dependent shell steps, and confirm an
+  edit landed before logging it.
+
+The session-log hook now renders `[cleanvibe cron]` prompts under
+`## Cron`, and the first and resume prompts name the update check.
+
+---
+
 ## v2.0.2 (2026-09-27) — one simple work loop; the chat-test proposals
 
 **`autonomous-loop` is replaced (existing repos: copy the text below).** One
