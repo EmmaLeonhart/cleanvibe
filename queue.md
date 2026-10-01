@@ -17,4 +17,4 @@
 
 - Completed work (chronological, with releases): `devlog.md`. Long-horizon backlog: `todo.md`.
 - Vision / framing: `docs/replication_framing.md`; reference corpus: `docs/replication-examples/`.
-- Narrative history: `git log`. Current version: `2.0.2`.
+- Narrative history: `git log`. Current version: `2.0.3`.
