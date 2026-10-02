@@ -61,6 +61,21 @@ project):
 The session-log hook now renders `[cleanvibe cron]` prompts under
 `## Cron`, and the first and resume prompts name the update check.
 
+**Chat mode first (2026-10-01).** A session now starts in chat mode: the chat
+is the project from the first message, and the agent stays light and
+conversational (no file edits, commits, plans or option menus) until the user
+says to start working or an hour passes without a message from them. The
+intake script reports how long ago the user's last message was and returns
+CHAT MODE (with the time of the next Mode check) or WORK MODE; it can be
+re-run as the Mode check. Starting work mode writes INTENT.md, creates a
+**private GitHub repository under a descriptive name** (not the folder name)
+and pushes, fills in the README, plans, and starts the loop. The old
+"substantial engagement, start in 60 minutes" verdict is gone. The
+`autonomous-loop` skill now says the work-mode switch decides when the loop
+starts. Existing repos: copy CLAUDE.md's "Chat mode, then work mode" and
+"Mode check" sections and the new `.claude/scripts/data_lake_intake.py` from
+a fresh project.
+
 ---
 
 ## v2.0.2 (2026-09-27) — one simple work loop; the chat-test proposals
