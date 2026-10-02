@@ -76,6 +76,8 @@ def new_project(
     path = Path(path)
     project_name = path.name
     is_windows = platform.system() == "Windows"
+    # Untitled projects get a passphrase-style session title; chosen names are used as is.
+    session_name = templates.passphrase_name() if auto_named else None
 
     if dry_run:
         print(f"[dry-run] New cleanvibe project: {path}" + (" (auto-named)" if auto_named else ""))
@@ -101,7 +103,7 @@ def new_project(
     _write(path / "CLAUDE.md", templates.v2_claude_md(project_name))
     _write(path / "README.md", templates.v2_readme_md(project_name))
     _write(path / "INTENT.md", templates.v2_intent_md(project_name, auto_named))
-    _write(path / MARKER, templates.v2_marker_json(project_name, auto_named))
+    _write(path / MARKER, templates.v2_marker_json(project_name, auto_named, session_name))
     _write(path / ".gitignore", templates.V2_GITIGNORE)
     _write_gitkeep(path / "sessions")
     _write_gitkeep(path / "data_lake")
@@ -116,7 +118,7 @@ def new_project(
     _write(scripts / "data_lake_intake.py", templates.V2_INTAKE_PY)
 
     if is_windows:
-        _write(path / "!runClaude.bat", templates.v2_runclaude_bat(path, auto_named))
+        _write(path / "!runClaude.bat", templates.v2_runclaude_bat(path, auto_named, session_name))
 
     _git_init(path, message=(
         f"Initial commit: cleanvibe v{__version__} project\n"
@@ -139,8 +141,7 @@ def new_project(
             print("  Marked the new folder as trusted in Claude Code's config")
         _launch_claude(
             path, templates.v2_first_prompt(path.resolve(), auto_named),
-            # A generated name is a poor session name; let Claude pick one.
-            remote_control=True, name=None if auto_named else path.resolve().name,
+            remote_control=True, name=session_name or path.resolve().name,
         )
 
 
@@ -157,13 +158,18 @@ def open_project(path: Path, dry_run: bool = False, no_claude: bool = False) -> 
     _launch_claude(
         path, templates.v2_resume_prompt(path.resolve()),
         remote_control=True, show_folder=False,
-        name=None if _auto_named(path) else path.resolve().name,
+        name=_session_name(path),
     )
 
 
-def _auto_named(path: Path) -> bool:
+def _session_name(path: Path) -> str | None:
+    """The session title for a project: its passphrase if it was auto-named (None
+    for an auto-named project from before 2.0.3), otherwise the folder name."""
     import json
     try:
-        return bool(json.loads((Path(path) / MARKER).read_text(encoding="utf-8")).get("auto_named"))
+        marker = json.loads((Path(path) / MARKER).read_text(encoding="utf-8"))
     except (OSError, ValueError):
-        return False
+        marker = {}
+    if marker.get("auto_named"):
+        return marker.get("session_name")
+    return Path(path).resolve().name

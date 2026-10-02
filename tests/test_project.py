@@ -113,7 +113,31 @@ class TestNewProject(unittest.TestCase):
         args, kwargs = launch.call_args
         self.assertEqual(args[1], templates.v2_first_prompt(proj.resolve(), True))
         self.assertTrue(kwargs["remote_control"])
-        self.assertIsNone(kwargs["name"])  # auto-named: Claude picks the session name
+        # Auto-named: a passphrase title, recorded in the marker and the .bat (Emma,
+        # 2026-10-01: Claude's own title came from the boilerplate prompt).
+        name = kwargs["name"]
+        self.assertRegex(name, r"^[a-z]+-[a-z]+-[a-z]+$")
+        marker = json.loads((proj / ".cleanvibe.json").read_text(encoding="utf-8"))
+        self.assertEqual(marker["session_name"], name)
+        if (proj / "!runClaude.bat").exists():
+            self.assertIn(f"--name {name} --remote-control {name}",
+                          (proj / "!runClaude.bat").read_text(encoding="utf-8"))
+        with mock.patch.object(project, "_launch_claude") as launch, redirect_stdout(io.StringIO()):
+            project.open_project(proj)
+        self.assertEqual(launch.call_args.kwargs["name"], name)  # reopening keeps it
+
+    def test_chosen_name_is_the_session_name(self):
+        proj = Path(tempfile.mkdtemp()) / "mental-health-discussion"
+        with mock.patch.object(project, "_launch_claude") as launch, redirect_stdout(io.StringIO()):
+            project.new_project(proj)
+        self.assertEqual(launch.call_args.kwargs["name"], "mental-health-discussion")
+        self.assertNotIn("session_name", (proj / ".cleanvibe.json").read_text(encoding="utf-8"))
+
+    def test_passphrase_names_vary_and_are_cmd_safe(self):
+        names = {templates.passphrase_name() for _ in range(50)}
+        self.assertGreater(len(names), 40)
+        for name in names:
+            self.assertRegex(name, r"^[a-z]+-[a-z]+-[a-z]+$")
 
     def test_dry_run_writes_nothing(self):
         proj = Path(tempfile.mkdtemp()) / "p"

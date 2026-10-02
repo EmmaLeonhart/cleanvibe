@@ -3203,10 +3203,41 @@ def v2_resume_prompt(path) -> str:
     return prompt
 
 
-def v2_runclaude_bat(path, auto_named: bool = False) -> str:
-    """`!runClaude.bat`: reopen this project as a new session (resume prompt)."""
+# Words for an untitled project's session name: a passphrase-style title such as
+# "graceful-amber-otter", distinct per project, like Remote Control's own default
+# names. Without an explicit name, Claude Code titles the session from cleanvibe's
+# boilerplate first prompt, so every untitled project got the same title (Emma,
+# 2026-10-01). cmd-safe by construction: lowercase letters and hyphens only.
+_PASSPHRASE_ADJECTIVES = (
+    "amber", "bold", "brisk", "calm", "clever", "cosmic", "crisp", "dapper", "eager",
+    "fabled", "gentle", "golden", "graceful", "hidden", "humble", "jolly", "keen",
+    "lively", "lucky", "mellow", "misty", "nimble", "quiet", "rapid", "rustic",
+    "silver", "snowy", "sunny", "swift", "tidy", "velvet", "vivid", "wandering",
+    "witty", "zesty",
+)
+_PASSPHRASE_NOUNS = (
+    "badger", "beacon", "canyon", "comet", "cedar", "dolphin", "ember", "falcon",
+    "fern", "harbor", "heron", "lantern", "maple", "meadow", "otter", "pebble",
+    "pine", "quartz", "raven", "river", "saffron", "sparrow", "summit", "thistle",
+    "tide", "tulip", "unicorn", "walrus", "willow", "zephyr",
+)
+
+
+def passphrase_name(rng=None) -> str:
+    """A random passphrase-style session name: adjective-adjective-noun."""
+    import random
+    rng = rng or random.SystemRandom()
+    first, second = rng.sample(_PASSPHRASE_ADJECTIVES, 2)
+    return f"{first}-{second}-{rng.choice(_PASSPHRASE_NOUNS)}"
+
+
+def v2_runclaude_bat(path, auto_named: bool = False, session_name: str | None = None) -> str:
+    """`!runClaude.bat`: reopen this project as a new session (resume prompt).
+
+    The session is named after the folder when the user chose it, otherwise after
+    the project's passphrase ``session_name`` (from `.cleanvibe.json`)."""
     # %~dp0 is the .bat's own folder, so the prompt names no fixed path.
-    name = Path(str(path)).name if path and not auto_named else ""
+    name = session_name or (Path(str(path)).name if path and not auto_named else "")
     tail = " --remote-control"
     if name and not _PROMPT_UNSAFE.intersection(name) and " " not in name:
         tail = f" --name {name} --remote-control {name}"
@@ -3216,16 +3247,16 @@ def v2_runclaude_bat(path, auto_named: bool = False) -> str:
     )
 
 
-def v2_marker_json(project_name: str, auto_named: bool) -> str:
-    return json.dumps(
-        {
-            "cleanvibe": __version__,
-            "name": project_name,
-            "created": datetime.now().strftime("%Y-%m-%d"),
-            "auto_named": auto_named,
-        },
-        indent=2,
-    ) + "\n"
+def v2_marker_json(project_name: str, auto_named: bool, session_name: str | None = None) -> str:
+    marker = {
+        "cleanvibe": __version__,
+        "name": project_name,
+        "created": datetime.now().strftime("%Y-%m-%d"),
+        "auto_named": auto_named,
+    }
+    if session_name:
+        marker["session_name"] = session_name
+    return json.dumps(marker, indent=2) + "\n"
 
 
 V2_GITIGNORE = GITIGNORE.rstrip("\n") + """

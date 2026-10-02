@@ -1969,3 +1969,18 @@ private, under descriptive names rather than the folder name.
 - autonomous-loop skill: the work-mode switch decides when the loop starts.
 - Tests: the old verdict and prompt assertions were changed on purpose; new
   tests for chat mode, an hour of quiet, and the re-run Mode check. 231 pass.
+
+## 2026-10-01 — 2.0.3: passphrase session titles for untitled projects
+
+Emma: untitled sessions all showed "Untitled cleanvibe project intake" in the
+app, because with no name Claude Code titles the session from cleanvibe's
+boilerplate first prompt. She expected Remote Control's passphrase-style
+random names. The starting prompt stays (it carries the operating
+instructions and permissions; moving it to the system prompt is ruled out).
+- An untitled project now gets a random `adjective-adjective-noun` session
+  name (`templates.passphrase_name`), stored as `session_name` in
+  `.cleanvibe.json` and passed as `--name X --remote-control X` at the first
+  launch, in `!runClaude.bat`, and when the project is reopened. A folder name
+  the user chose is still the session name.
+- Tests: the launch test now expects the passphrase (changed on purpose), plus
+  tests for chosen names and for passphrase variety and cmd-safety. 233 pass.
