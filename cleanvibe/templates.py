@@ -3384,7 +3384,7 @@ In the very first session, before anything else, schedule this with
 `CronCreate`: a one-time job (`recurring: false`) at the local time 30 minutes
 from now, with minute, hour, day and month pinned, and this prompt:
 
-    [cleanvibe cron] Thirty-minute intake: follow the Thirty-minute intake section of CLAUDE.md, steps 1-5.
+    [cleanvibe cron] Thirty-minute intake: follow the Thirty-minute intake section of CLAUDE.md.
 
 When it fires, do this:
 
