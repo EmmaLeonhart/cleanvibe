@@ -106,8 +106,10 @@ These are how the work is done, not reasons to stop the loop.
   `emergency-stop` skill).
 - If something goes wrong, say so plainly in your next message and carry on
   with whatever is still safe to do.
-- In a cleanvibe project, the thirty-minute intake in CLAUDE.md decides when
-  the loop starts. Elsewhere, start it when the user asks for autonomous work.
+- In a cleanvibe project, the switch to work mode in CLAUDE.md decides when
+  the loop starts: the user says to start working, or an hour passes without
+  a message from them. Elsewhere, start it when the user asks for autonomous
+  work.
 
 **Why one cron:** earlier versions ran separate hourly work, flush and status
 crons. In practice the flushes and status reports weren't useful, and one

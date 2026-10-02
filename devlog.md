@@ -1944,3 +1944,28 @@ approved by Emma: "you can apply all the eight fixes".
   in the hook test, and three new 2.0.3 tests. 229 pass.
 - **Not done:** push, CI, release, PyPI. Pushing publishes to the public repo
   and the Pages site, so it waits for Emma (BLOCKED-ON-USER-ACTION).
+
+## 2026-10-01 — 2.0.3: chat mode first, private descriptive remote by default
+
+Emma, after an untitled session went into "work mode" (INTENT.md, a commit
+and a menu of options) the moment she said "This is the project": the chat is
+the project by default, the start is supposed to be light and conversational,
+and the agent goes hard into work only when told to or after the user has been
+gone long enough that it is no longer a chat. Repos go to GitHub by default,
+private, under descriptive names rather than the folder name.
+- CLAUDE.md: "The chat is the project, from the first message"; a new
+  "Chat mode, then work mode" section (no files, commits, plans or menus in
+  chat mode; work mode on the user's word or after an hour without a message,
+  restarting with each message; the work-mode start writes INTENT.md, creates
+  `gh repo create <descriptive-name> --private --source=. --push`, fills in
+  the README, runs the update check, plans and starts the loop); a "Mode
+  check" section; the commit rule now pushes to that private remote.
+- Intake script: reports minutes since the user's last message (from the
+  transcript timestamps) and returns CHAT MODE with a pinned cron time for
+  the Mode check, or WORK MODE. It can be re-run after the intake as the Mode
+  check, committing nothing. The SUBSTANTIAL verdict is removed.
+- First prompt: chat mode, greet in a line or two; the resume prompt
+  reschedules a Mode check if work mode hasn't started.
+- autonomous-loop skill: the work-mode switch decides when the loop starts.
+- Tests: the old verdict and prompt assertions were changed on purpose; new
+  tests for chat mode, an hour of quiet, and the re-run Mode check. 231 pass.

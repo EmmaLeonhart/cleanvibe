@@ -83,11 +83,13 @@ class TestNewProject(unittest.TestCase):
 
     def test_claude_md_rules(self):
         claude = (_new() / "CLAUDE.md").read_text(encoding="utf-8")
-        for needle in ("work from low information", "The chat comes first",
+        for needle in ("work from low information", "The chat is the project, from the first message",
                        "INTENT.md", "AskUserQuestion only when the user is clearly here",
                        "Material goes into `data_lake/`", "Thirty-minute intake",
                        "recurring: false", "data_lake_intake.py",
-                       "Little or no engagement, with material", "60 minutes from now",
+                       "## Chat mode, then work mode", "## Mode check",
+                       "An hour has passed since the user's last message",
+                       "every new message restarts the hour",
                        "Nothing to go on", "a guess about why the project exists",
                        "No strict instructions is not no work",
                        "the tool or the chat is the subject, it is",
@@ -95,7 +97,8 @@ class TestNewProject(unittest.TestCase):
                        "ask one short question before acting",
                        "Stay inside this project", "mean stop now",
                        "queue-driven-workflow", "research-practice", "autonomous-loop",
-                       "scratch/", "gh repo create --private", "sessions/",
+                       "scratch/", "gh repo create <descriptive-name> --private --source=. --push",
+                       "sessions/",
                        "Not-done taxonomy"):
             self.assertIn(needle, claude)
         self.assertNotIn("--public", claude)
@@ -168,7 +171,9 @@ class TestV2Prompts(unittest.TestCase):
         self.assertIn("at /home/e/oolong", named)
         self.assertIn("I chose the folder name", named)
         self.assertIn("a guess about why the project exists is not a task", named)
-        self.assertIn("if there is nothing to go on, say exactly that", auto)
+        for prompt in (named, auto):
+            self.assertIn("starts in chat mode", prompt)
+            self.assertIn("private GitHub repo with a descriptive name", prompt)
         for prompt in (named, auto):
             self.assertIn("low information", prompt)
             self.assertIn("CronCreate", prompt)
@@ -211,13 +216,22 @@ def _run_intake(proj):
     )
 
 
-def _log(proj, *messages):
-    """A transcript in sessions/: cleanvibe's own prompt, then user messages."""
+def _log(proj, *messages, minutes_ago=None):
+    """A transcript in sessions/: cleanvibe's own prompt, then user messages.
+
+    With minutes_ago, the user's messages carry a timestamp that long ago;
+    without it they have none (which the intake treats as just now)."""
+    from datetime import datetime, timedelta, timezone
+    stamp = {}
+    if minutes_ago is not None:
+        when = datetime.now(timezone.utc) - timedelta(minutes=minutes_ago)
+        stamp = {"timestamp": when.isoformat().replace("+00:00", "Z")}
     entries = [{"type": "user", "message": {"role": "user", "content":
                 templates.v2_first_prompt(proj, True)}},
                {"type": "user", "message": {"role": "user", "content":
                 "[cleanvibe cron] Thirty-minute intake: follow CLAUDE.md"}}]
-    entries += [{"type": "user", "message": {"role": "user", "content": m}} for m in messages]
+    entries += [{"type": "user", "message": {"role": "user", "content": m}, **stamp}
+                for m in messages]
     (proj / "sessions" / "2026-09-26_abc.jsonl").write_text(
         "\n".join(json.dumps(e) for e in entries) + "\n", encoding="utf-8")
 
@@ -288,33 +302,53 @@ class TestThirtyMinuteIntake(unittest.TestCase):
         self.assertIn("already done", again.stdout)
         self.assertEqual(_git(self.proj, "rev-parse", "HEAD"), head)
 
-    def test_no_engagement_starts_the_loop_now(self):
+    def test_no_chat_with_material_starts_work_mode(self):
         _log(self.proj)  # only cleanvibe's own prompts
         out = _run_intake(self.proj).stdout
         self.assertIn("0 message(s)", out)
-        self.assertIn("LITTLE OR NO engagement", out)
+        self.assertIn("WORK MODE", out)
+        self.assertIn("said nothing, but there is material", out)
 
-    def test_substantial_engagement_postpones_the_loop(self):
-        _log(self.proj, "This is about the history of AI.", "Focus on the 1956 Dartmouth workshop.")
+    def test_recent_chat_stays_in_chat_mode(self):
+        # 2.0.3: the start is conversational; work waits for an hour of quiet.
+        _log(self.proj, "This is about the history of AI.", "Focus on Dartmouth.", minutes_ago=10)
         out = _run_intake(self.proj).stdout
         self.assertIn("2 message(s)", out)
-        self.assertIn("SUBSTANTIAL engagement", out)
-        self.assertIn("The user is present", out)
-        self.assertNotIn("steering:", out)
+        self.assertIn("last message: 10 minute(s) ago", out)
+        self.assertIn("CHAT MODE", out)
+        self.assertIn("Schedule the Mode check", out)
+        self.assertRegex(out, r"cron `\d+ \d+ \d+ \d+ \*`, recurring: false")
+        self.assertNotIn("WORK MODE", out)
+
+    def test_an_hour_of_quiet_starts_work_mode(self):
+        _log(self.proj, "This is about the history of AI.", minutes_ago=75)
+        out = _run_intake(self.proj).stdout
+        self.assertIn("WORK MODE", out)
+        self.assertIn("quiet for 60+ minutes", out)
+
+    def test_mode_check_reruns_without_committing(self):
+        _log(self.proj, "hello", minutes_ago=5)
+        self.assertIn("CHAT MODE", _run_intake(self.proj).stdout)
+        head = _git(self.proj, "rev-parse", "HEAD")
+        _log(self.proj, "hello", minutes_ago=70)  # the user went quiet
+        out = _run_intake(self.proj).stdout
+        self.assertIn("# Mode check", out)
+        self.assertIn("WORK MODE", out)
+        self.assertEqual(_git(self.proj, "rev-parse", "HEAD"), head)
 
     def test_empty_folder_generated_name_is_nothing_to_go_on(self):
         proj = _new("cleanvibe-2026-09-26", auto_named=True)  # nothing dropped in
         out = _run_intake(proj).stdout
         self.assertIn("Material in data_lake/: none", out)
         self.assertIn("NOTHING TO GO ON", out)
-        self.assertNotIn("start the work loop now", out)
+        self.assertNotIn("start work mode now", out)
 
     def test_something_said_without_material_is_the_subject(self):
         # P1: anything the user says is something to go on.
         proj = _new("cleanvibe-2026-09-26", auto_named=True)
         _log(proj, "the history of chess engines")
         out = _run_intake(proj).stdout
-        self.assertIn("SOME ENGAGEMENT, no material", out)
+        self.assertIn("CHAT MODE", out)  # no timestamp counts as just now
         self.assertNotIn("NOTHING TO GO ON", out)
 
     def test_empty_folder_chosen_name_is_name_only(self):
@@ -324,7 +358,7 @@ class TestThirtyMinuteIntake(unittest.TestCase):
     def test_material_without_engagement_starts_now(self):
         out = _run_intake(self.proj).stdout  # setUp dropped files in
         self.assertIn("but there is material", out)
-        self.assertIn("start the work loop now", out)
+        self.assertIn("start work mode now", out)
 
     def test_agent_work_already_committed_stays_put(self):
         (self.proj / "research").mkdir()

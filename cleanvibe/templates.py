@@ -3119,9 +3119,12 @@ B. **Run the status-report action once more, independently** — an end-of-sessi
 # asks (AskUserQuestion) when the goal is unclear, keeps INTENT.md as its
 # running read of what the user is trying to do, and picks up development or
 # research practices from skills only once the work takes that shape.
-# Transcripts are saved into sessions/ by a hook, not by the agent. The repo is
-# private and local (no remote unless the user asks). Sessions always start as
-# real top-level sessions with Remote Control on (see cleanvibe/launch.py).
+# Transcripts are saved into sessions/ by a hook, not by the agent. Since 2.0.3
+# a session starts in chat mode (light, conversational, no files) and switches
+# to work mode when the user says so or after an hour without a message; work
+# mode pushes to a private GitHub repo under a descriptive name (Emma,
+# 2026-10-01). Sessions always start as real top-level sessions with Remote
+# Control on (see cleanvibe/launch.py).
 # ---------------------------------------------------------------------------
 
 V2_MARKER = ".cleanvibe.json"
@@ -3165,13 +3168,16 @@ def v2_first_prompt(path, auto_named: bool) -> str:
         f"the project exists is not a task: do not invent work from it. Read "
         f"CLAUDE.md first. Then, before "
         f"anything else, use CronCreate to schedule the one-time Thirty-minute "
-        f"intake exactly as CLAUDE.md describes, for 30 minutes from now. Then look "
-        f"at what is in this folder, write your first read of the purpose into "
-        f"INTENT.md (if there is nothing to go on, say exactly that; do not guess), "
-        f"commit, run the cleanvibe-update-check skill if its weekly check is "
-        f"due, and tell me briefly what you see. Only use AskUserQuestion if I "
-        f"am clearly here and replying. If I say nothing, the intake decides what "
-        f"happens next from what is in the folder."
+        f"intake exactly as CLAUDE.md describes, for 30 minutes from now. The "
+        f"session starts in chat mode: the chat is the project, so keep it light "
+        f"and conversational, and do not edit files, commit, plan or offer me "
+        f"options until I tell you to start working or I have been quiet for an "
+        f"hour. Then work mode starts as CLAUDE.md describes, including INTENT.md, "
+        f"a private GitHub repo with a descriptive name, and the "
+        f"cleanvibe-update-check skill if its weekly check is due. For now, look "
+        f"at what is in this folder and greet me in a line or two. Only use "
+        f"AskUserQuestion if I am clearly here and replying. If I say nothing, "
+        f"the intake decides what happens next from what is in the folder."
     )
     if not _prompt_safe(prompt):
         raise ValueError("v2 first-session prompt has cmd-unsafe characters")
@@ -3185,8 +3191,10 @@ def v2_resume_prompt(path) -> str:
         f"Catch up before doing anything: read CLAUDE.md, INTENT.md and the newest "
         f"session log in sessions/, and queue.md if there is one. If the "
         f"Thirty-minute intake in CLAUDE.md has not run yet, schedule it again. "
-        f"If the weekly cleanvibe update check in CLAUDE.md is due, run the "
-        f"cleanvibe-update-check skill. "
+        f"If it has run but work mode has not started, the project is still in "
+        f"chat mode: stay conversational and schedule a Mode check for an hour "
+        f"from now. If the weekly cleanvibe update check in CLAUDE.md is due, run "
+        f"the cleanvibe-update-check skill. "
         f"Then tell me briefly where things stand. If I reply, follow my lead; if "
         f"I say nothing, carry on with the work already planned."
     )
@@ -3241,8 +3249,9 @@ built to **work from low information**: the user may say a lot, a little, or
 nothing, and may not be here at all. Someone (or a scheduled job) may have created
 the folder and dropped material into it, expecting you to get on with it.
 
-- **The chat comes first.** Anything the user says in the conversation takes
-  priority over everything else.
+- **The chat is the project, from the first message.** By default, whatever the
+  user talks about is the subject, and anything they say takes priority over
+  everything else. A session starts in chat mode (next section).
 - **Then what is in the folder.** Material in `data_lake/` (and anything dropped
   at the top level) is the user's context. Read it carefully: a Markdown file
   with a spec, a brief or instructions is worth following, unless the chat says
@@ -3260,10 +3269,11 @@ the folder and dropped material into it, expecting you to get on with it.
   `data_lake/`, or say what this is for), and wait. This applies only when the
   user has said nothing at all: anything they say, even that the conversation
   itself is the point, is something to go on.
-- **No strict instructions is not no work.** If there is a subject (the chat, a
-  name the user chose, the material) but no spec or build task, the work loop
-  still runs: it researches and writes about the subject under
-  `research-practice`, with the question written down as an assumption.
+- **No strict instructions is not no work.** Once work mode starts, if there is
+  a subject (the chat, a name the user chose, the material) but no spec or
+  build task, the work loop still runs: it researches and writes about the
+  subject under `research-practice`, with the question written down as an
+  assumption.
 - **Stay inside this project.** Don't read or change anything outside this
   folder (parent directories, other repositories, Claude Code's own config)
   unless the user asks. That includes Claude Code's own memory directory
@@ -3281,6 +3291,8 @@ the folder and dropped material into it, expecting you to get on with it.
   assumption down there and carry on. **Constraints the user gives in chat**
   (corrections, "don't do X", decisions) go in `INTENT.md` too: a long
   conversation can be compacted and lose them, but `INTENT.md` is re-read.
+  In chat mode the session log is the record; `INTENT.md` is written when work
+  mode starts and kept current from then on.
 - **AskUserQuestion only when the user is clearly here.** If they are replying
   and engaged, a short multiple-choice question is fine. If they are not, don't
   stop to ask: decide, record the assumption in `INTENT.md`, and keep working.
@@ -3303,14 +3315,59 @@ the folder and dropped material into it, expecting you to get on with it.
   again, with a clear name and a line saying what it is for. Delete what is no
   longer used.
 - **Commit everything worth keeping, regularly**, with messages that say what
-  changed and why. This repo is private and local: it has no GitHub remote unless
-  the user asks for one, and then it is private
-  (`gh repo create --private --source=. --push`).
+  changed and why. When work mode starts, the repo goes to GitHub as a
+  **private** repository under a descriptive name (see the next section), and
+  from then on every commit is pushed. Never make it public unless the user
+  asks.
 - **Edit files with the file tools, and check before you log.** Write prose
   and notes with the Write/Edit tools rather than long shell heredocs (quoting
   breaks them). Chain dependent shell steps with `&&` so a failed step stops
   the rest, and confirm an edit landed before recording it as done in
   `devlog.md` or a commit message.
+
+## Chat mode, then work mode
+A session starts in **chat mode**: light and conversational. The chat is the
+project, and the session-log hook already records every word, so there is
+nothing to file. In chat mode:
+
+- Talk with the user the way a person would, in a few lines. Follow what they
+  say; don't steer it toward a project.
+- Don't edit or commit files, write `INTENT.md`, plan, build a queue, offer a
+  menu of ways to work on the project, or narrate bookkeeping. Don't turn
+  what the user says into a task.
+- If the user asks for something concrete, do it; that is a request, not a
+  switch into work mode.
+- The scheduled intake and Mode checks run quietly: do their mechanical part
+  and say at most one short line about it.
+
+**Work mode** starts when either of these happens:
+
+1. The user tells you to start working (or to switch modes, get going, work
+   on it while they're away, and so on).
+2. An hour has passed since the user's last message. The Mode check below
+   decides this; every new message restarts the hour.
+
+When work mode starts, do this once, in order, and commit as you go:
+
+1. Read everything in `data_lake/` and the session logs. The chat is the
+   subject by default; add what the material and the name say.
+2. Write `INTENT.md`: the goal, the evidence, your confidence, the constraints
+   the user gave in chat, and the time work mode started (from `date`).
+3. Create the GitHub repository: **private**, under a descriptive kebab-case
+   name that says what the project is about, not the folder name (which may be
+   generated): `gh repo create <descriptive-name> --private --source=. --push`.
+   If `gh` is missing or not logged in, record that in `INTENT.md` as
+   BLOCKED-ON-USER-ACTION and carry on locally.
+4. Fill in `README.md`, and run the `cleanvibe-update-check` skill if its
+   weekly check is due.
+5. Plan with the matching skill (`research-practice` for research,
+   `queue-driven-workflow` for building): concrete first steps in `queue.md`.
+6. Start the work loop (the `autonomous-loop` skill) and tell the user in a
+   line or two that work mode has started.
+
+**Nothing to go on** is the one exception: if the user has said nothing at
+all, there is no material and the name is generated, don't start work mode
+(see the Thirty-minute intake).
 
 ## The data lake
 `data_lake/` holds the material the project works from: documents, datasets,
@@ -3335,42 +3392,38 @@ When it fires, do this:
    It commits the repository exactly as found ("the repository 30 minutes in,
    before moving into data_lake/"), then `git mv`s every top-level file or
    directory that had never been committed into `data_lake/` and commits that
-   move. It prints a report: what moved, what is in `data_lake/`, and how much
-   the user has said so far. It runs only once; it records `intake_at` in
-   `.cleanvibe.json`.
-2. **Investigate `data_lake/` thoroughly.** Read everything. Look especially for
-   specs, briefs, outlines or instructions. Put that together with the chat and
-   the directory name.
-3. **Update `INTENT.md`** with what the project is for, the evidence, and your
-   confidence. Commit.
-4. **If the purpose is clear enough to act on, plan it.** Use the matching skill
-   (`research-practice` for research, `queue-driven-workflow` for building) to
-   put concrete first steps into `queue.md` / `todo.md`. Commit. Thin material
-   is normal here and still worth acting on; an empty folder is not (step 5).
-5. **Start the work loop** (the `autonomous-loop` skill: one cron every half
-   hour that commits, pushes and keeps working the queue), depending on the
-   report's verdict:
-   - **Nothing to go on** (the user has said nothing at all, no material,
-     generated name): do not infer a purpose, plan, or start the loop. Write in
-     `INTENT.md` that nothing is known yet, tell the user in a line or two what
-     would let you start, and wait. Their next message (or files appearing in
-     the next session) is where work begins.
-   - **The user said something, but no material:** what they said is the
-     subject. Plan research on it (`research-practice`) and start the loop now.
-   - **Name only** (no material, no engagement, a name the user chose): start
-     only if the name plainly states a task (say, `history-of-ai-research`);
-     otherwise treat it as nothing to go on.
-   - **Little or no engagement, with material:** assume the user is away and
-     that the folder holds the context they meant to give. Start the loop now.
-   - **Substantial engagement:** the user is present (the intake counts
-     messages; it can't tell steering from chatting), so don't take over yet.
-     Schedule another one-time `CronCreate` job 60 minutes from now with the
-     prompt `[cleanvibe cron] Start the work loop: follow step 5 of the
-     Thirty-minute intake in CLAUDE.md.`, and start the loop when it fires,
-     unless the user has asked you not to by then.
+   move. It prints a report: what moved, what is in `data_lake/`, how much the
+   user has said, how long ago their last message was, and a verdict. It
+   commits and moves only once; it records `intake_at` in `.cleanvibe.json`.
+2. **Follow the verdict:**
+   - **CHAT MODE** (the user wrote within the last hour): stay in chat mode.
+     Schedule the Mode check as a one-time `CronCreate` job at the time the
+     report gives, with the prompt `[cleanvibe cron] Mode check: follow the
+     Mode check section of CLAUDE.md.`
+   - **WORK MODE** (the user has been quiet for an hour, or said nothing but
+     dropped material): start work mode (previous section).
+   - **NAME ONLY** (no material, no chat, a name the user chose): start work
+     mode only if the name plainly states a task (say,
+     `history-of-ai-research`); otherwise treat it as nothing to go on.
+   - **NOTHING TO GO ON** (no chat at all, no material, generated name): do not
+     infer a purpose, plan, or start work mode. Write in `INTENT.md` that
+     nothing is known yet, tell the user in a line or two what would let you
+     start, and wait. Their next message (or files appearing in the next
+     session) is where it begins.
+
+   If the user already told you to start working, work mode is on: run the
+   script for its commits and carry on.
 
 If the first session ended before the intake ran (`.cleanvibe.json` has no
 `intake_at`), the next session schedules it again.
+
+## Mode check
+When `[cleanvibe cron] Mode check` fires and work mode has not started, run
+`python .claude/scripts/data_lake_intake.py` again. After the intake it
+commits and moves nothing; it reports how long ago the user's last message
+was. **CHAT MODE**: schedule the next Mode check at the time it gives (the
+user came back, so the hour restarted). **WORK MODE**: start work mode. If
+work mode has already started, do nothing.
 
 ## Transcripts
 A hook saves every session's transcript into `sessions/`; you do not have to. After
@@ -3386,7 +3439,8 @@ hand.
 - `README.md`: for people; fill it in once the purpose is clear.
 - `sessions/`: session transcripts (automatic).
 - `scratch/`: one-off work, gitignored.
-- `.claude/scripts/data_lake_intake.py`: the thirty-minute intake.
+- `.claude/scripts/data_lake_intake.py`: the thirty-minute intake and the Mode
+  check.
 
 {SKILLS_POINTER}
 
@@ -3834,17 +3888,20 @@ judgment, so the history is exact:
    (the user's drops, new directories), except the project's own files, into
    `data_lake/`, and commit that move on its own.
 3. Print a report for the agent: the two commits, what moved where, the files
-   now in `data_lake/`, and how much the user has said in the chat so far
-   (counted from the transcripts in `sessions/`).
+   now in `data_lake/`, how much the user has said in the chat so far and how
+   long ago their last message was (from the transcripts in `sessions/`), and
+   a verdict: stay in chat mode (with the time of the next Mode check) or
+   start work mode.
 
-It records `intake_at` in `.cleanvibe.json` and does nothing on later runs.
+It records `intake_at` in `.cleanvibe.json`. Later runs (the Mode check) commit
+and move nothing; they print only the chat report and the verdict.
 Stdlib only. Exit code 0 on success, 1 if a git step failed.
 """
 
 import json
 import subprocess
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -3865,8 +3922,8 @@ _NOT_USER = (
     "This is the first ever session in a new project",
     "This is a new session in an existing cleanvibe project",
 )
-SUBSTANTIAL_MESSAGES = 2
-SUBSTANTIAL_CHARS = 300
+# An hour without a message from the user means the chat is over: work mode starts.
+ABSENT_MINUTES = 60
 
 
 def git(*args):
@@ -3927,9 +3984,18 @@ def _text(entry):
     return ""
 
 
+def _when(entry):
+    """The entry's timestamp as an aware datetime, or None."""
+    try:
+        return datetime.fromisoformat(str(entry.get("timestamp")).replace("Z", "+00:00"))
+    except ValueError:
+        return None
+
+
 def engagement():
-    """(messages, characters) the user sent, from sessions/*.jsonl."""
+    """(messages, characters, time of the last message or None) the user sent, from sessions/*.jsonl."""
     messages = chars = 0
+    last = None
     for log in sorted((ROOT / "sessions").glob("*.jsonl")):
         try:
             lines = log.read_text(encoding="utf-8").splitlines()
@@ -3937,14 +4003,54 @@ def engagement():
             continue
         for line in lines:
             try:
-                text = _text(json.loads(line)).strip()
+                entry = json.loads(line)
+                text = _text(entry).strip()
             except ValueError:
                 continue
             if not text or text.startswith("<") or text.startswith(_NOT_USER):
                 continue
             messages += 1
             chars += len(text)
-    return messages, chars
+            when = _when(entry)
+            if when and (last is None or when > last):
+                last = when
+    return messages, chars, last
+
+
+def chat_report(marker, lake_files, messages, chars, last):
+    """The chat part of the report and the verdict: chat mode or work mode."""
+    now = datetime.now(timezone.utc)
+    print(f"- User engagement so far: {messages} message(s), {chars} characters "
+          f"(not counting cleanvibe's own prompts)")
+    print(f"- Material in {LAKE}/: {'yes' if lake_files else 'none'}; folder name: "
+          f"{'generated (says nothing)' if marker.get('auto_named') else 'chosen by the user'}")
+    if messages:
+        # A message without a timestamp counts as just now: stay in chat mode.
+        age = (now - last).total_seconds() / 60 if last else 0.0
+        print(f"- User's last message: {age:.0f} minute(s) ago")
+        if age >= ABSENT_MINUTES:
+            print(f"- Verdict: WORK MODE. The user has been quiet for {ABSENT_MINUTES}+ minutes, "
+                  "so the chat is over. Start work mode now, with the chat as the subject.")
+            return
+        check = (last or now) + timedelta(minutes=ABSENT_MINUTES)
+        check = max(check, now + timedelta(minutes=2)).astimezone()  # local time for CronCreate
+        print("- Verdict: CHAT MODE. The user was here recently: stay light and "
+              "conversational, and do not start work. Schedule the Mode check as a "
+              f"one-time job at {check:%H:%M} local (cron "
+              f"`{check.minute} {check.hour} {check.day} {check.month} *`, recurring: false), "
+              "unless the user tells you to start working first.")
+    elif lake_files:
+        print("- Verdict: WORK MODE. The user has said nothing, but there is material. "
+              "Assume they are away and that the folder holds the context they meant to "
+              "give: start work mode now.")
+    elif not marker.get("auto_named"):
+        print("- Verdict: NAME ONLY. No material and no chat. Start work mode only if the "
+              "folder name plainly states a task; otherwise treat this as NOTHING TO GO ON.")
+    else:
+        print("- Verdict: NOTHING TO GO ON. No material, no chat, and a generated "
+              "name. Do not invent work from circumstance (a guess about why the project "
+              "exists is not a task), do not plan, do not start work mode. Say so in "
+              "INTENT.md and wait for the user.")
 
 
 def free_name(name):
@@ -3960,11 +4066,15 @@ def free_name(name):
 def main():
     marker = load_marker()
     if marker.get("intake_at"):
-        print(f"Intake already done at {marker['intake_at']}; nothing to do.")
+        print(f"# Mode check\n\n- Intake already done at {marker['intake_at']}; "
+              "nothing committed or moved.")
+        lake_files = [p for p in git("ls-files", "--", LAKE).stdout.splitlines()
+                      if not p.endswith(".gitkeep")]
+        chat_report(marker, lake_files, *engagement())
         return 0
 
     moving = never_committed_entries()
-    messages, chars = engagement()
+    messages, chars, last = engagement()
 
     git("add", "-A")
     first = None
@@ -3998,7 +4108,6 @@ def main():
 
     lake_files = [p for p in git("ls-files", "--", LAKE).stdout.splitlines()
                   if not p.endswith(".gitkeep")]
-    substantial = messages >= SUBSTANTIAL_MESSAGES or chars >= SUBSTANTIAL_CHARS
 
     print("# Thirty-minute intake report\n")
     print(f"- Snapshot commit: {first or '(nothing new to commit)'}")
@@ -4009,30 +4118,7 @@ def main():
         print(f"  - {path}")
     if len(lake_files) > 200:
         print(f"  - ... and {len(lake_files) - 200} more")
-    print(f"- User engagement so far: {messages} message(s), {chars} characters "
-          f"(not counting cleanvibe's own prompts)")
-    print(f"- Material in {LAKE}/: {'yes' if lake_files else 'none'}; folder name: "
-          f"{'generated (says nothing)' if marker.get('auto_named') else 'chosen by the user'}")
-    if substantial:
-        print("- Verdict: SUBSTANTIAL engagement. The user is present (this counts "
-              "messages; it cannot tell steering from chatting): schedule the work loop "
-              "to start in 60 minutes rather than now.")
-    elif messages and not lake_files:
-        print("- Verdict: SOME ENGAGEMENT, no material. What the user said is the subject: "
-              "plan research on it and start the work loop now.")
-    elif lake_files:
-        print("- Verdict: LITTLE OR NO engagement, but there is material. Assume the user "
-              "is away and that the folder holds the context they meant to give: start "
-              "the work loop now.")
-    elif not marker.get("auto_named"):
-        print("- Verdict: NAME ONLY. No material and no engagement. Start work only if the "
-              "folder name plainly states a task; otherwise treat this as NOTHING TO GO ON.")
-    else:
-        print("- Verdict: NOTHING TO GO ON. No material, no engagement, and a generated "
-              "name. Do not invent work from circumstance (a guess about why the project "
-              "exists is not a task), do not plan, do not start the work loop. Say so in "
-              "INTENT.md and wait "
-              "for the user.")
+    chat_report(marker, lake_files, messages, chars, last)
     return 0
 
 
