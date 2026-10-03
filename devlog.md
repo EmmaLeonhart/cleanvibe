@@ -2012,3 +2012,14 @@ so its six commits are in this repo's history (`e9a9d9d`). The prefix stayed
 `helping-with-arxiv/`. How it relates to `cleanvibe/arxiv.py` is still open
 and logged in `todo.md`. Packaging is unaffected (`packages = ["cleanvibe"]`);
 233 tests pass and `doctor` is clean.
+
+## 2026-10-03 — Case study 07: did the 2.0.3 fixes work?
+
+The ai-context-research follow-up on the first eight 2.0.3 sessions, written
+up for this repo without project names or quotes (several sessions are
+personal). M2 (update check), M6 (`## Cron` in the log) and M7 (chat
+constraints into INTENT.md) work; M1 does not keep INTENT.md current during
+the loop, and no empty queue was refilled, each time for a stated reason;
+M8 (prose through file tools, check before logging) still fails in most
+sessions. Three open decisions for Emma are listed in the case study.
+
