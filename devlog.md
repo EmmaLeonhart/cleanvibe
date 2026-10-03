@@ -1994,3 +1994,21 @@ paper and overlaps with `cleanvibe/arxiv.py`. The submodule is a stopgap; the
 plan is a `git subtree add` later so its history is kept, logged in `todo.md`
 with the open questions (prefix, relation to `arxiv.py`). Packaging is
 unaffected: `pyproject.toml` lists `packages = ["cleanvibe"]` explicitly.
+
+## 2026-10-03 — Released v2.0.3
+
+Emma: "push it, then merge into main and release it". The
+`research-fixes-2.0.3` branch was already contained in `main` (and `main` was
+already pushed), so the merge was a no-op; the branch was pushed as asked.
+Tagged `v2.0.3`, published the GitHub release, and the publish workflow put
+2.0.3 on PyPI (verified on pypi.org). CI green on `main` before tagging.
+
+## 2026-10-03 — `helping-with-arxiv` subtree-merged, keeping its history
+
+Emma: merge it "in properly as a subtree maintaining the history". Removed the
+submodule (`0357173`), then `git subtree add --prefix=helping-with-arxiv
+https://github.com/EmmaLeonhart/helping-with-arxiv main` without `--squash`,
+so its six commits are in this repo's history (`e9a9d9d`). The prefix stayed
+`helping-with-arxiv/`. How it relates to `cleanvibe/arxiv.py` is still open
+and logged in `todo.md`. Packaging is unaffected (`packages = ["cleanvibe"]`);
+233 tests pass and `doctor` is clean.

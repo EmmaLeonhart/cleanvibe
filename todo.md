@@ -26,7 +26,7 @@ See the `queue-driven-workflow` skill (`.claude/skills/queue-driven-workflow/SKI
 
 - **Add a feedback loop from real first-sessions back into the template.** As more projects are bootstrapped, the bootstrap queue should evolve based on what consistently goes well or poorly in step 1–7. Figure out a lightweight way to capture that (a "what bit you?" prompt at session end? a curated `BOOTSTRAP_LEARNINGS.md` in this repo?) without making the tool itself heavyweight.
 
-- **Subtree-merge `helping-with-arxiv` into this repo, replacing the temporary submodule.** Since 2026-10-03 it is a submodule at `helping-with-arxiv/` (arXiv submission prep: LaTeX rebuild and submission package for the Quatrix paper). Remove the submodule, then `git subtree add --prefix=<dir> https://github.com/EmmaLeonhart/helping-with-arxiv main` so its history comes along. Do not build on the submodule pointer or copy its files in by hand in the meantime. Decide at merge time: the prefix, and how it relates to `cleanvibe/arxiv.py` (which fetches arXiv metadata for `replicate`; this repo goes the other way, preparing a submission).
+- **Decide how `helping-with-arxiv/` relates to `cleanvibe/arxiv.py`.** Since 2026-10-03 the arXiv submission-prep repo (Quatrix paper: LaTeX rebuilt from the Zenodo PDF, submission package) lives in this repo as a subtree at `helping-with-arxiv/`, with its history. `arxiv.py` reads arXiv for `replicate`; this goes the other way, preparing a submission. Open: whether submission prep becomes a cleanvibe feature (a mode or skill), stays a worked example under `docs/`, or stays where it is. Its nested `.claude/skills/` are v1.17-era copies.
 
 ### Replication infrastructure (merged-in from `replication_skill`)
 

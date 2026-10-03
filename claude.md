@@ -24,6 +24,7 @@ cleanvibe/
 │   └── templates.py     # all generated text: v2 (v2_*, V2_INTAKE_PY), 1.x modes, replication, the session-log hook script
 ├── tests/               # stdlib unittest, run by CI on win/mac/linux
 ├── docs/                # replication_framing.md (vision) + replication-examples/ (reference corpus)
+├── helping-with-arxiv/   # subtree (with history): arXiv submission prep for the Quatrix paper
 ├── pages/                # static GitHub Pages site (index.html/identity.css/CNAME → cleanvibe.emmaleonhart.com)
 ├── .github/workflows/
 │   ├── ci.yml           # 3-OS x 2-py-version matrix
