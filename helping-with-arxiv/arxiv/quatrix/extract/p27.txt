@@ -1,0 +1,190 @@
+0
+500
+1000
+1500
+2000
+2500
+3000
+3500
+4000
+Training step
+0.45
+0.50
+0.55
+0.60
+0.65
+0.70
+0.75
+0.80
+Validation AUROC  (5-year OS)
+Phase 4: multimodal survival prediction
+chance (AUROC = 0.5)
+Clinical-only (age+sex+stage+cancer-type)
+Full fusion (SBS96 + clinical + cancer-type)
+Mutation-only (SBS96)
+Mutation
+(SBS96 only)
+Clinical
+(age+sex+stage+cancer)
+Full
+fusion
+0.45
+0.50
+0.55
+0.60
+0.65
+0.70
+0.75
+0.80
+Final validation AUROC
+0.637
+0.689
+0.681
+Δ(full − clinical) = -0.007   — within seed noise
+Channel ablation at final step
+Fig. 16. Phase 4: 5-year overall-survival prediction on TCGA-CDR (4,768 patients, 21 cancer types). Left:
+per-step validation AUROC for the three channel-ablation configurations of the same checkpoint. Right: final-step
+AUROC bars. Mutation alone above chance (0.633), clinical dominates (0.696), fusion does not improve over
+clinical alone within noise.
+UV-induced damage, although we do not quantify this against random-attention baselines or per-class
+controls. We present the heatmap as a qualitative interpretability check, not a quantitative attribution
+claim.
+The
+·reinforcement
+-
+learning
+·Q
+-
+function
+·assigns
+·a
+·scal
+ar
+·value
+·to
+·each
+·state
+-
+action
+·pair
+,
+·and
+·in
+·this
+·paper
+·we
+·use
+·it
+·as
+·the
+·attention
+·kernel
+.
+action token (key position)
+The
+·reinforcement
+-
+learning
+·Q
+-
+function
+·assigns
+·a
+·scal
+ar
+·value
+·to
+·each
+·state
+-
+action
+·pair
+,
+·and
+·in
+·this
+·paper
+·we
+·use
+·it
+·as
+·the
+·attention
+·kernel
+.
+state token (query position)
+Text pipeline: SAVO mid-layer Q(s,a)  (60m model)
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+attention weight
+C[C>A]T
+G[C>A]A
+G[C>A]C
+C[C>G]T
+G[C>G]A
+G[C>G]G
+T[C>G]T
+A[C>T]C
+A[C>T]G
+C[C>T]T
+G[C>T]C
+T[C>T]A
+C[T>A]T
+G[T>A]A
+G[T>A]C
+G[T>A]G
+C[T>C]T
+G[T>C]A
+G[T>C]C
+T[T>C]T
+A[T>G]A
+A[T>G]C
+A[T>G]T
+C[T>G]T
+action context (key)
+C[C>A]T
+G[C>A]A
+G[C>A]C
+C[C>G]T
+G[C>G]A
+G[C>G]G
+T[C>G]T
+A[C>T]C
+A[C>T]G
+C[C>T]T
+G[C>T]C
+T[C>T]A
+C[T>A]T
+G[T>A]A
+G[T>A]C
+G[T>A]G
+C[T>C]T
+G[T>C]A
+G[T>C]C
+T[T>C]T
+A[T>G]A
+A[T>G]C
+A[T>G]T
+C[T>G]T
+state context (query)
+Cancer pipeline: SAVO layer-0 Q(s,a)  (UV-like SBS96 input)
+0.005
+0.010
+0.015
+0.020
+0.025
+0.030
+attention weight
+Fig. 17. SAVO attention on two modalities. Left: 𝑄(𝑠, 𝑎) at a mid-layer of the 60m SAVO text model on
+a short technical sentence. Right: 𝑄(𝑠, 𝑎) at layer 0 of the 14.86M SAVO cancer model on a UV-like SBS96
+input (24-context subsample for readability); structured cross-context attention over 𝐶>𝑇transitions at 𝑇-flanked
+contexts reproduces the UV co-occurrence signature.
+Cross-field summary
+• Phase 1 — Signature decomposition. SAVO cosine 0.975 vs NNLS 0.987; NNLS is higher.
+• Phase 2 — Pan-cancer classification. Peak top-1 = 0.517, top-5 = 0.838 on 27 TCGA classes
+from SBS96 alone (5.6× majority baseline).
+27

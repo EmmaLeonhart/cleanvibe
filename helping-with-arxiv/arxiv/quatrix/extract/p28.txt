@@ -1,0 +1,72 @@
+• Phase 3 — Drug-response regression. Pearson 𝑟= 0.903, Spearman 0.869 on 133k GDSC2
+assays; 57% RMSE reduction over constant-mean.
+• Phase 4 — Multimodal survival. Full fusion AUROC 0.690 vs clinical-only 0.696; SBS96 alone
+0.633 (above chance, does not beat AJCC staging).
+The same SAVO block runs across all four cancer-ML tasks plus text, vision, audio, and world-state
+transition. The architectural claim is invariance of the block, not superiority on the specific task. NanoG1
+(cancer foundation model with mid-CoT hypothetical simulation, building on the Phase 1–4 setup here)
+is the named successor paper.
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+1.2
+1.4
+Ratio to domain-specialist baseline  (1.0 = parity)
+Text LM (60m)
+Cancer Phase 1
+signature decomp.
+Cancer Phase 4
+5-yr OS C-index
+0.957× 
+SAVO 263 ppl  vs  QKVO 252 ppl
+0.988× 
+SAVO 0.975  vs  NNLS 0.987
+0.990× 
+SAVO 0.701  vs  clinical-only 0.708
+specialist
+parity
+a.  SAVO at specialist parity (3 head-to-head comparisons)
+b.  Absolute reports (no
+     rank-matched baseline)
+Vision
+COCO 5% tail
+ppl 175
+Audio
+LibriSpeech tail
+ppl 1,905
+World
+MiniGrid MSE
+0.071 @ 180m  (predict-mean 0.033 — model fails P3)
+Cancer P2
+33-class top-1
+0.517 peak  (majority 0.087)
+Cancer P3
+GDSC drug r
+Pearson 0.903  (RMSE −57%)
+All values are held-out;
+same SAVO block, modality-
+specific I/O.
+One block, multiple domains: SAVO reach across the full study
+Fig. 18. One block, multiple domains. Left: three head-to-head ratios where SAVO has a comparable specialist
+baseline — text vs. rank-matched QKVO at 60m, signature decomposition vs. NNLS, and 5-year survival vs.
+clinical-only ablation. All three sit within ∼5% of the specialist baseline; in each case the specialist baseline is in
+fact slightly better (rank-matched MHA −12 ppl vs SAVO; NNLS +0.012 cosine vs SAVO; clinical-only AUROC
++0.006 vs full fusion). The architectural claim is invariance of the block, not domain superiority. Right: absolute
+SAVO held-out numbers for vision, audio, world, and the two cancer tasks for which there is no rank-matched
+single-domain baseline at our scale.
+8 Conclusion
+We evaluated Q-Compass 1 as a single routing primitive across text, vision, audio, world-state transition,
+and four cross-field cancer-ML tasks at three parameter scales (60m, 120m, 180m).
+SAVO — the
+four-projection variant in which the 𝑉projects state⊙action — closes the SAO→QKVO 60m text-LM
+gap to a 4-seed paired difference of +12.33 ± 0.87 ppl above the rank-matched controlled ablation
+(𝑝= 7.6 × 10−4); a comparable ∼11–12-ppl gap holds at 120m and 180m (single seed each). The
+rank-matched transformer baseline is a controlled ablation isolating the value-projection question, not
+a comparison against full-rank attention. At matched 60m text-compute, joint four-modality training
+reaches the same per-text-token loss as text-only training, and the property holds through 180m. The same
+SAVO block, with no architectural changes, runs on signature decomposition (cosine 0.975 vs NNLS
+0.987), 27-class pan-cancer classification (top-1 0.517), GDSC2 drug-response regression (𝑟= 0.903),
+28

@@ -1,0 +1,71 @@
+60m
+(plain SAO)
+120m
+(SAVO)
+180m
+(SAVO)
+0
+100
+200
+300
+400
+500
+600
+Held-out perplexity  (lower is better)
+512
+430
+454
+175
+130
+129
+Text + vision
+Text (WT-103 val)
+Vision (COCO 5% tail)
+60m
+(plain SAO)
+120m
+(SAVO)
+180m
+(SAVO)
+0
+500
+1000
+1500
+2000
+Audio perplexity (left axis)
+1905
+1962
+2018
+Audio + world
+Audio (LibriSpeech)
+World (MiniGrid MSE)
+0.0
+0.1
+0.2
+0.3
+0.4
+0.5
+World MSE (right axis)
+0.406
+0.407
+0.071
+predict-mean reference (0.033) — MiniGrid low-variance regime
+Multimodal scaling: each modality has its own scaling regime at 10k steps
+Fig. 5. Multimodal scaling per modality across 60m / 120m / 180m. Left: text and vision held-out perplexity.
+Vision is monotonic; text peaks at 120m and regresses at 180m, in lock-step with the text-only regression at the
+same scales. Right: audio (left axis) and world MSE (right axis). World MSE drops from ∼0.41 at 60m/120m to
+0.071 at 180m; the predict-mean reference line at 0.033 (computed on the trained 180m StateEncoder) is in the
+same band, reflecting MiniGrid’s low encoded-state variance (§6.3).
+5.2 60m text-LM head-to-head: Q-Compass vs. rank-matched attention
+To isolate the effect of the Q-Compass primitive, we train a matched-architecture transformer baseline
+at 60m: same hidden size, layer count, FFN ratio, optimizer, data, and training budget, but with standard
+multi-head attention instead of Q-Compass. All three attention projections (𝑊𝑄, 𝑊𝐾, 𝑊𝑉) are at rank
+𝑟= 48, matching Q-Compass’s 𝑊𝑠, 𝑊𝑎rank, so the only architectural difference is whether content is
+gathered through a learned value projection 𝑊𝑉(transformer) or directly from 𝑥(Q-Compass). This is a
+controlled ablation isolating the value-projection question, not a comparison against full-rank standard
+multi-head attention; a real-world Transformer-base baseline at full QKV rank (or with GQA / MQA
+at standard configurations) is left to future work, and the absolute perplexity numbers in this paper
+(val ppl ∼250 on WikiText-103 at 60m / 10,000 steps) reflect the limited training budget rather than a
+converged-regime architectural ceiling. Under the rank-matched constraint the transformer has ∼4.4%
+fewer parameters (32.3M vs. 33.4M) because 𝑊𝑜shrinks to 𝑟×𝐻.
+9

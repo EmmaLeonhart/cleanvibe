@@ -1,0 +1,80 @@
+2. Content gather. The output is Í
+𝑗weights𝑡, 𝑗· content𝑗where content 𝑗= (state 𝑗⊙action𝑗)𝑊𝑐.
+The dim-𝐻content is the projection of a dim-𝑟quantity, the elementwise product qval𝑗= state𝑗⊙
+action𝑗∈R𝑟. Caching qval𝑗(or equivalently state𝑗and action𝑗) is sufficient; the dim-𝐻content
+can be reconstructed at decode time as qval𝑗𝑊𝑐via a single [𝐿, 𝑟] · [𝑟, 𝐻] matmul, an O(𝐿𝑟𝐻) cost
+that is dominated by the routing-softmax O(𝐿2𝑟) cost at any 𝐿for which long-context inference is
+interesting.
+The total per-token per-layer cache is therefore 2𝑟(state plus action, or equivalently qval plus action)
+rather than 2𝐻. SAO does not have this property: its content is the raw 𝑥𝑗∈R𝐻, which has rank 𝐻
+and cannot be losslessly compressed. The structural compressibility is a property of SAVO’s 𝑄-value
+content projection.
+Method
+Per-token cache
+At 𝐻=384
+1M-context, 32-layer, fp16
+vs MHA
+Standard MHA (ℎ=8)
+2𝐻
+768
+49 GB
+1×
+GQA-4 (𝑔=4, ℎ=8)
+2𝑔𝐻/ℎ
+384
+25 GB
+0.50×
+MQA (ℎ=8)
+2𝐻/ℎ
+96
+6.1 GB
+0.125×
+DeepSeek-V2 MLA 23
+∼𝑟latent
+(config-dep.)
+comparable regime
+comparable
+DeepSeek-V4 CSA + HCA 18
+∼𝑟latent + sparse-𝑘
+(config-dep.)
+10% of V3.2 at 1M
+∼0.1×
+SAO (raw-𝑥content), 𝑟=𝐻/8
+𝐻+ 𝑟
+432
+28 GB
+0.56×
+SAVO at 𝑟=𝐻/8
+2𝑟
+96
+6.1 GB
+0.125×
+SAVO at 𝑟=𝐻/16
+2𝑟
+48
+3.1 GB
+0.0625×
+Table 11. Autoregressive cache footprint per token per layer. GB figures assume fp16 storage; bf16 / fp8 /
+int8 inference quantisation would scale accordingly (this paper does not measure quantised inference). SAVO’s
+cache depends only on the compass rank 𝑟, not on the hidden size 𝐻; SAO and standard MHA scale with 𝐻. At
+𝑟=𝐻/8 SAVO matches MQA’s cache footprint while preserving full-rank routing across ℎheads. At 𝑟=𝐻/16 (val
+ppl 264.89, comparable to the 𝑟=𝐻/8 baseline per Table 9), SAVO halves MQA’s footprint — a 16× reduction
+relative to standard MHA. The structural compressibility comes from SAVO’s content path being a projection of a
+rank-𝑟quantity (state ⊙action), not from any approximation or sparsification.
+The trade-off.
+SAVO at 𝑟=𝐻/8 trades the SAVO→rank-matched perplexity gap (§5.2: +12.33 ± 0.87
+ppl on WikiText-103, 4-seed paired difference, 𝑝< 10−3, Table 5) for an 8× KV-cache reduction. At
+𝑟=𝐻/16 the cache is 16× smaller and the val-ppl penalty is at most 1.6 ppl above 𝑟=𝐻/8 (Table 9). The
+per-decode-step compute overhead of reconstructing dim-𝐻content from cached dim-𝑟qval is a single
+[𝐿, 𝑟] · [𝑟, 𝐻] matmul, dominated at every interesting 𝐿by the routing softmax cost. The cache reduction
+is structural — it is a consequence of SAVO’s content path being intrinsically rank-𝑟, not a quantization,
+sparsification, or sliding-window approximation.
+Position relative to existing work.
+Multi-Query Attention 24 reduces cache by sharing 𝐾and 𝑉across
+all heads of standard attention; the KV cache becomes 2𝐻/ℎat the cost of head-diversity. Grouped-
+Query Attention 9 interpolates between MHA and MQA via 𝑔groups.
+DeepSeek-V2’s Multi-head
+Latent Attention 23 compresses 𝐾and 𝑉into a single low-rank latent before caching; this gives a
+cache footprint comparable to MQA on their configuration while preserving multi-head expressivity in
+the routing. DeepSeek-V4’s hybrid Compressed Sparse Attention + Heavily Compressed Attention 18
+17

@@ -1,0 +1,32 @@
+and TCGA 5-year-survival prediction (C-index 0.701). The world-model branch trains stably as a fourth
+concurrent objective (world MSE 1.125 →0.071 over the training budget); MiniGrid-Empty-8x8’s low
+encoded next-state variance puts the predict-mean baseline (0.033) in the same band, so benchmarking
+against dedicated world-model architectures on demanding environments (DMLab, Habitat) is left as
+future work. NanoG1 (cancer foundation model with mid-CoT hypothetical simulation, building on §7)
+is the named successor project whose results will be reported separately.
+Data and Code Availability
+All training scripts, dataset preparation scripts, figure-generation scripts, and checkpoints are released
+under the MIT license at https://github.com/Abd0r/quatrix. All quantitative results in this paper
+are reproducible from a clean checkout on a single 6 GB consumer GPU. The arxiv + pubmed OOD
+subsets used in §5.4 are reproducible from the data-preparation script. No human-subjects data were
+collected by this work; the TCGA-CDR and GDSC2 data used in §7 are obtained from their public
+release URLs.
+AI Assistance Disclosure
+Claude (Anthropic) was used as a writing and coding assistant during preparation of this manuscript,
+figure-generation scripts, and training pipeline. The author conceived the architecture, designed all
+experiments, verified all results, and takes full responsibility for the scientific content.
+Acknowledgments
+This work was conducted independently, without institutional affiliation or external funding.
+References
+[1] Syed Abdur Rehman Ali. Q-Compass: Grounding sequence mixing in reinforcement learning nav-
+igation, March 2026. URL https://zenodo.org/records/19104202. Independent preprint.
+[2] Alexey Dosovitskiy, Lucas Beyer, Alexander Kolesnikov, Dirk Weissenborn, Xiaohua Zhai, Thomas
+Unterthiner, Mostafa Dehghani, Matthias Minderer, Georg Heigold, Sylvain Gelly, Jakob Uszkoreit,
+and Neil Houlsby. An image is worth 16x16 words: Transformers for image recognition at scale.
+In International Conference on Learning Representations (ICLR), 2021.
+[3] Alec Radford, Jong Wook Kim, Tao Xu, Greg Brockman, Christine McLeavey, and Ilya Sutskever.
+Robust speech recognition via large-scale weak supervision. In International Conference on Ma-
+chine Learning (ICML), 2023.
+[4] Alec Radford, Jeffrey Wu, Rewon Child, David Luan, Dario Amodei, and Ilya Sutskever. Language
+models are unsupervised multitask learners. OpenAI Technical Report, 2019.
+29

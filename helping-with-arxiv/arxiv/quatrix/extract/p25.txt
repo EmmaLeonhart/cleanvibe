@@ -1,0 +1,104 @@
+0
+1000
+2000
+3000
+4000
+5000
+6000
+7000
+8000
+Training step
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+Classification accuracy (higher is better)
+peak top-1 = 0.513 @ step 5500.0
+Phase 2: pan-cancer classification (27 classes, SBS96 only)
+random baseline = 0.04 (1/27)
+majority-class baseline = 0.09
+SAVO val top-1
+SAVO val top-5
+0
+1000
+2000
+3000
+4000
+5000
+6000
+7000
+8000
+Training step
+1.0
+1.5
+2.0
+2.5
+3.0
+Cross-entropy loss (nats)
+Train vs. val loss (mild late-training overfit)
+train loss
+val loss
+best val @ step 2500.0
+Fig. 13. Phase 2: pan-cancer classification from SBS96 alone. Left: top-1 and top-5 validation accuracy vs.
+training step (purple) vs. chance and majority-class baselines. Peak top-1 = 0.517 at step 2,500. Right: train vs.
+validation loss; validation minimum at step 2,500 marks onset of mild overfitting.
+𝑟= 0.864 — ∼92% of the variance in this task is captured by drug identity. Cell-line identity alone
+reaches 𝑟= 0.306. The architecture’s contribution beyond drug identity is +0.04 𝑟. The Phase 3 number
+sits in the competitive band of published drug-response baselines but the headline 𝑟=0.903 should be
+read with the drug-only baseline in mind.
+0
+500
+1000
+1500
+2000
+2500
+3000
+3500
+4000
+Training step
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+Pearson correlation with ln IC50
+Phase 3: GDSC drug-response regression
+chance (r = 0)
+Full fusion (cell-line + drug + tissue)
+Drug-only (mask cell-line)
+Cell-line-only (mask drug)
+Cell-line
+only
+Drug
+only
+Full
+fusion
+0.0
+0.2
+0.4
+0.6
+0.8
+1.0
+Final validation Pearson r
+r = 0.302
+r = 0.864
+r = 0.890
+RMSE drops 2.75 (mean-predict) → 1.19 (full)
+Full fusion adds +0.04 r over drug-only
+Channel ablation at final step
+Fig. 14. Phase 3: drug-response regression on GDSC2 (566 cell lines × 280 drugs, 133k assays). Left:
+per-step validation Pearson 𝑟for the three channel-ablation configurations. Right: final-step Pearson bars. Drug
+identity captures most of the variance (𝑟= 0.864); cell-line identity alone is weak (𝑟= 0.306); full fusion of drug
+× cell-line × tissue reaches 𝑟= 0.903.
+Phase 4: multimodal survival prediction with channel ablation
+The capstone test in a clinical setting. We join SBS96 signatures, a cancer-type embedding, and three
+standard clinical features (age, sex, AJCC stage) from TCGA-CDR 32 and predict the binary endpoint
+"died within 5 years of diagnosis" on 4,768 TCGA patients across 21 cancer types (positive fraction 0.31).
+The architecture is three parallel SAVO encoders (mutation, cancer-type, clinical), stacked as a length-3
+token sequence, passed through a 2-layer bidirectional SAVO fusion block, then pooled and scored by a
+logistic head (6 × 105 parameters total, trains in 30 seconds). The built-in channel ablation re-evaluates
+the same checkpoint after zeroing the mutation channel and after zeroing the clinical channel.
+25

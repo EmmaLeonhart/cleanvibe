@@ -1,0 +1,85 @@
+Modality
+sampler
+text 35%
+vision 25%
+audio 20%
+world 20%
+text
+BPE tokens
+vision
+RGB 224×224 → 196 patches
+audio
+mel 80×T → patches
+world
+(framet, at, framet + 1)
+Q-Compass
+Ws, Wa, Wo
+shared
+Ltotal
+Per-step routing: one batch through shared kernel
+Fig. 2. Per-step routing: one batch through the shared kernel. At each optimizer step the modality sampler
+draws from text (35%), vision (25%), audio (20%), or world (20%). Regardless of modality, the batch flows
+through the same 𝑊𝑠, 𝑊𝑎, 𝑊𝑜parameters inside the Q-Compass kernel.
+4 Experiment Setup
+Datasets.
+Text: WikiText-103 19, 200,000 contiguous samples (min. 512-character length) tokenized
+with GPT-2 BPE 4, total ≈103M tokens. Vision: MS-COCO captions (2017 val split) 20, 5,000 images
+/ 25,000 captions, 224 × 224 ImageNet-normalized. Audio: LibriSpeech train-clean-100 21, 10,000
+indexed utterances at 16 kHz / 80-mel. World: 20,000 episodes from MiniGrid-Empty-8x8-v0 22,
+recording (frame𝑡, 𝑎𝑡, frame𝑡+1) triples with six discrete actions.
+Model scales.
+Three configurations with hard-capped total parameter budget (Table 2, Fig. 3). Compass
+rank 𝑟= 𝐻/8. All three fit within 6 GB VRAM at 1024-token context.
+Scale
+𝐻
+𝐿LM
+𝐿WM
+𝑟
+LM core
+Vision
+Audio
+World
+Total
+W/LM
+60m
+384
+10
+10
+48
+33.4M
+4.6M
+4.7M
+15.0M
+57.7M
+45%
+120m
+640
+11
+9
+80
+74.6M
+4.7M
+4.8M
+37.6M
+121.7M
+50%
+180m
+768
+14
+9
+96
+115.9M
+4.7M
+4.8M
+54.0M
+179.4M
+47%
+Table 2. Three model configurations with verified parameter counts. 𝐿LM is LM-block depth; 𝐿WM is world-model
+TransitionModel depth.
+Training protocol.
+Each scale is trained for 10,000 optimizer steps (≈650M tokens observed per scale).
+Training runs sequentially on the same physical GPU in the order 60m →120m →180m. Checkpoints
+saved every 2,000 steps. All experiments are reproducible from python3 download_poc_data.py
+followed by python3 train_quatrix_poc.py –all –steps 10000 plus the three text-only vari-
+ants.
+6

@@ -1,0 +1,80 @@
+separately (∼0.7 ppl on val, Table 5).
+Adding vision, audio, and world objectives to the shared
+Q-Compass stack does not measurably change the per-text-token learning rate. Caveat: this is a single-
+curve, single-observation comparison (one multimodal training run vs. one text-only training run, at the
+matched-text-compute interpolation point). A multi-seed analogue — multi-seed multimodal vs. multi-
+seed text-only at matched text compute — is deferred to future work; the SAVO multi-seed checkpoints
+exist but the multimodal seeds do not.
+The 120m SAVO multimodal text loss tracks the text-only trajectory at matched text-compute, and
+the 180m multimodal text loss regresses in lock-step with the text-only 180m regression (Table 3 vs.
+Table 7). The joint training mix is not the source of the 180m text regression — the 10,000-step training
+budget is. The non-interference observation generalises through the full 60m/120m/180m sweep.
+5.6 Scaling at text-only: 60m, 120m, 180m
+Table 7 reports the full text-only scaling for the rank-matched transformer baseline and for SAVO. The
+ℎ=6 multi-head variants are reported where dimensional divisibility allows: 60m (𝑟=48, 𝐻=384) and
+180m (𝑟=96, 𝐻=768) are clean; 120m (𝑟=80, 𝐻=640) is not.
+60m
+120m
+180m
+Variant
+val
+test
+val
+test
+val
+test
+Transformer QKVO, ℎ=1
+252
+251
+230
+—
+248.5
+246
+Transformer QKVO, ℎ=6
+—
+—
+—
+—
+258
+255
+Q-Compass plain (SAO, ℎ=1)
+272
+271
+258
+—
+—
+—
+MH-Q-Compass (SAO, ℎ=6)
+275
+274
+—
+—
+—
+—
+SAVO (ℎ=1)
+263
+262
+239
+236
+260
+257
+SAVO+MH (ℎ=6)
+266
+—
+—
+—
+265
+260
+SAVO −QKVO gap
++11
++11
++9
++6
++11.5
++11
+Table 7. Scaling across 60m / 120m / 180m (WikiText-103 perplexity; lower is better). All models trained
+10,000 steps with identical hyperparameters; single seed per cell except the 60m row, where the multi-seed paired
+difference +12.33±0.87 ppl from Table 5 replaces the single-seed entry. Both architectures regress 120m →180m
+at the 10,000-step budget — a compute-budget effect, not architecture-specific. The SAVO–QKVO gap is ∼11–12
+ppl at every scale, consistent with the 60m multi-seed mean. Multi-head adds nothing for either architecture.
+14

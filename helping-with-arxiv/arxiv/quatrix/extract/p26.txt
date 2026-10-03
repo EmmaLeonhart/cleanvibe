@@ -1,0 +1,55 @@
+Result (AUROC).
+Mutation signatures alone predict 5-year OS at validation AUROC 0.633. Clinical
+features alone reach AUROC 0.696. Full fusion reaches 0.690. Fusion −clinical = −0.006, inside
+seed-to-seed noise. Full fusion does not exceed clinical-only within seed-to-seed noise. SBS96 alone
+is above chance but does not add measurable predictive value on top of standard AJCC staging + age
++ sex + cancer type at this sample size. The Phase 4 model has 6 × 105 parameters total and trains
+in 30 seconds: this experiment tests block-class reusability and clinical calibration, not architectural
+superiority.
+Richer inputs (gene expression, histopathology, treatment history) are required to test
+whether mutation signatures contribute prognostic signal beyond clinical staging; both are out of scope
+here.
+Cox-PH C-index.
+Recomputing with Harrell’s concordance index on the continuous (os_time_days,
+os_event) endpoint, treating the model’s sigmoid output as a monotone risk score: full fusion 0.701,
+clinical-only 0.708, mutation-only 0.622, AJCC stage alone 0.645, random risk 0.521 (𝑁= 715 held-
+out, 240 events). The same pattern holds: clinical features dominate, mutation signatures carry real
+but subsidiary signal. C-index ∼0.70 is in the published band for pan-cancer prognosis from standard
+clinical features.
+Random
+risk
+Mutation
+only
+AJCC stage
+alone
+Full
+fusion
+Clinical
+only
+0.50
+0.55
+0.60
+0.65
+0.70
+0.75
+Harrell's concordance (C-index)
+0.521
+0.622
+0.645
+0.701
+0.708
+chance = 0.5
+Δ(full − clinical) = -0.008   (N = 715, events = 240)
+Phase 4: Cox-PH C-index on 5-year OS endpoint
+Fig. 15. Phase 4: Harrell’s C-index for 5-year overall survival. Five configurations on 𝑁= 715 held-out
+patients with 240 events: random risk (0.521), mutation-only SBS96 (0.622), AJCC stage alone (0.645), full
+fusion (0.701), clinical-only ablation (0.708). Δ(full −clinical) = −0.008, within noise.
+Attention-map visualisation
+To ground the modality-agnostic claim beyond loss curves, we visualise the softmax(state · action⊤/√𝑟)
+attention weights at one representative layer from the SAVO text model and from the SAVO cancer model
+(Fig. 17). The two models share the block class but are trained on entirely different data. The text panel
+shows the expected causal lower-triangular pattern with sparse focused peaks at content anchors. The
+cancer panel, bidirectional and over the 96 SBS96 contexts (a 24-context subset shown for legibility),
+shows structured cross-context attention: visually, the heatmap suggests 𝐶> 𝑇transitions attend more
+strongly to 𝑇-flanked contexts — consistent with the biological co-occurrence pattern that distinguishes
+26

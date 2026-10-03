@@ -1,0 +1,234 @@
+\section{Conclusion}\label{sec:8}
+
+We evaluated \QC{}~\cite{ref1} as a single routing primitive across text, vision, audio, world-state transition,
+and four cross-field cancer-ML tasks at three parameter scales (60m, 120m, 180m). SAVO --- the
+four-projection variant in which the $V$ projects state$\odot$action --- closes the SAO$\to$QKVO 60m text-LM
+gap to a 4-seed paired difference of $+12.33 \pm 0.87$ ppl above the rank-matched controlled ablation
+($p = 7.6 \times 10^{-4}$); a comparable ${\sim}$11--12-ppl gap holds at 120m and 180m (single seed each). The
+rank-matched transformer baseline is a controlled ablation isolating the value-projection question, not
+a comparison against full-rank attention. At matched 60m text-compute, joint four-modality training
+reaches the same per-text-token loss as text-only training, and the property holds through 180m. The same
+SAVO block, with no architectural changes, runs on signature decomposition (cosine 0.975 vs NNLS
+0.987), 27-class pan-cancer classification (top-1 0.517), GDSC2 drug-response regression ($r = 0.903$),
+and TCGA 5-year-survival prediction (C-index 0.701). The world-model branch trains stably as a fourth
+concurrent objective (world MSE $1.125 \to 0.071$ over the training budget); MiniGrid-Empty-8x8's low
+encoded next-state variance puts the predict-mean baseline (0.033) in the same band, so benchmarking
+against dedicated world-model architectures on demanding environments (DMLab, Habitat) is left as
+future work. \NanoG{} (cancer foundation model with mid-CoT hypothetical simulation, building on \S\ref{sec:7})
+is the named successor project whose results will be reported separately.
+
+\section*{Data and Code Availability}
+
+All training scripts, dataset preparation scripts, figure-generation scripts, and checkpoints are released
+under the MIT license at \url{https://github.com/Abd0r/quatrix}. All quantitative results in this paper
+are reproducible from a clean checkout on a single 6\,GB consumer GPU. The arxiv + pubmed OOD
+subsets used in \S\ref{sec:5.4} are reproducible from the data-preparation script. No human-subjects data were
+collected by this work; the TCGA-CDR and GDSC2 data used in \S\ref{sec:7} are obtained from their public
+release URLs.
+
+\section*{AI Assistance Disclosure}
+
+Claude (Anthropic) was used as a writing and coding assistant during preparation of this manuscript,
+figure-generation scripts, and training pipeline. The author conceived the architecture, designed all
+experiments, verified all results, and takes full responsibility for the scientific content.
+
+\section*{Acknowledgments}
+
+This work was conducted independently, without institutional affiliation or external funding.
+
+\begin{thebibliography}{99}
+
+\bibitem{ref1}
+Syed Abdur Rehman Ali.
+\newblock Q-Compass: Grounding sequence mixing in reinforcement learning navigation, March 2026.
+\newblock URL \url{https://zenodo.org/records/19104202}.
+\newblock Independent preprint.
+
+\bibitem{ref2}
+Alexey Dosovitskiy, Lucas Beyer, Alexander Kolesnikov, Dirk Weissenborn, Xiaohua Zhai, Thomas
+  Unterthiner, Mostafa Dehghani, Matthias Minderer, Georg Heigold, Sylvain Gelly, Jakob Uszkoreit,
+  and Neil Houlsby.
+\newblock An image is worth 16x16 words: Transformers for image recognition at scale.
+\newblock In \emph{International Conference on Learning Representations (ICLR)}, 2021.
+
+\bibitem{ref3}
+Alec Radford, Jong Wook Kim, Tao Xu, Greg Brockman, Christine McLeavey, and Ilya Sutskever.
+\newblock Robust speech recognition via large-scale weak supervision.
+\newblock In \emph{International Conference on Machine Learning (ICML)}, 2023.
+
+\bibitem{ref4}
+Alec Radford, Jeffrey Wu, Rewon Child, David Luan, Dario Amodei, and Ilya Sutskever.
+\newblock Language models are unsupervised multitask learners.
+\newblock \emph{OpenAI Technical Report}, 2019.
+
+\bibitem{ref5}
+Ashish Vaswani, Noam Shazeer, Niki Parmar, Jakob Uszkoreit, Llion Jones, Aidan N. Gomez,
+  Lukasz Kaiser, and Illia Polosukhin.
+\newblock Attention is all you need.
+\newblock In \emph{Advances in Neural Information Processing Systems (NeurIPS)}, volume~30, 2017.
+
+\bibitem{ref6}
+Angelos Katharopoulos, Apoorv Vyas, Nikolaos Pappas, and Fran\c{c}ois Fleuret.
+\newblock Transformers are RNNs: Fast autoregressive transformers with linear attention.
+\newblock In \emph{International Conference on Machine Learning (ICML)}, 2020.
+
+\bibitem{ref7}
+Rewon Child, Scott Gray, Alec Radford, and Ilya Sutskever.
+\newblock Generating long sequences with sparse transformers.
+\newblock \emph{arXiv preprint arXiv:1904.10509}, 2019.
+
+\bibitem{ref8}
+Tri Dao, Daniel~Y. Fu, Stefano Ermon, Atri Rudra, and Christopher R\'{e}.
+\newblock FlashAttention: Fast and memory-efficient exact attention with IO-awareness.
+\newblock In \emph{Advances in Neural Information Processing Systems (NeurIPS)}, 2022.
+
+\bibitem{ref9}
+Joshua Ainslie, James Lee-Thorp, Michiel de~Jong, Yury Zemlyanskiy, Federico Lebr\'{o}n, and Sumit
+  Sanghai.
+\newblock GQA: Training generalized multi-query transformer models from multi-head checkpoints.
+\newblock \emph{arXiv preprint arXiv:2305.13245}, 2023.
+
+\bibitem{ref10}
+Alec Radford, Jong Wook Kim, Chris Hallacy, Aditya Ramesh, Gabriel Goh, Sandhini Agarwal,
+  Girish Sastry, Amanda Askell, Pamela Mishkin, Jack Clark, Gretchen Krueger, and Ilya Sutskever.
+\newblock Learning transferable visual models from natural language supervision.
+\newblock In \emph{International Conference on Machine Learning (ICML)}, 2021.
+
+\bibitem{ref11}
+Jean-Baptiste Alayrac, Jeff Donahue, Pauline Luc, Antoine Miech, Iain Barr, Yana Hasson, Karel
+  Lenc, Arthur Mensch, Katie Millican, Malcolm Reynolds, Roman Ring, Eliza Rutherford, Serkan
+  Cabi, Tengda Han, Zhitao Gong, Sina Samangooei, Marianne Monteiro, Jacob Menick, Sebastian
+  Borgeaud, Andrew Brock, Aida Nematzadeh, Sahand Sharifzadeh, Mikolaj Binkowski, Ricardo
+  Barreira, Oriol Vinyals, Andrew Zisserman, and Karen Simonyan.
+\newblock Flamingo: A visual language model for few-shot learning.
+\newblock In \emph{Advances in Neural Information Processing Systems (NeurIPS)}, 2022.
+
+\bibitem{ref12}
+Andrew Jaegle, Sebastian Borgeaud, Jean-Baptiste Alayrac, Carl Doersch, Catalin Ionescu, David
+  Ding, Skanda Koppula, Daniel Zoran, Andrew Brock, Evan Shelhamer, Olivier H\'{e}naff, Matthew~M.
+  Botvinick, Andrew Zisserman, Oriol Vinyals, and Jo\~{a}o Carreira.
+\newblock Perceiver IO: A general architecture for structured inputs \& outputs.
+\newblock In \emph{International Conference on Learning Representations (ICLR)}, 2022.
+
+\bibitem{ref13}
+Scott Reed, Konrad \.{Z}o\l{}na, Emilio Parisotto, Sergio G\'{o}mez Colmenarejo, Alexander Novikov,
+  Gabriel Barth-Maron, Mai Gim\'{e}nez, Yury Sulsky, Jackie Kay, Jost Tobias Springenberg, Tom
+  Eccles, Jake Bruce, Ali Razavi, Ashley Edwards, Nicolas Heess, Yutian Chen, Raia Hadsell, Oriol
+  Vinyals, Mahyar Bordbar, and Nando de~Freitas.
+\newblock A generalist agent.
+\newblock \emph{Transactions on Machine Learning Research (TMLR)}, 2022.
+
+\bibitem{ref14}
+David Ha and J\"{u}rgen Schmidhuber.
+\newblock Recurrent world models facilitate policy evolution.
+\newblock In \emph{Advances in Neural Information Processing Systems (NeurIPS)}, 2018.
+
+\bibitem{ref15}
+Danijar Hafner, Jurgis Pasukonis, Jimmy Ba, and Timothy Lillicrap.
+\newblock Mastering diverse domains through world models.
+\newblock \emph{arXiv preprint arXiv:2301.04104}, 2023.
+
+\bibitem{ref16}
+Keller Jordan.
+\newblock Muon: An optimizer for the hidden layers of neural networks.
+\newblock \url{https://kellerjordan.github.io/posts/muon/}, 2024.
+
+\bibitem{ref17}
+Ilya Loshchilov and Frank Hutter.
+\newblock Decoupled weight decay regularization.
+\newblock In \emph{International Conference on Learning Representations (ICLR)}, 2019.
+
+\bibitem{ref18}
+DeepSeek-AI.
+\newblock Deepseek-v4: Towards highly efficient million-token context intelligence.
+\newblock \emph{arXiv preprint}, 2026.
+\newblock Preview release. Model checkpoints: \url{https://huggingface.co/collections/deepseek-ai/deepseek-v4}.
+
+\bibitem{ref19}
+Stephen Merity, Caiming Xiong, James Bradbury, and Richard Socher.
+\newblock Pointer sentinel mixture models.
+\newblock In \emph{International Conference on Learning Representations (ICLR)}, 2017.
+
+\bibitem{ref20}
+Tsung-Yi Lin, Michael Maire, Serge Belongie, James Hays, Pietro Perona, Deva Ramanan, Piotr
+  Doll\'{a}r, and C.~Lawrence Zitnick.
+\newblock Microsoft COCO: Common objects in context.
+\newblock In \emph{European Conference on Computer Vision (ECCV)}, 2014.
+
+\bibitem{ref21}
+Vassil Panayotov, Guoguo Chen, Daniel Povey, and Sanjeev Khudanpur.
+\newblock LibriSpeech: An ASR corpus based on public domain audio books.
+\newblock In \emph{IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP)}, 2015.
+
+\bibitem{ref22}
+Maxime Chevalier-Boisvert, Bolun Dai, Mark Towers, Rodrigo de~Lazcano, Lucas Willems, Salem
+  Lahlou, Suman Pal, Pablo~Samuel Castro, and Jordan Terry.
+\newblock Minigrid \& miniworld: Modular \& customizable reinforcement learning environments for
+  goal-oriented tasks.
+\newblock \url{https://github.com/Farama-Foundation/Minigrid}, 2023.
+\newblock Gymnasium compatible RL benchmark.
+
+\bibitem{ref23}
+DeepSeek-AI.
+\newblock Deepseek-v2: A strong, economical, and efficient mixture-of-experts language model.
+\newblock \emph{arXiv preprint arXiv:2405.04434}, 2024.
+
+\bibitem{ref24}
+Noam Shazeer.
+\newblock Fast transformer decoding: One write-head is all you need.
+\newblock \emph{arXiv preprint arXiv:1911.02150}, 2019.
+
+\bibitem{ref25}
+Edward~J. Hu, Yelong Shen, Phillip Wallis, Zeyuan Allen-Zhu, Yuanzhi Li, Shean Wang, Lu~Wang,
+  and Weizhu Chen.
+\newblock LoRA: Low-rank adaptation of large language models.
+\newblock In \emph{International Conference on Learning Representations (ICLR)}, 2022.
+
+\bibitem{ref26}
+Sinong Wang, Belinda~Z. Li, Madian Khabsa, Han Fang, and Hao Ma.
+\newblock Linformer: Self-attention with linear complexity.
+\newblock \emph{arXiv preprint arXiv:2006.04768}, 2020.
+
+\bibitem{ref27}
+Krzysztof Choromanski, Valerii Likhosherstov, David Dohan, Xingyou Song, Andreea Gane,
+  Tamas Sarlos, Peter Hawkins, Jared Davis, Afroz Mohiuddin, Lukasz Kaiser, David Belanger, Lucy
+  Colwell, and Adrian Weller.
+\newblock Rethinking attention with Performers.
+\newblock In \emph{International Conference on Learning Representations (ICLR)}, 2021.
+
+\bibitem{ref28}
+Ludmil~B. Alexandrov, Jaegil Kim, Nicholas~J. Haradhvala, Mi~Ni Huang, Alvin~W. Tian~Ng, Yang
+  Wu, Arnoud Boot, Kyle~R. Covington, Dmitry~A. Gordenin, Erik~N. Bergstrom, S.~M. Ashiqul
+  Islam, et~al.
+\newblock The repertoire of mutational signatures in human cancer.
+\newblock \emph{Nature}, 578:94--101, 2020.
+
+\bibitem{ref29}
+S.~M. Ashiqul Islam, Marcos D\'{i}az-Gay, Yang Wu, Mark Barnes, Raviteja Vangara, Erik~N.
+  Bergstrom, Yudou He, Mike Vella, Jingwei Wang, Jon~W. Teague, Peter Clapham, et~al.
+\newblock Uncovering novel mutational signatures by de novo extraction with SigProfilerExtractor.
+\newblock \emph{Cell Genomics}, 2(11):100179, 2022.
+
+\bibitem{ref30}
+Kyle Ellrott, Matthew~H. Bailey, Gordon Saksena, Kyle~R. Covington, Cyriac Kandoth, Chip
+  Stewart, Julian Hess, Singer Ma, Kami~E. Chiotti, Michael McLellan, et~al.
+\newblock Scalable open science approach for mutation calling of tumor exomes using multiple genomic
+  pipelines (MC3).
+\newblock \emph{Cell Systems}, 6(3):271--281.e7, 2018.
+
+\bibitem{ref31}
+Wanjuan Yang, Jorge Soares, Patricia Greninger, Elena~J. Edelman, Howard Lightfoot, Simon
+  Forbes, Nidhi Bindal, Dave Beare, James~A. Smith, I.~Richard Thompson, et~al.
+\newblock Genomics of drug sensitivity in cancer (GDSC): a resource for therapeutic biomarker
+  discovery in cancer cells.
+\newblock \emph{Nucleic Acids Research}, 41(D1):D955--D961, 2013.
+
+\bibitem{ref32}
+Jianfang Liu, Tara Lichtenberg, Katherine~A. Hoadley, Laila~M. Poisson, Alexander~J. Lazar,
+  Andrew~D. Cherniack, Albert~J. Kovatich, Christopher~C. Benz, Douglas~A. Levine, Adrian~V. Lee,
+  et~al.
+\newblock An integrated TCGA pan-cancer clinical data resource to drive high-quality survival outcome
+  analytics.
+\newblock \emph{Cell}, 173(2):400--416.e11, 2018.
+
+\end{thebibliography}

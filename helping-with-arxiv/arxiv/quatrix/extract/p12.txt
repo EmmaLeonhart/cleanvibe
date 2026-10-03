@@ -1,0 +1,49 @@
++6.54 ppl worse than the rank-matched MHA’s 251.42 ± 0.40, despite having ∼8× more attention-block
+parameters per layer (590,208 vs 73,728, Table 1). The interpretation: at 10,000 optimizer steps, the
+smaller rank-matched configuration converges; the full-rank configuration does not. The 60m / 10k-step
+budget is parameter-undertrained for the configuration that the field would normally call “standard 8-head
+MHA at 𝐻=384.” This implies the rank-matched controlled ablation we use throughout the rest of this
+paper is, at this budget, a stronger baseline than the standard-attention baseline a reviewer might assume;
+SAVO’s +12.33-ppl gap to it is therefore a worst-case characterisation, not a strawman comparison.
+SAVO’s gap to full-rank MHA is the smaller +5.79 ppl. Whether either gap survives in the trained
+regime (105–106 steps) where the larger MHA configuration converges is not tested here (§6.6).
+5.3 IID held-out behaviour (on-distribution)
+WikiText-103 val and test are drawn from the same distribution as the training split. Performance there
+measures on-distribution fit, not OOD generalization. Quatrix text-only drops 0.133 nats from train to val
+(5.739→5.606); the rank-matched transformer drops 0.133 nats (5.662→5.529). The between-model
+gap is 0.077 nats at every split (Fig. 7). Neither model overfits the training split more aggressively than
+the other at 60m / 10,000 steps. The OOD form of the 𝑊𝑉-removal claim is addressed in §5.4.
+Quatrix text-only
+(33.4M)
+Transformer rank-matched
+(32.3M)
+5.40
+5.45
+5.50
+5.55
+5.60
+5.65
+5.70
+5.75
+5.80
+Mean cross-entropy loss (nats)
+5.739
+5.662
+5.606
+5.529
+5.602
+5.526
+60m text-LM: train vs held-out loss
+train
+WT-103 val
+WT-103 test
+Fig. 7. 60m IID held-out behaviour on WikiText-103. Training (grey), val (blue), and test (green) loss for
+Quatrix-60m text-only and the rank-matched transformer. Both models show an identical train-to-held-out gap
+(≈0.13 nats); the 0.077-nat between-model difference persists across all three splits. This measures on-distribution
+fit; OOD evaluation is in §5.4.
+5.4 Out-of-distribution generalisation
+To probe whether the variants generalise differently on text distributions unlike the Wikipedia-based
+WT-103 training data, we held-out-evaluate every trained checkpoint on two scientific-prose subsets:
+500 arxiv papers and 500 pubmed abstracts, each distinct from Wikipedia in vocabulary, style, and topic.
+Table 6 reports validation perplexity per subset; Fig. 8 plots in-distribution vs OOD side-by-side.
+12

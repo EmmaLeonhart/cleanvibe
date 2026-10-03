@@ -1,0 +1,93 @@
+Variant (60m text-only, 10,000 steps)
+Seed 0
+Seed 1
+Seed 2
+Seed 3
+SAVO (𝑊𝑐, ℎ=1) val ppl
+263.31
+263.06
+264.53
+264.09
+SAVO test ppl
+262.46
+261.83
+263.17
+262.38
+Rank-matched MHA val ppl
+252.00
+251.12
+251.25
+251.32
+Rank-matched MHA test ppl
+251.04
+249.46
+250.49
+250.22
+Per-seed paired difference (SAVO −rank-matched, ppl)
+Val paired Δ
++11.31
++11.94
++13.28
++12.77
+Test paired Δ
++11.42
++12.37
++12.68
++12.16
+Aggregate, 4 seeds, mean ± sample std (n–1)
+SAVO val ppl
+263.75 ± 0.68
+Rank-matched val ppl
+251.42 ± 0.40
+Val paired Δ (SAVO −rank-matched)
++12.33 ± 0.87 ppl
+SAVO test ppl
+262.46 ± 0.55
+Rank-matched test ppl
+250.30 ± 0.66
+Test paired Δ (SAVO −rank-matched)
++12.16 ± 0.54 ppl
+Full-rank standard 8-head MHA (2 seeds at batch = 2, grad accum= 32, eff batch= 64)
+Full-rank MHA val ppl
+—
+259.46
+256.46
+—
+Full-rank MHA test ppl
+—
+258.33
+255.89
+—
+Mean val ppl (𝑛=2)
+257.96 ± 2.12
+Mean test ppl (𝑛=2)
+257.11 ± 1.73
+SAVO −full-rank MHA, val
++5.79 ppl (𝑛=2, low-precision std)
+Rank-matched −full-rank MHA, val
+−6.54 ppl
+Table 5. Multi-seed 60m text-LM comparison (WikiText-103). Each seed is one independent training run
+from the matched recipe (Muon + AdamW, 10,000 optimizer steps, 𝐻=384, 𝑟=48, single-head for SAVO and
+rank-matched; ℎ=8, qk_rank=𝐻=384 for full-rank). Seed 0 is the original single-seed baseline reported in Table 4;
+seeds 1–3 are explicit multi-seed replications. The paired difference (SAVO −rank-matched at the same seed) is the
+appropriate statistic because both architectures are trained from the same data ordering at each seed; the per-seed
+pairing controls for data-mixture variance. Mean SAVO −rank-matched paired Δ is +12.33 ± 0.87 ppl on val
+(one-sample 𝑡-test: 𝑡= 14.18, 𝑝= 7.6×10−4, 𝑑𝑓= 3) and +12.16±0.54 ppl on test. The architectural gap to rank-
+matched is real and seed-stable. The full-rank standard 8-head MHA baseline (2 seeds at 𝐵=2, accum= 32 — the
+same effective batch of 64 sequences, but with double the gradient-accumulation cycles per optimizer step — due to
+OOM at 𝐵=4 on 6 GB VRAM; see Table 10) lands at 257.96 ± 2.12 val ppl, worse than rank-matched MHA at this
+10,000-step budget despite having 8× more attention-block parameters. The 60m / 10k-step budget is sufficient to
+converge a 1×-attention-block model (rank-matched, 74k params) but insufficient for an 8×-attention-block model
+(full-rank, 590k params): the latter is parameter-undertrained at this step count. Caveat on the comparison: the
+full-rank MHA seeds use a different micro-batch size from the SAVO and rank-matched seeds (which use 𝐵=4,
+accum= 16). Effective batch and total steps match, but Adam’s gradient second-moment averaging may behave
+subtly differently across micro-batch sizes; a fully apples-to-apples comparison would re-run the rank-matched
+MHA at 𝐵=2. We report both numbers honestly and flag this asymmetry; the gap is large enough (∼6.5 ppl) that
+micro-batch sensitivity is unlikely to flip the direction.
+The seed-to-seed variance within each architecture (val std ∼0.4–0.7 ppl across 4 seeds at this recipe)
+is much smaller than the architectural difference (∼12 ppl). The single-seed gap reported in Table 4 is
+statistically representative; multi-seed replication did not collapse it.
+Counterintuitive finding: full-rank MHA underperforms the rank-matched controlled ablation at
+this budget.
+The 2-seed full-rank standard 8-head MHA result in Table 5 (257.96 ± 2.12 val ppl) is
+11

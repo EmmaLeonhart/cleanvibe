@@ -1,0 +1,37 @@
+count and matched training recipe is required to position SAVO within the parameter-efficient
+attention literature.
+3. World-model evaluation on a finite MDP. MiniGrid-Empty-8x8-v0 has ∼256 state-orientation
+pairs and 6 discrete actions. Whether the routing primitive supports world-model learning in the
+regimes that benchmark world-model architectures (Atari, DMLab, Habitat, 105+ states, raw-
+pixel targets, dedicated training recipes with target-network EMA / predictor heads / contrastive
+auxiliaries) is not tested.
+These are not soft caveats. They are the experiments a reader should expect from any future revision
+before treating SAVO as validated against the broader attention-architecture literature. The current paper
+reports what it observed at the chosen scope; it does not claim what it could not test.
+7 Cross-field demonstration: cancer mutation-signature tasks
+The claim that 𝑄(𝑠, 𝑎) is modality-agnostic is structural. The four primary modalities (text, vision,
+audio, world) test it within sequence-shaped or grid-shaped data. A harder test is whether the same block
+transfers to a domain where the input is not a sequence in the linguistic or sensory sense at all. We
+run four cross-field demonstrations: signature decomposition, pan-cancer classification, drug-response
+regression, and 5-year survival prediction. Each phase uses the identical SAVO block class; only the I/O
+layers and the output head differ.
+Phase 1: COSMIC SBS96 signature decomposition
+Given 𝑣∈Δ96 (a tumor’s SBS96 context distribution), recover 𝑐∈Δ𝐾, the mixture over 𝐾=79 COSMIC
+reference signatures 28 such that 𝑣≈𝑆𝑐. The domain baseline is non-negative least squares (NNLS)
+applied directly to the fixed signature dictionary 𝑆∈R96×79 — the arithmetic that SigProfilerAssign-
+ment 29 performs internally. On synthetic mixtures (50,000 train / 2,000 val) NNLS reaches mean cosine
+similarity 0.987 and top-1 exact-signature recovery 0.961.
+Architecture.
+A 14.86M-parameter SAVO stack (𝐻=384, 𝑟=48, 6 encoder + 4 transition layers, ℎ=6,
+MH-QVC) with a context-embedding front-end (log(1 + count) · 𝑊count + ctx_embed) and a softmax
+head over 𝐾signatures (Fig. 10). Cross-entropy with a soft target plus an auxiliary MSE term enforcing
+𝑆ˆ𝑐≈𝑣.
+Result.
+Trained from random initialization for 15,000 steps (batch 64, cosine-annealed LR, Muon for
+2D weights and AdamW for biases/embeddings, bf16 AMP), the SAVO cancer model reaches held-out
+cosine similarity 0.975 — 0.012 cosine below NNLS. Top-1 exact-signature recovery is 0.878 (NNLS
+0.961); reconstruction MSE is 2 × 10−5. SAVO 0.975 vs NNLS 0.987: NNLS is the higher number,
+which is expected — signature decomposition with 𝑆known is a convex non-negative least-squares
+problem and NNLS is near-optimal on it. The architectural claim is invariance of the routing primitive
+across domains, not domain superiority.
+22

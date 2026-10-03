@@ -1,0 +1,44 @@
+achieves comparable or stronger cache reduction at trillion-parameter scale through a separately intro-
+duced compression layer plus top-𝑘sparse selection. SAVO is in the same low-rank-cache regime as
+MLA and V4 but achieves it through a smaller mechanism: the routing itself operates in a rank-𝑟subspace
+(𝑄(𝑠, 𝑎) over state and action projections at rank 𝑟), so the cache is rank-𝑟by construction rather than by
+a separately introduced compression layer or top-𝑘selector. The detailed structural relationship to V4
+(developed concurrently and independently) is discussed in §6.1.
+A further consequence: SAVO’s cache footprint depends only on 𝑟, not on 𝐻. Halving 𝑟halves
+the cache regardless of model width. Standard attention’s cache scales with 𝐻and so cannot reduce as
+the model widens unless the head count ℎis also raised in proportion (MQA / GQA). For long-context
+applications where cache footprint per token is the dominant constraint, SAVO offers a configuration
+knob (𝑟) decoupled from model width and head count.
+6 Discussion
+6.1 SAVO and the rank-matched transformer
+The 60m exploratory ablation isolates the structural ingredient that closes the SAO→QKVO gap: the
+𝑄-value content projection 𝑊𝑐, not multi-head routing. SAO (no 𝑊𝑐, ℎ=1) sits at 272 ppl; SAVO (𝑊𝑐,
+ℎ=1) at 263; MH-SAO (ℎ=6, no 𝑊𝑐) at 275; MH-QVC (ℎ=6, 𝑊𝑐) at 266. The Transformer’s 𝑊𝑉—
+a learned projection of raw 𝑥— and SAVO’s 𝑊𝑐— a learned projection of the state⊙action product
+— both reintroduce a content transform after content gathering, but operate on different domains: raw
+input vs. self-𝑄-value. The empirical consequence is that SAVO closes most of the SAO→QKVO gap
+on this controlled ablation while preserving the 𝑊𝑉-free property of Q-Compass at the raw-input level
+(no learned linear projection of raw 𝑥in the content path).
+Concurrent work and structural family.
+Q-Compass 1 was published in March 2026, with SAVO as a
+four-projection variant introduced in this empirical follow-up. DeepSeek-V4 18 (preview release) reports
+an architecture in the same low-rank-routing family at trillion-parameter scale, developed concurrently.
+We did not draw on V4’s design and the V4 preview does not cite Q-Compass; the two architectures
+appear to have arrived at related primitives independently. The structural overlap is real and worth
+documenting precisely:
+• Rank-𝑟routing factorisation. V4’s Lightning Indexer queries are produced by a rank-𝑑𝑐down-
+then-up factorisation: 𝑐𝑄
+𝑡= ℎ𝑡· 𝑊𝐷𝑄followed by 𝑞𝐼
+𝑡= 𝑐𝑄
+𝑡· 𝑊𝐼𝑈𝑄(V4 eqs. 13–14). Q-Compass
+uses the same down-projection structure: state = 𝑥· 𝑊𝑠, action = 𝑥· 𝑊𝑎, with the routing softmax
+operating in the rank-𝑟subspace.
+• Hadamard-product content compression. V4’s CSA aggregates compressed KV entries via
+𝐶Comp
+𝑖
+= Í
+𝑗𝑆𝑗⊙𝐶𝑗(V4 eq. 12), an elementwise-product compression of the KV stream. SAVO’s
+content gather is content𝑖= (state𝑖⊙action𝑖) · 𝑊𝑐, an elementwise product of the routing’s own
+state and action. The elementwise product is not the same in either operand or aggregation pattern,
+but it occupies the same algebraic role of "low-rank content via Hadamard product."
+18

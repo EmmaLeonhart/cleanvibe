@@ -1,0 +1,62 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{newtxtext,newtxmath}
+\usepackage[margin=1in]{geometry}
+\usepackage{setspace}
+\onehalfspacing
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{enumitem}
+\usepackage[labelfont=bf,labelsep=period,font=small,figurename=Fig.]{caption}
+\usepackage{xcolor}
+\usepackage[colorlinks=true,linkcolor=blue!70!black,citecolor=blue!70!black,urlcolor=blue!70!black]{hyperref}
+
+% Section headings: \large bold for sections, \normalsize bold for subsections
+\makeatletter
+\renewcommand\section{\@startsection{section}{1}{\z@}%
+  {-3.5ex \@plus -1ex \@minus -.2ex}{2.3ex \@plus.2ex}{\normalfont\large\bfseries}}
+\renewcommand\subsection{\@startsection{subsection}{2}{\z@}%
+  {-3.25ex\@plus -1ex \@minus -.2ex}{1.5ex \@plus .2ex}{\normalfont\normalsize\bfseries}}
+\renewcommand\paragraph{\@startsection{paragraph}{4}{\z@}%
+  {3.25ex \@plus 1ex \@minus .2ex}{-1em}{\normalfont\normalsize\bfseries}}
+% Citations print as bare linked numbers (no brackets), as in the original
+\renewcommand\@cite[2]{#1\if@tempswa , #2\fi}
+\makeatother
+
+% Let large figures/tables sit at the top of a text page, as in the original
+\renewcommand{\topfraction}{0.95}
+\renewcommand{\bottomfraction}{0.9}
+\renewcommand{\textfraction}{0.05}
+\renewcommand{\floatpagefraction}{0.8}
+\setcounter{topnumber}{3}
+\setcounter{totalnumber}{4}
+
+% Names used throughout
+\newcommand{\QC}{Q-\textsc{Compass}}
+\newcommand{\QCBi}{Q-\textsc{Compass}-\textsc{Bi}}
+\newcommand{\NanoG}{\textsc{NanoG1}}
+
+\title{\textbf{Quatrix: An Empirical Evaluation of \QC{} and SAVO\\on Multimodal Sequence Modeling}}
+\author{Syed Abdur Rehman Ali\\[2pt]
+  {\small Independent Researcher}\\
+  {\small\href{https://github.com/Abd0r}{\texttt{github.com/Abd0r}} $\cdot$ ORCID \href{https://orcid.org/0009-0004-6611-2918}{0009-0004-6611-2918}}}
+\date{\small April 2026}
+
+\begin{document}
+\maketitle
+
+\input{sections/00-abstract}
+\input{sections/01-intro-method}
+\input{sections/02-setup-results-a}
+\input{sections/03-results-b}
+\input{sections/04-discussion}
+\input{sections/05-crossfield}
+\input{sections/06-conclusion-refs}
+
+\end{document}

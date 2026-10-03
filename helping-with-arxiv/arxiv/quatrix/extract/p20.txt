@@ -1,0 +1,37 @@
+world-model benchmarks 14, 15 use richer environments (DMLab, Habitat, Atari) where the next-state
+distribution carries enough variance to separate learned dynamics from constant-mean baselines.
+Within the scope of this paper — demonstrating that the routing primitive supports a world-model
+objective concurrently with text/vision/audio inside a single shared backbone — the world branch
+behaves as required: it trains, it converges, and it does not interfere with the other three modalities.
+Demonstrating world-model performance competitive with dedicated architectures (target-network EMA,
+predictor heads, contrastive auxiliaries, raw-pixel targets) on demanding environments is out of scope
+and is flagged as future work in §6.5.
+6.4 Out-of-distribution generalisation
+The original OOD reading of the 𝑊𝑉-removal claim was that routing without a learned content projection
+of raw 𝑥should generalise better off-distribution. The 60m data is consistent with this (plain SAO has
+the best OOD average and is best per-subset on both arxiv and pubmed). At 120m and 180m the effect
+does not replicate cleanly: SAVO and QKVO sit within ∼3–5 ppl of each other on arxiv, and QKVO
+is best on pubmed and on the OOD average at both scales. We read the 60m advantage as plausibly
+an under-training artifact (the 𝑊𝑉-free architecture has less capacity to overfit when the training loss
+has not fully converged). By 120m all variants exploit distributional content structure, and the raw-𝑥
+𝑊𝑉is at least competitive on average. Multi-head consistently hurts OOD, mirroring its in-distribution
+nothing-knob behaviour.
+Summary: the primary result of this paper
+The text-LM and cross-modal results combine into a single positive structural finding: a 𝑊𝑉-free routing
+primitive — with a 𝑄-value content projection rather than a raw-𝑥content projection — sits +12.33±0.87
+perplexity above the rank-matched controlled-ablation transformer (4-seed paired difference, 𝑝= 7.6 ×
+10−4, Table 5) and concurrently hosts vision, audio, world-model, and four cross-field cancer-ML
+objectives in a single training run, without per-text-token interference. The four modalities reach their
+per-modality optimal scales separately (vision at 180m, audio at 60m, text at 120m) rather than uniformly,
+so a single scale does not dominate every modality at the 10,000-step budget. World-model performance
+on a chosen-simple environment is bounded by that environment’s intrinsic state variance, not by the
+routing primitive; demanding-environment benchmarks against dedicated world-model architectures are
+out of scope here.
+6.5 Limitations and Open Questions
+1. The vision encoder is lightweight (5M parameters) and not competitive with CLIP-scale encoders.
+2. The 120m multi-head variants (SAVO+MH and QKVO ℎ=6) could not be run because the 120m
+scale config (𝑟=80, 𝐻=640) is not divisible by ℎ=6; multi-head data exists at 60m and 180m only.
+3. Both architectures regress 120𝑚→180𝑚at the 10,000-step training budget. The fair read is that
+the 180m configuration is compute-budget-starved at this step count, not that the scaling law fails
+structurally.
+20
