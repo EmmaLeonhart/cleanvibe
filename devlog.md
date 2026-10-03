@@ -1984,3 +1984,13 @@ instructions and permissions; moving it to the system prompt is ruled out).
   the user chose is still the session name.
 - Tests: the launch test now expects the passphrase (changed on purpose), plus
   tests for chosen names and for passphrase variety and cmd-safety. 233 pass.
+
+## 2026-10-03 — `helping-with-arxiv` added as a submodule (temporary)
+
+Emma's request (queued by the pc-manager session): add
+<https://github.com/EmmaLeonhart/helping-with-arxiv> as a git submodule at
+`helping-with-arxiv/`. It holds the arXiv submission-prep work for the Quatrix
+paper and overlaps with `cleanvibe/arxiv.py`. The submodule is a stopgap; the
+plan is a `git subtree add` later so its history is kept, logged in `todo.md`
+with the open questions (prefix, relation to `arxiv.py`). Packaging is
+unaffected: `pyproject.toml` lists `packages = ["cleanvibe"]` explicitly.
