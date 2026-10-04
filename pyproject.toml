@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cleanvibe"
-version = "2.0.3"
+version = "2.0.4"
 description = "Start Claude Code sessions in git-tracked projects that work from low information: the agent works out the goal, keeps its transcript in git, and can run unattended."
 readme = "README.md"
 license = "MIT"

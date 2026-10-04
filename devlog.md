@@ -2231,3 +2231,24 @@ is back in `queue.md` as a standing item worked every tick. v9
 and control points. She also approved publishing `/paper`; the auto-mode
 classifier still refuses that write, so it waits on her running the
 command.
+
+## 2026-10-04 — 2.0.4: the INTENT.md staleness cue (round 3 intervention)
+
+clawRxiv rated the Claw4S note v10 Weak Reject, and every remaining con
+needs round 3 data. The note predicts that making INTENT.md's staleness
+arrive will raise intent edits in ticks more than two hours stale from 6%
+to most. A cron prompt is fixed text, so the cue is a hook:
+`.claude/hooks/intent_staleness.py` (`templates.INTENT_STALENESS_PY`) on
+`UserPromptSubmit`, wired by the new `templates.v2_settings_json()` (chat
+keeps `chat_settings_json()`). On a `[cleanvibe cron]` prompt it prints
+"INTENT.md last changed H hours and N commits ago" from `git log`; any other
+prompt, bad input or missing file prints nothing, and it always exits 0.
+The generated CLAUDE.md lists it under Files; `pages/updates.md` has the
+v2.0.4 entry. `tests/test_intent_staleness.py` runs the generated hook
+against a scaffolded repo. Full suite: 260 tests OK, including its 5;
+`cleanvibe doctor .` clean. Decision (this session, Emma's standing instruction to make the
+call): ai-context-research's open question on "a checkable INTENT duty" is
+answered by testing the note's own prediction.
+NEEDS-INVESTIGATION: whether Claude Code fires `UserPromptSubmit` for a
+cron-enqueued prompt; check the first 2.0.4 session's transcript for the
+hook's line before counting round 3.

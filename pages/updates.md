@@ -25,6 +25,20 @@ self-exempting for replication-style bounded work.
 
 ---
 
+## v2.0.4 (2026-10-04) — INTENT.md staleness arrives on each tick
+
+From the ai-context-research Claw4S note: duties whose cue arrives in the
+agent's context were kept; duties it had to notice lapsed, and naming
+INTENT.md in the tick prompt did not keep it current. So the staleness
+itself now arrives.
+
+**New hook (cleanvibe 2 projects; existing repos: copy both files from a
+fresh project).** `.claude/hooks/intent_staleness.py` runs on
+`UserPromptSubmit`; on a prompt that starts with `[cleanvibe cron]` it adds
+"INTENT.md last changed H hours and N commits ago" to the agent's context,
+and prints nothing otherwise. `.claude/settings.json` gains the
+`UserPromptSubmit` entry. No skill text changed.
+
 ## v2.0.3 (2026-09-29) — name the standing duties; make the parts agree
 
 From the ai-context-research study of cleanvibe's own transcripts (case study

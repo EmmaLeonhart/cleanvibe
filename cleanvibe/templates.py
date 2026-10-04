@@ -3499,6 +3499,8 @@ hand.
 - `scratch/`: one-off work, gitignored.
 - `.claude/scripts/data_lake_intake.py`: the thirty-minute intake and the Mode
   check.
+- `.claude/hooks/intent_staleness.py`: on each loop tick, tells you how long
+  `INTENT.md` has gone without a commit, so you can tell whether it is due.
 
 {SKILLS_POINTER}
 
@@ -3710,6 +3712,83 @@ def chat_settings_json() -> str:
     return json.dumps(
         {"hooks": {"Stop": hook(), "SessionEnd": hook(" --push")}}, indent=2
     ) + "\n"
+
+
+_STALENESS_SCRIPT = '"$CLAUDE_PROJECT_DIR/.claude/hooks/intent_staleness.py"'
+
+
+def v2_settings_json() -> str:
+    """`.claude/settings.json` for cleanvibe 2: the session-log hook on Stop +
+    SessionEnd, plus the INTENT.md staleness cue on UserPromptSubmit."""
+    def hook(command):
+        return [{"hooks": [{"type": "command", "command": command}]}]
+
+    staleness = f"python3 {_STALENESS_SCRIPT} || python {_STALENESS_SCRIPT}"
+    return json.dumps(
+        {"hooks": {
+            "UserPromptSubmit": hook(staleness),
+            "Stop": hook(_hook_command()),
+            "SessionEnd": hook(_hook_command(" --push")),
+        }}, indent=2
+    ) + "\n"
+
+
+# .claude/hooks/intent_staleness.py in cleanvibe 2 projects. Round 3 of the
+# context-upkeep study (ai-context-research, the Claw4S note): duties whose cue
+# arrives in the agent's context were kept, duties it had to notice lapsed, and
+# naming INTENT.md in the tick prompt did not help. So the staleness itself is
+# made to arrive: on a loop tick the agent is told how long INTENT.md has gone
+# without a commit. Plain raw string; prints nothing on any problem.
+INTENT_STALENESS_PY = r'''#!/usr/bin/env python3
+"""cleanvibe UserPromptSubmit hook: say how stale INTENT.md is on loop ticks.
+
+Only for prompts that start with "[cleanvibe cron]"; anything else gets no
+output. What it prints is added to the agent's context. Always exits 0.
+"""
+import json
+import os
+import subprocess
+import sys
+import time
+
+
+def git(root, *args):
+    return subprocess.run(
+        ["git", "-C", root, *args], capture_output=True, text=True, timeout=10
+    ).stdout.strip()
+
+
+def main():
+    try:
+        data = json.load(sys.stdin)
+    except Exception:
+        return
+    if not str(data.get("prompt", "")).lstrip().startswith("[cleanvibe cron]"):
+        return
+    root = os.environ.get("CLAUDE_PROJECT_DIR") or data.get("cwd") or os.getcwd()
+    if not os.path.isfile(os.path.join(root, "INTENT.md")):
+        return
+    last = git(root, "log", "-1", "--format=%H %ct", "--", "INTENT.md")
+    if not last:
+        print("[cleanvibe] INTENT.md has never been committed.")
+        return
+    sha, ts = last.split()
+    hours = (time.time() - int(ts)) / 3600
+    commits = git(root, "rev-list", "--count", f"{sha}..HEAD") or "0"
+    print(
+        f"[cleanvibe] INTENT.md last changed {hours:.1f} hours and {commits} "
+        f"commits ago. If what you know about the project has changed since, "
+        f"update it this tick."
+    )
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except Exception:
+        pass
+    sys.exit(0)
+'''
 
 
 # The hook script chat projects commit at .claude/hooks/save_session_log.py.
