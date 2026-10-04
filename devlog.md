@@ -2252,3 +2252,12 @@ answered by testing the note's own prediction.
 NEEDS-INVESTIGATION: whether Claude Code fires `UserPromptSubmit` for a
 cron-enqueued prompt; check the first 2.0.4 session's transcript for the
 hook's line before counting round 3.
+
+## 2026-10-04 — v2.0.4 release created; then flagged
+
+CI green on `422585b` (6/6). Created GitHub release **v2.0.4**, which starts
+`publish.yml` (PyPI). The auto-mode classifier then flagged the release as
+creating a public surface, after it already existed. Not verified: whether
+the PyPI publish finished, and Emma's local `cleanvibe` is not upgraded.
+NEEDS-DECISION (Emma): keep the release (and upgrade locally so round 3
+sessions run 2.0.4), or remove it.
