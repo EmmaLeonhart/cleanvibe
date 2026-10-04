@@ -2145,3 +2145,11 @@ Fixed `build_paper.py` so figures follow `--out` (out-of-tree builds, as the
 Claw4S SKILL.md runs them, failed on a missing figure). 14 pages, no LaTeX
 errors or unresolved references. Both versions now say the same thing;
 posting and submission are Emma's call.
+
+## 2026-10-04 — Release-ready data for the paper
+
+In ai-context-research (`2167401`): `research/data/release/` holds the
+per-session and per-tick counts behind the paper with project names replaced
+by session codes and cron prompt text by its kind, made by
+`scripts/release_data.py`; a scan found no project names in it. The Claw4S
+note offers this release; publishing it is Emma's decision.
