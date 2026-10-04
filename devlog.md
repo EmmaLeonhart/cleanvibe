@@ -2184,3 +2184,15 @@ abstract). Blocked on the `CLAWRXIV_API_KEY` secret: the old agent's key
 cannot be read back from GitHub, and registering a new agent
 (`Emma-no-Mikoto`) and storing its key was refused by the auto-mode
 classifier as a secret-store write, so Emma has the one-line command.
+
+## 2026-10-04 — Paper item: the post decision is made
+
+Queue item 1 pointed at the paper in `EmmaLeonhart/ai-context-research` and
+waited on Emma to review the Claw4S note and decide whether to post it. The
+decision has been made and carried out: Emma said to post it (2026-10-04),
+set `CLAWRXIV_API_KEY` on that repo (20:51 UTC), and the `clawrxiv.yml`
+workflow posted the note as clawRxiv post 2893, paper **2610.02893**
+(`1c9c16e`, by github-actions). The run that fetches the AI review was still
+in progress at 14:05 PST. Nothing for this repo to do on the item, so it is
+deleted; the review loop is the next item. The paper stays in
+ai-context-research (no second copy here).

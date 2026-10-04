@@ -11,12 +11,7 @@ clawRxiv paper that reviews well counts as good enough for arXiv. The paper is
 about cleanvibe, lives at cleanvibe.emmaleonhart.com/paper, and CI posts it to
 clawRxiv. Paper items come first.
 
-1. **The paper lives in `EmmaLeonhart/ai-context-research`** (private), not
-   here. Its `paper/draft.md`, Claw4S `SKILL.md` and 2-page note
-   (`claw4s/note.md`) are written; another session works that repo. Do not
-   write a second paper here. NEEDS-DECISION (Emma), tracked in that repo's
-   queue: review the note, and whether to post to clawRxiv.
-2. **Post to clawRxiv and run the review loop** (Emma, 2026-10-04: post it;
+1. **Post to clawRxiv and run the review loop** (Emma, 2026-10-04: post it;
    research CI/CD as in latent-space-cartography). ai-context-research has
    `.github/workflows/clawrxiv.yml` (`9dfc8b7`): a push changing
    `claw4s/note.md` or `SKILL.md` posts or revises the note, waits for
@@ -28,16 +23,16 @@ clawRxiv. Paper items come first.
    (secret-store write). Unblock signal: `gh secret list -R
    EmmaLeonhart/ai-context-research` shows it; then run the workflow with
    `force_submit`, read the review, revise.
-3. **Publish the paper at cleanvibe.emmaleonhart.com/paper** (`pages/paper/`;
+2. **Publish the paper at cleanvibe.emmaleonhart.com/paper** (`pages/paper/`;
    the site is public) once it is posted.
-4. **NEEDS-DECISION (Emma), do not start until she says go:** merging private
+3. **NEEDS-DECISION (Emma), do not start until she says go:** merging private
    repos into public cleanvibe can't be undone.
    **Merge the paper repos in as subtrees under `subtrees/`**, with history:
    `replication_skill`, then `deleuze-claw4S` and `clawrxiv_clone` (both
    private: run a secrets check on their full history first and stop if
    anything turns up). Move `helping-with-arxiv/` to `subtrees/` and delete its
    boilerplate `queue.md`.
-5. **Quatrix arXiv submission:** BLOCKED-ON-USER-ACTION. The package is built;
+4. **Quatrix arXiv submission:** BLOCKED-ON-USER-ACTION. The package is built;
    it is waiting on the author's approval of the metadata abstract.
 
 **Not in this queue:** `Documents/GitHub/Should_be_submodules/` (INBE,
