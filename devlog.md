@@ -2023,3 +2023,18 @@ the loop, and no empty queue was refilled, each time for a stated reason;
 M8 (prose through file tools, check before logging) still fails in most
 sessions. Three open decisions for Emma are listed in the case study.
 
+## 2026-10-03 — `convert` adopts existing planning files
+
+From `todo.md` (the queue was empty; case study 07's three open items are
+NEEDS-DECISION for Emma). `convert` never injected `todo.md` itself, but its
+bootstrap queue would have moved a repo's `ROADMAP.md` or `TODO` into
+`data_lake/` as stray material in step 2 and written a fresh `todo.md` beside
+it in step 5. Now `scaffold.find_planning_artifacts` finds top-level
+`todo`/`backlog`/`roadmap`/`tasks`/`plan` files, `convert` (and its
+`--dry-run`) reports them, and `templates.queue_md(existing_planning=...)`
+adds a bullet to step 2 (leave them in place) and to step 5 (build
+`todo.md` from them; ask before deleting the originals). A convert without
+such files produces the same queue as before. Site card and CLAUDE.md
+updated. 4 new tests; 237 pass, `doctor` clean. The site's stability
+section calls the legacy modes frozen; this change is additive only.
+

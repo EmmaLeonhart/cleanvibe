@@ -15,7 +15,9 @@ from pathlib import Path
 
 from cleanvibe import __version__, templates
 from cleanvibe.cli import main
-from cleanvibe.scaffold import convert_project, create_project
+from cleanvibe.scaffold import (
+    convert_project, create_project, find_planning_artifacts,
+)
 
 
 IS_WINDOWS = platform.system() == "Windows"
@@ -386,6 +388,65 @@ class TestConvert(unittest.TestCase):
             self.assertTrue((proj / "devlog.md").is_file())
             self.assertTrue((proj / ".gitignore").is_file())
             self.assertTrue((proj / "data_lake" / ".gitkeep").is_file())
+
+    def test_find_planning_artifacts(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            proj = Path(tmp)
+            for name in ("ROADMAP.md", "TODO", "backlog.txt", "Tasks.md",
+                         "todo.py", "roadmap.png", "notes.md"):
+                (proj / name).write_text("x", encoding="utf-8")
+            (proj / "plan").mkdir()  # a directory is not a planning file
+            self.assertEqual(
+                find_planning_artifacts(proj),
+                ["backlog.txt", "ROADMAP.md", "Tasks.md", "TODO"],
+            )
+
+    def test_convert_adopts_existing_planning_files(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            proj = Path(tmp) / "existing"
+            proj.mkdir()
+            roadmap = "# Roadmap\n- ship v2\n"
+            (proj / "ROADMAP.md").write_text(roadmap, encoding="utf-8")
+            (proj / "TODO").write_text("fix the parser\n", encoding="utf-8")
+
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                convert_project(proj, no_claude=True)
+
+            self.assertIn("Found existing planning files: ROADMAP.md, TODO",
+                          buf.getvalue())
+            # The originals are kept, and no second backlog is injected.
+            self.assertEqual((proj / "ROADMAP.md").read_text(encoding="utf-8"),
+                             roadmap)
+            self.assertFalse((proj / "todo.md").exists())
+            queue = (proj / "queue.md").read_text(encoding="utf-8")
+            self.assertIn("Leave the existing planning files where they are:**"
+                          " `ROADMAP.md`, `TODO`", queue)
+            self.assertIn("Build it from the existing planning files", queue)
+            self.assertIn("do not delete them on your own", queue)
+
+    def test_convert_without_planning_files_has_plain_queue(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            proj = Path(tmp) / "existing"
+            proj.mkdir()
+            (proj / "main.py").write_text("print(1)\n", encoding="utf-8")
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                convert_project(proj, no_claude=True)
+            self.assertNotIn("Found existing planning files", buf.getvalue())
+            queue = (proj / "queue.md").read_text(encoding="utf-8")
+            self.assertEqual(queue, templates.queue_md("existing"))
+
+    def test_convert_dry_run_reports_planning_files(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            proj = Path(tmp)
+            (proj / "BACKLOG.md").write_text("x", encoding="utf-8")
+            buf = io.StringIO()
+            with redirect_stdout(buf):
+                convert_project(proj, dry_run=True, no_claude=True)
+            self.assertIn("Found existing planning files: BACKLOG.md",
+                          buf.getvalue())
+            self.assertFalse((proj / "queue.md").exists())
 
 
 if __name__ == "__main__":

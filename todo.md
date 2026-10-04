@@ -22,8 +22,6 @@ See the `queue-driven-workflow` skill (`.claude/skills/queue-driven-workflow/SKI
 
 - **Make the bootstrap queue customizable.** Right now `queue_md()` ships one fixed bootstrap sequence. Eventually projects with different shapes (library vs. service vs. data pipeline vs. wiki bot) probably want different opening sequences. Explore whether this should be a `--profile` flag on `cleanvibe new`, a set of swappable template modules, or something else.
 
-- **Extend `cleanvibe convert` to detect and adopt existing planning artifacts.** If a target repo already has a `TODO`, `BACKLOG.md`, `ROADMAP.md`, or similar, `convert` should recognize them and either rename/merge into `todo.md` or surface a prompt rather than silently injecting an empty one alongside.
-
 - **Add a feedback loop from real first-sessions back into the template.** As more projects are bootstrapped, the bootstrap queue should evolve based on what consistently goes well or poorly in step 1–7. Figure out a lightweight way to capture that (a "what bit you?" prompt at session end? a curated `BOOTSTRAP_LEARNINGS.md` in this repo?) without making the tool itself heavyweight.
 
 - **Decide how `helping-with-arxiv/` relates to `cleanvibe/arxiv.py`.** Since 2026-10-03 the arXiv submission-prep repo (Quatrix paper: LaTeX rebuilt from the Zenodo PDF, submission package) lives in this repo as a subtree at `helping-with-arxiv/`, with its history. `arxiv.py` reads arXiv for `replicate`; this goes the other way, preparing a submission. Open: whether submission prep becomes a cleanvibe feature (a mode or skill), stays a worked example under `docs/`, or stays where it is. Its nested `.claude/skills/` are v1.17-era copies.

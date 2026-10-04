@@ -163,6 +163,10 @@ def convert_project(path: Path, dry_run: bool = False, no_claude: bool = False) 
             print(f"[dry-run] Would run: git init")
             print(f"[dry-run] Would commit all existing files (commit 1)")
         print(f"[dry-run] Would check for missing CLAUDE.md / README.md / queue.md / devlog.md / .gitignore")
+        planning = find_planning_artifacts(path) if path.is_dir() else []
+        if planning:
+            print(f"[dry-run] Found existing planning files: {', '.join(planning)} "
+                  f"(the bootstrap queue would build todo.md from them)")
         if is_windows:
             print(f"[dry-run] Would check for missing !runClaude.bat")
         if not is_git_repo:
@@ -207,6 +211,27 @@ def convert_project(path: Path, dry_run: bool = False, no_claude: bool = False) 
         _launch_claude(path, templates.starting_prompt("convert"))
 
 
+# Top-level files a repo already uses as its backlog, matched without case and
+# with or without a .md/.txt/.org extension. `convert` adopts them into
+# todo.md instead of starting a second backlog beside them.
+PLANNING_STEMS = ("todo", "todos", "backlog", "roadmap", "tasks", "plan")
+PLANNING_SUFFIXES = ("", ".md", ".txt", ".org", ".rst")
+
+
+def find_planning_artifacts(path: Path) -> list:
+    """Names of top-level planning files in ``path`` (sorted, case kept)."""
+    found = []
+    for entry in path.iterdir():
+        if not entry.is_file():
+            continue
+        name = entry.name.lower()
+        stem, dot, ext = name.partition(".")
+        suffix = dot + ext
+        if stem in PLANNING_STEMS and suffix in PLANNING_SUFFIXES:
+            found.append(entry.name)
+    return sorted(found, key=str.lower)
+
+
 def _inject_scaffold(path: Path, project_name: str, is_windows: bool) -> bool:
     """Inject missing scaffold files into a directory. Returns True if any were injected."""
     injected = False
@@ -223,10 +248,16 @@ def _inject_scaffold(path: Path, project_name: str, is_windows: bool) -> bool:
         print(f"  Injected README.md (was missing)")
         injected = True
 
+    planning = find_planning_artifacts(path)
+    if planning:
+        print(f"  Found existing planning files: {', '.join(planning)}")
+
     queue = path / "queue.md"
     if not queue.exists():
-        _write(queue, templates.queue_md(project_name))
+        _write(queue, templates.queue_md(project_name, existing_planning=planning))
         print(f"  Injected queue.md (was missing)")
+        if planning:
+            print(f"  The bootstrap queue will build todo.md from them (originals kept)")
         injected = True
 
     devlog = path / "devlog.md"

@@ -173,7 +173,33 @@ See the `queue-driven-workflow` skill (`.claude/skills/queue-driven-workflow/SKI
 {first_entry}"""
 
 
-def queue_md(project_name: str) -> str:
+def _planning_bullets(existing_planning) -> "tuple[str, str]":
+    """Extra step-2 and step-5 bullets when ``convert`` found planning files.
+
+    Without them, triage (step 2) would move a ROADMAP.md into ``data_lake/``
+    as stray material and step 5 would write a fresh ``todo.md`` beside it.
+    """
+    if not existing_planning:
+        return "", ""
+    names = ", ".join(f"`{n}`" for n in existing_planning)
+    triage = (
+        f"\n   - **Leave the existing planning files where they are:** {names}. "
+        "`cleanvibe convert` found them; they are the project's own backlog, "
+        "not stray material, and step 5 adopts them."
+    )
+    adopt = (
+        f"\n   - **Build it from the existing planning files ({names}), not "
+        "beside them.** Carry every still-open item into `todo.md` (or into "
+        "`queue.md` if it is already a concrete step), keep their wording "
+        "where you can, and drop items that are clearly done. Then ask the "
+        "user whether to delete the originals or keep them; do not delete "
+        "them on your own."
+    )
+    return triage, adopt
+
+
+def queue_md(project_name: str, existing_planning=None) -> str:
+    triage_note, adopt_note = _planning_bullets(existing_planning)
     return f"""# {project_name} — Work Queue
 
 **This file is a queue of *concrete, executable steps*, not a state snapshot.** It lists what is being worked on right now. Finished work lives in `devlog.md` (a dated entry) and `git log`; longer-horizon, *abstract* work lives in `todo.md` and gets decomposed into items here when it's ready to execute. **When an item is done, delete it from this file AND append a dated entry to `devlog.md` in the same commit, then push.** Do not add checkmarks, "done" markers, or status indicators in place. If an item is still here, it is not done.
@@ -198,7 +224,7 @@ These items are the default opening sequence for a new cleanvibe project. Work t
    - `data_lake/` already exists — the scaffold created it with a `.gitkeep` (so a user could drop files straight into it before this session). Move all such files into `data_lake/` so the project root stays clean. Only the scaffold (`CLAUDE.md`, `README.md`, `queue.md`, `.gitignore`, `LICENSE`, and any source/config files you have explicitly chosen to keep at the root) should live at the top level. Leave the `.gitkeep` in place.
    - If any of these files are `.zip` archives, extract them into `data_lake/` alongside the originals, then add the `.zip` files to `.gitignore` (we keep the extracted contents in git, not the archives).
    - For any file that looks big enough to need Git LFS (rough rule of thumb: >50 MB, or large binary like video/audio/large datasets), STOP and ask the user before doing anything — do not silently commit it, do not silently `git lfs track` it.
-   - Commit. Commit message should describe what got moved/extracted and why.
+   - Commit. Commit message should describe what got moved/extracted and why.{triage_note}
 
 3. **Read the data lake to infer what this project is.** Skim every file in `data_lake/` (text files, READMEs from extracted zips, design notes, spec docs, sample data shapes). Build up a working hypothesis: what is the user trying to build? What domain? What constraints or instructions are stated explicitly?
    - Update `README.md` to reflect this hypothesis: project description, any explicit instructions you found, anything load-bearing for future sessions.
@@ -211,7 +237,7 @@ These items are the default opening sequence for a new cleanvibe project. Work t
    - Capture both **near-term** answers (what to build now) AND **long-horizon** answers (what's wanted eventually). The long-horizon material is what feeds `todo.md` in the next step.
    - Commit once the picture is concrete enough to plan against.
 
-5. **Create `todo.md` — the long-horizon backlog.** This is the step before any concrete queue gets written. Based on the interview and inferred picture, write `todo.md` as the project's long-term horizon: every multi-session goal, architectural ambition, capability, integration, or future direction the user described. Items here are *abstract destinations*, not steps — they will be decomposed into concrete tasks in `queue.md` later, one at a time, as the work unfolds. `todo.md` is the *basis for* `queue.md`: work flows `todo.md` → `queue.md` → executed → deleted from both.
+5. **Create `todo.md` — the long-horizon backlog.** This is the step before any concrete queue gets written. Based on the interview and inferred picture, write `todo.md` as the project's long-term horizon: every multi-session goal, architectural ambition, capability, integration, or future direction the user described. Items here are *abstract destinations*, not steps — they will be decomposed into concrete tasks in `queue.md` later, one at a time, as the work unfolds. `todo.md` is the *basis for* `queue.md`: work flows `todo.md` → `queue.md` → executed → deleted from both.{adopt_note}
    - Use the convention described in the `queue-driven-workflow` skill (`.claude/skills/queue-driven-workflow/SKILL.md`) for the file format.
    - Do NOT touch `queue.md` in this commit — populating the real queue is the *next* step.
    - Commit `todo.md` on its own so the long-horizon picture is a reviewable artifact, not buried inside a larger change.
