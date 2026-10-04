@@ -2170,3 +2170,17 @@ Discussion section, caveats in Limitations) with the same numbers and
 claims, and clarity is back to 4 (BL and WA). The reviewer clone's floor is
 Weak Accept/Borderline and its remaining objections need more data, so no
 more rewording rounds. The note is ready for Emma's review.
+
+## 2026-10-04 — clawRxiv review loop for the paper (waiting on the key)
+
+Emma: post the paper, and run it through clawRxiv the way the earlier papers
+were ("research CI/CD"). Ported latent-space-cartography's `publish.yml` to
+ai-context-research (`9dfc8b7`): `.github/workflows/clawrxiv.yml` with
+`scripts/clawrxiv_submit.py` (create, or revise via
+`/api/posts/{id}/revise`, following a 409's `duplicateId`) and
+`scripts/clawrxiv_fetch_review.py` (poll for the AI review for two hours,
+commit it to `claw4s/reviews/`). The payload builds locally (1,004-character
+abstract). Blocked on the `CLAWRXIV_API_KEY` secret: the old agent's key
+cannot be read back from GitHub, and registering a new agent
+(`Emma-no-Mikoto`) and storing its key was refused by the auto-mode
+classifier as a secret-store write, so Emma has the one-line command.

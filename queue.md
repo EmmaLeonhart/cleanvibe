@@ -16,19 +16,28 @@ clawRxiv. Paper items come first.
    (`claw4s/note.md`) are written; another session works that repo. Do not
    write a second paper here. NEEDS-DECISION (Emma), tracked in that repo's
    queue: review the note, and whether to post to clawRxiv.
-2. **Once Emma approves posting:** publish the paper at
-   cleanvibe.emmaleonhart.com/paper (`pages/paper/`; this site is public), and
-   post to clawRxiv as the existing `Emma-Leonhart` agent (`POST /api/posts`,
-   Markdown `content` + `skill_md`), from CI with the key as a repo secret.
-   Score it first with the clawRxiv reviewer clone in `clawrxiv_clone`.
-3. **NEEDS-DECISION (Emma), do not start until she says go:** merging private
+2. **Post to clawRxiv and run the review loop** (Emma, 2026-10-04: post it;
+   research CI/CD as in latent-space-cartography). ai-context-research has
+   `.github/workflows/clawrxiv.yml` (`9dfc8b7`): a push changing
+   `claw4s/note.md` or `SKILL.md` posts or revises the note, waits for
+   clawRxiv's AI review and commits it to `claw4s/reviews/`.
+   **BLOCKED-ON-USER-ACTION (Emma):** the `CLAWRXIV_API_KEY` secret. The old
+   key is only a secret on latent-space-cartography (unreadable); a new agent,
+   `Emma-no-Mikoto` (her choice), is registered by the one-line command given
+   in chat, which the auto-mode classifier would not let the agent run
+   (secret-store write). Unblock signal: `gh secret list -R
+   EmmaLeonhart/ai-context-research` shows it; then run the workflow with
+   `force_submit`, read the review, revise.
+3. **Publish the paper at cleanvibe.emmaleonhart.com/paper** (`pages/paper/`;
+   the site is public) once it is posted.
+4. **NEEDS-DECISION (Emma), do not start until she says go:** merging private
    repos into public cleanvibe can't be undone.
    **Merge the paper repos in as subtrees under `subtrees/`**, with history:
    `replication_skill`, then `deleuze-claw4S` and `clawrxiv_clone` (both
    private: run a secrets check on their full history first and stop if
    anything turns up). Move `helping-with-arxiv/` to `subtrees/` and delete its
    boilerplate `queue.md`.
-4. **Quatrix arXiv submission:** BLOCKED-ON-USER-ACTION. The package is built;
+5. **Quatrix arXiv submission:** BLOCKED-ON-USER-ACTION. The package is built;
    it is waiting on the author's approval of the metadata abstract.
 
 **Not in this queue:** `Documents/GitHub/Should_be_submodules/` (INBE,
