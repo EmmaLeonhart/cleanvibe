@@ -2135,3 +2135,13 @@ prediction for the next round, and grounding in prospective memory
 swings between Weak Accept and Borderline on the same text; v1, v3 and v4
 mostly Weak Accept, v2 dipped. Scores and responses are in
 `claw4s/review.md` there. Posting is still Emma's call.
+
+## 2026-10-04 — The arXiv draft gets the cue-source analysis
+
+In ai-context-research (`03369fa`): the draft's new §7.2 carries the Claw4S
+note's v5 finding, replacing §7.1's closing "event vs habit" paragraph, with
+a sentence each in the abstract and conclusion; frozen sections untouched.
+Fixed `build_paper.py` so figures follow `--out` (out-of-tree builds, as the
+Claw4S SKILL.md runs them, failed on a missing figure). 14 pages, no LaTeX
+errors or unresolved references. Both versions now say the same thing;
+posting and submission are Emma's call.
