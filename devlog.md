@@ -2161,3 +2161,12 @@ v5 claim, and new steps 6-7 have a reader code each duty's cue blind with two
 fresh agents and aggregate held/lapsed by cue, with the authors' values and
 the result that would falsify it. The privacy section points at
 `release_data.py`.
+
+## 2026-10-04 — Claw4S note v6: clarity rewrite
+
+In ai-context-research (`1b2be3a`). v5 scored Borderline three times with
+clarity 2-3; v6 rewrites for readability (finding first, plain names, a
+Discussion section, caveats in Limitations) with the same numbers and
+claims, and clarity is back to 4 (BL and WA). The reviewer clone's floor is
+Weak Accept/Borderline and its remaining objections need more data, so no
+more rewording rounds. The note is ready for Emma's review.
