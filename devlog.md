@@ -2119,3 +2119,19 @@ to genealogy is not bumped. The local clawRxiv reviewer clone (gemma3:12b)
 rated the paper's Claw4S note Weak Accept (scores 4/3/4/4); review saved in
 `scratch/paper-score/`, nothing posted.
 
+
+## 2026-10-04 — The Claw4S note answers its pre-submission review (v2-v5)
+
+Emma: keep working, "responding to the Claw4S analysis and trying to refine
+our hypothesis". Worked in ai-context-research (pushed `b56f25a`, `65c3e52`,
+`40a03c8`, `cc97467`). The finding is now stated as where a duty's cue comes
+from: it holds when the cue arrives in the agent's context (14/14 session
+cases) and lapses when the agent must notice it (20/35), with two blind
+coders agreeing on every duty, the update check as a quasi-intervention
+(0/8 -> 6/6, same-week control 0/1), intent staleness from git rather than
+the read heuristic, M6 dropped from the agent duties, a falsifiable
+prediction for the next round, and grounding in prospective memory
+(McDaniel & Einstein 2000, focal vs non-focal cues). The reviewer clone
+swings between Weak Accept and Borderline on the same text; v1, v3 and v4
+mostly Weak Accept, v2 dipped. Scores and responses are in
+`claw4s/review.md` there. Posting is still Emma's call.

@@ -16,17 +16,12 @@ clawRxiv. Paper items come first.
    (`claw4s/note.md`) are written; another session works that repo. Do not
    write a second paper here. NEEDS-DECISION (Emma), tracked in that repo's
    queue: review the note, and whether to post to clawRxiv.
-2. **Respond to the Claw4S review and refine the hypothesis** (Emma,
-   2026-10-04: "continue working… responding to the Claw4S analysis"). Work in
-   ai-context-research (pull first; another session may be active). The local
-   reviewer gave Weak Accept (4/3/4/4) with five cons: one user/scaffold/agent;
-   heuristic read detection; no compaction; transcripts not released;
-   correlation not causation. Answer each in the note where data allows:
-   validate the read heuristic against a hand-checked sample; release the
-   per-tick aggregates; sharpen the hypothesis to "the same duty holds when
-   bound to an event and drops when it is standing" using the duties that
-   moved between the two (M2 update check 0/9 → 6/6) as the closest thing to
-   an intervention; state the rest as limits. Rescore with the reviewer clone.
+2. **Carry the v5 hypothesis into the arXiv draft** (`paper/draft.md` in
+   ai-context-research). The Claw4S note now states the finding as where a
+   duty's cue comes from (arrives vs must be noticed), coded by two blind
+   coders, with the update check as a quasi-intervention and the
+   prospective-memory grounding (McDaniel & Einstein 2000); the full draft
+   still has the older framing. Rebuild the PDF and check it by eye.
 3. **Once Emma approves posting:** publish the paper at
    cleanvibe.emmaleonhart.com/paper (`pages/paper/`; this site is public), and
    post to clawRxiv as the existing `Emma-Leonhart` agent (`POST /api/posts`,
