@@ -301,3 +301,15 @@ flags (real 2026 dates/Ollama versions read as "the future"/"fraudulent"); the c
 temporal false-flags and gives content-based Borderline reviews, even crediting the LSC Ollama bug
 as significance 5. Findings + build plan: `investigation/2026-06-29-clone-vs-website-comparison.md`;
 raw clone reviews: `investigation/samples/clone_review_{sutra,lsc}_2026-06-29.json`.
+
+## 2026-10-03 — `parse_markdown_paper` reads an `## Abstract` section
+
+The queue's follow-up from the CLI work: papers that put an author line above
+an `## Abstract` heading (latent-space-cartography) handed the author line to
+the reviewer as the abstract. The parser now uses the text under an
+`## Abstract` heading (levels 2-6, any case, optional colon) up to the next
+heading, and falls back to the first block when there is no such section or
+it is empty. Four new tests in `tests/test_papers.py`; 33 pass locally with
+`tests/test_api.py` left out (fastapi is not installed on this machine; CI
+installs it). Done from the cleanvibe session, which now carries this repo's
+open queue items.

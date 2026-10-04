@@ -40,12 +40,6 @@ adds `.tex`/`.pdf`/`.txt` extraction (pypdf added to deps, `tests/test_extract.p
 paper → Borderline (clarity 2) and latent-space-cartography → Borderline. Also fixed the
 reviewer drifting to a summary on long papers (restate-task-after-paper). History in devlog.
 
-1. **Follow-up: teach `parse_markdown_paper` to recognise a `## Abstract` section.** The
-   latent-space-cartography paper uses a `## Abstract` header rather than a blank-line abstract
-   block, so `parse_markdown_paper` currently grabs the author line as the abstract. The review
-   still read sensibly (the body carries the content), but the `abstract` field handed to the
-   reviewer is wrong. Make the parser prefer a `## Abstract` section's text when present.
-
 ---
 
 ## Always last — restart the three crons and summarize
