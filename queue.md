@@ -31,8 +31,8 @@ clawRxiv. Paper items come first.
    it is waiting on the author's approval of the metadata abstract.
 
 **Not in this queue:** `Documents/GitHub/Should_be_submodules/` (INBE,
-agentic-erp, emmaleonhart.com, topaz_buiness_plan) is not arXiv work.
-NEEDS-DECISION (Emma): whether and how those join.
+agentic-erp, emmaleonhart.com, topaz_buiness_plan). Emma, 2026-10-03: leave
+all four alone. They are not arXiv work and do not belong in cleanvibe.
 
 ---
 
