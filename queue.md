@@ -12,7 +12,16 @@ about cleanvibe, lives at cleanvibe.emmaleonhart.com/paper, and CI posts it to
 clawRxiv. Paper items come first.
 
 1. **Publish the paper at cleanvibe.emmaleonhart.com/paper** (`pages/paper/`;
-   the site is public) once it is posted.
+   the site is public). The note is posted (clawRxiv 2610.02895, v8).
+   Ready, uncommitted, in gitignored `scratch/`: `note_to_page.py` +
+   `paper_template.html` render `claw4s/note.md` into a site-styled page,
+   and the v8 PDF is built. **BLOCKED-ON-USER-ACTION (Emma):** the
+   auto-mode classifier refused writing the private repo's note into the
+   public `pages/` (2026-10-04, "Out-of-Place Publication"). Unblock: Emma
+   says to publish it (or allows the write), then
+   `python scratch/note_to_page.py <ai-context-research>/claw4s/note.md pages/paper/index.html`,
+   copy the built `main.pdf` to `pages/paper/note.pdf`, link it from the
+   home page, push.
 2. **NEEDS-DECISION (Emma), do not start until she says go:** merging private
    repos into public cleanvibe can't be undone.
    **Merge the paper repos in as subtrees under `subtrees/`**, with history:
