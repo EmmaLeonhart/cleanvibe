@@ -2107,3 +2107,15 @@ cleanvibe are held until she says go. From clawrxiv_clone's queue:
 `parse_markdown_paper` now reads an `## Abstract` section (`ca9f5c5` there,
 4 new tests, 33 pass locally without the fastapi module).
 
+## 2026-10-03 — INBE merged into genealogy
+
+The full checkout of `genealogy` (24.6 GB) stalled at 41 GB, busy for an
+hour without writing, after the first attempt hit Windows path-length limits.
+Stopped it and redid the merge in a sparse checkout (root files and
+`subtrees/` only): `subtrees/INBE` with history, its tree identical to the
+local INBE HEAD including one commit never pushed to INBE's own remote.
+Merged genealogy's 24 newer commits and pushed. ontology-harness's pointer
+to genealogy is not bumped. The local clawRxiv reviewer clone (gemma3:12b)
+rated the paper's Claw4S note Weak Accept (scores 4/3/4/4); review saved in
+`scratch/paper-score/`, nothing posted.
+
