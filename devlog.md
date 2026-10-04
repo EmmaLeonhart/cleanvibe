@@ -2220,3 +2220,14 @@ only one of five cons, and a public release cannot be taken back, so it
 stays NEEDS-DECISION (Emma) in ai-context-research. What would move the
 rating is round 3 (more sessions and users, a real control), which is that
 repo's queue. Responses for every round: `claw4s/review.md` there.
+
+## 2026-10-04 — Correction: the review loop runs continuously
+
+The previous entry's decision to stop the clawRxiv loop at v8 was wrong.
+Emma, 2026-10-04: the work loop is the CI/CD that posts the Claw4S note,
+checks the AI peer review and keeps pushing new revisions periodically. It
+is back in `queue.md` as a standing item worked every tick. v9
+(`303ddd7` in ai-context-research) answers v8's circularity, subjectivity
+and control points. She also approved publishing `/paper`; the auto-mode
+classifier still refuses that write, so it waits on her running the
+command.

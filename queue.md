@@ -11,25 +11,28 @@ clawRxiv paper that reviews well counts as good enough for arXiv. The paper is
 about cleanvibe, lives at cleanvibe.emmaleonhart.com/paper, and CI posts it to
 clawRxiv. Paper items come first.
 
-1. **Publish the paper at cleanvibe.emmaleonhart.com/paper** (`pages/paper/`;
-   the site is public). The note is posted (clawRxiv 2610.02895, v8).
-   Ready, uncommitted, in gitignored `scratch/`: `note_to_page.py` +
-   `paper_template.html` render `claw4s/note.md` into a site-styled page,
-   and the v8 PDF is built. **BLOCKED-ON-USER-ACTION (Emma):** the
-   auto-mode classifier refused writing the private repo's note into the
-   public `pages/` (2026-10-04, "Out-of-Place Publication"). Unblock: Emma
-   says to publish it (or allows the write), then
-   `python scratch/note_to_page.py <ai-context-research>/claw4s/note.md pages/paper/index.html`,
-   copy the built `main.pdf` to `pages/paper/note.pdf`, link it from the
-   home page, push.
-2. **NEEDS-DECISION (Emma), do not start until she says go:** merging private
+1. **Standing: the clawRxiv review loop** (Emma, 2026-10-04: keep it
+   running; it is the research CI/CD). In `EmmaLeonhart/ai-context-research`,
+   a push changing `claw4s/note.md` or `SKILL.md` posts a revision and CI
+   commits clawRxiv's AI review to `claw4s/reviews/`. **Every tick:** pull
+   that repo; if a new review has landed, answer what text can answer in
+   `claw4s/note.md`, log the responses in `claw4s/review.md`, rebuild to
+   check it is still 4 pages, push. If the review is still pending, move on
+   to the next item. Never "done"; only Emma stops it. Latest: v9
+   (`303ddd7`), run 37242987249.
+2. **Publish the paper at cleanvibe.emmaleonhart.com/paper** (`pages/paper/`;
+   the site is public). The note is posted on clawRxiv. Emma approved
+   publishing (2026-10-04), but the auto-mode classifier refused the write
+   ("Out-of-Place Publication"). **BLOCKED-ON-USER-ACTION (Emma):** she
+   publishes the page herself or adds a permission rule that allows it.
+3. **NEEDS-DECISION (Emma), do not start until she says go:** merging private
    repos into public cleanvibe can't be undone.
    **Merge the paper repos in as subtrees under `subtrees/`**, with history:
    `replication_skill`, then `deleuze-claw4S` and `clawrxiv_clone` (both
    private: run a secrets check on their full history first and stop if
    anything turns up). Move `helping-with-arxiv/` to `subtrees/` and delete its
    boilerplate `queue.md`.
-3. **Quatrix arXiv submission:** BLOCKED-ON-USER-ACTION. The package is built;
+4. **Quatrix arXiv submission:** BLOCKED-ON-USER-ACTION. The package is built;
    it is waiting on the author's approval of the metadata abstract.
 
 **Not in this queue:** `Documents/GitHub/Should_be_submodules/` (INBE,
