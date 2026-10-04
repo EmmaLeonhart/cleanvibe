@@ -34,7 +34,7 @@ if %errorlevel% equ 0 (
     exit /b 1
 )
 
-set "BOOT_PROMPT=Read queue.md and start working the highest-priority item that is not blocked on user action. Follow the queue-driven-workflow skill: finish an item, delete it from queue.md, append a dated devlog.md entry in the same commit, then push. Ask me before anything destructive."
+set "BOOT_PROMPT=Read queue.md and work its FIRST item, on its own, never combined with another item. Do not skip it, even if it says it is waiting on Emma or blocked: if it is stuck on a question, make the call yourself, do it, and record the decision and why in devlog.md. Only when it is done go on to the next item, the new first one. Follow the queue-driven-workflow skill: finish an item, delete it from queue.md, append a dated devlog.md entry in the same commit, then push. Ask me before anything destructive."
 
 REM Remote Control with an EXPLICIT name: the flag takes an optional value, so a
 REM bare --remote-control before the prompt would swallow the prompt as the name.
