@@ -2066,3 +2066,16 @@ hit every category. README, site card and CLAUDE.md updated; the `todo.md`
 item is narrowed to what is left (following install steps, a real review).
 9 new tests; 246 pass, `doctor` clean.
 
+## 2026-10-03 — `todo.md`: replication section brought up to date
+
+The section still described shipped work as future and said the downloader
+fetches HTML first (reversed in v1.5.0). Checked each item against the code
+and a fresh scaffold, then removed the three that shipped: the Pages findings
+site + PDF report (v1.13.0, `pages.yml`), the ZIP package (`package.yml`,
+artifact + release asset) and repo provisioning (private `gh repo create`
+since v1.5.0/v1.18.0; the "public from minute one" half was reversed on
+purpose). Dropped the stale history paragraph (it is in this file already).
+Reworded the HTML extractor item to cover only papers with no LaTeX source,
+and replaced "unify the two scaffolds" with the open question it became after
+cleanvibe 2: whether `replicate` should share the v2 base.
+
