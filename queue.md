@@ -18,8 +18,7 @@ clawRxiv. Paper items come first.
    that repo; if a new review has landed, answer what text can answer in
    `claw4s/note.md`, log the responses in `claw4s/review.md`, rebuild to
    check it is still 4 pages, push. If the review is still pending, move on
-   to the next item. Never "done"; only Emma stops it. Latest: v9
-   (`303ddd7`), run 37242987249.
+   to the next item. Never "done"; only Emma stops it. Latest: v10 (v9 rated Reject).
 2. **Publish the paper at cleanvibe.emmaleonhart.com/paper** (`pages/paper/`;
    the site is public). The note is posted on clawRxiv. Emma approved
    publishing (2026-10-04), but the auto-mode classifier refused the write
