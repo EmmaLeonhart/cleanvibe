@@ -672,9 +672,10 @@ it (and append to `devlog.md`).
    for their answer before executing any of it.** Reading the paper, the
    `source/`, and the recipe text is fine — *running* third-party code is the
    gated action. (Downloading the arXiv source and extracting the tarball is
-   plain data handling, already done by the scaffolder, and is not gated.) An
-   automated security scan of the code before running is a future enhancement
-   (see `todo.md`); for now, only proceed if the user trusts the source.
+   plain data handling, already done by the scaffolder, and is not gated.)
+   Before asking, run `cleanvibe scan .` and put its summary in the question.
+   It is a pattern match, not a review, so still only proceed if the user
+   trusts the source.
 
 2. **Read the already-extracted source.** The scaffolder downloaded the arXiv
    **e-print source** ($src_url) to `replication_target/source/` **locally** —
@@ -797,8 +798,8 @@ gaps. Reimplementing from scratch is the fallback, not the default.
 > did not write (the recipe / cloned scripts / a downloaded zip). Per harness
 > safety requirements, ask the user for explicit consent before executing ANY
 > such code, and wait for their answer. Reading the paper/source/recipe is fine;
-> *running* third-party code is gated. (A future automated security scan is in
-> `todo.md`.)
+> *running* third-party code is gated. Run `cleanvibe scan .` first and include
+> its summary when you ask.
 
 1. **Acquire the LaTeX source.** The scaffolder already downloaded + extracted
    the e-print source to `replication_target/source/` **locally** and saved the
@@ -1610,9 +1611,9 @@ completes it (and append to `devlog.md`).
 > repo). Per harness safety requirements, **before executing ANY such code
 > (step 4 onward), ask the user for explicit consent and wait for their
 > answer.** Reading the paper and the recipe text is fine; *running*
-> third-party code is the gated action. An automated security scan of the code
-> before running is a future enhancement (see `todo.md`); for now, only proceed
-> if the user trusts the source.
+> third-party code is the gated action. Before asking, run `cleanvibe scan .`
+> and put its summary in the question. It is a pattern match, not a review, so
+> still only proceed if the user trusts the source.
 
 {step1}
 
@@ -2139,9 +2140,9 @@ Work top to bottom. Delete each item in the same commit that completes it
    any cloned scripts it pulls in) is gated. Per harness safety requirements,
    **ask the user for explicit consent to run it and wait for their answer
    before executing anything.** Reading the paper, the recipe text, and the
-   `source/` is fine — *running* it is the gated action. An automated security
-   scan of the code before running is a future enhancement (see `todo.md`); for
-   now, only proceed if the user trusts the source.
+   `source/` is fine — *running* it is the gated action. Before asking, run
+   `cleanvibe scan .` and put its summary in the question. It is a pattern
+   match, not a review, so still only proceed if the user trusts the source.
 
 2. **Create the GitHub repo and push — PRIVATE, early.** Create a private repo
    and push: `gh repo create --private --source=. --push` (publishing the Pages
@@ -2226,7 +2227,7 @@ $skill_location
 > you did not write. Per harness safety requirements, ask the user for explicit
 > consent before executing it (or any cloned scripts it pulls in), and wait for
 > their answer. Reading the paper and the recipe text is fine; *running* it is
-> gated. (A future automated security scan is in `todo.md`.)
+> gated. Run `cleanvibe scan .` first and include its summary when you ask.
 
 ## Plan
 

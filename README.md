@@ -292,6 +292,24 @@ time. It changes nothing, and exits `1` if it finds anything (so it can run in C
 | `ci` | a `tests/` directory with no GitHub Actions workflow |
 | `pages-gate` | a pre-v1.18.0 Pages workflow that fails on a private repo |
 
+### Scan — look at third-party code before running it
+
+```
+cleanvibe scan              # scan the current directory
+cleanvibe scan replication_target/ replication_skill.md
+```
+
+A **read-only** pattern scan for code you did not write: a replication's
+recipe, the authors' cloned repo, a downloaded zip. It groups what matched
+(piping a download into a shell, `eval`/`exec` and decoding, destructive
+commands, credential files and tokens, changes that outlive the run, unusual
+package sources, binaries) with file and line, and lists every host the code
+mentions. The replicate consent gate has the agent run it and show you the
+summary when it asks to run anything. It is a pattern match, not a security
+review: no match does not mean the code is safe. It skips `.git/`, `.github/`
+(CI runs on GitHub, not your machine), `.claude/`, and the docs cleanvibe
+writes at the project root. Exits `1` if anything matched.
+
 ### Options
 
 ```
@@ -300,6 +318,7 @@ cleanvibe new NAME --dry-run              # Preview a new project
 cleanvibe new NAME --no-claude            # Create it without launching Claude
 cleanvibe replicate URL --dry-run         # Preview a replication scaffold
 cleanvibe doctor                          # Audit the current project for drift (read-only)
+cleanvibe scan                            # Pattern-scan third-party code before running it (read-only)
 cleanvibe legacy research NAME --dry-run  # Preview a 1.x mode (prints a deprecation warning)
 cleanvibe --version                       # Show version
 ```

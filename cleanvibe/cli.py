@@ -8,6 +8,7 @@ cleanvibe 2 usage:
     cleanvibe replicate REF     Scaffold a replication project: clawRxiv ref, arXiv/alphaxiv ref,
                                 a non-arXiv URL, or a drop-in folder
     cleanvibe doctor [PATH]     Read-only audit of a cleanvibe project for drift
+    cleanvibe scan [PATH...]    Read-only pattern scan of third-party code before running it
     cleanvibe legacy CMD ...    The deprecated cleanvibe 1.x modes:
                                 new, research, original, chat, clone, convert
     cleanvibe --version         Show version
@@ -35,6 +36,7 @@ from .doctor import doctor
 from .original import original_project
 from .project import auto_project_path, is_cleanvibe_repo, new_project, open_project
 from .research import research_project
+from .scan import scan_cli
 from .scaffold import clone_project, convert_project, create_project
 
 LEGACY_COMMANDS = ("new", "research", "original", "chat", "clone", "convert")
@@ -438,6 +440,17 @@ def build_parser() -> argparse.ArgumentParser:
         help="Project to audit (defaults to the current directory)",
     )
 
+    scan_parser = subparsers.add_parser(
+        "scan",
+        help="Read-only pattern scan of code you did not write (a replication's "
+        "recipe, cloned repo or zip) before running it. Exits 1 if anything "
+        "matched",
+    )
+    scan_parser.add_argument(
+        "paths", nargs="*", type=Path, default=[Path(".")],
+        help="Files or directories to scan (defaults to the current directory)",
+    )
+
     legacy_parser = subparsers.add_parser(
         "legacy",
         help="DEPRECATED: the cleanvibe 1.x modes (new, research, original, "
@@ -466,6 +479,8 @@ def main(argv: list[str] | None = None) -> None:
         _do_replicate(args)
     elif args.command == "doctor":
         sys.exit(doctor(args.path))
+    elif args.command == "scan":
+        sys.exit(scan_cli(args.paths))
     elif args.command == "legacy":
         _deprecation_warning(args.legacy_command)
         _LEGACY_HANDLERS[args.legacy_command](args)

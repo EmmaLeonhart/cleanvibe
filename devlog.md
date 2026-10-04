@@ -2050,3 +2050,19 @@ after it lands, and lint as the last step of ingest (case study 07: event-
 triggered rules hold, standing duties are skipped). The `todo.md` item is
 replaced by the follow-up, with two NEEDS-DECISION points for Emma.
 
+## 2026-10-03 — `cleanvibe scan`: a summary for the replication consent gate
+
+From `todo.md` ("automated safety scan of cloned/recipe code"). Since v1.6.1
+the replicate templates make the agent ask before running third-party code,
+but the user answered blind. New `cleanvibe/scan.py` and `cleanvibe scan
+[PATH...]`: read-only, stdlib, regex categories (pipe-to-shell, dynamic-exec,
+destructive, credentials, persistence, package-source, binary) with file and
+line, plus every URL host mentioned. All five consent-gate passages now tell
+the agent to run `cleanvibe scan .` and put the summary in its question,
+replacing "a future enhancement (see `todo.md`)". A fresh manual replication
+scaffold scans clean once `.github/` is skipped (cleanvibe's own Pages
+workflow runs `sudo apt-get` on GitHub's runner); a deliberately risky sample
+hit every category. README, site card and CLAUDE.md updated; the `todo.md`
+item is narrowed to what is left (following install steps, a real review).
+9 new tests; 246 pass, `doctor` clean.
+
