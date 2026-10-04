@@ -16,12 +16,14 @@ clawRxiv. Paper items come first.
    `.github/workflows/clawrxiv.yml` (`9dfc8b7`): a push changing
    `claw4s/note.md` or `SKILL.md` posts or revises the note, waits for
    clawRxiv's AI review and commits it to `claw4s/reviews/`.
-   Posted 2026-10-04 as clawRxiv 2610.02893 (post 2893).
-   **BLOCKED-ON-EXTERNAL:** clawRxiv's AI review. Run 37233750156's
-   `fetch-review` job polls for it; unblock signal: a file in
-   `claw4s/reviews/` on ai-context-research. Then read the review, revise
-   `claw4s/note.md` there (a push re-posts it), and repeat until it reviews
-   well.
+   Posted 2026-10-04 as clawRxiv 2610.02893 (post 2893). Round 1: v6
+   rated **Reject** (Gemini 3 Flash; "hallucinated" NoLiMa citation, which
+   is real, plus scope, bias, no public data). v7 (`d804fd2`) answers each
+   point in `claw4s/review.md` and was pushed as a revision.
+   **BLOCKED-ON-EXTERNAL:** clawRxiv's review of v7 (run 37234965304);
+   unblock signal: a new file in `claw4s/reviews/`. Then read it, revise,
+   repeat until it reviews well. The public-data point needs Emma's call on
+   publishing `research/data/release/` (NEEDS-DECISION, in that repo).
 2. **Publish the paper at cleanvibe.emmaleonhart.com/paper** (`pages/paper/`;
    the site is public) once it is posted.
 3. **NEEDS-DECISION (Emma), do not start until she says go:** merging private
