@@ -2038,3 +2038,15 @@ such files produces the same queue as before. Site card and CLAUDE.md
 updated. 4 new tests; 237 pass, `doctor` clean. The site's stability
 section calls the legacy modes frozen; this change is additive only.
 
+## 2026-10-03 — Design note: the LLM Wiki pattern (the "Carpathes" item)
+
+From `todo.md`. "Carpathes / L-Carpathes" is read as a dictation of
+Karpathy's LLM Wiki (April 2026 gist); a search for "Carpathes" finds nothing
+relevant, and the note states that assumption. `docs/llm-wiki.md` maps the
+pattern onto cleanvibe (`data_lake/` ≈ `raw/`, `research-practice` notes and
+summary ≈ the wiki) and recommends a skill adopted on demand, not a mode or an
+integration. Two parts are worth taking regardless: `data_lake/` read-only
+after it lands, and lint as the last step of ingest (case study 07: event-
+triggered rules hold, standing duties are skipped). The `todo.md` item is
+replaced by the follow-up, with two NEEDS-DECISION points for Emma.
+

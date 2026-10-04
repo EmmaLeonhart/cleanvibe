@@ -18,7 +18,7 @@ See the `queue-driven-workflow` skill (`.claude/skills/queue-driven-workflow/SKI
 
 ## Backlog
 
-- **Investigate the Carpathes / L-Carpathes agentic wiki idea and see whether it fits inside cleanvibe.** Look at what the Carpathes (a.k.a. L-Carpathes) agentic wiki concept is actually trying to do — how it models pages, agents, and edits — and decide whether cleanvibe should: (a) integrate with it directly, (b) ship a scaffold variant for projects that want this pattern, or (c) leave it alone. Output: a short design note in the repo with the recommendation and, if it's a fit, a follow-up `todo.md` entry describing the integration shape.
+- **An LLM Wiki skill (Karpathy's pattern) for projects whose `data_lake/` is a pile of documents.** Design note: `docs/llm-wiki.md`. Shape: `data_lake/` as the read-only raw layer; entity/concept pages with an `index.md` and a parseable `log.md`; ingest / query (file answers back) / lint, with lint run as the last step of each ingest. Adopted on demand like `queue-driven-workflow`, not a mode. NEEDS-DECISION (Emma): a separate skill or folded into `research-practice`, and whether "`data_lake/` is read-only" goes into the v2 CLAUDE.md now.
 
 - **Make the bootstrap queue customizable.** Right now `queue_md()` ships one fixed bootstrap sequence. Eventually projects with different shapes (library vs. service vs. data pipeline vs. wiki bot) probably want different opening sequences. Explore whether this should be a `--profile` flag on `cleanvibe new`, a set of swappable template modules, or something else.
 
