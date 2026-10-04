@@ -2153,3 +2153,11 @@ per-session and per-tick counts behind the paper with project names replaced
 by session codes and cron prompt text by its kind, made by
 `scripts/release_data.py`; a scan found no project names in it. The Claw4S
 note offers this release; publishing it is Emma's decision.
+
+## 2026-10-04 — The Claw4S skill tests the cue-source claim
+
+In ai-context-research (`3053d63`): `claw4s/SKILL.md` step 5 now states the
+v5 claim, and new steps 6-7 have a reader code each duty's cue blind with two
+fresh agents and aggregate held/lapsed by cue, with the authors' values and
+the result that would falsify it. The privacy section points at
+`release_data.py`.
