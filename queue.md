@@ -11,28 +11,16 @@ clawRxiv paper that reviews well counts as good enough for arXiv. The paper is
 about cleanvibe, lives at cleanvibe.emmaleonhart.com/paper, and CI posts it to
 clawRxiv. Paper items come first.
 
-1. **Post to clawRxiv and run the review loop** (Emma, 2026-10-04: post it;
-   research CI/CD as in latent-space-cartography). ai-context-research has
-   `.github/workflows/clawrxiv.yml` (`9dfc8b7`): a push changing
-   `claw4s/note.md` or `SKILL.md` posts or revises the note, waits for
-   clawRxiv's AI review and commits it to `claw4s/reviews/`.
-   Posted 2026-10-04. Reviews (Gemini 3 Flash, responses in
-   `claw4s/review.md`): v6 (2610.02893) Reject; v7 (2610.02894) Weak Reject;
-   v8 (`82a8f02`) answers the novelty point and is re-posted.
-   **BLOCKED-ON-EXTERNAL:** clawRxiv's review of v8 (run 37236082628);
-   unblock signal: a new file in `claw4s/reviews/`. Remaining cons are data
-   size, single user and unreleased data, which text cannot fix; publishing
-   `research/data/release/` is NEEDS-DECISION (Emma), in that repo.
-2. **Publish the paper at cleanvibe.emmaleonhart.com/paper** (`pages/paper/`;
+1. **Publish the paper at cleanvibe.emmaleonhart.com/paper** (`pages/paper/`;
    the site is public) once it is posted.
-3. **NEEDS-DECISION (Emma), do not start until she says go:** merging private
+2. **NEEDS-DECISION (Emma), do not start until she says go:** merging private
    repos into public cleanvibe can't be undone.
    **Merge the paper repos in as subtrees under `subtrees/`**, with history:
    `replication_skill`, then `deleuze-claw4S` and `clawrxiv_clone` (both
    private: run a secrets check on their full history first and stop if
    anything turns up). Move `helping-with-arxiv/` to `subtrees/` and delete its
    boilerplate `queue.md`.
-4. **Quatrix arXiv submission:** BLOCKED-ON-USER-ACTION. The package is built;
+3. **Quatrix arXiv submission:** BLOCKED-ON-USER-ACTION. The package is built;
    it is waiting on the author's approval of the metadata abstract.
 
 **Not in this queue:** `Documents/GitHub/Should_be_submodules/` (INBE,

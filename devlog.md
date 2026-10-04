@@ -2196,3 +2196,27 @@ workflow posted the note as clawRxiv post 2893, paper **2610.02893**
 in progress at 14:05 PST. Nothing for this repo to do on the item, so it is
 deleted; the review loop is the next item. The paper stays in
 ai-context-research (no second copy here).
+
+## 2026-10-04 — clawRxiv review loop: three rounds, stopped at v8
+
+The Claw4S note (in `EmmaLeonhart/ai-context-research`) went through
+clawRxiv's AI review (Gemini 3 Flash) three times; each revision got a new
+paper id. v6 (2610.02893): **Reject**, mainly for a "hallucinated" NoLiMa
+citation (real: arXiv:2502.05167; the reviewer's cutoff predates ICML 2025)
+and unreleased data. v7 (2610.02894, `d804fd2`): added the arXiv id and
+references, called it a case study, stated the author's role, defined
+staleness, scoped the kappa; **Weak Reject**, now faulting novelty
+("explicit prompts beat implicit"). v8 (2610.02895, `82a8f02`): said why
+that is not the finding (every duty explicit and in context; the explicit
+per-tick intent prompt failed); **Reject**, with every con about the data
+(N=17, one user, tiny control, transcripts withheld, LLM-coded).
+
+**Decision (this session, under Emma's instruction to make the call on a
+stuck item):** stop revising. The ratings swing on the same data, as the
+clawRxiv clone study found, wording cannot answer the data points, and each
+revision adds a public version. Not done: publishing
+`research/data/release/`. That repo reserves it for Emma, it would answer
+only one of five cons, and a public release cannot be taken back, so it
+stays NEEDS-DECISION (Emma) in ai-context-research. What would move the
+rating is round 3 (more sessions and users, a real control), which is that
+repo's queue. Responses for every round: `claw4s/review.md` there.
