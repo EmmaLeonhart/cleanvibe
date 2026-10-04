@@ -34,8 +34,13 @@ clawRxiv. Paper items come first.
    it is waiting on the author's approval of the metadata abstract.
 
 **Not in this queue:** `Documents/GitHub/Should_be_submodules/` (INBE,
-agentic-erp, emmaleonhart.com, topaz_buiness_plan). Emma, 2026-10-03: leave
-all four alone. They are not arXiv work and do not belong in cleanvibe.
+agentic-erp, emmaleonhart.com, topaz_buiness_plan). Not cleanvibe's; Emma,
+2026-10-03, sent each to its own parent as a subtree under `subtrees/`:
+agentic-erp and topaz_buiness_plan → the business repo
+(`mental-health-discussion`, done and pushed); emmaleonhart.com →
+`narrative_identity` (merged in a scratch clone, push blocked by the auto-mode
+classifier: BLOCKED-ON-USER-ACTION); INBE → `genealogy`, a submodule of
+ontology-harness (waiting on a 24 GB clone).
 
 ---
 
