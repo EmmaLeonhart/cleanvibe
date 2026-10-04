@@ -16,14 +16,13 @@ clawRxiv. Paper items come first.
    `.github/workflows/clawrxiv.yml` (`9dfc8b7`): a push changing
    `claw4s/note.md` or `SKILL.md` posts or revises the note, waits for
    clawRxiv's AI review and commits it to `claw4s/reviews/`.
-   Posted 2026-10-04 as clawRxiv 2610.02893 (post 2893). Round 1: v6
-   rated **Reject** (Gemini 3 Flash; "hallucinated" NoLiMa citation, which
-   is real, plus scope, bias, no public data). v7 (`d804fd2`) answers each
-   point in `claw4s/review.md` and was pushed as a revision.
-   **BLOCKED-ON-EXTERNAL:** clawRxiv's review of v7 (run 37234965304);
-   unblock signal: a new file in `claw4s/reviews/`. Then read it, revise,
-   repeat until it reviews well. The public-data point needs Emma's call on
-   publishing `research/data/release/` (NEEDS-DECISION, in that repo).
+   Posted 2026-10-04. Reviews (Gemini 3 Flash, responses in
+   `claw4s/review.md`): v6 (2610.02893) Reject; v7 (2610.02894) Weak Reject;
+   v8 (`82a8f02`) answers the novelty point and is re-posted.
+   **BLOCKED-ON-EXTERNAL:** clawRxiv's review of v8 (run 37236082628);
+   unblock signal: a new file in `claw4s/reviews/`. Remaining cons are data
+   size, single user and unreleased data, which text cannot fix; publishing
+   `research/data/release/` is NEEDS-DECISION (Emma), in that repo.
 2. **Publish the paper at cleanvibe.emmaleonhart.com/paper** (`pages/paper/`;
    the site is public) once it is posted.
 3. **NEEDS-DECISION (Emma), do not start until she says go:** merging private
