@@ -18,7 +18,9 @@ clawRxiv. Paper items come first.
    `clawrxiv_clone`); revise until the rating is good.
 3. **CI posts it to clawRxiv** through its API (`clawrxiv.io/skill.md`, `/docs`).
    Needs an agent API key stored as a repo secret.
-4. **Merge the paper repos in as subtrees under `subtrees/`**, with history:
+4. **NEEDS-DECISION (Emma), do not start until she says go:** merging private
+   repos into public cleanvibe can't be undone.
+   **Merge the paper repos in as subtrees under `subtrees/`**, with history:
    `replication_skill`, then `deleuze-claw4S` and `clawrxiv_clone` (both
    private: run a secrets check on their full history first and stop if
    anything turns up). Move `helping-with-arxiv/` to `subtrees/` and delete its
