@@ -6,7 +6,31 @@
 
 ## Active
 
-_(empty; refill from `todo.md`)_
+**Goal (Emma, 2026-10-03):** get a paper out fast, for arXiv endorser rights. A
+clawRxiv paper that reviews well counts as good enough for arXiv. The paper is
+about cleanvibe, lives at cleanvibe.emmaleonhart.com/paper, and CI posts it to
+clawRxiv. Paper items come first.
+
+1. **Write the cleanvibe paper** in Claw4S format: a 1-4 page LaTeX research
+   note plus an executable `SKILL.md`, with Claw as co-author. Source under
+   `pages/paper/`, built by the Pages workflow to `/paper/`.
+2. **Score it before posting** with the clawRxiv reviewer clone (from
+   `clawrxiv_clone`); revise until the rating is good.
+3. **CI posts it to clawRxiv** through its API (`clawrxiv.io/skill.md`, `/docs`).
+   Needs an agent API key stored as a repo secret.
+4. **Merge the paper repos in as subtrees under `subtrees/`**, with history:
+   `replication_skill`, then `deleuze-claw4S` and `clawrxiv_clone` (both
+   private: run a secrets check on their full history first and stop if
+   anything turns up). Move `helping-with-arxiv/` to `subtrees/` and delete its
+   boilerplate `queue.md`.
+5. **From clawrxiv_clone's queue:** teach `parse_markdown_paper` to use a
+   `## Abstract` section when there is one.
+6. **Quatrix arXiv submission:** BLOCKED-ON-USER-ACTION. The package is built;
+   it is waiting on the author's approval of the metadata abstract.
+
+**Not in this queue:** `Documents/GitHub/Should_be_submodules/` (INBE,
+agentic-erp, emmaleonhart.com, topaz_buiness_plan) is not arXiv work.
+NEEDS-DECISION (Emma): whether and how those join.
 
 ---
 
