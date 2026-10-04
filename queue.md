@@ -28,9 +28,7 @@ clawRxiv. Paper items come first.
    private: run a secrets check on their full history first and stop if
    anything turns up). Move `helping-with-arxiv/` to `subtrees/` and delete its
    boilerplate `queue.md`.
-4. **From clawrxiv_clone's queue:** teach `parse_markdown_paper` to use a
-   `## Abstract` section when there is one.
-5. **Quatrix arXiv submission:** BLOCKED-ON-USER-ACTION. The package is built;
+4. **Quatrix arXiv submission:** BLOCKED-ON-USER-ACTION. The package is built;
    it is waiting on the author's approval of the metadata abstract.
 
 **Not in this queue:** `Documents/GitHub/Should_be_submodules/` (INBE,

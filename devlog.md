@@ -2093,3 +2093,17 @@ both scaffolded and fetched into `tests/scratch/batch-live`, and bare
 README, site card and CLAUDE.md updated; the README stability note now says
 `replicate` is 1.x plus the additive `--batch`. 9 new tests; 255 pass.
 
+## 2026-10-03 — Queue refocused on the paper; repo moves; clawrxiv_clone fix
+
+Emma: the goal is a paper out fast (arXiv endorser rights), posted to
+clawRxiv. The paper already exists in `ai-context-research` (draft, Claw4S
+`SKILL.md`, 2-page note), waiting on her review, so the queue points there
+instead of starting a second one. Repo moves she directed: agentic-erp and
+topaz_buiness_plan subtree-merged with history into the business repo
+(pushed); emmaleonhart.com merged into a scratch clone of narrative_identity,
+push blocked by the auto-mode classifier; INBE → genealogy waiting on a
+24.6 GB clone. The subtree merges of private paper repos into public
+cleanvibe are held until she says go. From clawrxiv_clone's queue:
+`parse_markdown_paper` now reads an `## Abstract` section (`ca9f5c5` there,
+4 new tests, 33 pass locally without the fastapi module).
+
