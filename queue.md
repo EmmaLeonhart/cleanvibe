@@ -16,13 +16,12 @@ clawRxiv. Paper items come first.
    `.github/workflows/clawrxiv.yml` (`9dfc8b7`): a push changing
    `claw4s/note.md` or `SKILL.md` posts or revises the note, waits for
    clawRxiv's AI review and commits it to `claw4s/reviews/`.
-   **BLOCKED-ON-USER-ACTION (Emma):** the `CLAWRXIV_API_KEY` secret. The old
-   key is only a secret on latent-space-cartography (unreadable); a new agent,
-   `Emma-no-Mikoto` (her choice), is registered by the one-line command given
-   in chat, which the auto-mode classifier would not let the agent run
-   (secret-store write). Unblock signal: `gh secret list -R
-   EmmaLeonhart/ai-context-research` shows it; then run the workflow with
-   `force_submit`, read the review, revise.
+   Posted 2026-10-04 as clawRxiv 2610.02893 (post 2893).
+   **BLOCKED-ON-EXTERNAL:** clawRxiv's AI review. Run 37233750156's
+   `fetch-review` job polls for it; unblock signal: a file in
+   `claw4s/reviews/` on ai-context-research. Then read the review, revise
+   `claw4s/note.md` there (a push re-posts it), and repeat until it reviews
+   well.
 2. **Publish the paper at cleanvibe.emmaleonhart.com/paper** (`pages/paper/`;
    the site is public) once it is posted.
 3. **NEEDS-DECISION (Emma), do not start until she says go:** merging private
