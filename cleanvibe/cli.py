@@ -7,6 +7,8 @@ cleanvibe 2 usage:
     cleanvibe new [NAME]        Create a project (auto-named without NAME) and open it
     cleanvibe replicate REF     Scaffold a replication project: clawRxiv ref, arXiv/alphaxiv ref,
                                 a non-arXiv URL, or a drop-in folder
+    cleanvibe replicate --batch FILE [--into DIR]
+                                One replication project per paper listed in FILE
     cleanvibe doctor [PATH]     Read-only audit of a cleanvibe project for drift
     cleanvibe scan [PATH...]    Read-only pattern scan of third-party code before running it
     cleanvibe legacy CMD ...    The deprecated cleanvibe 1.x modes:
@@ -19,13 +21,16 @@ Zero dependencies. Just Python stdlib.
 from __future__ import annotations  # noqa: I001 - keep at top for 3.9 compat
 
 import argparse
+import os
 import sys
+import time
 from pathlib import Path
 
 from . import __version__
 from .arxiv import is_arxiv_ref
 from .clawrxiv import is_clawrxiv_ref
 from .replicate import (
+    load_batch,
     replicate_clawrxiv_project,
     replicate_manual_project,
     replicate_project,
@@ -114,38 +119,96 @@ def _do_new(args) -> None:
 
 
 def _do_replicate(args) -> None:
-    if is_clawrxiv_ref(args.target):
+    if args.batch is not None:
+        if args.target is not None:
+            print("cleanvibe replicate: give either a target or --batch, not both",
+                  file=sys.stderr)
+            sys.exit(2)
+        sys.exit(_do_replicate_batch(args))
+    if args.target is None:
+        print("cleanvibe replicate: a target (paper ref, URL or folder) or "
+              "--batch FILE is required", file=sys.stderr)
+        sys.exit(2)
+    _replicate_one(args.target, args.path, args.dry_run, args.no_claude)
+
+
+def _replicate_one(target, path, dry_run, no_claude) -> None:
+    if is_clawrxiv_ref(target):
         # Checked before arXiv so clawrxiv.io links / clawrxiv:<id> route to
         # the dedicated clawRxiv mode (the API ships a skill recipe).
-        print(f"Scaffolding clawRxiv replication project for: {args.target}")
-        replicate_clawrxiv_project(
-            args.target, args.path, dry_run=args.dry_run, no_claude=args.no_claude
-        )
-    elif is_arxiv_ref(args.target):
-        print(f"Scaffolding replication project for: {args.target}")
-        replicate_project(
-            args.target, args.path, dry_run=args.dry_run, no_claude=args.no_claude
-        )
-    elif _looks_like_url(args.target):
+        print(f"Scaffolding clawRxiv replication project for: {target}")
+        replicate_clawrxiv_project(target, path, dry_run=dry_run, no_claude=no_claude)
+    elif is_arxiv_ref(target):
+        print(f"Scaffolding replication project for: {target}")
+        replicate_project(target, path, dry_run=dry_run, no_claude=no_claude)
+    elif _looks_like_url(target):
         # A plain http(s) URL that isn't arXiv/clawRxiv -> the research is
         # hosted elsewhere; download the page/PDF as the replication source.
-        print(f"Scaffolding replication project from non-arXiv URL: {args.target}")
-        replicate_url_project(
-            args.target, args.path, dry_run=args.dry_run, no_claude=args.no_claude
-        )
+        print(f"Scaffolding replication project from non-arXiv URL: {target}")
+        replicate_url_project(target, path, dry_run=dry_run, no_claude=no_claude)
     else:
         # Not a paper ref or URL -> treat it as a folder name and
         # scaffold a manual drop-in replication project there.
-        if args.path is not None:
+        if path is not None:
             print(
-                f"Note: '{args.path}' ignored — in folder mode the target "
-                f"folder is '{args.target}'.",
+                f"Note: '{path}' ignored — in folder mode the target "
+                f"folder is '{target}'.",
                 file=sys.stderr,
             )
-        print(f"Scaffolding manual (drop-in) replication project: {args.target}")
-        replicate_manual_project(
-            args.target, dry_run=args.dry_run, no_claude=args.no_claude
-        )
+        print(f"Scaffolding manual (drop-in) replication project: {target}")
+        replicate_manual_project(target, dry_run=dry_run, no_claude=no_claude)
+
+
+def _is_manual_ref(ref: str) -> bool:
+    return not (is_clawrxiv_ref(ref) or is_arxiv_ref(ref) or _looks_like_url(ref))
+
+
+# arXiv asks API clients for no more than one request every three seconds.
+BATCH_DELAY_SECONDS = 3.0
+
+
+def _do_replicate_batch(args) -> int:
+    """Scaffold one replication per entry in a batch file; never launch Claude.
+
+    Each paper runs from inside ``--into`` (default: the current directory), so
+    default folder names and relative ``path`` values land there. One failure
+    does not stop the rest; the exit code is 1 if any paper failed.
+    """
+    try:
+        entries = load_batch(args.batch)
+    except (OSError, ValueError) as e:
+        print(f"cleanvibe replicate --batch: {e}", file=sys.stderr)
+        return 2
+    into = args.into or Path(".")
+    if args.dry_run and not into.is_dir():
+        print(f"[dry-run] Would create {into}")
+        into = Path(".")
+    else:
+        into.mkdir(parents=True, exist_ok=True)
+
+    failed = []
+    home = Path.cwd()
+    for i, (ref, path) in enumerate(entries, 1):
+        if i > 1 and BATCH_DELAY_SECONDS and not _is_manual_ref(ref):
+            time.sleep(BATCH_DELAY_SECONDS)
+        print(f"\n[{i}/{len(entries)}] {ref}")
+        os.chdir(into)
+        try:
+            _replicate_one(ref, path, args.dry_run, no_claude=True)
+        except (Exception, SystemExit) as e:  # one bad paper must not stop the batch
+            failed.append((ref, str(e) or type(e).__name__))
+            print(f"  FAILED: {failed[-1][1]}", file=sys.stderr)
+        finally:
+            os.chdir(home)
+
+    done = len(entries) - len(failed)
+    print(f"\nBatch: {done} of {len(entries)} scaffolded in {into.resolve()}.")
+    for ref, why in failed:
+        print(f"  failed: {ref} ({why})")
+    if done and not args.dry_run:
+        print("Claude was not launched. Open a project with `cleanvibe` inside "
+              "its folder (or its runClaude .bat on Windows).")
+    return 1 if failed else 0
 
 
 # ---------------------------------------------------------------------------
@@ -414,7 +477,7 @@ def build_parser() -> argparse.ArgumentParser:
         "arXiv/alphaxiv paper, a URL, or a folder you drop the paper(s) into",
     )
     replicate_parser.add_argument(
-        "target",
+        "target", nargs="?", default=None,
         help="A clawRxiv ref (clawrxiv.io/abs/<id> or clawrxiv:<id> — fetches "
         "content + skill recipe), an arXiv/alphaxiv id or URL (fetches "
         "metadata), a plain http(s) URL to non-arXiv research (downloads the "
@@ -427,6 +490,18 @@ def build_parser() -> argparse.ArgumentParser:
         help="arXiv mode only: target directory (defaults to "
         "replicating-<paper-slug>, auto-suffixed -2/-3 if it exists). "
         "Ignored in folder mode — there the target IS the folder.",
+    )
+    replicate_parser.add_argument(
+        "--batch", type=Path, default=None, metavar="FILE",
+        help="Scaffold one replication per paper listed in FILE instead of a "
+        "single target: JSON (a list, or {'papers': [...]}; each entry a ref "
+        "string or an object with ref/arxiv_id/url and an optional path) or a "
+        "text file with one ref per line (# comments allowed). Never launches "
+        "Claude",
+    )
+    replicate_parser.add_argument(
+        "--into", type=Path, default=None, metavar="DIR",
+        help="With --batch: create the projects inside DIR (default: here)",
     )
     _add_run_flags(replicate_parser)
 

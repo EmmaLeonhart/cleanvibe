@@ -2079,3 +2079,17 @@ Reworded the HTML extractor item to cover only papers with no LaTeX source,
 and replaced "unify the two scaffolds" with the open question it became after
 cleanvibe 2: whether `replicate` should share the v2 base.
 
+## 2026-10-03 — `cleanvibe replicate --batch`
+
+From `todo.md` ("batch replication from a corpus"). `cleanvibe replicate
+--batch FILE [--into DIR]` scaffolds one replication project per paper in a
+JSON or text list, each routed exactly as a single `replicate` (the
+dispatcher is now `cli._replicate_one`). It never launches Claude, waits 3 s
+between network papers (arXiv's rate limit), carries on past a failure and
+exits 1 if any paper failed. `docs/replication-examples/papers.json` loads
+unchanged. Live run against arXiv: Sutra and "Attention Is All You Need"
+both scaffolded and fetched into `tests/scratch/batch-live`, and bare
+`cleanvibe --dry-run` inside one would open it, as the closing hint says.
+README, site card and CLAUDE.md updated; the README stability note now says
+`replicate` is 1.x plus the additive `--batch`. 9 new tests; 255 pass.
+

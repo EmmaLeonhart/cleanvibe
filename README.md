@@ -267,6 +267,23 @@ than invent one. Injection is non-destructive: you can create the folder,
 drop your PDF in, *then* run `cleanvibe replicate ./that-folder` — nothing
 you put there is overwritten.
 
+**Many papers at once:**
+
+```
+cleanvibe replicate --batch papers.json --into replications/
+cleanvibe replicate --batch papers.txt
+```
+
+One replication project per paper, each routed exactly as a single
+`replicate` would be. The file is JSON (a list, or `{"papers": [...]}` like
+`docs/replication-examples/papers.json`; each entry a ref string or an object
+with `ref`, `arxiv_id` or `url` and an optional `path`) or plain text with one
+ref per line and `#` comments. Projects land in `--into` (default: here).
+Batch mode never launches Claude; open a project later with `cleanvibe`
+inside its folder. It waits three seconds between network papers (arXiv's
+rate limit), carries on past a paper that fails, lists the failures at the
+end and exits `1` if there were any.
+
 Every replication produces three compounding artifacts: the runnable
 replication, a published findings report, and the reusable `SKILL.md`
 methodology. See `docs/replication_framing.md` for the full vision.
@@ -492,7 +509,7 @@ cleanvibe 2.0.0 is a new major version: the default `cleanvibe` / `cleanvibe new
 behavior changed, and the 1.x modes moved under `cleanvibe legacy`. Within 2.x:
 
 - **Commands:** `cleanvibe`, `new`, `replicate`, `doctor` and `legacy` are
-  stable. `replicate` behaves exactly as in 1.x. The `legacy` modes keep working
+  stable. `replicate` behaves as in 1.x, plus the additive `--batch`. The `legacy` modes keep working
   but are frozen.
 - **A new project always has:** `CLAUDE.md`, `README.md`, `INTENT.md`,
   `.cleanvibe.json`, `.gitignore` (with `scratch/`), `sessions/`, `data_lake/`,

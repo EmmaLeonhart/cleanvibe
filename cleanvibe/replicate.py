@@ -78,6 +78,56 @@ def _run_extraction(target: Path) -> None:
     print("  Paper fetched into replication_target/ (local only, gitignored)")
 
 
+BATCH_REF_KEYS = ("ref", "arxiv_id", "url")
+
+
+def load_batch(file) -> list:
+    """Read a ``replicate --batch`` file into ``[(ref, path_or_None), ...]``.
+
+    JSON: a list, or an object with a ``papers`` list (the shape of
+    ``docs/replication-examples/papers.json``). Each entry is a ref string or
+    an object with the first of ``ref``/``arxiv_id``/``url`` and an optional
+    ``path``; other keys (``slug``, ``title``...) are ignored. Anything that is
+    not JSON is read as text: one ref per line, blank lines and ``#`` comments
+    (at line start, or after whitespace) skipped. Raises ValueError on an empty or malformed file.
+    """
+    file = Path(file)
+    text = file.read_text(encoding="utf-8")
+    try:
+        data = json.loads(text)
+    except json.JSONDecodeError:
+        data = None
+        if text.lstrip().startswith(("{", "[")):
+            raise ValueError(f"{file} looks like JSON but does not parse")
+
+    entries = []
+    if data is None:
+        for line in text.splitlines():
+            # A comment is a line starting with #, or " #..." after a ref; a
+            # URL's own #fragment has no space before it and is kept.
+            ref = re.split(r"\s+#", line.strip(), maxsplit=1)[0].strip()
+            if ref and not ref.startswith("#"):
+                entries.append((ref, None))
+    else:
+        items = data.get("papers") if isinstance(data, dict) else data
+        if not isinstance(items, list):
+            raise ValueError(f"{file}: expected a list of papers or {{\"papers\": [...]}}")
+        for n, item in enumerate(items, 1):
+            if isinstance(item, str):
+                ref, path = item, None
+            elif isinstance(item, dict):
+                ref = next((item[k] for k in BATCH_REF_KEYS if item.get(k)), None)
+                path = item.get("path")
+            else:
+                ref = None
+            if not isinstance(ref, str) or not ref.strip():
+                raise ValueError(f"{file}: entry {n} has no ref, arxiv_id or url")
+            entries.append((ref.strip(), Path(path) if path else None))
+    if not entries:
+        raise ValueError(f"{file} lists no papers")
+    return entries
+
+
 def _resolve_target(base: Path) -> Path:
     """Return a non-existing directory, auto-suffixing ``-2``, ``-3``, … .
 
