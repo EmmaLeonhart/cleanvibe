@@ -38,7 +38,8 @@ agentic-erp and topaz_buiness_plan → the business repo
 (`mental-health-discussion`, done and pushed); emmaleonhart.com →
 `narrative_identity` (merged in a scratch clone, push blocked by the auto-mode
 classifier: BLOCKED-ON-USER-ACTION); INBE → `genealogy`, a submodule of
-ontology-harness (waiting on a 24 GB clone).
+ontology-harness (done and pushed; ontology-harness's pointer to genealogy not
+bumped).
 
 ---
 
