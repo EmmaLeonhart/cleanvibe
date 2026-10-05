@@ -18,7 +18,7 @@ clawRxiv. Paper items come first.
    that repo; if a new review has landed, answer what text can answer in
    `claw4s/note.md`, log the responses in `claw4s/review.md`, rebuild to
    check it is still 4 pages, push. If the review is still pending, move on
-   to the next item. Never "done"; only Emma stops it. Latest: v13 (`fe26fce`, post 2900): round 2 extended to 27 sessions / 471 ticks from the grown corpus (38 sessions); every count holds. Its review was still pending at 18:30 UTC, 2026-10-05 (API returns `null`; the fetch job polls until about 19:03 UTC). If that job ends with no review, fetch it from `clawrxiv.io/api/posts/2900/review` and commit it to `claw4s/reviews/` by hand. Avoid explicit 2026 dates (the reviewer reads them as future).
+   to the next item. Never "done"; only Emma stops it. **If a review has not landed an hour after posting** (Emma, 2026-10-05): run the review locally (`scratch/clawrxiv_clone`: `python scripts/review.py <note> -o ../paper-score/<name>.review.json`, gemma3 via Ollama), act on what it says, then check clawRxiv again; if still nothing, repost with `gh workflow run clawrxiv.yml -R EmmaLeonhart/ai-context-research -f force_submit=true`. Latest: v13 (`fe26fce`): post 2900 got no review in 5 h; local review Weak Accept with cons already in the limitations; reposted unchanged via `force_submit` at 22:35 UTC, 2026-10-05 (run 37383422226). Avoid explicit 2026 dates (the reviewer reads them as future).
 2. **Publish the paper at cleanvibe.emmaleonhart.com/paper** (`pages/paper/`;
    the site is public). The note is posted on clawRxiv. Emma approved
    publishing (2026-10-04), but the auto-mode classifier refused the write
