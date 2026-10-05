@@ -243,7 +243,8 @@ cleanvibe replicate https://openreview.net/forum?id=XXXX
 When the argument is a plain `http(s)` URL that isn't an arXiv/clawRxiv
 reference, cleanvibe **downloads it** as the replication source — the page or
 PDF lands **locally** in `replication_target/source/` (`paper.pdf` or
-`paper.html`, detected automatically) — gitignored, **never committed** — and
+`paper.html`, detected automatically; an HTML page is also converted to a
+clean `paper.md`, math kept as LaTeX) — gitignored, **never committed** — and
 provenance is recorded in `source.json`. A `download_paper.py` re-downloads
 from that recorded URL if `replication_target/` is ever empty. Same 429-aware
 retry/backoff as arXiv mode. Use it for research hosted on lab sites,

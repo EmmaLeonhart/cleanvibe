@@ -27,7 +27,7 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
-from . import __version__, templates
+from . import __version__, htmltext, templates
 from .arxiv import _read_url, _slugify, fetch_paper
 from .clawrxiv import fetch_clawrxiv_paper
 from .scaffold import (
@@ -181,7 +181,19 @@ def _download_source(url: str, dest_dir: Path):
     fname = "paper.pdf" if is_pdf else "paper.html"
     (dest_dir / fname).write_bytes(data)
     print(f"  wrote replication_target/source/{fname} ({len(data)} bytes)")
+    if not is_pdf:
+        _write_markdown(data, dest_dir / "paper.md")
     return fname
+
+
+def _write_markdown(data: bytes, out: Path) -> None:
+    """Best-effort clean-text copy of a downloaded HTML paper (paper.md)."""
+    try:
+        text = htmltext.html_to_markdown(data.decode("utf-8", errors="replace"))
+        out.write_text(text, encoding="utf-8")
+        print(f"  wrote replication_target/source/{out.name} ({len(text)} chars, read this one)")
+    except Exception as e:  # never fail the scaffold over a conversion
+        print(f"  could not convert the HTML to Markdown ({e}); read paper.html")
 
 
 # The replication verdict that drives the report's status badge. The agent

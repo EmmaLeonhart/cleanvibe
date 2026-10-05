@@ -2269,3 +2269,19 @@ round 3 work: `cleanvibe doctor` now lists `.claude/hooks/intent_staleness.py`
 among the cleanvibe 2 core files, so a project scaffolded before 2.0.4
 reports it missing instead of silently running round 3 without the cue.
 New test in `tests/test_doctor.py`; 261 tests OK; doctor clean on this repo.
+
+## 2026-10-04 — URL-mode replication papers get a clean `paper.md`
+
+Refilled from `todo.md` while the other queue items wait on Emma. A paper
+downloaded from a plain URL was saved only as raw `paper.html` (scripts,
+navigation, base64 figures). New `cleanvibe/htmltext.py`
+`html_to_markdown()` (stdlib `html.parser`) keeps headings, paragraphs,
+lists, links, code, tables and image alt text, takes math from LaTeXML's
+`alttext` as `$...$`, and drops the rest. `replicate._download_source`
+writes `paper.md` beside `paper.html`, and the generated `download_paper.py`
+embeds the module's source verbatim, so both paths convert the same way
+with no cleanvibe import. The URL queue tells the agent to read `paper.md`.
+Live check on arXiv's HTML for 1706.03762: 189 KB of HTML became 42 KB of
+Markdown with every section heading and the equations as LaTeX. The PDF-only
+half stays in `todo.md`: arXiv PDF-only papers have no HTML at all.
+`tests/test_htmltext.py` (8 tests); 269 tests OK; doctor clean.

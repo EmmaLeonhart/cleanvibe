@@ -19,25 +19,19 @@ clawRxiv. Paper items come first.
    `claw4s/note.md`, log the responses in `claw4s/review.md`, rebuild to
    check it is still 4 pages, push. If the review is still pending, move on
    to the next item. Never "done"; only Emma stops it. Latest: v12, Weak Reject; every con now needs data. Next revision when round 3 sessions (cleanvibe 2.0.4) land or Emma decides on releasing the anonymised counts. Avoid explicit 2026 dates (the reviewer reads them as future).
-2. **URL-mode replication: clean Markdown next to `paper.html`** (from
-   `todo.md`, "paper text for papers with no LaTeX source"; arXiv PDF-only
-   papers have no HTML, so this is the URL path). Stdlib
-   `cleanvibe/htmltext.py` `html_to_markdown()`; `replicate._download` and the
-   generated `download_paper.py` (embedding the same source) write
-   `paper.md`; tests.
-3. **Publish the paper at cleanvibe.emmaleonhart.com/paper** (`pages/paper/`;
+2. **Publish the paper at cleanvibe.emmaleonhart.com/paper** (`pages/paper/`;
    the site is public). The note is posted on clawRxiv. Emma approved
    publishing (2026-10-04), but the auto-mode classifier refused the write
    ("Out-of-Place Publication"). **BLOCKED-ON-USER-ACTION (Emma):** she
    publishes the page herself or adds a permission rule that allows it.
-4. **NEEDS-DECISION (Emma), do not start until she says go:** merging private
+3. **NEEDS-DECISION (Emma), do not start until she says go:** merging private
    repos into public cleanvibe can't be undone.
    **Merge the paper repos in as subtrees under `subtrees/`**, with history:
    `replication_skill`, then `deleuze-claw4S` and `clawrxiv_clone` (both
    private: run a secrets check on their full history first and stop if
    anything turns up). Move `helping-with-arxiv/` to `subtrees/` and delete its
    boilerplate `queue.md`.
-5. **Quatrix arXiv submission:** BLOCKED-ON-USER-ACTION. The package is built;
+4. **Quatrix arXiv submission:** BLOCKED-ON-USER-ACTION. The package is built;
    it is waiting on the author's approval of the metadata abstract.
 
 **Not in this queue:** `Documents/GitHub/Should_be_submodules/` (INBE,

@@ -12,7 +12,7 @@ from datetime import datetime
 from pathlib import Path
 from string import Template
 
-from . import __version__
+from . import __version__, htmltext
 from .arxiv import ArxivPaper, _slugify
 from .clawrxiv import ClawrxivPaper
 
@@ -1377,9 +1377,11 @@ The paper was downloaded from a plain web URL at scaffold time into
 ``replication_target/source/`` (provenance recorded in ``source.json``). That
 directory is **gitignored** — the paper is copyrighted and is NEVER committed;
 the download is local context only. If the directory is empty (e.g. a fresh
-clone), run this script to repopulate it from the recorded URL.
+clone), run this script to repopulate it from the recorded URL. An HTML page
+is also converted to ``paper.md`` (clean text: no scripts, navigation or
+inline images), which is the copy to read.
 
-Stdlib only (``urllib``).
+Stdlib only (``urllib``, ``html.parser``).
 """
 
 from __future__ import annotations
@@ -1408,6 +1410,10 @@ def main() -> int:
     out = _SOURCE / ("paper.pdf" if is_pdf else "paper.html")
     out.write_bytes(data)
     print(f"  wrote {out} ({len(data)} bytes)")
+    if not is_pdf:
+        md = _SOURCE / "paper.md"
+        md.write_text(html_to_markdown(data.decode("utf-8", errors="replace")), encoding="utf-8")
+        print(f"  wrote {md} (clean text; read this one)")
     return 0
 
 
@@ -1417,10 +1423,20 @@ if __name__ == "__main__":
 )
 
 
+_MAIN_MARKER = "\n\ndef main() -> int:"
+
+
 def url_download_paper_py(source_url: str) -> str:
     # source_url is recorded in source.json and read at runtime; the template
     # itself needs no substitution, but keep the signature for symmetry/clarity.
-    return _URL_DOWNLOAD_TMPL.template
+    # cleanvibe/htmltext.py is embedded verbatim (minus its docstring) before
+    # main(), so the generated script converts HTML the same way, stdlib only.
+    script = _URL_DOWNLOAD_TMPL.template
+    converter = Path(htmltext.__file__).read_text(encoding="utf-8")
+    converter = converter.split('"""', 2)[2].strip()
+    head, tail = script.split(_MAIN_MARKER, 1)
+    return (head + "\n\n# --- HTML -> Markdown (from cleanvibe/htmltext.py) ---\n"
+            + converter + "\n" + _MAIN_MARKER + tail)
 
 
 def _manual_name(folder: str) -> str:
@@ -1560,6 +1576,8 @@ def replication_manual_queue_md(folder: str, source_url: str | None = None) -> s
             "   - Verify `replication_target/source/` holds the downloaded paper\n"
             "     (`paper.html` or `paper.pdf`). If it is empty, the download failed —\n"
             "     STOP and tell the user the URL fetch did not succeed.\n"
+            "   - For an HTML page, read `paper.md` (the same text without scripts,\n"
+            "     navigation or inline images), not the raw `paper.html`.\n"
             "   - Move any datasets / supplementary / notes the user dropped in into\n"
             "     `data_lake/`.\n"
             "   - Commit. (`data_lake/` material is committed per the cleanvibe convention.)"
