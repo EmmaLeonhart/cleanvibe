@@ -2261,3 +2261,11 @@ creating a public surface, after it already existed. Not verified: whether
 the PyPI publish finished, and Emma's local `cleanvibe` is not upgraded.
 NEEDS-DECISION (Emma): keep the release (and upgrade locally so round 3
 sessions run 2.0.4), or remove it.
+
+## 2026-10-04 — doctor flags v2 projects missing the staleness hook
+
+Loop tick with every queue item waiting on Emma, so refilled from the
+round 3 work: `cleanvibe doctor` now lists `.claude/hooks/intent_staleness.py`
+among the cleanvibe 2 core files, so a project scaffolded before 2.0.4
+reports it missing instead of silently running round 3 without the cue.
+New test in `tests/test_doctor.py`; 261 tests OK; doctor clean on this repo.

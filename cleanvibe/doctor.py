@@ -35,6 +35,7 @@ V2_MARKER = ".cleanvibe.json"
 V2_CORE_FILES = (
     "CLAUDE.md", "README.md", "INTENT.md", V2_MARKER,
     ".claude/settings.json", ".claude/hooks/save_session_log.py",
+    ".claude/hooks/intent_staleness.py",  # since 2.0.4
     ".claude/scripts/data_lake_intake.py",
 )
 

@@ -70,6 +70,13 @@ class TestChecks(unittest.TestCase):
         self.assertEqual(sorted(f.where for f in doc.check_files(proj)),
                          [".claude/hooks/save_session_log.py", "INTENT.md"])
 
+    def test_v2_project_without_the_staleness_hook_is_flagged(self):
+        # Projects scaffolded before 2.0.4 lack the round 3 hook.
+        proj = _scaffold(new_project)
+        (proj / ".claude/hooks/intent_staleness.py").unlink()
+        self.assertEqual([f.where for f in doc.check_files(proj)],
+                         [".claude/hooks/intent_staleness.py"])
+
     def test_missing_and_edited_skills(self):
         slugs = list(skills.SKILLS)
         (self.proj / ".claude/skills" / slugs[0] / "SKILL.md").unlink()
