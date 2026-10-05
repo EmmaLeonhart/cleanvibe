@@ -2285,3 +2285,11 @@ Live check on arXiv's HTML for 1706.03762: 189 KB of HTML became 42 KB of
 Markdown with every section heading and the equations as LaTeX. The PDF-only
 half stays in `todo.md`: arXiv PDF-only papers have no HTML at all.
 `tests/test_htmltext.py` (8 tests); 269 tests OK; doctor clean.
+
+## 2026-10-05 — `scratch-2026-09-25/` added as a submodule
+
+A clone of `helping-with-arxiv` appeared at the repo root (01:00). Emma:
+make it a submodule. Added with `git submodule add` at its existing path,
+pointing at `e6bfe9e` (level with GitHub). Its uncommitted `!runClaude.bat`
+edit stays in the submodule's working tree. The same repo is also in this
+repo as the `helping-with-arxiv/` subtree.
