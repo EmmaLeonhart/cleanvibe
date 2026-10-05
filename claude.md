@@ -21,6 +21,7 @@ cleanvibe/
 │   ├── arxiv.py         # stdlib arXiv/alphaxiv metadata fetch + parsing (zero-dep)
 │   ├── clawrxiv.py      # stdlib clawRxiv (clawrxiv.io) JSON API fetch + parsing (zero-dep)
 │   ├── replicate.py     # replicate_{project,clawrxiv_project,manual_project}(): per-paper replication
+│   ├── htmltext.py      # stdlib HTML -> Markdown for URL-mode papers (paper.md); embedded in download_paper.py
 │   ├── skills.py        # the vendored skills (single source of truth), write_skills()
 │   └── templates.py     # all generated text: v2 (v2_*, V2_INTAKE_PY), 1.x modes, replication, the session-log hook script
 ├── tests/               # stdlib unittest, run by CI on win/mac/linux
