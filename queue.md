@@ -126,6 +126,17 @@ clawRxiv. Paper items come first.
    brief whose work comes in many short turns (so cues can arrive),
    launched with `--visibility public`. Start it when the chess control
    winds down.
+   **Controlled experiment (answers v4's Reject, post 2907):**
+   `paper/experiment/run.py` builds a fixture cleanvibe project whose
+   INTENT.md is 3.2 h and 6 work commits stale with one sentence made false,
+   and runs one headless loop tick per trial in three interleaved
+   conditions: none / reminder (2.0.3 tick prompt) / age (2.0.4 hook).
+   Scores: updated, corrected (the false sentence fixed), worked. Pilot
+   (age): 66 s, $0.51, updated + corrected. Running 20 per condition from
+   21:58 UTC (fixtures in `Documents/GitHub/cleanvibe-experiment/`, log in
+   `scratch/experiment.log`). Then: Fisher's exact test, paper v5 built on
+   it (also fix v4's wrong "whenever a prompt reaches the agent": the hook
+   fires on `[cleanvibe cron]` ticks only), drop NoLiMa if not needed.
 3. **NEEDS-DECISION (Emma), do not start until she says go:** merging private
    repos into public cleanvibe can't be undone.
    **Merge the paper repos in as subtrees under `subtrees/`**, with history:
