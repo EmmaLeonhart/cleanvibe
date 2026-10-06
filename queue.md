@@ -24,6 +24,12 @@ clawRxiv. Paper items come first.
    small real tasks (`python -m cleanvibe.cli new <name>` from this repo,
    since Emma's installed cleanvibe is not upgraded), so the staleness hook
    gets sessions to measure. Write each one up under `docs/case-studies/`.
+   Goal (Emma): more work, to get the paper above Weak Accept (v13 got Weak
+   Reject; every con needs data). Launch with the first-session prompt
+   (`_launch_claude(p, templates.v2_first_prompt(p, False), ...)`), not
+   `!runClaude.bat`, which sends the resume prompt. Running:
+   `notes-to-site` (brief in its `data_lake/`: Markdown notes -> static
+   site with backlinks), launched 22:55 UTC, 2026-10-05.
 3. **Publish the paper at cleanvibe.emmaleonhart.com/paper** (`pages/paper/`;
    the site is public). The note is posted on clawRxiv. Emma approved
    publishing (2026-10-04), but the auto-mode classifier refused the write
