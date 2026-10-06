@@ -45,6 +45,13 @@ clawRxiv. Paper items come first.
    passphrase folder + title; brief: a pure-Python SQL database with a
    B-tree file format, indexes, joins, crash-safe transactions, and
    differential tests against sqlite3), launched 02:45 UTC, 2026-10-06.
+   Both finished their brief in under 45 min and idled; written up as
+   case study 08 (no round 3 cases). Running: `silver-jolly-tulip`
+   (auto-named; brief: an R7RS-small Scheme in pure Python in five stages,
+   interpreter -> call/cc and macros -> libraries -> bytecode VM ->
+   conformance suite), launched 05:15 UTC, 2026-10-06. Decision (Claude,
+   Emma not answering): a long staged brief rather than waiting for a
+   human to feed requests, so round 3 gets hours of commits.
 3. **Publish the paper at cleanvibe.emmaleonhart.com/paper** (`pages/paper/`;
    the site is public). The note is posted on clawRxiv. Emma approved
    publishing (2026-10-04), but the auto-mode classifier refused the write
