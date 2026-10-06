@@ -149,6 +149,13 @@ clawRxiv. Paper items come first.
    turn before it, copied to new paths and resumed with
    `claude -p --resume <id> --fork-session`), one tick per fork:
    none / reminder / reminder+age line. About 10 per condition.
+   **Results (23:45 UTC):** exp 1 (fresh fixture, 20/cond): updated 20/20
+   in all three, corrected 19/19/20: ceiling. Exp 2 (30 forks of the
+   control's 20:48 tick, long context): updated none 5/10, reminder 4/10,
+   age 4/10: **no effect of the age line**; about half update whatever
+   the cue. NEXT: paper v5 must report both nulls plainly; the field 3/3
+   is not supported as a hook effect. Rethink the claim (e.g. the lapse
+   is ~50% per tick in long contexts regardless of cue) before posting.
 3. **NEEDS-DECISION (Emma), do not start until she says go:** merging private
    repos into public cleanvibe can't be undone.
    **Merge the paper repos in as subtrees under `subtrees/`**, with history:
