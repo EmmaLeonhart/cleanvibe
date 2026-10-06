@@ -70,7 +70,14 @@ clawRxiv. Paper items come first.
    outside this repo, so cleanvibe's CLAUDE.md is not loaded; brief: a
    pure-Python chess engine improved over 8+ self-play rounds of 200-game
    matches, which take hours of wall time), launched 11:08 UTC. Check its
-   repo is public after the intake (about 11:38).
+   repo is public after the intake (about 11:38). It made
+   `pure-python-chess-engine-selfplay` **private** too (made public by hand
+   12:08 UTC), without cleanvibe's CLAUDE.md loaded: the project CLAUDE.md's
+   `--private` line beats a `data_lake/` brief (2 of 2). That is the
+   paper's own pattern (a file the agent must notice loses to a rule in
+   context). **From now on** append to the first prompt at launch: "Create
+   the GitHub repo public, not private: this is a public research practice
+   project." (a cue that arrives); count whether that works.
 3. **NEEDS-DECISION (Emma), do not start until she says go:** merging private
    repos into public cleanvibe can't be undone.
    **Merge the paper repos in as subtrees under `subtrees/`**, with history:
