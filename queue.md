@@ -65,7 +65,12 @@ clawRxiv. Paper items come first.
    briefs alone rarely give round 3 cases; the case in 09 came from a
    session that died and resumed. Next: briefs with work that can't be
    rushed (waits on long test runs, or a series of user requests fed in
-   over hours), started outside this repo.
+   over hours), started outside this repo. Running:
+   `Documents/GitHub/cleanvibe-practice/hidden-vivid-thistle` (auto-named;
+   outside this repo, so cleanvibe's CLAUDE.md is not loaded; brief: a
+   pure-Python chess engine improved over 8+ self-play rounds of 200-game
+   matches, which take hours of wall time), launched 11:08 UTC. Check its
+   repo is public after the intake (about 11:38).
 3. **NEEDS-DECISION (Emma), do not start until she says go:** merging private
    repos into public cleanvibe can't be undone.
    **Merge the paper repos in as subtrees under `subtrees/`**, with history:
