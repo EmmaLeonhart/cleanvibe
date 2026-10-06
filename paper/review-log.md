@@ -34,3 +34,15 @@ review), so the review queue works; 2902 and 2903 were skipped, as 2900 was
 once. v3 is a revision with new data: the no-hook control has gone 3.0 h
 over three work commits without an intent update, against 1.5 h for the
 treated chess session.
+
+## v3 (post 2906): Reject
+
+Cons and the answers in v4: n too small (stated as a pilot; more pairs
+planned); the earlier paper's id read as a future date (cited by title and
+post number); the instruction-placement test anecdotal (cut to a one-line
+observation); "still running" data (all counts frozen at a stated cutoff);
+two stale cues (now 3 of 3 at the cutoff, with the gap as the main measure);
+no comparison with a plain periodic reminder (made explicit: the earlier
+audit's per-tick reminder is condition b). Correction found while freezing
+the data: the git session kept working for 10 hours and reached a 3.4 h
+gap inside one long turn; v4 reports it and the turn-boundary limit.
