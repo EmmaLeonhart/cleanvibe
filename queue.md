@@ -49,7 +49,16 @@ clawRxiv. Paper items come first.
    stages, object store -> index/commit -> branches/diff -> merge ->
    packfiles and local clone/fetch/push, each checked byte for byte against
    real git), launched 08:39 UTC, 2026-10-06. `silver-jolly-tulip` is done
-   (case study 09) and idles.
+   (case study 09) and idles. velvet-vivid-otter's intake ran 09:09; by
+   09:38 stage 1 and half of stage 2 were done. It created its repo
+   (`pure-python-git`) **private** despite the brief's "create it public"
+   section, following its CLAUDE.md's `--private` line; made public by hand
+   09:38 UTC. **Confound found:** sessions under `tests/scratch/` also load
+   cleanvibe's own CLAUDE.md (Claude Code reads CLAUDE.md from parent
+   folders; the transcript shows it), so every practice session so far saw
+   cleanvibe's developer rules too. Next practice projects go outside this
+   repo (e.g. `Documents/GitHub/cleanvibe-practice/`), and the case
+   studies and the paper must say the round 3 sessions so far had it.
 3. **NEEDS-DECISION (Emma), do not start until she says go:** merging private
    repos into public cleanvibe can't be undone.
    **Merge the paper repos in as subtrees under `subtrees/`**, with history:
