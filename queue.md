@@ -29,7 +29,10 @@ clawRxiv. Paper items come first.
    (`_launch_claude(p, templates.v2_first_prompt(p, False), ...)`), not
    `!runClaude.bat`, which sends the resume prompt. Running:
    `notes-to-site` (brief in its `data_lake/`: Markdown notes -> static
-   site with backlinks), launched 22:55 UTC, 2026-10-05.
+   site with backlinks), launched 01:41 UTC, 2026-10-06 (from its initial
+   commit). By 02:15 UTC: intake ran on time (WORK MODE), INTENT.md set from
+   the brief, update check run, queue/todo/devlog planned, three build
+   commits with tests.
 3. **Publish the paper at cleanvibe.emmaleonhart.com/paper** (`pages/paper/`;
    the site is public). The note is posted on clawRxiv. Emma approved
    publishing (2026-10-04), but the auto-mode classifier refused the write
