@@ -34,7 +34,12 @@ clawRxiv. Paper items come first.
    Next: more long staged briefs, so round 3 gets a rate. Practice sessions
    die in Emma's scheduled relaunch: check every tick and resume a dead one
    with `open_project` (resume prompt); ticks only exist between turns, so
-   count staleness against commits as well as ticks.
+   count staleness against commits as well as ticks. Running:
+   `velvet-vivid-otter` (auto-named; brief: a pure-Python git in five
+   stages, object store -> index/commit -> branches/diff -> merge ->
+   packfiles and local clone/fetch/push, each checked byte for byte against
+   real git), launched 08:39 UTC, 2026-10-06. `silver-jolly-tulip` is done
+   (case study 09) and idles.
 3. **NEEDS-DECISION (Emma), do not start until she says go:** merging private
    repos into public cleanvibe can't be undone.
    **Merge the paper repos in as subtrees under `subtrees/`**, with history:
