@@ -102,6 +102,13 @@ clawRxiv. Paper items come first.
    launch-prompt line worked (1 of 1, against 0 of 2 from the brief). Put
    that in the paper's next revision (after 2902's review lands, so the
    pending review is not lost to a new post id).
+   19:08 UTC: the control has its first stale work commit (18:49, INTENT.md
+   2.0 h old, no hook, no update). The treated session stalled from 17:45:
+   it held round 3 "until you say to restart it" and the repo "private
+   until you decide" (it never saw it made public), with no user present,
+   which the v2 design forbids; a finding for its case study. Sent it one
+   message at 19:10 UTC (restart round 3, keep going, repo is public);
+   disclose that user-like message in the paper and count from it apart.
 3. **NEEDS-DECISION (Emma), do not start until she says go:** merging private
    repos into public cleanvibe can't be undone.
    **Merge the paper repos in as subtrees under `subtrees/`**, with history:
