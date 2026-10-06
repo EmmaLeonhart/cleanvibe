@@ -27,53 +27,14 @@ clawRxiv. Paper items come first.
    Goal (Emma): more work, to get the paper above Weak Accept (v13 got Weak
    Reject; every con needs data). Launch with the first-session prompt
    (`_launch_claude(p, templates.v2_first_prompt(p, False), ...)`), not
-   `!runClaude.bat`, which sends the resume prompt. Running:
-   `notes-to-site` (brief in its `data_lake/`: Markdown notes -> static
-   site with backlinks), launched 01:41 UTC, 2026-10-06 (from its initial
-   commit). By 02:15 UTC: intake ran on time (WORK MODE), INTENT.md set from
-   the brief, update check run, queue/todo/devlog planned, three build
-   commits with tests. By 02:45 UTC: first version done in 37 minutes
-   (51 tests, CI green on 6 jobs, private repo
-   `EmmaLeonhart/markdown-notes-static-site`), INTENT.md updated at
-   completion; since then idle ticks that see the empty queue and decline
-   to refill (todo.md holds only extras beyond the brief), as in round 2.
-   The staleness hook fires ("last changed 0.5 hours and 0 commits ago"),
-   but INTENT.md never goes stale with no commits. Next practice project:
-   a task big enough to keep committing for hours, so the round 3
-   comparison (ticks with INTENT.md over 2 h stale) has cases.
-   Running: `quiet-gentle-otter` (auto-named, so it also tests the
-   passphrase folder + title; brief: a pure-Python SQL database with a
-   B-tree file format, indexes, joins, crash-safe transactions, and
-   differential tests against sqlite3), launched 02:45 UTC, 2026-10-06.
-   Both finished their brief in under 45 min and idled; written up as
-   case study 08 (no round 3 cases). Running: `silver-jolly-tulip`
-   (auto-named; brief: an R7RS-small Scheme in pure Python in five stages,
-   interpreter -> call/cc and macros -> libraries -> bytecode VM ->
-   conformance suite), launched 05:15 UTC, 2026-10-06. Decision (Claude,
-   Emma not answering): a long staged brief rather than waiting for a
-   human to feed requests, so round 3 gets hours of commits.
-   By 06:50 UTC: intake on time, INTENT.md set at 05:45 UTC and not touched
-   since, stages 1-3 done (interpreter, call/cc + syntax-rules, libraries +
-   ports + CLI), stage 4 (bytecode VM) in progress, 15 commits, still
-   committing every few minutes. Round 3 cases start once INTENT.md passes
-   2 h stale with commits continuing; write up case study 09 when stage 5
-   ends or the session idles. Two findings for case study 09: (a) the
-   whole build from intake (05:45) to 06:47 UTC was ONE turn, so neither
-   the Stop hook (sessions/ still at 05:15) nor the half-hour cron (fires
-   only when the REPL is idle) ran during it: a long turn produces no
-   ticks to measure. (b) The session died about 06:48 UTC. Emma's scheduled
-   job relaunched its sessions at 06:49:57 and this one was not among them.
-   Resumed with `open_project` (resume prompt) at 07:10 UTC. It caught up
-   from the log and git without help, restarted its loop cron, and ended
-   its turn. Its ticks now fire, and from the 08:07 UTC tick INTENT.md is
-   over 2 h stale: the first round 3 cases.
-   First round 3 case, 08:00 UTC: the hook fired ("2.1 hours and 12 commits
-   ago") and the agent's next commit, `029c05f`, updated INTENT.md with
-   substance: it replaced a fact that had gone stale (the R7RS report is now
-   in `data_lake/downloads/`) and added a progress line (stage 4 done,
-   stage 5 under way, user still silent). By 08:08 UTC: stage 4 done
-   (VM, CI on both engines, nine benchmarks), stage 5 conformance at
-   chapters 2-5. Keep counting hook firings vs INTENT.md updates.
+   `!runClaude.bat`, which sends the resume prompt. So far: three projects
+   (case studies 08 and 09). Round 3 has **one case** (09: the hook fired at
+   2.1 h stale and the next commit updated INTENT.md with substance). Short
+   briefs finish in under 45 min and give none; a staged brief gave one.
+   Next: more long staged briefs, so round 3 gets a rate. Practice sessions
+   die in Emma's scheduled relaunch: check every tick and resume a dead one
+   with `open_project` (resume prompt); ticks only exist between turns, so
+   count staleness against commits as well as ticks.
 3. **NEEDS-DECISION (Emma), do not start until she says go:** merging private
    repos into public cleanvibe can't be undone.
    **Merge the paper repos in as subtrees under `subtrees/`**, with history:

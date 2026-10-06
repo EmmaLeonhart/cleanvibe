@@ -2314,3 +2314,18 @@ push. `pages/paper/index.html` is the v13 note (`claw4s/note.md` in
 ai-context-research) rendered with `scratch/note_to_page.py`, pointing at
 the latest clawRxiv version (2610.02901, Weak Reject). Deployed by the
 existing `pages.yml`.
+
+## 2026-10-06 — case study 09: the first round 3 case
+
+`tests/scratch/silver-jolly-tulip` (auto-named; five-stage R7RS Scheme brief)
+built all five stages in 2 h 45 min: 34 commits, 151 unit tests and 1273
+conformance tests passing on both the interpreter and the bytecode VM. At
+08:00 UTC the staleness hook read "2.1 hours and 12 commits ago" and the
+next commit updated INTENT.md with real content, the first time the stale
+path was exercised. Also found: the first hour was one turn, so no ticks
+ran (the cron fires only when idle); the session died in Emma's scheduled
+relaunch at 06:49 UTC and was resumed at 07:10 with `open_project`, and
+caught up on its own; GitHub Actions has refused every job on the account
+for billing since about 08:16 UTC. Written up as
+`docs/case-studies/09-staged-scheme-on-2.0.4.md`; queue item 2 now says to
+resume dead practice sessions each tick and to run more long staged briefs.
