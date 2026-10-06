@@ -117,6 +117,15 @@ clawRxiv. Paper items come first.
    which the v2 design forbids; a finding for its case study. Sent it one
    message at 19:10 UTC (restart round 3, keep going, repo is public);
    disclose that user-like message in the paper and count from it apart.
+   20:42 UTC: its stall came from Claude Code's own low-memory stop, which
+   told it not to restart the match unless the user asked; the 19:10
+   message did not move it. Data frozen at 20:38 for paper v4. Wind-down
+   item added to the top of its queue.md (20:42, no reason given); kill it
+   once it is idle for an hour. **Next pair** (more data is the review's
+   main con): one hook/no-hook pair at a time, outside this repo, a long
+   brief whose work comes in many short turns (so cues can arrive),
+   launched with `--visibility public`. Start it when the chess control
+   winds down.
 3. **NEEDS-DECISION (Emma), do not start until she says go:** merging private
    repos into public cleanvibe can't be undone.
    **Merge the paper repos in as subtrees under `subtrees/`**, with history:
