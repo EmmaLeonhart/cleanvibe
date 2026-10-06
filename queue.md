@@ -78,6 +78,13 @@ clawRxiv. Paper items come first.
    context). **From now on** append to the first prompt at launch: "Create
    the GitHub repo public, not private: this is a public research practice
    project." (a cue that arrives); count whether that works.
+   **Candidate paper result (14:38 UTC):** longest INTENT.md gap during
+   active work, round 3 (2.0.4, hook on every tick): 0.5, 0.7, 2.3, 1.5,
+   1.0 h over five sessions; the chess session updates it about hourly when
+   a fact changes. Round 2 (2.0.3): 5-6 h in 3 of 7. The hook states the
+   age on every tick, not only past 2 h, so "stale cases" is the wrong
+   unit; the gap distribution is the comparison. Caveat for the paper:
+   round 3 sessions are written briefs, round 2 were Emma's own projects.
 3. **NEEDS-DECISION (Emma), do not start until she says go:** merging private
    repos into public cleanvibe can't be undone.
    **Merge the paper repos in as subtrees under `subtrees/`**, with history:
