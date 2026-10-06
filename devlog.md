@@ -2329,3 +2329,14 @@ caught up on its own; GitHub Actions has refused every job on the account
 for billing since about 08:16 UTC. Written up as
 `docs/case-studies/09-staged-scheme-on-2.0.4.md`; queue item 2 now says to
 resume dead practice sessions each tick and to run more long staged briefs.
+
+## 2026-10-06 — practice repos made public
+
+The practice projects followed cleanvibe's private default, so their repos
+were private and their CI matrices used up the account's private Actions
+minutes (jobs refused from about 08:16 UTC). Emma: research practice repos
+are supposed to be public, so the transcripts can be shown. Made public:
+`markdown-notes-static-site`, `pure-python-sql-database`,
+`r7rs-scheme-in-python`. `velvet-vivid-otter` had not made its repo yet; its
+brief now says to create it public. Queue item 2 now says every practice
+brief carries that section.

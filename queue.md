@@ -27,7 +27,11 @@ clawRxiv. Paper items come first.
    Goal (Emma): more work, to get the paper above Weak Accept (v13 got Weak
    Reject; every con needs data). Launch with the first-session prompt
    (`_launch_claude(p, templates.v2_first_prompt(p, False), ...)`), not
-   `!runClaude.bat`, which sends the resume prompt. So far: three projects
+   `!runClaude.bat`, which sends the resume prompt. **Practice repos are
+   PUBLIC** (Emma, 2026-10-06: the research shows the transcripts; private
+   repos also burn Actions minutes). The first prompt says private, so put
+   a "create the GitHub repo public" section in each brief in `data_lake/`
+   before the intake runs. So far: three projects
    (case studies 08 and 09). Round 3 has **one case** (09: the hook fired at
    2.1 h stale and the next commit updated INTENT.md with substance). Short
    briefs finish in under 45 min and give none; a staged brief gave one.
