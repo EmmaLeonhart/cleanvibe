@@ -32,7 +32,15 @@ clawRxiv. Paper items come first.
    site with backlinks), launched 01:41 UTC, 2026-10-06 (from its initial
    commit). By 02:15 UTC: intake ran on time (WORK MODE), INTENT.md set from
    the brief, update check run, queue/todo/devlog planned, three build
-   commits with tests.
+   commits with tests. By 02:45 UTC: first version done in 37 minutes
+   (51 tests, CI green on 6 jobs, private repo
+   `EmmaLeonhart/markdown-notes-static-site`), INTENT.md updated at
+   completion; since then idle ticks that see the empty queue and decline
+   to refill (todo.md holds only extras beyond the brief), as in round 2.
+   The staleness hook fires ("last changed 0.5 hours and 0 commits ago"),
+   but INTENT.md never goes stale with no commits. Next practice project:
+   a task big enough to keep committing for hours, so the round 3
+   comparison (ticks with INTENT.md over 2 h stale) has cases.
 3. **Publish the paper at cleanvibe.emmaleonhart.com/paper** (`pages/paper/`;
    the site is public). The note is posted on clawRxiv. Emma approved
    publishing (2026-10-04), but the auto-mode classifier refused the write
