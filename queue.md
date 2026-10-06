@@ -59,6 +59,13 @@ clawRxiv. Paper items come first.
    cleanvibe's developer rules too. Next practice projects go outside this
    repo (e.g. `Documents/GitHub/cleanvibe-practice/`), and the case
    studies and the paper must say the round 3 sessions so far had it.
+   velvet-vivid-otter finished all five stages by 10:49 UTC (1 h 40 min of
+   work), updating INTENT.md at completion: longest gap 1.5 h, no stale
+   case. Even five-stage briefs finish before INTENT.md goes 2 h stale, so
+   briefs alone rarely give round 3 cases; the case in 09 came from a
+   session that died and resumed. Next: briefs with work that can't be
+   rushed (waits on long test runs, or a series of user requests fed in
+   over hours), started outside this repo.
 3. **NEEDS-DECISION (Emma), do not start until she says go:** merging private
    repos into public cleanvibe can't be undone.
    **Merge the paper repos in as subtrees under `subtrees/`**, with history:
