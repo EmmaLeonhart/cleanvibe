@@ -137,6 +137,18 @@ clawRxiv. Paper items come first.
    `scratch/experiment.log`). Then: Fisher's exact test, paper v5 built on
    it (also fix v4's wrong "whenever a prompt reaches the agent": the hook
    fires on `[cleanvibe cron]` ticks only), drop NoLiMa if not needed.
+   22:09 UTC interim: ceiling, every trial in every condition updated and
+   corrected (20/20 so far); a fresh one-tick session reads INTENT.md and
+   fixes it with no cue. So the lapse needs a long context. Also a v4
+   error: the chess control had the 2.0.4 tick prompt, i.e. the REMINDER
+   (only the hook was removed): field control = condition b, not a. Its
+   final gap: 4.5 h over 6 stale work commits, then it updated on its own
+   at 21:19 UTC. **Experiment 2 (long context), after experiment 1 ends:**
+   fork the control's real state from just before 21:19 (repo at the
+   commit before its INTENT update, transcript cut at the end of the last
+   turn before it, copied to new paths and resumed with
+   `claude -p --resume <id> --fork-session`), one tick per fork:
+   none / reminder / reminder+age line. About 10 per condition.
 3. **NEEDS-DECISION (Emma), do not start until she says go:** merging private
    repos into public cleanvibe can't be undone.
    **Merge the paper repos in as subtrees under `subtrees/`**, with history:
