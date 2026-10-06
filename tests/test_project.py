@@ -107,7 +107,7 @@ class TestNewProject(unittest.TestCase):
         self.assertIn("\nscratch/\n", (_new() / ".gitignore").read_text(encoding="utf-8"))
 
     def test_launches_first_session_with_remote_control(self):
-        proj = Path(tempfile.mkdtemp()) / "p"
+        proj = project.auto_project_path(Path(tempfile.mkdtemp()))
         with mock.patch.object(project, "_launch_claude") as launch, redirect_stdout(io.StringIO()):
             project.new_project(proj, auto_named=True)
         args, kwargs = launch.call_args
@@ -117,6 +117,7 @@ class TestNewProject(unittest.TestCase):
         # 2026-10-01: Claude's own title came from the boilerplate prompt).
         name = kwargs["name"]
         self.assertRegex(name, r"^[a-z]+-[a-z]+-[a-z]+$")
+        self.assertEqual(name, proj.name)  # folder and title are the same name
         marker = json.loads((proj / ".cleanvibe.json").read_text(encoding="utf-8"))
         self.assertEqual(marker["session_name"], name)
         if (proj / "!runClaude.bat").exists():
@@ -159,18 +160,22 @@ class TestRecognizeAndOpen(unittest.TestCase):
         (plain / "queue.md").write_text("x\n", encoding="utf-8")
         self.assertFalse(project.is_cleanvibe_repo(plain))
 
-    def test_auto_project_path_untitled_then_timestamp_then_number(self):
+    def test_auto_project_path_is_a_fresh_passphrase(self):
+        import random
         base = Path(tempfile.mkdtemp())
-        first = project.auto_project_path(base)
-        self.assertEqual(first.name, "untitled-cleanvibe-project")
+        first = project.auto_project_path(base, random.Random(1))
+        self.assertRegex(first.name, r"^[a-z]+-[a-z]+-[a-z]+$")
         first.mkdir()
-        second = project.auto_project_path(base)
-        self.assertRegex(second.name, r"^untitled-cleanvibe-project-\d{4}-\d{2}-\d{2}-\d{4}$")
-        second.mkdir()
-        with mock.patch.object(project, "datetime") as dt:
-            dt.now.return_value.strftime.return_value = second.name.rsplit("project-", 1)[1]
-            third = project.auto_project_path(base)
-        self.assertEqual(third.name, second.name + "-2")
+        # The same draw again is taken, so it draws another name.
+        second = project.auto_project_path(base, random.Random(1))
+        self.assertNotEqual(second.name, first.name)
+        self.assertFalse(second.exists())
+
+    def test_auto_project_path_numbers_when_every_draw_is_taken(self):
+        base = Path(tempfile.mkdtemp())
+        (base / "calm-tidy-otter").mkdir()
+        with mock.patch.object(templates, "passphrase_name", return_value="calm-tidy-otter"):
+            self.assertEqual(project.auto_project_path(base).name, "calm-tidy-otter-2")
 
     def test_open_uses_resume_prompt_without_explorer(self):
         proj = _new()

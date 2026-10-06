@@ -3197,8 +3197,8 @@ def v2_first_prompt(path, auto_named: bool) -> str:
     """
     if auto_named:
         clue = (
-            "I created it without giving a name, so the folder name was generated "
-            "and says nothing about the purpose."
+            "I created it without giving a name, so the folder name is a random "
+            "generated passphrase and says nothing about the purpose."
         )
     else:
         clue = (
@@ -3547,8 +3547,9 @@ continue from the Claude app or web. Earlier sessions are in `sessions/`.
 def v2_intent_md(project_name: str, auto_named: bool) -> str:
     if auto_named:
         clue = (
-            f"The project was created without a name (`{project_name}` was "
-            f"generated), so the directory says nothing about its purpose."
+            f"The project was created without a name (`{project_name}` is a "
+            f"random generated passphrase), so the directory says nothing about "
+            f"its purpose."
         )
     else:
         clue = f"The only clue so far is the directory name, `{project_name}`."

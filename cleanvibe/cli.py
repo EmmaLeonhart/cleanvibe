@@ -467,7 +467,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     new_parser.add_argument(
         "name", nargs="?", type=Path, default=None,
-        help="Directory to create. Omit it to get untitled-cleanvibe-project.",
+        help="Directory to create. Omit it to get a generated passphrase name (e.g. golden-swift-otter).",
     )
     _add_run_flags(new_parser)
 

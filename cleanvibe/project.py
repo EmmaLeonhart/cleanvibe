@@ -17,7 +17,6 @@ top-level sessions with Remote Control on (see ``launch.py``).
 from __future__ import annotations
 
 import platform
-from datetime import datetime
 from pathlib import Path
 
 from . import __version__, skills, templates
@@ -43,21 +42,18 @@ def is_cleanvibe_repo(path: Path) -> bool:
     return mentions and has_workflow
 
 
-AUTO_NAME = "untitled-cleanvibe-project"
-
-
-def auto_project_path(base: Path | None = None) -> Path:
-    """Where an unnamed project goes under ``base`` (cwd).
-
-    ``untitled-cleanvibe-project`` if it is free; otherwise the same with a
-    timestamp (``untitled-cleanvibe-project-YYYY-MM-DD-HHMM``); only if that is
-    taken too, a number on the end (``-2``, ``-3``, ...).
+def auto_project_path(base: Path | None = None, rng=None) -> Path:
+    """Where an unnamed project goes under ``base`` (cwd): a fresh passphrase
+    name such as ``golden-swift-otter``, used for both the folder and the
+    session title (Emma, 2026-10-05: the generated names are good, use them for
+    the directory too). Drawn again if taken; after that, a number on the end.
     """
     base = Path(".") if base is None else Path(base)
-    candidate = base / AUTO_NAME
-    if not candidate.exists():
-        return candidate
-    stem = f"{AUTO_NAME}-{datetime.now().strftime('%Y-%m-%d-%H%M')}"
+    for _ in range(20):
+        candidate = base / templates.passphrase_name(rng)
+        if not candidate.exists():
+            return candidate
+    stem = templates.passphrase_name(rng)
     candidate = base / stem
     n = 2
     while candidate.exists():
@@ -76,8 +72,9 @@ def new_project(
     path = Path(path)
     project_name = path.name
     is_windows = platform.system() == "Windows"
-    # Untitled projects get a passphrase-style session title; chosen names are used as is.
-    session_name = templates.passphrase_name() if auto_named else None
+    # An auto-named project's folder is a passphrase (auto_project_path); the
+    # session title is the same name. Chosen names are used as is.
+    session_name = path.name if auto_named else None
 
     if dry_run:
         print(f"[dry-run] New cleanvibe project: {path}" + (" (auto-named)" if auto_named else ""))

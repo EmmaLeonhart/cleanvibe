@@ -2293,3 +2293,14 @@ make it a submodule. Added with `git submodule add` at its existing path,
 pointing at `e6bfe9e` (level with GitHub). Its uncommitted `!runClaude.bat`
 edit stays in the submodule's working tree. The same repo is also in this
 repo as the `helping-with-arxiv/` subtree.
+
+## 2026-10-05 — auto-named projects: the passphrase is the folder name too
+
+Emma: the generated names are good; use them for the directory and the chat
+title both. `auto_project_path` now draws a passphrase (`golden-swift-otter`,
+redrawn if the folder exists, a number after 20 taken draws) instead of
+`untitled-cleanvibe-project`, and `new_project` uses that folder name as the
+session title, so the two always match. The first prompt and INTENT.md call it
+"a random generated passphrase" that says nothing about the purpose, so the
+agent doesn't read meaning into "otter". README, CLAUDE.md and the `new` help
+text updated; tests rewritten for the new naming; 270 tests OK. Not released.
