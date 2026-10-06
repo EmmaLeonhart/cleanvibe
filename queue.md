@@ -41,6 +41,10 @@ clawRxiv. Paper items come first.
    but INTENT.md never goes stale with no commits. Next practice project:
    a task big enough to keep committing for hours, so the round 3
    comparison (ticks with INTENT.md over 2 h stale) has cases.
+   Running: `quiet-gentle-otter` (auto-named, so it also tests the
+   passphrase folder + title; brief: a pure-Python SQL database with a
+   B-tree file format, indexes, joins, crash-safe transactions, and
+   differential tests against sqlite3), launched 02:45 UTC, 2026-10-06.
 3. **Publish the paper at cleanvibe.emmaleonhart.com/paper** (`pages/paper/`;
    the site is public). The note is posted on clawRxiv. Emma approved
    publishing (2026-10-04), but the auto-mode classifier refused the write
