@@ -57,7 +57,13 @@ clawRxiv. Paper items come first.
    ports + CLI), stage 4 (bytecode VM) in progress, 15 commits, still
    committing every few minutes. Round 3 cases start once INTENT.md passes
    2 h stale with commits continuing; write up case study 09 when stage 5
-   ends or the session idles.
+   ends or the session idles. Two findings for case study 09: (a) the
+   whole build from intake (05:45) to 06:47 UTC was ONE turn, so neither
+   the Stop hook (sessions/ still at 05:15) nor the half-hour cron (fires
+   only when the REPL is idle) ran during it: a long turn produces no
+   ticks to measure. (b) The session died about 06:48 UTC. Emma's scheduled
+   job relaunched its sessions at 06:49:57 and this one was not among them.
+   Resumed with `open_project` (resume prompt) at 07:10 UTC.
 3. **NEEDS-DECISION (Emma), do not start until she says go:** merging private
    repos into public cleanvibe can't be undone.
    **Merge the paper repos in as subtrees under `subtrees/`**, with history:
