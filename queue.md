@@ -97,7 +97,11 @@ clawRxiv. Paper items come first.
    line (the new launch rule). Compare the two sessions' gaps with
    `paper/scripts/staleness.py`; this answers "before/after, different
    work" directly. Both run 6-way parallel matches on one machine, so
-   both are slower; that is the same for both arms.
+   both are slower; that is the same for both arms. Its intake ran 16:08;
+   it created `python-chess-engine-selfplay-elo` **public** on its own: the
+   launch-prompt line worked (1 of 1, against 0 of 2 from the brief). Put
+   that in the paper's next revision (after 2902's review lands, so the
+   pending review is not lost to a new post id).
 3. **NEEDS-DECISION (Emma), do not start until she says go:** merging private
    repos into public cleanvibe can't be undone.
    **Merge the paper repos in as subtrees under `subtrees/`**, with history:
