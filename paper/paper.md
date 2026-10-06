@@ -65,13 +65,24 @@ cleanvibe's session-log hook under `sessions/`.
 
 **Measure.** `paper/scripts/staleness.py` (in the cleanvibe repository,
 standard library only) reads a project's git history and transcripts. A
-*work commit* is one that touches anything outside `sessions/` (the
-session-log hook's own commits do not count). The *gap* is the time from
+*work commit* is one that changes any file outside `sessions/`. The
+session-log hook commits the transcript itself every half hour; those
+commits touch only `sessions/` and are excluded, so an idle project whose
+transcript keeps being saved does not count as working with a stale intent
+file. A commit that changes `INTENT.md` resets the clock. The *gap* is the time from
 one `INTENT.md` change to a later work commit that did not change it. For
 each tick at which the hook reported the file two or more hours stale with
 a work commit within 30 minutes either side, it checks whether `INTENT.md`
 was committed within the next 30 minutes. Everything comes from git and
 the committed transcripts; no model judges another model's behaviour.
+
+**Concurrent control.** The comparison with the prior audit is before and
+after, across different kinds of work. To separate the hook from the work,
+a sixth session runs the same chess brief on the same cleanvibe version on
+the same machine, started 2.5 hours after the treated chess session, with
+only the staleness hook removed (its second commit records the removal).
+Both chess sessions are still running; their rows are updated as matches
+finish.
 
 ## 3. Results
 
@@ -81,7 +92,8 @@ the committed transcripts; no model judges another model's behaviour.
 | pure-python-sql-database | SQL database | 44 min | 26 | 0.7 h | 0 | — |
 | r7rs-scheme-in-python | Scheme, 5 stages | 2 h 45 min | 49 | 2.3 h | 1 | 1 |
 | pure-python-git | git, 5 stages | 1 h 40 min | 24 | 2.4 h | 1 | 1 |
-| pure-python-chess-engine-selfplay | chess self-play (running) | 3 h 40 min + | 22 | 1.0 h | 0 | — |
+| pure-python-chess-engine-selfplay | chess self-play (running) | 5 h 30 min + | 30 | 1.5 h | 0 | — |
+| python-chess-engine-selfplay-elo (control, no hook) | same chess brief (running) | 1 h + | 12 | 0.7 h | — | — |
 
 **The gap.** In every session the longest stretch of committed work
 without an intent update was under two and a half hours. Before the hook,
@@ -100,15 +112,22 @@ that had become false (the R7RS report, described as absent, had just been
 downloaded) and added a progress line. These updates carried content, not
 a touched timestamp.
 
-**An unplanned test of the same account.** Every brief ended with a
-section saying to create the GitHub repository public, overriding the
-private default in the project's `CLAUDE.md`. The two sessions whose brief
-carried it and that reached that step created the repository private, as
-`CLAUDE.md` says (we made them public by hand). The brief is a file the
-agent must open and connect to a later step; `CLAUDE.md` is loaded into
-context at every turn. This matches the prior audit's split from the other
-side: a rule's location in or out of context mattered more than which
-instruction was more specific or more recent.
+**Where an instruction lives.** The sessions also tested the account on a
+second duty. Each project's `CLAUDE.md`, loaded into context at every
+turn, says to create the GitHub repository private. These sessions were to
+be public, and the instruction to make them so was placed in one of two
+places:
+
+| Placement | Sessions | Created public |
+|---|---|---|
+| A section of the brief in `data_lake/` (a file the agent reads once, at intake) | 2 | 0 |
+| The launch prompt (in context when the agent starts) | 1 | 1 |
+
+The brief is more specific and more recent than `CLAUDE.md`, and the
+agents read it: both built exactly what it asked. But the repository is
+created later, and at that step the rule in context won. In the launch
+prompt the same sentence was followed. The numbers are small; the
+direction is the prior audit's split seen from the other side.
 
 ## 4. Discussion
 
@@ -123,6 +142,18 @@ Work on long-context recall in language models describes the same
 weakness: recall drops when nothing in the current text matches the stored
 instruction (Modarressi et al., 2025).
 
+What else the result suggests for scaffold design. A cue costs one line
+of context per tick; at idle ticks it was correctly ignored (in the two
+short sessions the hook kept reporting a growing age after the brief was
+done, and the agents did not invent updates). The same mechanism should
+extend to the other standing duties that lapsed in the prior audit, such
+as the README and refilling an empty queue, each reported as a fact
+("README last changed 9 commits ago") rather than restated as a rule. It
+also has limits: it can only report what a script can compute, so a duty
+whose trigger is a judgement (has my understanding changed?) still needs
+a proxy, here time and commits. And a cue in context may not survive
+context compaction, which no session here reached.
+
 Two measurement lessons. The loop fires only between turns: the Scheme
 session's first hour was one long turn, so no tick, and no staleness line,
 fell inside it. And capable agents finish many briefs before a file can go
@@ -132,9 +163,10 @@ informative measure.
 ## 5. Limitations
 
 Five sessions, one agent model, one author who also built the scaffold.
-The comparison with the prior audit is before and after, not randomised,
-and the earlier sessions were the author's own projects while these ran
-from written briefs; the kind of work may explain part of the difference.
+The comparison with the prior audit is before and after, and the earlier
+sessions were the author's own projects while these ran from written
+briefs; the concurrent control addresses this for one brief, but it is one
+pair and is still running.
 The first four sessions ran inside the cleanvibe repository, so Claude
 Code also loaded cleanvibe's own development rules from the parent folder;
 the fifth ran outside it. Two stale ticks are not a rate. Everything here
