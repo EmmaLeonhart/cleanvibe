@@ -67,6 +67,13 @@ clawRxiv. Paper items come first.
    from the log and git without help, restarted its loop cron, and ended
    its turn. Its ticks now fire, and from the 08:07 UTC tick INTENT.md is
    over 2 h stale: the first round 3 cases.
+   First round 3 case, 08:00 UTC: the hook fired ("2.1 hours and 12 commits
+   ago") and the agent's next commit, `029c05f`, updated INTENT.md with
+   substance: it replaced a fact that had gone stale (the R7RS report is now
+   in `data_lake/downloads/`) and added a progress line (stage 4 done,
+   stage 5 under way, user still silent). By 08:08 UTC: stage 4 done
+   (VM, CI on both engines, nine benchmarks), stage 5 conformance at
+   chapters 2-5. Keep counting hook firings vs INTENT.md updates.
 3. **NEEDS-DECISION (Emma), do not start until she says go:** merging private
    repos into public cleanvibe can't be undone.
    **Merge the paper repos in as subtrees under `subtrees/`**, with history:
