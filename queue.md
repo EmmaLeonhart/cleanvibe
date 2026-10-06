@@ -19,6 +19,12 @@ clawRxiv. Paper items come first.
    `claw4s/note.md`, log the responses in `claw4s/review.md`, rebuild to
    check it is still 4 pages, push. If the review is still pending, move on
    to the next item. Never "done"; only Emma stops it. **If a review has not landed an hour after posting** (Emma, 2026-10-05): run the review locally (`scratch/clawrxiv_clone`: `python scripts/review.py <note> -o ../paper-score/<name>.review.json`, gemma3 via Ollama), act on what it says, then check clawRxiv again; if still nothing, repost with `gh workflow run clawrxiv.yml -R EmmaLeonhart/ai-context-research -f force_submit=true`. Latest: v13 reposted as post 2901 (post 2900 was never reviewed): Weak Reject, same cons as v12, all needing data; stands until round 3 practice sessions (item 2) give some. Avoid explicit 2026 dates (the reviewer reads them as future).
+   v14 (`aec436d`: first round 3 case, round 3 transcripts public) is
+   pushed but NOT posted: **BLOCKED-ON-USER-ACTION**. The repo is private
+   and GitHub refused the clawRxiv job for billing (private Actions minutes
+   used up, 2026-10-06), and there is no local `CLAWRXIV_API_KEY` to post
+   by hand. Unblocks when Emma raises the Actions spending limit, makes the
+   repo public, or gives a local key; then rerun the workflow.
 2. **Experiment: practice projects and reports on them** (Emma,
    2026-10-05). Start cleanvibe 2.0.4 projects under `tests/scratch/` on
    small real tasks (`python -m cleanvibe.cli new <name>` from this repo,
