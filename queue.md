@@ -19,19 +19,31 @@ clawRxiv. Paper items come first.
    `claw4s/note.md`, log the responses in `claw4s/review.md`, rebuild to
    check it is still 4 pages, push. If the review is still pending, move on
    to the next item. Never "done"; only Emma stops it. **If a review has not landed an hour after posting** (Emma, 2026-10-05): run the review locally (`scratch/clawrxiv_clone`: `python scripts/review.py <note> -o ../paper-score/<name>.review.json`, gemma3 via Ollama), act on what it says, then check clawRxiv again; if still nothing, repost with `gh workflow run clawrxiv.yml -R EmmaLeonhart/ai-context-research -f force_submit=true`. Latest: v13 (`fe26fce`): post 2900 got no review in 5 h; local review Weak Accept with cons already in the limitations; reposted unchanged via `force_submit` at 22:35 UTC, 2026-10-05 (run 37383422226). Avoid explicit 2026 dates (the reviewer reads them as future).
-2. **Publish the paper at cleanvibe.emmaleonhart.com/paper** (`pages/paper/`;
+2. **Experiment: more papers through the review loop** (Emma, 2026-10-05).
+   The post -> review -> revise loop works; run other papers through it.
+   First step: list candidate papers or notes in Emma's repos (e.g. the
+   Quatrix paper in `helping-with-arxiv/`, `deleuze-claw4S`) with their
+   state, pick one, and review it locally with `scratch/clawrxiv_clone`
+   first. Posting a new paper to clawRxiv is public: ask Emma before the
+   first post of each one.
+3. **Experiment: practice cleanvibe sessions for round 3 data** (Emma,
+   2026-10-05). Start cleanvibe 2.0.4 projects under `tests/scratch/` on
+   small real tasks (`python -m cleanvibe.cli new <name>` from this repo,
+   since Emma's installed cleanvibe is not upgraded), so the staleness hook
+   gets sessions to measure. Write each one up under `docs/case-studies/`.
+4. **Publish the paper at cleanvibe.emmaleonhart.com/paper** (`pages/paper/`;
    the site is public). The note is posted on clawRxiv. Emma approved
    publishing (2026-10-04), but the auto-mode classifier refused the write
    ("Out-of-Place Publication"). **BLOCKED-ON-USER-ACTION (Emma):** she
    publishes the page herself or adds a permission rule that allows it.
-3. **NEEDS-DECISION (Emma), do not start until she says go:** merging private
+5. **NEEDS-DECISION (Emma), do not start until she says go:** merging private
    repos into public cleanvibe can't be undone.
    **Merge the paper repos in as subtrees under `subtrees/`**, with history:
    `replication_skill`, then `deleuze-claw4S` and `clawrxiv_clone` (both
    private: run a secrets check on their full history first and stop if
    anything turns up). Move `helping-with-arxiv/` to `subtrees/` and delete its
    boilerplate `queue.md`.
-4. **Quatrix arXiv submission:** BLOCKED-ON-USER-ACTION. The package is built;
+6. **Quatrix arXiv submission:** BLOCKED-ON-USER-ACTION. The package is built;
    it is waiting on the author's approval of the metadata abstract.
 
 **Not in this queue:** `Documents/GitHub/Should_be_submodules/` (INBE,
