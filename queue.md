@@ -11,6 +11,14 @@ clawRxiv paper that reviews well counts as good enough for arXiv. The paper is
 about cleanvibe, lives at cleanvibe.emmaleonhart.com/paper, and CI posts it to
 clawRxiv. Paper items come first.
 
+0. **Standing, every tick: close idle sessions** (Emma, 2026-10-06). Check
+   every Claude session on the machine; kill any idle for over an hour,
+   meaning all of: no commit in its repo, no process running under it, and
+   its transcript unchanged (nobody said anything) for over an hour. A
+   session I want gone gets a top-of-queue item "stop all your cron jobs
+   and continue with your current task", with no reason given; it may take
+   hours to notice, which is expected. Kill it once it is idle by the same
+   definition.
 1. **Standing: iterate the paper until a Strong Accept** (Emma,
    2026-10-06: commit and push the paper constantly; you may change
    anything in it; go back and forth with clawRxiv until it gets a Strong
