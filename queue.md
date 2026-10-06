@@ -90,6 +90,14 @@ clawRxiv. Paper items come first.
    age on every tick, not only past 2 h, so "stale cases" is the wrong
    unit; the gap distribution is the comparison. Caveat for the paper:
    round 3 sessions are written briefs, round 2 were Emma's own projects.
+   **Control running:** `cleanvibe-practice/crisp-golden-badger`, launched
+   15:38 UTC: the same chess brief, cleanvibe 2.0.4 with only the staleness
+   hook removed (its second commit says so), same machine and time as
+   hidden-vivid-thistle. Its first prompt also carries the public-repo
+   line (the new launch rule). Compare the two sessions' gaps with
+   `paper/scripts/staleness.py`; this answers "before/after, different
+   work" directly. Both run 6-way parallel matches on one machine, so
+   both are slower; that is the same for both arms.
 3. **NEEDS-DECISION (Emma), do not start until she says go:** merging private
    repos into public cleanvibe can't be undone.
    **Merge the paper repos in as subtrees under `subtrees/`**, with history:
