@@ -63,7 +63,10 @@ clawRxiv. Paper items come first.
    only when the REPL is idle) ran during it: a long turn produces no
    ticks to measure. (b) The session died about 06:48 UTC. Emma's scheduled
    job relaunched its sessions at 06:49:57 and this one was not among them.
-   Resumed with `open_project` (resume prompt) at 07:10 UTC.
+   Resumed with `open_project` (resume prompt) at 07:10 UTC. It caught up
+   from the log and git without help, restarted its loop cron, and ended
+   its turn. Its ticks now fire, and from the 08:07 UTC tick INTENT.md is
+   over 2 h stale: the first round 3 cases.
 3. **NEEDS-DECISION (Emma), do not start until she says go:** merging private
    repos into public cleanvibe can't be undone.
    **Merge the paper repos in as subtrees under `subtrees/`**, with history:
