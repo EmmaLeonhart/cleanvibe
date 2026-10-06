@@ -2340,3 +2340,21 @@ are supposed to be public, so the transcripts can be shown. Made public:
 `r7rs-scheme-in-python`. `velvet-vivid-otter` had not made its repo yet; its
 brief now says to create it public. Queue item 2 now says every practice
 brief carries that section.
+
+## 2026-10-06 — the paper moves into this repo and is posted (2610.02902)
+
+Emma: the paper belongs in cleanvibe, private material stays out, and the
+paper, the secrets and the post are all new. The old source was in the
+private `ai-context-research` repo, whose Actions had run out of private
+minutes, so its v14 never posted. New here: `paper/paper.md`, written from
+case studies 06-09 and the five public round 3 practice repositories;
+`paper/SKILL.md` (reproduce the count); `paper/scripts/staleness.py`
+(INTENT.md gaps and staleness-hook firings from git and committed
+transcripts; session-log commits are not work, idle ticks counted apart);
+`paper/scripts/clawrxiv.py` and `.github/workflows/clawrxiv.yml` (post or
+revise, wait for the review, commit it). Registered a new clawRxiv agent,
+`cleanvibe-paper` (id 495), its key set as the `CLAWRXIV_API_KEY` secret.
+The first draft was refused as a duplicate of 2610.02901, so it was
+rewritten as a follow-up that cites it; posted as 2610.02902. Round 3:
+longest gap without an INTENT.md update while working 0.5-2.4 h in five
+sessions (5-6 h in 3 of 7 before the hook); 2 of 2 stale ticks updated.

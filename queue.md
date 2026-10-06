@@ -11,20 +11,25 @@ clawRxiv paper that reviews well counts as good enough for arXiv. The paper is
 about cleanvibe, lives at cleanvibe.emmaleonhart.com/paper, and CI posts it to
 clawRxiv. Paper items come first.
 
-1. **Standing: the clawRxiv review loop** (Emma, 2026-10-04: keep it
-   running; it is the research CI/CD). In `EmmaLeonhart/ai-context-research`,
-   a push changing `claw4s/note.md` or `SKILL.md` posts a revision and CI
-   commits clawRxiv's AI review to `claw4s/reviews/`. **Every tick:** pull
-   that repo; if a new review has landed, answer what text can answer in
-   `claw4s/note.md`, log the responses in `claw4s/review.md`, rebuild to
-   check it is still 4 pages, push. If the review is still pending, move on
-   to the next item. Never "done"; only Emma stops it. **If a review has not landed an hour after posting** (Emma, 2026-10-05): run the review locally (`scratch/clawrxiv_clone`: `python scripts/review.py <note> -o ../paper-score/<name>.review.json`, gemma3 via Ollama), act on what it says, then check clawRxiv again; if still nothing, repost with `gh workflow run clawrxiv.yml -R EmmaLeonhart/ai-context-research -f force_submit=true`. Latest: v13 reposted as post 2901 (post 2900 was never reviewed): Weak Reject, same cons as v12, all needing data; stands until round 3 practice sessions (item 2) give some. Avoid explicit 2026 dates (the reviewer reads them as future).
-   v14 (`aec436d`: first round 3 case, round 3 transcripts public) is
-   pushed but NOT posted: **BLOCKED-ON-USER-ACTION**. The repo is private
-   and GitHub refused the clawRxiv job for billing (private Actions minutes
-   used up, 2026-10-06), and there is no local `CLAWRXIV_API_KEY` to post
-   by hand. Unblocks when Emma raises the Actions spending limit, makes the
-   repo public, or gives a local key; then rerun the workflow.
+1. **Standing: iterate the paper until a Strong Accept** (Emma,
+   2026-10-06: commit and push the paper constantly; you may change
+   anything in it; go back and forth with clawRxiv until it gets a Strong
+   Accept). The paper lives in this repo: `paper/paper.md` +
+   `paper/SKILL.md`, public material only. Any push changing either runs
+   `.github/workflows/clawrxiv.yml`: it revises the post in
+   `paper/.post_id` as the clawRxiv agent `cleanvibe-paper` (key: repo
+   secret `CLAWRXIV_API_KEY`; copy in gitignored `scratch/.clawrxiv_key`),
+   waits up to 2 h for the review and commits it to `paper/reviews/`.
+   **Every tick:** pull; if a new review landed, revise the paper to answer
+   every con text can answer, plan practice projects (item 2) for every
+   con that needs data, log the round in `paper/review-log.md`, push. When
+   a practice session adds data, rerun `paper/scripts/staleness.py` on the
+   public repos and update the paper's table, then push. If no review
+   lands within the workflow's 2 h, rerun it (`gh workflow run
+   clawrxiv.yml`). Avoid explicit 2026 dates (the reviewer reads them as
+   future). Current: post 2902 (2610.02902), a follow-up citing 2610.02901;
+   review pending. The old private `ai-context-research` repo is no longer
+   used; nothing from it is copied here.
 2. **Experiment: practice projects and reports on them** (Emma,
    2026-10-05). Start cleanvibe 2.0.4 projects under `tests/scratch/` on
    small real tasks (`python -m cleanvibe.cli new <name>` from this repo,
