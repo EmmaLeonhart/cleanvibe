@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Forgotten duties: auditing how coding agents maintain their own context in a queue-driven autonomous loop">
+  <meta property="og:description" content="A case study of how Claude Code agents keep their own context files in cleanvibe's autonomous loop: duties whose cue arrives are kept; duties the agent must notice lapse.">
+  <meta property="og:url" content="https://cleanvibe.emmaleonhart.com/paper/">
+  <meta property="og:site_name" content="cleanvibe">
+  <meta name="description" content="A case study of how Claude Code agents keep their own context files in cleanvibe's autonomous loop.">
+  <title>Forgotten duties · cleanvibe</title>
+
+  <script>(function(){try{var t=localStorage.getItem('theme');if(t!=='light'&&t!=='dark')t='dark';document.documentElement.setAttribute('data-theme',t);}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();</script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/identity.css">
+
+  <style>
+    body { display: flex; justify-content: center; padding: 96px 16px 120px; overflow-x: hidden; }
+    .container { max-width: 760px; width: 100%; }
+    .site-nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+      display: flex; align-items: center; gap: 16px; padding: 13px 24px;
+      background: color-mix(in srgb, var(--bg) 72%, transparent);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .site-nav .brand { font-family: var(--mono); font-size: 0.82rem; font-weight: 600; color: var(--text-strong); text-decoration: none; }
+    .site-nav .brand:hover { color: var(--accent-bright); }
+    .site-nav .spacer { flex: 1; }
+    .site-nav .theme-toggle { position: static; }
+    h1 { font-family: var(--serif); font-weight: 400; font-size: clamp(2rem, 5vw, 2.8rem); line-height: 1.1; color: var(--text-strong); margin: 0 0 14px; }
+    .byline { color: var(--text-mute); font-size: 0.95rem; margin-bottom: 18px; }
+    .links { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 36px; }
+    article h2 { font-family: var(--serif); font-weight: 400; font-size: 1.6rem; color: var(--text-strong); margin: 40px 0 12px; }
+    article p, article li { line-height: 1.7; color: var(--text); }
+    article code { font-family: var(--mono); font-size: 0.86em; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 4px; padding: 0 4px; }
+    article a { color: var(--accent-bright); }
+    .tbl { overflow-x: auto; margin: 18px 0; }
+    table { border-collapse: collapse; width: 100%; font-size: 0.9rem; }
+    th, td { text-align: left; vertical-align: top; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+    th { color: var(--text-strong); font-weight: 600; border-bottom-color: var(--border-strong); }
+    .note { color: var(--text-mute); font-size: 0.88rem; border-top: 1px solid var(--border); margin-top: 48px; padding-top: 16px; }
+  </style>
+</head>
+<body>
+  <nav class="site-nav" aria-label="Primary">
+    <a class="brand" href="/">cleanvibe</a>
+    <div class="spacer"></div>
+    <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle light and dark theme" title="Toggle light / dark">
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="12" r="5"></circle></svg>
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.33,17.97C14.5,17.81 11.7,16.64 9.53,14.5C7.36,12.31 6.2,9.5 6.04,6.68C3.23,9.82 3.34,14.4 6.35,17.41C9.37,20.43 14,20.54 17.33,17.97Z"></path></svg>
+    </button>
+  </nav>
+
+  <main class="container">
+    <div class="eyebrow">Research note · Claw4S</div>
+    <h1>Forgotten duties: auditing how coding agents maintain their own context in a queue-driven autonomous loop</h1>
+    <div class="byline">Emma Leonhart and Claw · October 2026</div>
+    <div class="links">
+      <a class="btn" href="note.pdf">PDF</a>
+      <a class="btn" href="https://www.clawrxiv.io/abs/2610.02901">clawRxiv 2610.02901</a>
+    </div>
+    <article>
+<h2>Abstract</h2>
+<p>Long-running agentic work keeps the agent's context in files: rules, a statement of intent, a work queue, notes and logs. In a case study of one user's deployment, we audit, from preserved transcripts, how Claude Code agents keep these files up in cleanvibe, a scaffold for open-ended projects with a scheduled autonomous loop. Across 17 sessions on two scaffold generations (391 loop ticks), the duties agents kept were those whose cue arrives in their context (a launch prompt, a user message): 14 of 14 session-level cases. Duties the agent has to notice for itself, from its own state or its own actions, held in 20 of 35, and the intent file went hours stale while commits continued, before and after a fix that named it in every tick prompt. Cue source was coded blind from the instruction text. The one duty moved from "notice it yourself" to "the launch prompt says it" went from 0 of 8 sessions to 6 of 6, while a same-week control without the change stayed at 0; over all 27 sessions on that version (471 ticks) it ran in 15 of 16 first sessions. This is not "explicit prompts beat implicit ones": every duty was stated explicitly and stayed in context, and naming the intent file in every tick prompt did not keep it current, because the prompt arrived but the change that made an update due still had to be noticed. The sample comes from one user and the claim is a hypothesis with a stated prediction, not a general result about language models. The accompanying skill reruns the audit on any cleanvibe user's projects.</p>
+<h2>1. Motivation</h2>
+<p>An autonomous loop wakes the agent every half hour to "continue working on the queue"; each wake-up is a <em>tick</em>. Between ticks, what the agent knows about the project lives in files it is asked to maintain: <code>INTENT.md</code> (what the project is for), <code>queue.md</code> (the work), <code>README.md</code>, and a devlog. If those files drift, a later session starts from a wrong picture. We ask which of these upkeep duties agents actually carry out, and what makes the difference. The obvious answer, that agents follow what they are told explicitly and drop what is implicit, does not fit: every duty here is written out in <code>CLAUDE.md</code>, which the agent has in context throughout.</p>
+<h2>2. Design</h2>
+<p><strong>The scaffold.</strong> cleanvibe creates a git repository with a <code>CLAUDE.md</code> of standing rules, which stays in the agent's context; an <code>INTENT.md</code> the agent is told to keep current; skills for practices such as queue-driven work; and a hook that commits every session's full transcript. Two kinds of message reach the agent during a session: the launch prompt at the start, and one cron prompt every half hour ("commit and push, then continue working on the queue"). Everything else the agent should do is written in <code>CLAUDE.md</code> or a skill and waits there until the agent applies it.</p>
+<p><strong>What we measure.</strong> A script reads every cleanvibe project under a folder. Per session it records human messages, cron firings, commits, and how long <code>INTENT.md</code> had gone without a commit when the session's last commit was made. We call that interval <em>staleness</em>. We do not judge whether an update was due at a given moment, which would need a judgment about when the agent's understanding changed; staleness only says the file went uncommitted while the agent kept committing other work. Per tick it records which files the tick read or edited, whether it ran <code>date</code>, and whether it committed. A second script rebuilds the committed <code>queue.md</code> at each tick, so a tick that found the queue empty can be classed as having refilled it or not. Rules that cannot be counted, such as quoting the user before recording their view, are coded by a fresh agent that sees only the codebook and the raw transcripts, not our hypotheses or counts; a human spot-checks each violation it reports. Its agreement with our own coding of the first four sessions was κ = 0.69, which is moderate; only the rule outcomes in the Round 2 table rest on this coding.</p>
+<p><strong>Two rounds.</strong> Round 1 audited 9 sessions on cleanvibe 2.0.0–2.0.2 (312 ticks) and led to eight fixes, released as 2.0.3. Round 2 audited the first 8 sessions on 2.0.3 (79 ticks), with 2 sessions from the same week still on 2.0.2 as a control. We then extended round 2's counts, not its coding, to every 2.0.3 session a week later (27 sessions, 16 projects, 471 ticks).</p>
+<h2>3. Results</h2>
+<p><strong>Round 1.</strong> Of 141 applicable rule-by-session cases, 109 were followed. The failures were upkeep duties that no message named: the weekly update check (missed in 9 of 9 sessions), the intent file (hours behind in 6), the README, and refilling an empty queue (one loop idled for 100 ticks). Only 4 of 312 ticks read <code>INTENT.md</code>.</p>
+<p><strong>Round 2: the fixes.</strong></p>
+<div class='tbl'><table><thead><tr><th>Fix in 2.0.3</th><th>Outcome</th></tr></thead><tbody><tr><td>Tick prompt names the intent file, README and queue refill</td><td>Intent file touched in 5 of 79 ticks (before: 4 of 143), still 5–6 h stale in 3 sessions; README edits rose (6/79 vs 1/169); 0 of 55 empty-queue ticks refilled</td></tr><tr><td>Launch prompt names the update check</td><td>Ran in 6 of 6 first sessions (before: 0 of 8)</td></tr><tr><td>Rule: take times from the clock</td><td>Estimated times still written in 3 of 8 sessions</td></tr><tr><td>Rule: quote the user before recording their view</td><td>Followed in 7 of 8</td></tr><tr><td>Rule: keep downloads in one folder, off the harness's memory</td><td>Followed in 2 of 3 where it applied</td></tr><tr><td>Rule: record constraints the user states in chat</td><td>Followed in 8 of 8</td></tr><tr><td>Rule: write prose with the file tools; check an edit before logging it</td><td>Followed in 2 of 8 and 4 of 8</td></tr></tbody></table></div>
+<p><strong>Round 2, extended (counts only).</strong> On all 27 sessions on 2.0.3: the intent file was touched in 22 of 471 ticks (4.7%, against 6% in the first 8 sessions), and 15 of the 23 sessions that ever committed it ended more than two hours behind, 10 more than five; README edits came in 11 of 471 ticks; the update check ran in 15 of 16 first sessions (on 2.0.2: 0 of 5); and of 309 empty-queue ticks in projects still on disk, 1 refilled it. Every count matches the first 8 sessions, on six times the ticks.</p>
+<p>In the first 8 sessions every idle tick said why it did not refill (a guessed question, calls only the user could make, a pending decision): they saw the empty queue and declined, a different failure from not noticing.</p>
+<p><strong>A post-hoc hypothesis: where the cue comes from.</strong> We drew this account after seeing round 2, so here it describes the data and round 3 is its first prospective test (§4 states the prediction). What separates the duties that held from those that lapsed is where the cue that makes a duty due comes from. In some duties the cue <em>arrives</em>: the launch prompt says "run the update check", or the user states a constraint. In others the agent must <em>notice</em> it: its understanding of the project has changed, or it is about to write a time, some prose, or a "done" entry. The instruction is in context throughout in both cases. The coding rule is one question: is the event that makes the duty due a message entering the agent's context (arrives), or a change the agent would have to detect in its own state or its own next action (noticed)? Two fresh agents, working independently from the instruction text alone, with no transcripts and no outcomes, applied it to each duty and agreed on all of them. Because the coders saw only the rules, not the sessions, this coding does not involve a model judging another model's behavior.</p>
+<div class='tbl'><table><thead><tr><th>Cue</th><th>Duties</th><th>Held</th></tr></thead><tbody><tr><td>arrives</td><td>update check (launch prompt); recording the user's constraints</td><td>14 of 14 sessions</td></tr><tr><td>must be noticed</td><td>clock, quoting, downloads, prose tools, checking edits</td><td>20 of 35 sessions</td></tr><tr><td>must be noticed</td><td>updating the intent file</td><td>5–6 h stale in 3 of 7 sessions</td></tr></tbody></table></div>
+<p>Quoting the user is the exception: it must be noticed, yet held in 7 of 8. Both coders also called recording constraints borderline, since the agent has to recognise a remark made in passing as a constraint. And the tick prompt's "re-read INTENT.md" arrives every tick, yet ticks seldom read the file; the harness keeps a file in context once read, so a re-read may be unnecessary, and we count it neither way.</p>
+<p><strong>The update check changed cue, and adherence followed.</strong> It is the one duty whose cue moved between rounds. In 2.0.2 the agent had to notice that the weekly check was due, and 0 of 8 sessions ran it (we exclude our own project, which reads the updates page as data). In 2.0.3 the launch prompt names it, and 6 of 6 first sessions ran it. The main comparison is this before-and-after (0 of 8 against 6 of 6); the same-week control on 2.0.2, which did not run it, only rules out a change in the agent model that week, and with one session it cannot do more.</p>
+<h2>4. Discussion</h2>
+<p>The split matches a distinction from human prospective memory, the study of remembering to act later. In McDaniel and Einstein's multiprocess framework (Applied Cognitive Psychology 14, 2000), an intention whose cue is part of the task at hand is retrieved spontaneously, while one whose cue is not needs costly monitoring, and that monitoring is what suffers when the task is demanding. A launch prompt or a user message is the first kind of cue; a file quietly going stale is the second. Work on long-context recall in language models points the same way: recall drops when nothing in the current text matches the stored instruction (Modarressi et al., NoLiMa, <a href="https://arxiv.org/abs/2502.05167">arXiv:2502.05167</a>, 2025). We use the framework to predict which duties lapse, not as a claim about how models work inside.</p>
+<p>It also explains why naming the intent file in every tick prompt did not help, the result that separates this account from "make the instruction more explicit". The prompt arrives, and it is as explicit as an instruction can be, but "update it if your understanding has changed" still asks the agent to notice the change. More explicit wording moves the instruction; it does not move the cue. For people who build agent scaffolds, the practical rule is to deliver the trigger condition, not to restate the duty. The fix this suggests is to make the staleness itself arrive. <strong>Prediction for the next round:</strong> a tick prompt or session hook that states "INTENT.md last changed H hours and N commits ago" will raise intent edits, in ticks where it is over two hours stale, from 6% to most of them; and a hook that flags a shell command writing a Markdown file will cut shell-written prose (now 6 of 8 sessions). The first half is implemented: cleanvibe's <code>intent_staleness.py</code> hook now adds that line to the agent's context on every loop tick, so round 3 sessions carry the cue and the comparison with round 2's 6% is fixed in advance. We will report the result whichever way it goes.</p>
+<h2>5. Limitations</h2>
+<p>One user, one scaffold, one agent model; 17 sessions coded and 38 counted: enough to describe this deployment and to state a testable prediction, not to estimate how often agents in general keep such duties. The author built the scaffold and is its only user, which invites bias; for that reason the headline numbers come from logs and git, and the cue codes and rule outcomes come from fresh agents that never saw our hypotheses. The cue distinction was drawn after seeing round 2, so round 3 is its first real test. The update-check comparison has one control session, is not randomised, and the 2.0.3 sessions also carried the other fixes, although none of those touches whether the check runs. The coding agents share a model family with the agents they code; the headline numbers (ticks touching a file, staleness, whether the check ran) are counts from logs and git, and only the rule outcomes and the cue codes rest on a model's judgment. Tick reads are detected heuristically from shell commands, but the intent result comes from git history. No session reached context compaction, so the risk the literature stresses most is untested. The transcripts are personal and are not released, so the numbers here cannot be checked against them directly. The skill reruns the same scripts on a reader's own corpus, and the per-session and per-tick counts, with project names replaced by session codes and no conversation text, are prepared for release.</p>
+<h2>References</h2>
+<ul><li>McDaniel, M. A., and Einstein, G. O. (2000). Strategic and automatic processes in prospective memory retrieval: a multiprocess framework. <em>Applied Cognitive Psychology</em> 14(7), S127–S144.</li><li>Modarressi, A., Deilamsalehy, H., Dernoncourt, F., Bui, T., Rossi, R. A., Yoon, S., and Schütze, H. (2025). NoLiMa: Long-context evaluation beyond literal matching. arXiv preprint <a href="https://arxiv.org/abs/2502.05167">arXiv:2502.05167</a>.</li></ul>
+    </article>
+    <p class="note">Posted to clawRxiv as a series of revisions; this is the latest, 2610.02901. Its AI review rated it Weak Reject; every remaining objection concerns the size of the data, which the next round of sessions is meant to address.</p>
+  </main>
+
+  <script>
+    (function(){
+      var b=document.getElementById('theme-toggle');
+      if(b)b.addEventListener('click',function(){var c=document.documentElement.getAttribute('data-theme')==='light'?'light':'dark';var n=c==='light'?'dark':'light';document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('theme',n);}catch(e){}});
+    })();
+  </script>
+</body>
+</html>

@@ -2304,3 +2304,13 @@ session title, so the two always match. The first prompt and INTENT.md call it
 "a random generated passphrase" that says nothing about the purpose, so the
 agent doesn't read meaning into "otter". README, CLAUDE.md and the `new` help
 text updated; tests rewritten for the new naming; 270 tests OK. Not released.
+
+## 2026-10-06 — the paper is on the site at /paper
+
+Emma approved publishing `/paper` on 2026-10-04; the auto-mode classifier
+refused the write then and again on 2026-10-06, so the item waited as
+BLOCKED-ON-USER-ACTION. Emma switched out of auto mode and approved the
+push. `pages/paper/index.html` is the v13 note (`claw4s/note.md` in
+ai-context-research) rendered with `scratch/note_to_page.py`, pointing at
+the latest clawRxiv version (2610.02901, Weak Reject). Deployed by the
+existing `pages.yml`.

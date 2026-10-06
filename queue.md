@@ -52,19 +52,14 @@ clawRxiv. Paper items come first.
    conformance suite), launched 05:15 UTC, 2026-10-06. Decision (Claude,
    Emma not answering): a long staged brief rather than waiting for a
    human to feed requests, so round 3 gets hours of commits.
-3. **Publish the paper at cleanvibe.emmaleonhart.com/paper** (`pages/paper/`;
-   the site is public). The note is posted on clawRxiv. Emma approved
-   publishing (2026-10-04), but the auto-mode classifier refused the write
-   ("Out-of-Place Publication"). **BLOCKED-ON-USER-ACTION (Emma):** she
-   publishes the page herself or adds a permission rule that allows it.
-4. **NEEDS-DECISION (Emma), do not start until she says go:** merging private
+3. **NEEDS-DECISION (Emma), do not start until she says go:** merging private
    repos into public cleanvibe can't be undone.
    **Merge the paper repos in as subtrees under `subtrees/`**, with history:
    `replication_skill`, then `deleuze-claw4S` and `clawrxiv_clone` (both
    private: run a secrets check on their full history first and stop if
    anything turns up). Move `helping-with-arxiv/` to `subtrees/` and delete its
    boilerplate `queue.md`.
-5. **Quatrix arXiv submission:** BLOCKED-ON-USER-ACTION. The package is built;
+4. **Quatrix arXiv submission:** BLOCKED-ON-USER-ACTION. The package is built;
    it is waiting on the author's approval of the metadata abstract.
 
 **Not in this queue:** `Documents/GitHub/Should_be_submodules/` (INBE,
