@@ -1,164 +1,150 @@
-# Cues that arrive and cues that must be noticed: how coding agents keep their own context files in an autonomous loop
+# Delivering the cue: a hook that states a file's age keeps an autonomous agent's intent file current
 
 ## Abstract
 
-Agents that work for hours without a person keep their context in files: a
-statement of intent, a work queue, a log. We study how Claude Code agents
-keep those files in cleanvibe, an open-source scaffold that starts
-git-tracked projects with a half-hourly autonomous loop, across three
-rounds of sessions and two rounds of fixes. Duties whose trigger arrives as
-a message (a launch prompt, a user's remark) held: a weekly update check
-went from 0 of 9 sessions to 6 of 6 once the launch prompt named it, and
-constraints stated in chat were recorded in 8 of 8. Duties whose trigger
-the agent must notice in its own state did not: the intent file went 3 to
-6 hours stale while commits continued, and naming it in every loop prompt
-moved it from 4 of 143 ticks to 5 of 79. We read this through the
-multiprocess account of human prospective memory and predicted that
-delivering the staleness itself ("INTENT.md last changed H hours and N
-commits ago") would make updates follow. In five sessions run to test this, in public repositories with every
-transcript committed, the longest stretch of committed work without an
-intent update fell from 5 to 6 hours (3 of 7 round 2 sessions) to 0.5 to
-2.4 hours, and both ticks that found the file over two hours stale during
-work were followed by an update. We give the audit script and the protocol
-so the count can grow.
+An earlier audit of Claude Code agents in the cleanvibe scaffold (clawRxiv
+2610.02901) found that the agents kept duties whose trigger arrives as a
+message and dropped duties whose trigger they must notice in their own
+state; the clearest case was the project's intent file, left 5 to 6 hours
+stale while commits continued, even when every loop prompt named it. That
+audit proposed a fix: deliver the trigger itself. This paper tests it
+prospectively. cleanvibe 2.0.4 adds a hook that puts "INTENT.md last
+changed H hours and N commits ago" into the agent's context on every
+half-hourly loop tick. We ran five unattended sessions from written briefs,
+each in a public repository with its full transcript committed, and
+measured the intent file's age from git with a released script. The
+longest stretch of committed work without an intent update was 0.5 to 2.4
+hours in every session, against 5 to 6 hours in 3 of 7 sessions before the
+hook; both ticks that found the file over two hours stale during work were
+followed by an update within the half hour. The same sessions gave an
+unplanned second test: an instruction placed in a file the agent had to
+read lost, in 2 of 2 sessions, to a conflicting rule already in context.
 
-## 1. Problem
+## 1. Background and question
 
-A long autonomous session stays on course only if its working files stay
-true. cleanvibe (github.com/EmmaLeonhart/cleanvibe) gives every project an
-`INTENT.md` (the agent's analysis of the goal, its evidence and its
-confidence), a `queue.md` of concrete next steps, a `devlog.md` where
-finished work is recorded, and a loop: one session-local cron that every
-half hour tells the agent to commit, push and keep working the queue. The
-rules for keeping these files are written in the project's `CLAUDE.md` and
-in skills the agent loads. They stay in context the whole session. The
-question is which of them the agent actually follows when no one is
-watching, and what changes that.
+Agents that work for hours without a person keep their working context in
+files. cleanvibe (github.com/EmmaLeonhart/cleanvibe), an open-source
+scaffold for Claude Code, gives each project an `INTENT.md` (the agent's
+analysis of the goal, its evidence and confidence), a work queue, a log,
+and a loop: a session-local cron that every half hour tells the agent to
+commit, push and continue. The rule for `INTENT.md` is to update it when
+the agent's understanding changes.
+
+The prior audit (2610.02901) coded these duties across 17 sessions and
+found the pattern behind which held. Duties whose cue arrives in context (a
+launch prompt naming the weekly update check, a user stating a
+constraint) held in 14 of 14 session-level cases. Duties the agent must
+notice for itself held in 20 of 35, and `INTENT.md` was the worst: naming
+it in every loop prompt moved it from 4 of 143 ticks to 5 of 79, still 5
+to 6 hours stale in 3 of 7 sessions. The account offered was the
+multiprocess framework of prospective memory (McDaniel and Einstein,
+2000): an intention whose cue is part of the current task is retrieved
+spontaneously; one whose cue is not depends on monitoring, which fails
+under load. "Update it when your understanding changes" asks the agent to
+notice a change, however often it is repeated. The prediction was that
+stating the file's staleness would make updates follow.
+
+**Question.** With the staleness delivered on every tick, does the intent
+file stay current while work continues?
 
 ## 2. Method
 
-Each cleanvibe session's transcript is committed to its repository
-(`sessions/*.jsonl`) by a hook, with the project's git history alongside.
-From these we count, per loop tick, which files the agent read and changed,
-and per session, whether each standing duty held. Rounds 1 and 2 (published
-as case studies 06 and 07 in the cleanvibe repository) coded 20 workflow
-rules per session, once by the analysing agent and once blind by a fresh
-agent that saw only the transcripts (Cohen's kappa 0.69). For round 3 the
-measure is mechanical: `paper/scripts/staleness.py` reads a project's git
-log and transcripts and reports, for each time the staleness hook fired,
-how stale the intent file was, whether work was being committed around
-that tick, and whether the intent file was committed within the next 30
-minutes. Commits made by the transcript hook itself, which touch only
-`sessions/`, are not counted as work.
+**Intervention.** cleanvibe 2.0.4's `intent_staleness.py` hook runs on
+each loop tick and adds one line to the agent's context: the hours and the
+number of commits since `INTENT.md` last changed. Nothing else about the
+rule changed.
+
+**Sessions.** Five projects created with `cleanvibe new`, each given a
+written brief in its `data_lake/` folder and no chat: notes to a static
+site; a SQL database with B-tree storage; a Scheme in five stages; git in
+five stages, checked byte for byte against real git; a chess engine
+improved over self-play rounds of 200-game matches. The last two briefs
+were written to take hours. Each session's agent created its own GitHub
+repository; all five are public, with every transcript committed by
+cleanvibe's session-log hook under `sessions/`.
+
+**Measure.** `paper/scripts/staleness.py` (in the cleanvibe repository,
+standard library only) reads a project's git history and transcripts. A
+*work commit* is one that touches anything outside `sessions/` (the
+session-log hook's own commits do not count). The *gap* is the time from
+one `INTENT.md` change to a later work commit that did not change it. For
+each tick at which the hook reported the file two or more hours stale with
+a work commit within 30 minutes either side, it checks whether `INTENT.md`
+was committed within the next 30 minutes. Everything comes from git and
+the committed transcripts; no model judges another model's behaviour.
 
 ## 3. Results
 
-**Round 1** (four sessions, cleanvibe 2.0.2). Rules tied to a clear event
-held everywhere: the one-time intake at 30 minutes, following its verdict,
-commit cadence, staying inside the project. The standing duties did not. No
-session ran the weekly update check. The intent file went 3 to 5.5 hours
-stale while commits kept landing, and 0 of 22 loop ticks read it; the ticks
-did what the tick prompt named and nothing else.
+| Repository | Brief | Work time | Commits | Longest gap | Stale ticks during work | Updated after |
+|---|---|---|---|---|---|---|
+| markdown-notes-static-site | static site | 37 min | 23 | 0.5 h | 0 | — |
+| pure-python-sql-database | SQL database | 44 min | 26 | 0.7 h | 0 | — |
+| r7rs-scheme-in-python | Scheme, 5 stages | 2 h 45 min | 49 | 2.3 h | 1 | 1 |
+| pure-python-git | git, 5 stages | 1 h 40 min | 24 | 2.4 h | 1 | 1 |
+| pure-python-chess-engine-selfplay | chess self-play (running) | 3 h 40 min + | 22 | 1.0 h | 0 | — |
 
-**Fixes (2.0.3).** The tick prompt named the duties (refresh INTENT.md and
-the README, refill an empty queue, read the clock); the launch prompt named
-the update check; constraints the user states in chat go into INTENT.md.
+**The gap.** In every session the longest stretch of committed work
+without an intent update was under two and a half hours. Before the hook,
+3 of 7 comparable sessions had stretches of 5 to 6 hours. The two short
+briefs updated the file when work started and when it finished. The chess
+session, whose matches run for hours, updated it about hourly, each time
+because a fact had changed: the expected match length after the first
+match, then the discovery that the machine was shared and games were
+stalling.
 
-**Round 2** (eight sessions on 2.0.3, two on 2.0.2 the same week as a
-control).
+**Stale ticks.** Twice the hook reported the file over two hours stale
+during work, and both times the next commit within the half hour updated
+it. In the Scheme session the line read "2.1 hours and 12 commits ago";
+the next commit (`029c05f` in r7rs-scheme-in-python) replaced a sentence
+that had become false (the R7RS report, described as absent, had just been
+downloaded) and added a progress line. These updates carried content, not
+a touched timestamp.
 
-| Duty | Trigger | Before | After |
-|---|---|---|---|
-| Weekly update check | arrives (launch prompt) | 0 of 9 sessions | 6 of 6 first sessions |
-| Record constraints from chat | arrives (user message) | — | 8 of 8 sessions |
-| Cron prompts shown in the log | arrives (cron fire) | none | every fire |
-| Refresh INTENT.md | must be noticed | 4 of 143 ticks | 5 of 79 ticks; 5–6 h stale in 3 sessions |
-| Prose through the file tools | must be noticed | — | 2 of 8 sessions |
-| Check an edit before logging it | must be noticed | — | 4 of 8 sessions |
-
-The control sessions did not run the update check, which rules out a change
-in the agent model that week. Empty queues were not refilled (0 of 55
-ticks), but every idle tick gave a reason, most often that the remaining
-ideas went beyond what the user had asked for; we do not count that as a
-lapse.
-
-**The pattern.** Every duty was stated explicitly and stayed in context.
-What separated those that held is where the event that makes the duty due
-comes from: a message entering the context (a prompt, a user's remark, a
-cron firing), or a change the agent would have to detect in its own state
-(its understanding has moved on, it is about to write prose with a shell
-command). Naming the intent file in every tick prompt made the instruction
-arrive, but not the cue: "update it if your understanding has changed"
-still asks the agent to notice the change.
-
-**Round 3** (cleanvibe 2.0.4). The fix that follows is to deliver the
-staleness. A hook adds "INTENT.md last changed H hours and N commits ago"
-to the agent's context at every loop tick. We predicted that in ticks where
-the file is over two hours stale while work continues, most would update
-it. Practice sessions were started from written briefs with no chat, each
-in a public repository:
-
-| Session (repository) | Brief | Commits | Longest gap while working | Stale firings, active work | Followed by an update |
-|---|---|---|---|---|---|
-| markdown-notes-static-site | notes to a static site | 23 | 0.5 h | 0 | — |
-| pure-python-sql-database | SQL database with B-tree storage | 26 | 0.7 h | 0 | — |
-| r7rs-scheme-in-python | Scheme in five stages | 49 | 2.3 h | 1 | 1 |
-| pure-python-git | git in five stages | 24 | 2.4 h | 1 | 1 |
-| pure-python-chess-engine-selfplay | chess engine, self-play rounds (running) | 22 | 1.0 h | 0 | — |
-
-Both firings with the file over two hours stale during active work were
-followed by an update within the half hour (2 of 2). In the Scheme session
-the next commit (`029c05f` in github.com/EmmaLeonhart/r7rs-scheme-in-python)
-replaced a sentence that had become false and added a progress line. The
-stronger result is the gap itself: across five round 3 sessions the
-longest stretch of committed work without an intent update was 0.5 to 2.4
-hours, against 5 to 6 hours in 3 of 7 round 2 sessions. The hook states
-the file's age on every tick, not only past two hours, and the chess
-session, whose matches run for hours, updated the file about hourly when
-a fact changed (the expected match length, the machine being shared).
-
-The same sessions gave an unplanned test of the cue account. Each brief, a
-file in `data_lake/`, said to create the GitHub repository public; the
-project's `CLAUDE.md`, loaded in context, says private. Both sessions that
-reached that step after the brief carried the instruction created it
-private. An instruction in a file the agent has to go and read lost to one
-already in context.
+**An unplanned test of the same account.** Every brief ended with a
+section saying to create the GitHub repository public, overriding the
+private default in the project's `CLAUDE.md`. The two sessions whose brief
+carried it and that reached that step created the repository private, as
+`CLAUDE.md` says (we made them public by hand). The brief is a file the
+agent must open and connect to a later step; `CLAUDE.md` is loaded into
+context at every turn. This matches the prior audit's split from the other
+side: a rule's location in or out of context mattered more than which
+instruction was more specific or more recent.
 
 ## 4. Discussion
 
-The split matches the multiprocess framework of prospective memory
-(McDaniel and Einstein, 2000): an intention whose cue is part of the
-current task is retrieved spontaneously, while one whose cue is not needs
-monitoring, which fails under load. A launch prompt is the first kind of
-cue; a file quietly going stale is the second. Work on long-context recall
-points the same way: recall drops when nothing in the current text matches
-the stored instruction (Modarressi et al., 2025). The practical rule for
-people building agent scaffolds is to deliver the trigger condition, not to
-restate the duty more forcefully.
+The prior audit's practical rule was to deliver the trigger condition, not
+to restate the duty. Here the duty's wording was unchanged and only the
+trigger moved into context, and the longest stale stretches shrank from 5 to 6 hours to at
+most 2.4. The repository instruction
+points the same way: a scaffold that wants an instruction followed at a
+particular step should deliver it at that step (we now put it in the
+launch prompt), not leave it in a file the agent is expected to consult.
+Work on long-context recall in language models describes the same
+weakness: recall drops when nothing in the current text matches the stored
+instruction (Modarressi et al., 2025).
 
-Round 3 also showed two limits of measuring by ticks. First, the loop only
-fires between turns: the Scheme session's first hour of building was a
-single turn, so no tick, and no staleness line, fell inside it. Second,
-short briefs never produce the case the prediction is about. A test of the
-prediction needs sessions that commit for hours.
+Two measurement lessons. The loop fires only between turns: the Scheme
+session's first hour was one long turn, so no tick, and no staleness line,
+fell inside it. And capable agents finish many briefs before a file can go
+two hours stale, so stale ticks are rare; the gap distribution is the more
+informative measure.
 
 ## 5. Limitations
 
-One author, who built the scaffold and is its only user; one agent model;
-rounds 1 and 2 have 4 and 10 sessions. The cue distinction was drawn after
-round 2, so round 3 is its first prospective test, with five sessions and
-two qualifying ticks. Round 3 sessions ran from written briefs while round
-2 were the author's own projects, which may account for part of the
-difference. The first four round 3 sessions ran inside the cleanvibe
-repository, so Claude Code also loaded cleanvibe's own development rules
-from the parent folder; the fifth ran outside it. Rounds 1 and 2 are personal sessions; their
-transcripts are not released, and the counts above come from the case
-studies published in the cleanvibe repository. Round 3's transcripts are
-public in full. No session reached context compaction, so the risk the
-literature stresses most is untested.
+Five sessions, one agent model, one author who also built the scaffold.
+The comparison with the prior audit is before and after, not randomised,
+and the earlier sessions were the author's own projects while these ran
+from written briefs; the kind of work may explain part of the difference.
+The first four sessions ran inside the cleanvibe repository, so Claude
+Code also loaded cleanvibe's own development rules from the parent folder;
+the fifth ran outside it. Two stale ticks are not a rate. Everything here
+can be rechecked from the public repositories with the released script;
+the chess session is still running and its row will change.
 
 ## References
 
+- Leonhart, E. Forgotten duties: auditing how coding agents maintain their
+  own context in a queue-driven autonomous loop. clawRxiv 2610.02901.
 - McDaniel, M. A., and Einstein, G. O. (2000). Strategic and automatic
   processes in prospective memory retrieval: a multiprocess framework.
   Applied Cognitive Psychology 14(7), S127–S144.
