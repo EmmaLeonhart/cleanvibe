@@ -26,7 +26,7 @@ import sys
 import time
 from pathlib import Path
 
-from . import __version__
+from . import __version__, templates
 from .arxiv import is_arxiv_ref
 from .clawrxiv import is_clawrxiv_ref
 from .replicate import (
@@ -91,14 +91,14 @@ def _do_default(args) -> None:
         open_project(here, dry_run=args.dry_run, no_claude=args.no_claude)
         return
     new_project(auto_project_path(here), auto_named=True,
-                dry_run=args.dry_run, no_claude=args.no_claude)
+                dry_run=args.dry_run, no_claude=args.no_claude, **_create_opts(args))
 
 
 def _do_new(args) -> None:
     """`cleanvibe new [NAME]`."""
     if args.name is None:
         new_project(auto_project_path(), auto_named=True,
-                    dry_run=args.dry_run, no_claude=args.no_claude)
+                    dry_run=args.dry_run, no_claude=args.no_claude, **_create_opts(args))
         return
     path = args.name
     if path.exists() and not path.is_dir():
@@ -115,7 +115,13 @@ def _do_new(args) -> None:
             file=sys.stderr,
         )
         sys.exit(2)
-    new_project(path, auto_named=False, dry_run=args.dry_run, no_claude=args.no_claude)
+    new_project(path, auto_named=False, dry_run=args.dry_run, no_claude=args.no_claude,
+                **_create_opts(args))
+
+
+def _create_opts(args) -> dict:
+    return {"visibility": getattr(args, "visibility", None),
+            "prompt": getattr(args, "prompt", None)}
 
 
 def _do_replicate(args) -> None:
@@ -353,6 +359,20 @@ _LEGACY_HANDLERS = {
 }
 
 
+def _add_create_flags(parser) -> None:
+    """Options for creating a cleanvibe 2 project (bare `cleanvibe` and `new`)."""
+    parser.add_argument(
+        "--visibility", choices=templates.VISIBILITIES, default=None,
+        help="Where the project's repo goes: public or private on GitHub, or local "
+        "(no remote). Default: on GitHub, private unless something says public.",
+    )
+    parser.add_argument(
+        "--prompt", default=None, metavar="TEXT",
+        help="A starting prompt, appended to the first session's opening message "
+        "as your own words.",
+    )
+
+
 def _add_run_flags(parser, verb: str = "created") -> None:
     parser.add_argument(
         "--dry-run", action="store_true",
@@ -459,6 +479,7 @@ def build_parser() -> argparse.ArgumentParser:
         "--version", action="version", version=f"cleanvibe {__version__}"
     )
     _add_run_flags(parser)
+    _add_create_flags(parser)
 
     subparsers = parser.add_subparsers(dest="command", metavar="COMMAND")
 
@@ -470,6 +491,7 @@ def build_parser() -> argparse.ArgumentParser:
         help="Directory to create. Omit it to get a generated passphrase name (e.g. golden-swift-otter).",
     )
     _add_run_flags(new_parser)
+    _add_create_flags(new_parser)
 
     replicate_parser = subparsers.add_parser(
         "replicate",

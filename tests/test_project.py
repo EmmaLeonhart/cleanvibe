@@ -97,11 +97,13 @@ class TestNewProject(unittest.TestCase):
                        "ask one short question before acting",
                        "Stay inside this project", "mean stop now",
                        "queue-driven-workflow", "research-practice", "autonomous-loop",
-                       "scratch/", "gh repo create <descriptive-name> --private --source=. --push",
+                       "scratch/", "## Publishing", "With no signal, or signals both ways, it is private.",
                        "sessions/",
                        "Not-done taxonomy"):
             self.assertIn(needle, claude)
-        self.assertNotIn("--public", claude)
+        # The default rule names both commands; public only on a signal.
+        self.assertIn("--public --source=. --push", claude)
+        self.assertIn("(`--private`)", claude)
 
     def test_gitignore_keeps_scratch_out(self):
         self.assertIn("\nscratch/\n", (_new() / ".gitignore").read_text(encoding="utf-8"))
@@ -198,11 +200,13 @@ class TestV2Prompts(unittest.TestCase):
         # The path carries real information and stays in. What an early session
         # got wrong was turning "this is a practice run" into invented work.
         self.assertIn("at /home/e/oolong", named)
-        self.assertIn("I chose the folder name", named)
+        self.assertIn("I gave it a custom name", named)
+        self.assertIn("auto-generated placeholder passphrase", auto)
         self.assertIn("a guess about why the project exists is not a task", named)
         for prompt in (named, auto):
             self.assertIn("starts in chat mode", prompt)
-            self.assertIn("private GitHub repo with a descriptive name", prompt)
+            self.assertIn("GitHub repo with a descriptive name, public or private as CLAUDE.md describes", prompt)
+            self.assertIn("does not need my consent to continue", prompt)
         for prompt in (named, auto):
             self.assertIn("low information", prompt)
             self.assertIn("CronCreate", prompt)

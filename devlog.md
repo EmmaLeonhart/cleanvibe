@@ -2358,3 +2358,27 @@ The first draft was refused as a duplicate of 2610.02901, so it was
 rewritten as a follow-up that cites it; posted as 2610.02902. Round 3:
 longest gap without an INTENT.md update while working 0.5-2.4 h in five
 sessions (5-6 h in 3 of 7 before the hook); 2 of 2 stale ticks updated.
+
+## 2026-10-06 — creation options: --visibility, --prompt; name record; keep going
+
+Emma's spec, from the practice sessions' private repos and a stalled session:
+- `--visibility public|private|local` on bare `cleanvibe` and `new`. The
+  generated CLAUDE.md's new *Publishing* rule: always push to a GitHub remote
+  unless told local; any signal for public makes it public, any for private
+  makes it private, private breaks ties. It used to insist on private, which
+  beat a brief that asked for public in 2 of 2 practice sessions.
+- `--prompt TEXT`: a starting prompt appended to the end of the first prompt as
+  the user's own words, and kept verbatim in `.cleanvibe.json`
+  (`starting_prompt`). `templates.cmd_safe` replaces the characters cmd.exe
+  would mangle.
+- CLAUDE.md's new "This project's setup" section says whether the name is
+  custom or an auto-generated placeholder passphrase, the visibility, and
+  whether a starting prompt was given; the first prompt says the name kind.
+- "Keep going without asking" in CLAUDE.md and both prompts: planned work needs
+  no consent to continue, and a decision waiting on an absent user gets made,
+  recorded, and acted on (the treated chess session had held a match restart
+  "until you say").
+`tests/test_v2_options.py` (9 tests); the private-default test now checks the
+new rule; 281 tests OK; doctor clean. First use: `Documents/GitHub/agentic-behavior`
+(private, with Emma's starting prompt on how agents describe issues). Not
+released.

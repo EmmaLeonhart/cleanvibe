@@ -67,8 +67,15 @@ def new_project(
     auto_named: bool = False,
     dry_run: bool = False,
     no_claude: bool = False,
+    visibility: str | None = None,
+    prompt: str | None = None,
 ) -> None:
-    """Create a cleanvibe 2 project at ``path`` and open its first session."""
+    """Create a cleanvibe 2 project at ``path`` and open its first session.
+
+    ``visibility`` (public/private/local) is the user's explicit choice for the
+    GitHub repo; None leaves it to CLAUDE.md's default rule. ``prompt`` is a
+    starting prompt from the user, appended to the first-session prompt and
+    kept verbatim in the marker."""
     path = Path(path)
     project_name = path.name
     is_windows = platform.system() == "Windows"
@@ -98,10 +105,12 @@ def new_project(
     path.mkdir(parents=True, exist_ok=True)
     print(f"Creating cleanvibe project: {path}")
 
-    _write(path / "CLAUDE.md", templates.v2_claude_md(project_name))
+    _write(path / "CLAUDE.md", templates.v2_claude_md(
+        project_name, auto_named, visibility, has_prompt=bool(prompt)))
     _write(path / "README.md", templates.v2_readme_md(project_name))
     _write(path / "INTENT.md", templates.v2_intent_md(project_name, auto_named))
-    _write(path / MARKER, templates.v2_marker_json(project_name, auto_named, session_name))
+    _write(path / MARKER, templates.v2_marker_json(
+        project_name, auto_named, session_name, visibility, prompt))
     _write(path / ".gitignore", templates.V2_GITIGNORE)
     _write_gitkeep(path / "sessions")
     _write_gitkeep(path / "data_lake")
@@ -139,7 +148,7 @@ def new_project(
         if mark_trusted(path):
             print("  Marked the new folder as trusted in Claude Code's config")
         _launch_claude(
-            path, templates.v2_first_prompt(path.resolve(), auto_named),
+            path, templates.v2_first_prompt(path.resolve(), auto_named, visibility, prompt),
             remote_control=True, name=session_name or path.resolve().name,
         )
 

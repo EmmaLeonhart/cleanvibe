@@ -3179,13 +3179,64 @@ def _prompt_safe(text: str) -> bool:
     return not _PROMPT_UNSAFE.intersection(text)
 
 
+# What each cmd.exe-unsafe character becomes in a user's --prompt, so the text
+# can travel inside the launch command. The verbatim text is kept in
+# .cleanvibe.json (starting_prompt).
+_CMD_SAFE_MAP = {'"': "'", "%": " percent", "^": "", "&": " and ", "|": "/",
+                 "<": "(", ">": ")", "!": ".", "\n": " ", "\r": " "}
+
+
+def cmd_safe(text: str) -> str:
+    """``text`` with every cmd-unsafe character replaced, spaces collapsed."""
+    out = "".join(_CMD_SAFE_MAP.get(ch, ch) for ch in text)
+    return " ".join(out.split())
+
+
+VISIBILITIES = ("public", "private", "local")
+
+
+def _name_clue(auto_named: bool) -> str:
+    if auto_named:
+        return ("I created it without giving a name, so the folder name is an "
+                "auto-generated placeholder passphrase and says nothing about the "
+                "purpose.")
+    return ("I gave it a custom name; occasionally the name plainly states the "
+            "task, usually it is at most a hint.")
+
+
+def _repo_clause(visibility) -> str:
+    """How the first prompt describes the GitHub repo for ``visibility``."""
+    if visibility == "local":
+        return "no GitHub repo (I chose to keep this project local)"
+    if visibility == "public":
+        return "a public GitHub repo with a descriptive name (I chose public)"
+    if visibility == "private":
+        return "a private GitHub repo with a descriptive name (I chose private)"
+    return ("a GitHub repo with a descriptive name, public or private as "
+            "CLAUDE.md describes")
+
+
+def _extra_prompt(text) -> str:
+    if not text:
+        return ""
+    return (f" The program that started this conversation was also given this "
+            f"starting prompt, from me: {cmd_safe(text)}")
+
+
+_KEEP_GOING = (
+    "Work that is already planned or under way does not need my consent to "
+    "continue: if a decision is waiting on me and I have not answered, make it "
+    "yourself, write down why, and carry on."
+)
+
+
 def _prompt_path(path) -> str:
     """The project path for a starting prompt, or "" if cmd.exe would mangle it."""
     text = str(path) if path else ""
     return f" at {text}" if text and _prompt_safe(text) else ""
 
 
-def v2_first_prompt(path, auto_named: bool) -> str:
+def v2_first_prompt(path, auto_named: bool, visibility=None, extra=None) -> str:
     """Starting prompt for the very first session in a new cleanvibe 2 project.
 
     This is the one message cleanvibe can put directly in front of the agent,
@@ -3194,17 +3245,12 @@ def v2_first_prompt(path, auto_named: bool) -> str:
     the first practice session was not the path but turning a guess about *why*
     the project exists (a cleanvibe test run) into invented work (testing
     cleanvibe); the prompt and CLAUDE.md now say so.
+
+    ``visibility`` is the user's `--visibility` choice (None: the CLAUDE.md
+    rule decides). ``extra`` is the user's `--prompt`, appended last so it
+    reads as coming from the user; cmd-unsafe characters are replaced.
     """
-    if auto_named:
-        clue = (
-            "I created it without giving a name, so the folder name is a random "
-            "generated passphrase and says nothing about the purpose."
-        )
-    else:
-        clue = (
-            "I chose the folder name; occasionally it plainly states the task, "
-            "usually it is at most a hint."
-        )
+    clue = _name_clue(auto_named)
     prompt = (
         f"This is the first ever session in a new project I started with "
         f"cleanvibe{_prompt_path(path)}. cleanvibe projects are built to work from "
@@ -3218,11 +3264,12 @@ def v2_first_prompt(path, auto_named: bool) -> str:
         f"and conversational, and do not edit files, commit, plan or offer me "
         f"options until I tell you to start working or I have been quiet for an "
         f"hour. Then work mode starts as CLAUDE.md describes, including INTENT.md, "
-        f"a private GitHub repo with a descriptive name, and the "
+        f"{_repo_clause(visibility)}, and the "
         f"cleanvibe-update-check skill if its weekly check is due. For now, look "
         f"at what is in this folder and greet me in a line or two. Only use "
         f"AskUserQuestion if I am clearly here and replying. If I say nothing, "
-        f"the intake decides what happens next from what is in the folder."
+        f"the intake decides what happens next from what is in the folder. "
+        f"{_KEEP_GOING}{_extra_prompt(extra)}"
     )
     if not _prompt_safe(prompt):
         raise ValueError("v2 first-session prompt has cmd-unsafe characters")
@@ -3241,7 +3288,7 @@ def v2_resume_prompt(path) -> str:
         f"from now. If the weekly cleanvibe update check in CLAUDE.md is due, run "
         f"the cleanvibe-update-check skill. "
         f"Then tell me briefly where things stand. If I reply, follow my lead; if "
-        f"I say nothing, carry on with the work already planned."
+        f"I say nothing, carry on with the work already planned. {_KEEP_GOING}"
     )
     if not _prompt_safe(prompt):
         raise ValueError("v2 resume prompt has cmd-unsafe characters")
@@ -3292,7 +3339,8 @@ def v2_runclaude_bat(path, auto_named: bool = False, session_name: str | None = 
     )
 
 
-def v2_marker_json(project_name: str, auto_named: bool, session_name: str | None = None) -> str:
+def v2_marker_json(project_name: str, auto_named: bool, session_name: str | None = None,
+                   visibility=None, starting_prompt=None) -> str:
     marker = {
         "cleanvibe": __version__,
         "name": project_name,
@@ -3301,6 +3349,10 @@ def v2_marker_json(project_name: str, auto_named: bool, session_name: str | None
     }
     if session_name:
         marker["session_name"] = session_name
+    if visibility:
+        marker["visibility"] = visibility
+    if starting_prompt:
+        marker["starting_prompt"] = starting_prompt
     return json.dumps(marker, indent=2) + "\n"
 
 
@@ -3313,11 +3365,63 @@ scratch/
 """
 
 
-def v2_claude_md(project_name: str) -> str:
+def _setup_section(auto_named: bool, visibility, has_prompt: bool) -> str:
+    """CLAUDE.md's record of how this project was created."""
+    if auto_named:
+        name = ("- **Name:** auto-generated. No name was given, so the folder name "
+                "is a placeholder passphrase (adjective-adjective-noun) and says "
+                "nothing about the project.")
+    else:
+        name = ("- **Name:** custom. The user chose the folder name, so it may say "
+                "something about the project.")
+    if visibility:
+        repo = (f"- **Repository:** `{visibility}`, set by the user when creating the "
+                f"project (`--visibility {visibility}`). This overrides the default "
+                f"rule in *Publishing*.")
+    else:
+        repo = ("- **Repository:** not specified at creation; the default rule in "
+                "*Publishing* decides.")
+    if has_prompt:
+        prompt = ("- **Starting prompt:** the user gave one when creating the project. "
+                  "It is in the first session's opening message and verbatim in "
+                  "`.cleanvibe.json` (`starting_prompt`). Treat it as the user's own "
+                  "words.")
+    else:
+        prompt = "- **Starting prompt:** none was given."
+    return "\n".join(["## This project's setup", name, repo, prompt])
+
+
+def _publishing_section(visibility) -> str:
+    """CLAUDE.md's rule for where the repo goes."""
+    if visibility == "local":
+        how = ("The user chose to keep this project **local**: do not create a "
+               "remote. Commit locally as usual.")
+    elif visibility in ("public", "private"):
+        how = (f"The user chose **{visibility}**: `gh repo create <descriptive-name> "
+               f"--{visibility} --source=. --push`.")
+    else:
+        how = ("Push to a GitHub remote unless the user says to keep the project "
+               "local. Visibility follows any signal: anything suggesting it should "
+               "be public (the user says so, the material says so, it is meant to "
+               "be shown or shared) makes it public "
+               "(`gh repo create <descriptive-name> --public --source=. --push`); "
+               "anything suggesting it should be private makes it private "
+               "(`--private`). With no signal, or signals both ways, it is private.")
+    return "## Publishing\n" + how + (
+        " If the user's wishes change later, change the repository to match "
+        "(`gh repo edit --visibility ...`).")
+
+
+def v2_claude_md(project_name: str, auto_named: bool = False, visibility=None,
+                 has_prompt: bool = False) -> str:
     date = datetime.now().strftime("%Y-%m-%d")
     return f"""# {project_name}
 
 > A cleanvibe project: an open-ended, git-tracked working session.
+
+{_setup_section(auto_named, visibility, has_prompt)}
+
+{_publishing_section(visibility)}
 
 ## How this project works
 Nothing was decided up front about what this project is. cleanvibe projects are
@@ -3391,10 +3495,15 @@ the folder and dropped material into it, expecting you to get on with it.
   again, with a clear name and a line saying what it is for. Delete what is no
   longer used.
 - **Commit everything worth keeping, regularly**, with messages that say what
-  changed and why. When work mode starts, the repo goes to GitHub as a
-  **private** repository under a descriptive name (see the next section), and
-  from then on every commit is pushed. Never make it public unless the user
-  asks.
+  changed and why. When work mode starts, the repo goes to GitHub under a
+  descriptive name as *Publishing* says, and from then on every commit is
+  pushed.
+- **Keep going without asking.** Work that is already planned or under way
+  does not need the user's consent to continue, even when it is slow or has to
+  be redone (a test run to restart, a long job to rerun). If a decision is
+  waiting on the user and they have not answered by the next tick, make it
+  yourself, write down why in `INTENT.md`, and carry on. Stop only when the
+  user says to.
 - **Edit files with the file tools, and check before you log.** Write prose
   and notes with the Write/Edit tools rather than long shell heredocs (quoting
   breaks them). Chain dependent shell steps with `&&` so a failed step stops
@@ -3429,9 +3538,9 @@ When work mode starts, do this once, in order, and commit as you go:
    subject by default; add what the material and the name say.
 2. Write `INTENT.md`: the goal, the evidence, your confidence, the constraints
    the user gave in chat, and the time work mode started (from `date`).
-3. Create the GitHub repository: **private**, under a descriptive kebab-case
-   name that says what the project is about, not the folder name (which may be
-   generated): `gh repo create <descriptive-name> --private --source=. --push`.
+3. Create the GitHub repository as *Publishing* says, under a descriptive
+   kebab-case name that says what the project is about, not the folder name
+   (which may be generated).
    If `gh` is missing or not logged in, record that in `INTENT.md` as
    BLOCKED-ON-USER-ACTION and carry on locally.
 4. Fill in `README.md`, and run the `cleanvibe-update-check` skill if its
@@ -3547,9 +3656,9 @@ continue from the Claude app or web. Earlier sessions are in `sessions/`.
 def v2_intent_md(project_name: str, auto_named: bool) -> str:
     if auto_named:
         clue = (
-            f"The project was created without a name (`{project_name}` is a "
-            f"random generated passphrase), so the directory says nothing about "
-            f"its purpose."
+            f"The project was created without a name (`{project_name}` is an "
+            f"auto-generated placeholder passphrase), so the directory says "
+            f"nothing about its purpose."
         )
     else:
         clue = f"The only clue so far is the directory name, `{project_name}`."

@@ -39,7 +39,26 @@ cleanvibe                  # in a cleanvibe project: open a new session there
                            # anywhere else: create e.g. golden-swift-otter/ here and open it
 cleanvibe new              # create an unnamed project and open it
 cleanvibe new ai-history   # create ai-history/ and open it
+cleanvibe new notes --visibility public --prompt "Turn my notes into a site"
 ```
+
+Two creation options (on `cleanvibe new` and bare `cleanvibe`):
+
+- `--visibility public|private|local` decides where the repo goes. Without it,
+  the project goes to GitHub when work starts, public if anything says it
+  should be (you, the material, its purpose), private if anything says private,
+  and private when nothing does or the signals conflict. `local` means no
+  remote.
+- `--prompt TEXT` is a starting prompt. It is appended to the end of the first
+  session's opening message as your own words (characters cmd.exe can't carry,
+  such as `"` and `&`, are swapped for plain ones) and kept verbatim in
+  `.cleanvibe.json`.
+
+CLAUDE.md records how the project was made: whether the name is custom or an
+auto-generated placeholder, the visibility, and whether a starting prompt was
+given. It also tells the agent that work already planned doesn't need your
+consent to continue: a decision left waiting on you gets made, written down,
+and acted on.
 
 An unnamed project gets a random passphrase name such as `golden-swift-otter`
 (drawn again if the folder exists). The project's name, chosen or generated, is
@@ -47,8 +66,8 @@ also the session's name in the Claude app and `/resume` (`--name`, and the
 Remote Control session name). Claude is told that a generated name says
 nothing about the project's purpose.
 
-A new project gets a git repo on `main` (local and private, with no remote
-unless you ask for one) and a Claude Code session in a new window. The session
+A new project gets a git repo on `main` and a Claude Code session in a new
+window. The session
 starts with a first message that tells the agent how cleanvibe works: this is the
 first session, the information may be thin, and the user may be away. When the
 name was generated, the message says so, so the agent doesn't read meaning into
