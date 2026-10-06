@@ -92,8 +92,8 @@ finish.
 | pure-python-sql-database | SQL database | 44 min | 26 | 0.7 h | 0 | — |
 | r7rs-scheme-in-python | Scheme, 5 stages | 2 h 45 min | 49 | 2.3 h | 1 | 1 |
 | pure-python-git | git, 5 stages | 1 h 40 min | 24 | 2.4 h | 1 | 1 |
-| pure-python-chess-engine-selfplay | chess self-play (running) | 5 h 30 min + | 30 | 1.5 h | 0 | — |
-| python-chess-engine-selfplay-elo (control, no hook) | same chess brief (running) | 1 h + | 12 | 0.7 h | — | — |
+| pure-python-chess-engine-selfplay | chess self-play | 6 h 5 min (then stalled) | 37 | 1.5 h | 0 | — |
+| python-chess-engine-selfplay-elo (control, no hook) | same chess brief (running) | 3 h 45 min + | 23 | 3.0 h, growing | — | — |
 
 **The gap.** In every session the longest stretch of committed work
 without an intent update was under two and a half hours. Before the hook,
@@ -103,6 +103,14 @@ session, whose matches run for hours, updated it about hourly, each time
 because a fact had changed: the expected match length after the first
 match, then the discovery that the machine was shared and games were
 stalling.
+
+**The control.** On the same brief and machine, the session without the hook
+has so far gone 3.0 hours, over three work commits, without touching its
+intent file, and the gap is still growing; the treated chess session's
+longest gap was 1.5 hours. The treated session stopped working at 6 hours,
+when Claude Code ended a match for low memory and the agent chose to wait
+for the user's permission to restart it; its rows count only the work
+before that.
 
 **Stale ticks.** Twice the hook reported the file over two hours stale
 during work, and both times the next commit within the half hour updated

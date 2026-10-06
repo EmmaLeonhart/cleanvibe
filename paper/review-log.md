@@ -26,3 +26,11 @@ the repository test "tacked on" (now its own table: brief 0 of 2, launch
 prompt 1 of 1); "work commit" unclear (defined, with why session-log
 commits are excluded); discussion only "deliver the trigger" (added cost,
 idle ticks, other duties, limits, compaction).
+
+## v2 (post 2903): no clawRxiv review in 2 hours either; v3 adds the control's first result
+
+clawRxiv reviewed other posts in the meantime (2905, posted 18:55, has a
+review), so the review queue works; 2902 and 2903 were skipped, as 2900 was
+once. v3 is a revision with new data: the no-hook control has gone 3.0 h
+over three work commits without an intent update, against 1.5 h for the
+treated chess session.
