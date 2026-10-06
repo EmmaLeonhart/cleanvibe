@@ -76,6 +76,8 @@ def review(wait_s=7200, every_s=60):
     while True:
         try:
             r = _request("GET", f"/posts/{post}/review")
+            if isinstance(r, dict) and "review" in r:  # the API nests it: {"review": {...}}
+                r = r["review"]
         except urllib.error.HTTPError as e:
             r = None if e.code == 404 else sys.exit(f"review fetch failed: HTTP {e.code}")
         if r and r.get("rating"):
