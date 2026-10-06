@@ -52,6 +52,12 @@ clawRxiv. Paper items come first.
    conformance suite), launched 05:15 UTC, 2026-10-06. Decision (Claude,
    Emma not answering): a long staged brief rather than waiting for a
    human to feed requests, so round 3 gets hours of commits.
+   By 06:50 UTC: intake on time, INTENT.md set at 05:45 UTC and not touched
+   since, stages 1-3 done (interpreter, call/cc + syntax-rules, libraries +
+   ports + CLI), stage 4 (bytecode VM) in progress, 15 commits, still
+   committing every few minutes. Round 3 cases start once INTENT.md passes
+   2 h stale with commits continuing; write up case study 09 when stage 5
+   ends or the session idles.
 3. **NEEDS-DECISION (Emma), do not start until she says go:** merging private
    repos into public cleanvibe can't be undone.
    **Merge the paper repos in as subtrees under `subtrees/`**, with history:
