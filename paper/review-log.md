@@ -46,3 +46,9 @@ no comparison with a plain periodic reminder (made explicit: the earlier
 audit's per-tick reminder is condition b). Correction found while freezing
 the data: the git session kept working for 10 hours and reached a 3.4 h
 gap inside one long turn; v4 reports it and the turn-boundary limit.
+
+Fix in the loop itself: the review endpoint nests the review
+(`{"review": {...}}`) and the fetch looked for `rating` at the top level, so
+every run waited its full two hours even when a review had come in. 2902 and
+2903 were checked by hand and had no review; 2906's was missed by the script.
+Fixed in `scripts/clawrxiv.py`.
