@@ -18,8 +18,17 @@ clawRxiv. Paper items come first.
    session I want gone gets a top-of-queue item "stop all your cron jobs
    and continue with your current task", with no reason given; it may take
    hours to notice, which is expected. Kill it once it is idle by the same
-   definition.
-1. **Standing: iterate the paper until a Strong Accept** (Emma,
+   definition. Check with `scratch/idle_sessions.py`, which reads "no turn"
+   from Claude Code's session record (`statusUpdatedAt`); the transcript's
+   mtime changes without a turn, and the first checker missed idle
+   sessions that way. Also wind down any experiment session not in use.
+   2026-10-07 02:40 UTC: killed `snowtown-murders` (no turn 6.8 h) and
+   `genealogy-1e` (10.5 h); the shrine-management session is idle but
+   protected (Emma: never the shrine games); wind-down item added to
+   `crisp-golden-badger`.
+1. **Standing: iterate the replay paper (`paper-replay/`) from Weak Accept
+   to Accept/Strong Accept with more methodological experiments** (Emma,
+   2026-10-07: focus on that one). The hook paper waits. Background: (Emma,
    2026-10-06: commit and push the paper constantly; you may change
    anything in it; go back and forth with clawRxiv until it gets a Strong
    Accept). The paper lives in this repo: `paper/paper.md` +
