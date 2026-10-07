@@ -138,8 +138,7 @@ def main():
         if not rec["finished"] and "session limit" in rec["result"]:
             print("usage limit reached; stopping", flush=True)
             with open(args.out, "a", encoding="utf-8") as f:
-                f.write(json.dumps(rec) + "
-")
+                f.write(json.dumps(rec) + "\n")
             break
         with open(args.out, "a", encoding="utf-8") as f:
             f.write(json.dumps(rec) + "\n")
