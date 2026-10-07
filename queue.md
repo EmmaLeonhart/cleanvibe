@@ -180,6 +180,13 @@ clawRxiv. Paper items come first.
    **Next data for v6:** live sessions run to the lapse, with and without
    the hook, several pairs; and a probe of what a replay lacks (e.g.
    resume the live session itself interactively at a stale tick).
+3. **cleanvibe change: a session ends its crons when its work is finished**
+   (Emma, 2026-10-07, relayed by the pc-manager session: cleanvibe crons
+   go on forever and many sessions looping at once use up her tokens). In
+   the `autonomous-loop` skill and CLAUDE.md: when the queue is empty and
+   nothing in `todo.md` is actionable, or the user's work is done, delete
+   the loop cron (`CronDelete`) and say so, instead of idling on ticks.
+   Includes tests and the doctor check; release with the 2.0.5 changes.
 3. **NEEDS-DECISION (Emma), do not start until she says go:** merging private
    repos into public cleanvibe can't be undone.
    **Merge the paper repos in as subtrees under `subtrees/`**, with history:

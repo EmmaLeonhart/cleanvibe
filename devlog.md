@@ -2382,3 +2382,16 @@ Emma's spec, from the practice sessions' private repos and a stalled session:
 new rule; 281 tests OK; doctor clean. First use: `Documents/GitHub/agentic-behavior`
 (private, with Emma's starting prompt on how agents describe issues). Not
 released.
+
+## 2026-10-07 — this session's cron stopped; experiment sessions winding down
+
+Emma's instruction, relayed by the pc-manager session into the top of
+`queue.md` and repeated by her in chat: delete every cron in this session
+and carry on with the current task. Done at 06:40 UTC (`CronDelete`
+0e727e17). The sessions this repo started and is not studying
+(`hidden-vivid-thistle`, `crisp-golden-badger`, `agentic-behavior`) all
+carry the same stop-crons item at the top of their queues. Idle check
+(Claude Code's session status, not the transcript's mtime): closed
+`Sodacan-arms-svg-generator` (no turn, commit or process for 1.7 h);
+earlier `snowtown-murders` and `genealogy-1e`. Queued the cleanvibe change
+she asked for: a session ends its crons when its work is finished.
