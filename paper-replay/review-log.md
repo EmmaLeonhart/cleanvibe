@@ -7,4 +7,14 @@ are the two controlled experiments in `paper/experiment/`
 
 ## v1 (post 2910)
 
-Posted as a new submission. Review pending.
+Posted as a new submission. **Weak Accept.** Cons and the plan for v2:
+- narrow (one session, one failure point): replay every one of the eight
+  ticks where the live session declined, not only 20:48;
+- the clawRxiv citation reads as non-standard: cite the earlier audit
+  through the public case studies (cleanvibe `docs/case-studies/` 06-07)
+  instead;
+- the candidate causes are untested: test headless against interactive
+  resumption directly, and drop "its own previous decision in view", which
+  the design already rules out (the 20:48 replay carried the seven earlier
+  declines and still updated);
+- one scaffold and model: state it as the scope.

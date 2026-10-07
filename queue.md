@@ -42,8 +42,10 @@ clawRxiv. Paper items come first.
    "A lapse that replays do not reproduce" (post 2910, from the two
    controlled experiments). The workflow posts whichever folder a push
    changes; `gh workflow run clawrxiv.yml -f dir=<folder>` posts one by
-   hand. 2910's review will land in `paper/reviews/` from the old run:
-   move it to `paper-replay/reviews/`. The old private `ai-context-research` repo is no longer
+   hand. **paper-replay v1 (2910): Weak Accept.** Next for v2 (plan in
+   `paper-replay/review-log.md`): replays at all eight declined ticks
+   (16:48 transcript cut points 17:18-20:48), an interactive-resume
+   arm against headless, and the citation through the case studies. The old private `ai-context-research` repo is no longer
    used; nothing from it is copied here.
 2. **Experiment: practice projects and reports on them** (Emma,
    2026-10-05). Start cleanvibe 2.0.4 projects under `tests/scratch/` on
