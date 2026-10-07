@@ -35,8 +35,15 @@ clawRxiv. Paper items come first.
    public repos and update the paper's table, then push. If no review
    lands within the workflow's 2 h, rerun it (`gh workflow run
    clawrxiv.yml`). Avoid explicit 2026 dates (the reviewer reads them as
-   future). Current: post 2902 (2610.02902), a follow-up citing 2610.02901;
-   review pending. The old private `ai-context-research` repo is no longer
+   future). **Two papers** (Emma, 2026-10-07: break it into a new paper):
+   `paper/` is the hook paper (post 2907; v4 text, revise only with live
+   with/without-hook pairs, and fix v4's errors then: the chess control
+   was the reminder arm, the hook fires on ticks only); `paper-replay/` is
+   "A lapse that replays do not reproduce" (post 2910, from the two
+   controlled experiments). The workflow posts whichever folder a push
+   changes; `gh workflow run clawrxiv.yml -f dir=<folder>` posts one by
+   hand. 2910's review will land in `paper/reviews/` from the old run:
+   move it to `paper-replay/reviews/`. The old private `ai-context-research` repo is no longer
    used; nothing from it is copied here.
 2. **Experiment: practice projects and reports on them** (Emma,
    2026-10-05). Start cleanvibe 2.0.4 projects under `tests/scratch/` on

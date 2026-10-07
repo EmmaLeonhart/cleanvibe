@@ -1,16 +1,22 @@
-name: "clawRxiv: post the paper and fetch its review"
+name: "clawRxiv: post the papers and fetch their reviews"
 
-# The paper's review loop: every push that changes paper/paper.md or
-# paper/SKILL.md posts it to clawRxiv (a new post the first time, a revision
-# of paper/.post_id after that), waits for clawRxiv's AI review, and commits
-# it under paper/reviews/ so the next revision can answer it.
+# The papers' review loop. Each paper is a folder (paper/, paper-replay/)
+# holding paper.md, SKILL.md, .post_id and reviews/. A push that changes a
+# paper's paper.md or SKILL.md posts that paper to clawRxiv (a revision of its
+# .post_id, or a new post), waits for clawRxiv's AI review, and commits it to
+# its reviews/ so the next revision can answer it.
 on:
   push:
     branches: [main]
     paths:
-      - "paper/paper.md"
-      - "paper/SKILL.md"
+      - "paper*/paper.md"
+      - "paper*/SKILL.md"
   workflow_dispatch:
+    inputs:
+      dir:
+        description: "Paper folder to post (e.g. paper or paper-replay)"
+        required: true
+        default: "paper-replay"
 
 permissions:
   contents: write
@@ -22,33 +28,40 @@ concurrency:
 jobs:
   post-and-review:
     runs-on: ubuntu-latest
-    timeout-minutes: 150
+    timeout-minutes: 300
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: "3.13"
 
-      - name: Post to clawRxiv
+      - name: Which papers changed
+        id: dirs
+        run: |
+          if [ -n "${{ github.event.inputs.dir }}" ]; then
+            dirs="${{ github.event.inputs.dir }}"
+          else
+            dirs=$(git diff --name-only ${{ github.event.before }} ${{ github.sha }} \
+              | grep -E '^paper[^/]*/(paper|SKILL)\.md$' | cut -d/ -f1 | sort -u | tr '\n' ' ')
+          fi
+          echo "dirs=$dirs" >> "$GITHUB_OUTPUT"
+          echo "papers: $dirs"
+
+      - name: Post each changed paper and wait for its review
         env:
           CLAWRXIV_API_KEY: ${{ secrets.CLAWRXIV_API_KEY }}
-        run: python paper/scripts/clawrxiv.py submit
-
-      - name: Record the post id
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add paper/.post_id
-          git commit -m "paper: clawRxiv post $(cat paper/.post_id)" || true
-          git pull --rebase origin main && git push
-
-      - name: Wait for the review
-        env:
-          CLAWRXIV_API_KEY: ${{ secrets.CLAWRXIV_API_KEY }}
-        run: python paper/scripts/clawrxiv.py review
-
-      - name: Commit the review
-        run: |
-          git add paper/reviews/
-          git commit -m "paper: clawRxiv review of post $(cat paper/.post_id)" || true
-          git pull --rebase origin main && git push
+          for d in ${{ steps.dirs.outputs.dirs }}; do
+            python paper/scripts/clawrxiv.py submit "$d"
+            git add "$d/.post_id"
+            git commit -m "$d: clawRxiv post $(cat $d/.post_id)" || true
+            git pull --rebase origin main && git push
+            python paper/scripts/clawrxiv.py review "$d" || echo "no review for $d"
+            git add "$d/reviews/" 2>/dev/null || true
+            git commit -m "$d: clawRxiv review of post $(cat $d/.post_id)" || true
+            git pull --rebase origin main && git push
+          done

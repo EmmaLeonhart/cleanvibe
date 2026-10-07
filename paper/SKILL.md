@@ -1,48 +1,41 @@
 ---
-name: cleanvibe-staleness-cue-experiments
-description: Reproduce the paper's two controlled experiments on whether stating INTENT.md's age makes a Claude Code agent update it, and the field staleness audit, from the public cleanvibe repository.
-allowed-tools: Bash(git *), Bash(python *), Bash(claude *)
+name: cleanvibe-intent-staleness-audit
+description: Reproduce the round 3 count — how often a stale INTENT.md is updated after cleanvibe's staleness hook reports it — on public practice sessions or your own cleanvibe projects.
+allowed-tools: Bash(git *), Bash(python *), Bash(gh *)
 ---
 
-# Reproduce the staleness-cue experiments
+# Reproduce the INTENT.md staleness audit
 
-Needs git, Python 3.9+, and Claude Code (`claude`) logged in. Each trial is
-one headless session (about a minute and $0.50 in experiment 1, $1.50 in
-experiment 2).
+Needs git and Python 3.9+ (standard library only).
 
-1. Get cleanvibe:
+1. Get the audit script and the round 3 practice sessions (public; each
+   repository holds its full transcripts under `sessions/`):
 
    ```
    git clone https://github.com/EmmaLeonhart/cleanvibe
-   cd cleanvibe
+   git clone https://github.com/EmmaLeonhart/markdown-notes-static-site
+   git clone https://github.com/EmmaLeonhart/pure-python-sql-database
+   git clone https://github.com/EmmaLeonhart/r7rs-scheme-in-python
+   git clone https://github.com/EmmaLeonhart/pure-python-git
+   git clone https://github.com/EmmaLeonhart/pure-python-chess-engine-selfplay
    ```
 
-2. **Experiment 1 (stale fixture).** Builds fixtures next to the clone and
-   runs one loop tick per trial in the conditions none / reminder / age:
+2. Run the audit on them:
 
    ```
-   python paper/experiment/run.py --trials 20 --out my_results.jsonl
+   python cleanvibe/paper/scripts/staleness.py markdown-notes-static-site pure-python-sql-database r7rs-scheme-in-python pure-python-git pure-python-chess-engine-selfplay
    ```
 
-   Each line records `updated` (INTENT.md changed), `corrected` (the
-   false sentence is fixed), `worked` (the queued task was done) and
-   `finished` (the run was not cut off). The paper's counts are in
-   `paper/experiment/results.jsonl`.
+   Each line is one project. `active_stale_firings` counts the times the hook
+   reported INTENT.md two or more hours stale while work was being committed;
+   `active_stale_firings_updated` counts how many of those were followed by an
+   INTENT.md commit within 30 minutes. The paper's prediction is that the
+   second is most of the first.
 
-3. **Experiment 2 (replay)** needs the original session's transcript, which
-   lives only on the author's machine; its per-trial results are in
-   `paper/experiment/fork_results.jsonl`, and `paper/experiment/fork.py`
-   shows exactly how each replay was built. To run the same test on your
-   own lapse: point `SOURCE`, `SESSION`, `CUT_LINE` and `COMMIT` in
-   `fork.py` at a session and tick of yours, then
-   `python paper/experiment/fork.py --trials 10`.
+3. To add a session of your own: install cleanvibe from the clone
+   (`pip install ./cleanvibe`), create a project with `cleanvibe new`, put a
+   brief large enough for several hours of work in its `data_lake/brief.md`,
+   say nothing in the chat, and let the loop run. Then run step 2 on that
+   project's folder.
 
-4. **Field audit.** For any cleanvibe project (the paper's are public, e.g.
-   github.com/EmmaLeonhart/python-chess-engine-selfplay-elo):
-
-   ```
-   python paper/scripts/staleness.py PROJECT_DIR
-   ```
-
-   prints the longest stretch of work without an INTENT.md update and how
-   the staleness hook's reports were followed.
+The numbers in the paper's round 3 table are the output of step 2.

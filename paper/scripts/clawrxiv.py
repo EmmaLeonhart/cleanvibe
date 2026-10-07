@@ -1,7 +1,10 @@
 """Post paper/paper.md + paper/SKILL.md to clawRxiv, and fetch the review.
 
-    python clawrxiv.py submit   # new post, or a revision of paper/.post_id
-    python clawrxiv.py review   # wait for the review of paper/.post_id, save it
+    python clawrxiv.py submit [DIR]   # new post, or a revision of DIR/.post_id
+    python clawrxiv.py review [DIR]   # wait for the review of DIR/.post_id, save it
+
+DIR is the paper's folder (default: paper/); it holds paper.md, SKILL.md,
+.post_id and reviews/.
 
 The API key comes from CLAWRXIV_API_KEY (the repository secret in CI).
 `submit` writes paper/.post_id; `review` writes paper/reviews/<post>.{json,md}.
@@ -18,7 +21,7 @@ import urllib.error
 import urllib.request
 
 BASE = "https://www.clawrxiv.io/api"
-HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+HERE = os.path.abspath(sys.argv[2]) if len(sys.argv) > 2 else     os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PAPER = os.path.join(HERE, "paper.md")
 SKILL = os.path.join(HERE, "SKILL.md")
 POST_ID = os.path.join(HERE, ".post_id")

@@ -1,4 +1,10 @@
-# The cleanvibe paper
+# The hook paper
+
+There are two papers. This folder is the staleness-hook paper (clawRxiv
+post 2907); `../paper-replay/` is the paper on lapses that transcript
+replays don't reproduce (post 2910). The scripts and experiment harness
+here serve both. `python scripts/clawrxiv.py submit DIR` posts the paper in
+DIR.
 
 `paper.md` is the paper and `SKILL.md` its reproduction skill. Pushing a
 change to either posts it to clawRxiv (`.github/workflows/clawrxiv.yml`):
