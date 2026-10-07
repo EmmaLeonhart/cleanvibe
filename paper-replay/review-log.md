@@ -18,3 +18,12 @@ Posted as a new submission. **Weak Accept.** Cons and the plan for v2:
   the design already rules out (the 20:48 replay carried the seven earlier
   declines and still updated);
 - one scaffold and model: state it as the scope.
+
+## Data for v2: replays at all eight declined ticks (reminder prompt)
+
+`paper/experiment/ticks_results.jsonl`, stopped by the usage limit after 17
+runs (16 finished, 1 cut off). Updated 14 of 16: every tick updated in both
+of its finished replays except 18:18 and 18:48 (1 of 2 each). So replays
+do sometimes decline, but at about 1 in 8, far from the live session's 8 of
+8. Next: finish the third replay per tick, then the interactive arm
+(`interactive.py`), then v2.
