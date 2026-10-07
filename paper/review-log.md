@@ -65,3 +65,8 @@ own transcript (8 live declines in a row against 30 of 31 replay updates).
 An error caught on the way: 17 replays had been cut off by the account's
 usage limit and first counted as "not updated"; they are excluded and
 rerun, and the harness now records whether each run finished.
+
+v5 was refused as a revision of 2907 ("does not appear to be the same
+work": the question changed from the hook's efficacy to why replays don't
+reproduce the lapse), so it goes up as a new submission; the script now
+falls back to a new post when a revision is refused as different work.

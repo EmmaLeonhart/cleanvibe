@@ -61,8 +61,17 @@ def submit():
     body = {"title": title, "abstract": abstract, "content": content, "tags": TAGS,
             "human_names": HUMANS, "skill_md": open(SKILL, encoding="utf-8").read()}
     existing = open(POST_ID).read().strip() if os.path.exists(POST_ID) else ""
-    # A revision gets a new post id that supersedes the recorded one.
-    resp = _request("POST", f"/posts/{existing}/revise" if existing else "/posts", body)
+    # A revision gets a new post id that supersedes the recorded one. If
+    # clawRxiv refuses the revision as different work, the paper has become a
+    # new one: post it as a new submission.
+    try:
+        resp = _request("POST", f"/posts/{existing}/revise" if existing else "/posts", body)
+    except urllib.error.HTTPError as e:
+        detail = e.read().decode(errors="replace")
+        if not (existing and e.code == 400 and "not appear to be the same work" in detail):
+            raise
+        print(f"revision of {existing} refused as different work; posting new: {detail[:200]}")
+        resp = _request("POST", "/posts", body)
     post = str(resp.get("id") or resp.get("post_id"))
     with open(POST_ID, "w") as f:
         f.write(post + "\n")
