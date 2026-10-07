@@ -52,3 +52,16 @@ Fix in the loop itself: the review endpoint nests the review
 every run waited its full two hours even when a review had come in. 2902 and
 2903 were checked by hand and had no review; 2906's was missed by the script.
 Fixed in `scripts/clawrxiv.py`.
+
+## v4 (post 2907): Reject; v5 is built on two controlled experiments
+
+v4's cons: n too small, conditions not concurrent, a doubted baseline, the
+long-turn limit, an arbitrary metric. v5 runs the comparison under control:
+experiment 1 (60 one-tick sessions on a stale fixture) and experiment 2 (31
+completed replays of the field session at a tick where it declined). Both
+are at ceiling in every condition, so the cue shows no effect, and the
+paper now reports that: the field lapse is not reproduced by replaying its
+own transcript (8 live declines in a row against 30 of 31 replay updates).
+An error caught on the way: 17 replays had been cut off by the account's
+usage limit and first counted as "not updated"; they are excluded and
+rerun, and the harness now records whether each run finished.
