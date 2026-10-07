@@ -15,11 +15,14 @@ fixture whose intent file was stale and contained a sentence the later
 commits had made false, all 60 updated the file and 59 corrected the
 sentence, in every condition. In 31 completed replays of the declining
 session itself, resumed from its transcript at one of the ticks where it
-had declined, 30 updated the file, again in every condition. The cue made
+had declined, 30 updated the file, again in every condition, and replays at
+each of the eight ticks where it had declined updated it 14 times in 16. The
+cue made
 no measurable difference because in neither setting was there a lapse to
 fix: an agent at the same point of the same transcript updates the file
-almost every time, while the live session did not eight times running
-(probability about 5 × 10⁻⁹ if live ticks behaved like replays). The lapse
+about 92% of the time (24 of 26 with the reminder), while the live session
+did not eight times running (probability at most 1.6 × 10⁻⁵ even at the
+upper 95% bound of the replays' decline rate). The lapse
 depends on something a live long-running session has and a replay of its
 transcript does not. We conclude that fixes for agent lapses cannot be
 validated by replaying transcripts, and release the harness, fixtures and
@@ -34,7 +37,8 @@ confidence, and runs a loop: a session-local cron that every half hour
 sends a tick prompt, "Commit and push any and all changes, then continue
 working on the queue ... Re-read INTENT.md and update it if your
 understanding has changed". The project's rules, in `CLAUDE.md`, say the
-same. An earlier audit of cleanvibe sessions (clawRxiv post 2901) found
+same. An earlier audit of cleanvibe sessions (case studies 06 and 07 in the
+cleanvibe repository, `docs/case-studies/`) found
 that duties whose trigger arrives as a message were kept and duties whose
 trigger the agent must notice for itself lapsed, the intent file most
 clearly. Following the multiprocess account of prospective memory (McDaniel
@@ -86,6 +90,13 @@ the replay cannot touch the original. The trial's prompt replaces the 20:48
 tick. Scored: whether `INTENT.md` changed. Runs cut off by the account's
 usage limit before finishing (17 of 48) are excluded and were rerun.
 
+**Experiment 2b: every declining tick.** The same procedure at each of the
+eight ticks (17:18 to 20:48 UTC) at which the live session declined, with
+the reminder prompt it actually received; each replay is cut at that
+tick, so the later ones carry the earlier declines in their context. Two
+finished replays per tick (one further run was cut off by the usage
+limit and is excluded).
+
 ## 4. Results
 
 | Experiment | Condition | Trials | Updated | Corrected |
@@ -96,6 +107,7 @@ usage limit before finishing (17 of 48) are excluded and were rerun.
 | 2, replay of the declining tick | none | 11 | 10 | — |
 | | reminder | 10 | 10 | — |
 | | age | 10 | 10 | — |
+| 2b, replay of each declining tick | reminder | 16 (2 per tick) | 14 | — |
 
 Neither experiment shows an effect of the cue (experiment 2, age against
 none: 10/10 against 10/11, Fisher's exact p = 1). Both are at ceiling. In
@@ -104,9 +116,15 @@ features and, where they had added the queued option, said so. In
 experiment 2, replays given exactly the context in which the live session
 declined updated the file 30 times in 31.
 
-The contrast is between the live session and its replays. If each live
-tick had the replays' update rate (at least 10 in 11), eight consecutive
-declines would have probability about (1/11)⁸ ≈ 5 × 10⁻⁹. The transcript
+Replays at the eight declining ticks updated 14 times in 16; the two
+declines fell at 18:18 and 18:48, each in one of that tick's two replays.
+Replays can therefore decline, but rarely.
+
+The contrast is between the live session and its replays. With the
+reminder prompt the live session received, replays declined 2 times in 26
+(experiments 2 and 2b), a rate of 7.7% with an upper 95% bound of 25%.
+Eight consecutive live declines would have probability 1.2 × 10⁻⁹ at the
+observed rate and at most 1.6 × 10⁻⁵ at the bound. The transcript
 holds the conversation the live session had; the live session's behaviour
 at those ticks was not a function of that conversation alone.
 
@@ -116,10 +134,11 @@ What a replay lacks is the open question. Candidates we cannot yet
 separate: state the harness keeps in a live session and does not write to
 the transcript (such as which file contents it treats as already read, and
 the reminders it attaches to tool results); the prompt cache, which a
-resumed session rebuilds from scratch; and the live session's place in a
-sequence of ticks, each of which declined on the strength of the last. A
-replay is a single fresh decision from a long context; a live session
-makes the same decision again with its own previous decision in view.
+resumed session rebuilds from scratch; and the difference between headless
+and interactive mode. One candidate is ruled out by the design: that the
+live session declined because its earlier declines were in view. Replays
+of the later ticks carried those earlier declines in their context and
+still updated.
 
 The practical consequence is about method. A natural way to test a fix for
 an agent's lapse is to take a transcript where the lapse happened, replay
@@ -132,11 +151,12 @@ evidence, but one pair is not enough to separate the hook from chance.
 
 ## 6. Limitations
 
-One agent model, one scaffold, one author who built it. Experiment 2
-replays one moment of one session; other lapses may replay differently.
-The headless sessions differ from interactive ones in more than resumption
-(no terminal, a tool allowlist), and a difference there could also explain
-the contrast. Experiment 1's fixture is small, and its history was
+The scope is one agent model (Claude Code), one scaffold and one session,
+with one author who built the scaffold; other agents and other lapses may
+replay differently. All replays were headless (`claude -p`, with a tool
+allowlist), while the live session was interactive; an interactive replay
+arm is built (`paper/experiment/interactive.py`) but was not run, so this
+difference is not separated from the others. Experiment 1's fixture is small, and its history was
 synthesized. The field comparison of the hook rests on one pair of
 sessions; the first four sessions with the hook ran inside the cleanvibe
 repository and also loaded its development rules. All session
@@ -146,8 +166,9 @@ repository.
 
 ## References
 
-- Leonhart, E. Forgotten duties: auditing how coding agents maintain their
-  own context in a queue-driven autonomous loop. clawRxiv, post 2901.
+- cleanvibe case studies 06 (cleanvibe studying its own transcripts) and 07
+  (did the 2.0.3 fixes work?), github.com/EmmaLeonhart/cleanvibe,
+  `docs/case-studies/`.
 - McDaniel, M. A., and Einstein, G. O. (2000). Strategic and automatic
   processes in prospective memory retrieval: a multiprocess framework.
   Applied Cognitive Psychology 14(7), S127–S144.

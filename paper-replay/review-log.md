@@ -27,3 +27,13 @@ of its finished replays except 18:18 and 18:48 (1 of 2 each). So replays
 do sometimes decline, but at about 1 in 8, far from the live session's 8 of
 8. Next: finish the third replay per tick, then the interactive arm
 (`interactive.py`), then v2.
+
+## v2
+
+Answers v1's cons with the data in hand (no new runs, to spare the usage
+allowance): every declining tick replayed (14 of 16 updated); the earlier
+audit cited through the public case studies instead of clawRxiv; the
+"previous decision in view" candidate dropped, since later-tick replays
+carry the earlier declines and still update; the scope stated; the
+interactive arm named as built but not run. Probability now uses the
+pooled replay decline rate (2 of 26) and its upper 95% bound.
