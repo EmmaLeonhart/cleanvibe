@@ -155,10 +155,13 @@ clawRxiv. Paper items come first.
    age 4/10, BUT the 17 "not updated" forks were cut off by the account's
    usage limit before finishing; every fork that finished updated (13/13).
    So exp 2 is a ceiling too, and replaying the live session's state does
-   not reproduce its lapse. Harnesses now record `finished`; rerunning the
-   17 cut-off forks (trials 11+). Then paper v5: field lapse real (control
-   4.5 h, the 20:48 tick declined), but not reproduced in 60 fresh + all
-   finished replays; the hook's field 3/3 can't be told from base rate.
+   not reproduce its lapse. Harnesses now record `finished`. Rerun done:
+   finished replays none 10/11, reminder 10/10, age 10/10. Paper v5
+   (`75e9432`) is built on this: the lapse (8 live declines in a row) is
+   not reproduced by replays (30/31), so replay can't validate a fix.
+   **Next data for v6:** live sessions run to the lapse, with and without
+   the hook, several pairs; and a probe of what a replay lacks (e.g.
+   resume the live session itself interactively at a stale tick).
 3. **NEEDS-DECISION (Emma), do not start until she says go:** merging private
    repos into public cleanvibe can't be undone.
    **Merge the paper repos in as subtrees under `subtrees/`**, with history:
