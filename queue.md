@@ -152,10 +152,13 @@ clawRxiv. Paper items come first.
    **Results (23:45 UTC):** exp 1 (fresh fixture, 20/cond): updated 20/20
    in all three, corrected 19/19/20: ceiling. Exp 2 (30 forks of the
    control's 20:48 tick, long context): updated none 5/10, reminder 4/10,
-   age 4/10: **no effect of the age line**; about half update whatever
-   the cue. NEXT: paper v5 must report both nulls plainly; the field 3/3
-   is not supported as a hook effect. Rethink the claim (e.g. the lapse
-   is ~50% per tick in long contexts regardless of cue) before posting.
+   age 4/10, BUT the 17 "not updated" forks were cut off by the account's
+   usage limit before finishing; every fork that finished updated (13/13).
+   So exp 2 is a ceiling too, and replaying the live session's state does
+   not reproduce its lapse. Harnesses now record `finished`; rerunning the
+   17 cut-off forks (trials 11+). Then paper v5: field lapse real (control
+   4.5 h, the 20:48 tick declined), but not reproduced in 60 fresh + all
+   finished replays; the hook's field 3/3 can't be told from base rate.
 3. **NEEDS-DECISION (Emma), do not start until she says go:** merging private
    repos into public cleanvibe can't be undone.
    **Merge the paper repos in as subtrees under `subtrees/`**, with history:

@@ -281,6 +281,10 @@ def run_trial(root: Path, n: int, cond: str, timeout: int) -> dict:
     return {"trial": n, "condition": label, "path": str(path),
             "seconds": round(time.time() - t0), "cost_usd": meta.get("total_cost_usd"),
             "session_id": meta.get("session_id"), "num_turns": meta.get("num_turns"),
+            "result": (meta.get("result") or "")[:300],
+            # A run cut off by a usage limit or an error is not a valid trial.
+            "finished": bool(meta) and not meta.get("is_error")
+                        and "session limit" not in (meta.get("result") or ""),
             **score(path)}
 
 

@@ -114,7 +114,11 @@ def run_trial(root: Path, n: int, cond: str, timeout: int) -> dict:
     after = (dest / "INTENT.md").read_text(encoding="utf-8")
     return {"trial": n, "condition": label, "path": str(dest), "seconds": round(time.time() - t0),
             "cost_usd": meta.get("total_cost_usd"), "num_turns": meta.get("num_turns"),
-            "session_id": meta.get("session_id"), "updated": after != before}
+            "session_id": meta.get("session_id"), "updated": after != before,
+            "result": (meta.get("result") or "")[:300],
+            # A run cut off by a usage limit or an error is not a valid trial.
+            "finished": bool(meta) and not meta.get("is_error")
+                        and "session limit" not in (meta.get("result") or "")}
 
 
 def main():
@@ -131,6 +135,12 @@ def main():
     order = [c for _ in range(args.trials) for c in args.only]
     for i, cond in enumerate(order):
         rec = run_trial(root, args.start + i, cond, args.timeout)
+        if not rec["finished"] and "session limit" in rec["result"]:
+            print("usage limit reached; stopping", flush=True)
+            with open(args.out, "a", encoding="utf-8") as f:
+                f.write(json.dumps(rec) + "
+")
+            break
         with open(args.out, "a", encoding="utf-8") as f:
             f.write(json.dumps(rec) + "\n")
         print(json.dumps(rec), flush=True)
