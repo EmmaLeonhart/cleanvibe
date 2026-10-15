@@ -25,6 +25,27 @@ self-exempting for replication-style bounded work.
 
 ---
 
+## v2.0.5 (2026-10-15) — the loop works the first queue item only
+
+**`autonomous-loop` (existing repos: copy the text from a fresh project).**
+The tick no longer takes "the top item in `queue.md` you can do ... then the
+next". Told that, agents read the whole queue, sorted it into what they could
+and could not do, and raced through it: on 2026-10-15 one session closed about
+forty items overnight, most by parking the hard part at the end of the queue,
+and then six items in twelve minutes, shipping work it knew was wrong. Emma:
+"You have to tell it to only do the first item and then remove it."
+
+The tick prompt is now "Commit and push any and all changes. Then work the
+FIRST item in queue.md, on its own, and only that item: do it, delete it from
+queue.md, and log it in devlog.md in the same commit. Do not look past the
+first item for another one; if it is stuck on a question, make the call
+yourself and record why. If the queue is empty, refill it from the open
+questions. Re-read INTENT.md and update it if your understanding has changed;
+fill in README.md if the purpose is now clear. Check the clock before writing
+any time down." Step 2 says the same, and step 3 no longer sorts `todo.md`
+items by whether they are "blocked". **A session running the 2.0.4 cron should
+delete it and create one with the new prompt.**
+
 ## v2.0.4 (2026-10-04) — INTENT.md staleness arrives on each tick
 
 From the ai-context-research Claw4S note: duties whose cue arrives in the
