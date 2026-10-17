@@ -206,7 +206,12 @@ class TestCreateProject(unittest.TestCase):
             self.assertIn(duty, prompt)
         # v2.0.5: the tick works the FIRST item only and never reads down the
         # queue for one it "can do" (Emma, 2026-10-15).
-        self.assertIn("work the FIRST item in queue.md, on its own, and only that item", prompt)
+        self.assertIn("work the FIRST item in queue.md, on its own", prompt)
+        # v2.0.6: after the first item the tick keeps going with the new first
+        # item, one at a time, instead of stopping after one (Emma, 2026-10-17).
+        self.assertNotIn("and only that item", prompt)
+        self.assertIn("the new first item", prompt)
+        self.assertIn("one at a time", prompt)
         self.assertNotIn("you can\n   do and do it", content)
         self.assertNotRegex(lower, r"\bunblocked\b|remaining items are blocked")
         for gone in ("15 * * * *", "42 * * * *", "**flush,", "**status,"):

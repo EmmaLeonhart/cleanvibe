@@ -11,10 +11,12 @@ overnight, while they are away), set up **one** local `CronCreate` job:
 - **Schedule:** `7,37 * * * *` (every half hour, off the busy :00/:30 marks),
   recurring.
 - **Prompt:** `[cleanvibe cron] Commit and push any and all changes. Then
-  work the FIRST item in queue.md, on its own, and only that item: do it,
-  delete it from queue.md, and log it in devlog.md in the same commit. Do not
-  look past the first item for another one; if it is stuck on a question,
-  make the call yourself and record why. If the queue is empty, refill it
+  work the FIRST item in queue.md, on its own: do it, delete it from
+  queue.md, and log it in devlog.md in the same commit. Then the next item is
+  the new first item: work it the same way, one at a time, until the queue is
+  empty or about 25 minutes have passed. Never look past the current first
+  item for another one; if it is stuck on a question, make the call yourself
+  and record why. If the queue is empty, refill it
   from the open questions. Re-read INTENT.md and update it if
   your understanding has changed; fill in README.md if the purpose is now
   clear. Check the clock before writing any time down.`
@@ -23,12 +25,18 @@ That's the whole loop. Each time it fires:
 
 1. **Commit and push** everything that has changed, with messages that say what
    and why. Push only if the repo has a remote. No empty commits.
-2. **Work the first item, and only the first item.** Do the item at the top of
-   `queue.md`, then delete it from `queue.md` and log it in `devlog.md` in the
-   same commit. Do not read down the queue looking for an item you can do, and
-   do not skip the first item or move it to the end to get past it: if it is
-   stuck on a question, make the call yourself, do it, and record the decision.
-   The next tick takes the new first item.
+2. **Work the first item, then the new first item, one at a time.** Do the item
+   at the top of `queue.md`, then delete it from `queue.md` and log it in
+   `devlog.md` in the same commit. The item below it is now the first item: work
+   it the same way, and keep going until the queue is empty or about 25 minutes
+   of the tick have passed (the next tick picks up where this one stopped). Do
+   not read down the queue looking for an item you can do, and do not skip the
+   first item or move it to the end to get past it: if it is stuck on a
+   question, make the call yourself, do it, and record the decision.
+   **Why it keeps going (v2.0.6):** with "only that item", a tick did one item
+   and sat idle for the rest of the half hour. On 2026-10-17 a queue of 81
+   one-minute checks was going to take about 40 hours. Emma: "why does it do it
+   once an hour lol" and "Change the loop rule".
    **Why:** told to take "the top item you can do", agents read the whole
    queue, sorted it into what they could and could not do, and raced through
    it. On 2026-10-15 one session closed about forty items overnight, most by

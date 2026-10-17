@@ -25,6 +25,20 @@ self-exempting for replication-style bounded work.
 
 ---
 
+## v2.0.6 (2026-10-17) — the loop keeps going after the first item
+
+**`autonomous-loop` (existing repos: copy the text from a fresh project).** The tick
+still works only the FIRST item, never reading down the queue for one it can do,
+but no longer stops after it: once the first item is done and deleted, the next item
+is the new first item, and the tick works it the same way, one at a time, until the
+queue is empty or about 25 minutes have passed. The cron prompt changes from "on its
+own, and only that item" to "on its own ... Then the next item is the new first item
+... until the queue is empty or about 25 minutes have passed". Why: one item per
+half-hour tick left 29 minutes idle; a queue of 81 one-minute checks would have taken
+about 40 hours. A running cron keeps its old prompt until it is created again.
+
+---
+
 ## v2.0.5 (2026-10-15) — the loop works the first queue item only
 
 **`autonomous-loop` (existing repos: copy the text from a fresh project).**
