@@ -359,6 +359,22 @@ class TestThirtyMinuteIntake(unittest.TestCase):
         self.assertIn("WORK MODE", out)
         self.assertIn("quiet for 60+ minutes", out)
 
+    def test_queued_message_with_an_image_is_read(self):
+        # A message typed mid-turn with an image attached is logged as a
+        # queued_command whose prompt is a list of content blocks, not a
+        # string; the intake crashed on it ('list' has no attribute 'strip').
+        from datetime import datetime, timedelta, timezone
+        when = (datetime.now(timezone.utc) - timedelta(minutes=5)).isoformat().replace("+00:00", "Z")
+        entry = {"type": "attachment", "timestamp": when, "attachment": {
+            "type": "queued_command", "prompt": [
+                {"type": "text", "text": "Look at this screenshot."},
+                {"type": "image", "source": {"type": "base64", "data": "AAAA"}}]}}
+        (self.proj / "sessions" / "2026-09-26_abc.jsonl").write_text(
+            json.dumps(entry) + "\n", encoding="utf-8")
+        result = _run_intake(self.proj)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn("1 message(s)", result.stdout)
+
     def test_mode_check_reruns_without_committing(self):
         _log(self.proj, "hello", minutes_ago=5)
         self.assertIn("CHAT MODE", _run_intake(self.proj).stdout)

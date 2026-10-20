@@ -2395,3 +2395,16 @@ carry the same stop-crons item at the top of their queues. Idle check
 `Sodacan-arms-svg-generator` (no turn, commit or process for 1.7 h);
 earlier `snowtown-murders` and `genealogy-1e`. Queued the cleanvibe change
 she asked for: a session ends its crons when its work is finished.
+
+## 2026-10-20 — intake no longer crashes on a queued message with an image
+
+Found in the topaz-submodules project; Emma: "Fix it in cleanvibe". The
+generated `data_lake_intake.py` crashed with `AttributeError: 'list' object
+has no attribute 'strip'` when a session log held a message typed mid-turn
+with an image attached: Claude Code logs it as a `queued_command` attachment
+whose `prompt` is a list of content blocks, and `_text` returned that list
+as is. `_text` now reads both shapes through `_blocks_text` (the same fix
+topaz-submodules carries). Regression test
+`test_queued_message_with_an_image_is_read`; full suite 282 tests OK on
+Windows. Not released.
+

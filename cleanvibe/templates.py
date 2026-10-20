@@ -4237,10 +4237,14 @@ def never_committed_entries():
 def _text(entry):
     if entry.get("type") == "attachment":
         att = entry.get("attachment") or {}
-        return att.get("prompt", "") if att.get("type") == "queued_command" else ""
+        return _blocks_text(att.get("prompt", "")) if att.get("type") == "queued_command" else ""
     if entry.get("type") != "user" or entry.get("isMeta"):
         return ""
-    content = (entry.get("message") or {}).get("content")
+    return _blocks_text((entry.get("message") or {}).get("content"))
+
+
+def _blocks_text(content):
+    """Text from a message body: a plain string, or a list of content blocks (e.g. text plus an image)."""
     if isinstance(content, str):
         return content
     if isinstance(content, list):
