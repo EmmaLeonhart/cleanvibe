@@ -51,8 +51,12 @@ SKILLS_POINTER = """## Skills
 
 Workflow behaviors live as skills in `.claude/skills/` (auto-discovered by Claude Code):
 `emergency-stop`, `cron-is-local`, `autonomous-loop`, `queue-driven-workflow`,
-`research-practice`, `writing-style`, `cleanvibe-update-check`. They are vendored into this repo and kept
+`research-practice`, `writing-style`, `cleanvibe-update-check`, `browser-persistence`. They are vendored into this repo and kept
 current by the `cleanvibe-update-check` skill.
+
+**Web pages:** when a fetch fails or a task needs a website, follow `browser-persistence`: open
+it in Claude in Chrome before giving up, try different approaches before stopping, and hand a
+step to the user by leaving its tab open (say which window) instead of closing it.
 
 - **Last cleanvibe update check:** `never`
 - **Updates source:** <https://cleanvibe.emmaleonhart.com/updates.md>"""

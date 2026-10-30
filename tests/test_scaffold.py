@@ -269,7 +269,7 @@ class TestCreateProject(unittest.TestCase):
                 create_project(proj, no_claude=True)
             for slug in ("emergency-stop", "cron-is-local", "autonomous-loop",
                          "queue-driven-workflow", "writing-style",
-                         "cleanvibe-update-check"):
+                         "cleanvibe-update-check", "browser-persistence"):
                 p = proj / ".claude" / "skills" / slug / "SKILL.md"
                 self.assertTrue(p.exists(), f"{slug} skill not written")
                 self.assertIn(f"name: {slug}", p.read_text(encoding="utf-8"))

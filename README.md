@@ -150,6 +150,7 @@ cleanvibe vendors these into every project's `.claude/skills/`:
 | `writing-style` | prose without the "honestly" tic |
 | `cron-is-local` | "cron" means a local `CronCreate` job |
 | `emergency-stop` | "stop stop stop" halts everything |
+| `browser-persistence` | web pages: use Claude in Chrome before giving up, try different approaches, hand steps over without closing the tab |
 | `cleanvibe-update-check` | weekly refresh of these skills from <https://cleanvibe.emmaleonhart.com/updates.md> |
 
 The single source of truth is `cleanvibe/skills.py`. To back-fill them into an

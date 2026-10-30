@@ -226,4 +226,20 @@ bumped).
 
 - Completed work (chronological, with releases): `devlog.md`. Long-horizon backlog: `todo.md`.
 - Vision / framing: `docs/replication_framing.md`; reference corpus: `docs/replication-examples/`.
-- Narrative history: `git log`. Current version: `2.0.4`.
+- Narrative history: `git log`. Current version: `2.0.7`.
+
+**Keep a repo name Emma chose; only replace a generated one.** Queued by pc-manager at Emma's word,
+2026-10-30. Sessions keep throwing out a good name she gave (e.g. `astronism`) for a longer
+"descriptive" one, which she finds annoying. The cause is the v2 `CLAUDE.md` template in
+`cleanvibe/templates.py`, work-mode step 3 (~line 3414): *"under a descriptive kebab-case name that says
+what the project is about, not the folder name (which may be generated)"*. The first-session prompt
+(~line 3203) also says *"a private GitHub repo with a descriptive name"*. `v2_first_prompt` already knows
+`auto_named`; the template does not use it. **Fix (Emma, 2026-10-30): the generated `CLAUDE.md` itself must
+differ depending on whether the name was generated or set by her**, rather than one shared text with a
+conditional for the session to interpret. Her words: *"they should be different Claude.mds to do these
+different tasks. This should not be something that the agent has to figure out on its own."* cleanvibe
+decides at creation and writes one of two CLAUDE.md texts; nothing in the written file asks the agent to
+work out which case it is in. Pass `auto_named` into the template. A set name gets a step 3 that
+says to use the folder name as the repo name. A generated name gets the current "descriptive kebab-case
+name" step. Make the first-session prompt match. Add a test that renders both and asserts the two texts
+differ in exactly that step.

@@ -25,6 +25,23 @@ self-exempting for replication-style bounded work.
 
 ---
 
+## v2.0.7 (2026-10-30) — new skill: `browser-persistence`
+
+**New skill `browser-persistence` (existing repos: copy `.claude/skills/browser-persistence/SKILL.md`
+from a fresh project, and add `browser-persistence` to the skill list and the "Web pages" line in
+CLAUDE.md's `## Skills` section).** Sessions using Claude in Chrome gave up early and closed tabs the
+user still needed (case study 10, 18 transcripts): they skipped sites without opening them, quit on a
+first "Permission denied" that worked 45 minutes later, waited a week for the user to download files
+Chrome could have fetched, and closed a CAPTCHA or login tab in the same turn they handed it over.
+Claude Code's general browser guidance says to stop and ask after 2-3 failing attempts; with the user
+away, that leaves the task sitting. The skill: open the page in Chrome before giving up on curl; read
+"2-3 attempts" as identical attempts and try different approaches first; treat a first error as
+retryable; don't skip a site unseen; scroll to the end before concluding; hand a step over by leaving
+its tab open and saying which window it is in; close only finished tabs; still never solve bot checks,
+buy things, create accounts or enter card or ID data.
+
+---
+
 ## v2.0.6 (2026-10-17) — the loop keeps going after the first item
 
 **`autonomous-loop` (existing repos: copy the text from a fresh project).** The tick
