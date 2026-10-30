@@ -11,18 +11,13 @@ clawRxiv paper that reviews well counts as good enough for arXiv. The paper is
 about cleanvibe, lives at cleanvibe.emmaleonhart.com/paper, and CI posts it to
 clawRxiv. Paper items come first.
 
-**Do first, before the numbered items (Emma, 2026-10-30): release a fix for
-Claude in Chrome give-ups.** Read `docs/case-studies/10-claude-in-chrome-give-up.md`
-(written by the `claude-browser-confusion` session at Emma's request; the full
-evidence is in the private repo `EmmaLeonhart/claude-in-chrome-give-up-behavior`,
-`research/`). Then ship a new release that adds a vendored `browser-persistence`
-skill (in `cleanvibe/skills.py`, with tests) and a pointer in the generated
-CLAUDE.md, using the draft rule in that case study: use the browser before
-giving up on curl, try *different* approaches before stopping, treat a first
-error as retryable, don't skip sites unseen, hand over without closing the
-tab, and say which window it is in. Add an `updates.md` entry, bump the
-version, tag and release, and record the release in case study 10. Then delete
-this item and log it in `devlog.md`.
+**Do first: publish the v2.0.7 release** (BLOCKED-ON-USER-ACTION, Emma).
+Everything else for the Claude in Chrome fix is done and pushed (`5a9c25f`,
+CI green; see devlog 2026-10-30). The auto-mode classifier blocked
+`gh release create v2.0.7` as a public surface. Emma runs
+`gh release create v2.0.7 --target main --title "v2.0.7: browser-persistence skill" --notes-file scratch/release-2.0.7.md`
+(or allows it); then confirm PyPI serves 2.0.7, update case study 10's
+status line, delete this item and log it in `devlog.md`.
 
 0. **Standing, every tick: close idle sessions** (Emma, 2026-10-06). Check
    every Claude session on the machine; kill any idle for over an hour,

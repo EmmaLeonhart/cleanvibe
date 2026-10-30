@@ -2408,3 +2408,25 @@ topaz-submodules carries). Regression test
 `test_queued_message_with_an_image_is_read`; full suite 282 tests OK on
 Windows. Not released.
 
+## 2026-10-30 — v2.0.7: `browser-persistence` skill (case study 10); release blocked
+
+The top queue item: a fix for Claude in Chrome give-ups. New vendored skill
+`browser-persistence` in `cleanvibe/skills.py`, from case study 10's draft
+rule: use the browser before giving up on curl, read "2-3 attempts" as
+identical attempts and try different approaches first, treat a first error
+as retryable, don't skip a site unseen, scroll to the end before
+concluding, hand a step over by leaving its tab open and naming its window,
+close only finished tabs, and still never solve bot checks, buy, create
+accounts or enter card or ID data. `SKILLS_POINTER` lists it and adds a
+one-line "Web pages" pointer, so every generated CLAUDE.md carries it. This
+repo vendors it too; README and `pages/updates.md` (v2.0.7 entry) updated.
+Tests for the skill text and the pointer; 284 tests OK; doctor clean; CI
+green on `main` (`5a9c25f`, `0df46cc` follow-up). Version 2.0.7 (2.0.5 and 2.0.6
+were never tagged, so this release carries them too).
+
+Not done: the GitHub release. `gh release create v2.0.7` was blocked by the
+auto-mode classifier ("Create Public Surface"), the same block that hit
+v2.0.4. BLOCKED-ON-USER-ACTION (Emma): create the release or allow it. The
+queue item stays at the top, cut down to that step; release notes are in
+gitignored `scratch/release-2.0.7.md`.
+

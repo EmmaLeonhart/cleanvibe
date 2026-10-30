@@ -108,5 +108,11 @@ The rule narrows the system-prompt guidance rather than contradicting it.
 Separately, the user can set "Always allow actions on this site" for
 regularly used sites, which removes most permission prompts.
 
-**Status:** proposed, untested. Testing needs a browser task run in a session
-that has the skill loaded.
+**Status:** shipped in cleanvibe 2.0.7 as the vendored skill
+`browser-persistence` (`cleanvibe/skills.py`, commit `5a9c25f`), with the
+"Web pages" line in every generated CLAUDE.md's `## Skills` section and an
+entry in `pages/updates.md`. CI green on `main`. The GitHub release (which
+publishes to PyPI) is not created yet: the auto-mode classifier blocked
+`gh release create v2.0.7` as a public surface, so it waits on Emma
+(BLOCKED-ON-USER-ACTION). Untested in a live browser task: testing needs a
+browser task run in a session that has the skill loaded.
