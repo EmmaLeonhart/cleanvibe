@@ -99,7 +99,7 @@ cleanvibe/
 cleanvibe dogfoods its own skills: the workflow behaviors live as skills in
 `.claude/skills/` (auto-discovered by Claude Code) — `emergency-stop`,
 `cron-is-local`, `autonomous-loop`, `queue-driven-workflow`, `research-practice`,
-`writing-style`, `cleanvibe-update-check`. They are the single-source-of-truth bodies from
+`writing-style`, `cleanvibe-update-check`, `browser-persistence`. They are the single-source-of-truth bodies from
 `cleanvibe/skills.py`, materialized by `write_skills()`. The short version of the
 workflow contract: commit early with *why*; plan into `queue.md` first and mirror
 into the task tool; `todo.md` is the long-horizon basis for `queue.md`; finishing
