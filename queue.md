@@ -11,6 +11,19 @@ clawRxiv paper that reviews well counts as good enough for arXiv. The paper is
 about cleanvibe, lives at cleanvibe.emmaleonhart.com/paper, and CI posts it to
 clawRxiv. Paper items come first.
 
+**Do first, before the numbered items (Emma, 2026-10-30): release a fix for
+Claude in Chrome give-ups.** Read `docs/case-studies/10-claude-in-chrome-give-up.md`
+(written by the `claude-browser-confusion` session at Emma's request; the full
+evidence is in the private repo `EmmaLeonhart/claude-in-chrome-give-up-behavior`,
+`research/`). Then ship a new release that adds a vendored `browser-persistence`
+skill (in `cleanvibe/skills.py`, with tests) and a pointer in the generated
+CLAUDE.md, using the draft rule in that case study: use the browser before
+giving up on curl, try *different* approaches before stopping, treat a first
+error as retryable, don't skip sites unseen, hand over without closing the
+tab, and say which window it is in. Add an `updates.md` entry, bump the
+version, tag and release, and record the release in case study 10. Then delete
+this item and log it in `devlog.md`.
+
 0. **Standing, every tick: close idle sessions** (Emma, 2026-10-06). Check
    every Claude session on the machine; kill any idle for over an hour,
    meaning all of: no commit in its repo, no process running under it, and
