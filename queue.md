@@ -16,7 +16,7 @@ Everything else for the Claude in Chrome fix is done and pushed (`5a9c25f`,
 CI green; see devlog 2026-10-30). The auto-mode classifier blocked
 `gh release create v2.0.7` as a public surface. Emma runs
 `gh release create v2.0.7 --target main --title "v2.0.7: browser-persistence skill" --notes-file scratch/release-2.0.7.md`
-(or allows it); then confirm PyPI serves 2.0.7, update case study 10's
+(or allows it; notes regenerated 2026-11-09, they now also cover the relaunch-loop fix); then confirm PyPI serves 2.0.7, update case study 10's
 status line, delete this item and log it in `devlog.md`.
 
 0. **Standing, every tick: close idle sessions** (Emma, 2026-10-06). Check

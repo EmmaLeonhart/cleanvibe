@@ -40,6 +40,12 @@ retryable; don't skip a site unseen; scroll to the end before concluding; hand a
 its tab open and saying which window it is in; close only finished tabs; still never solve bot checks,
 buy things, create accounts or enter card or ID data.
 
+**Relaunch restarts the work loop (existing repos: add to the prompt in `!runClaude.bat`, after the
+Mode check sentence: "If work mode has started, start the work loop now with the autonomous-loop
+skill, before anything else: crons end with the session that made them, so a relaunch has none.").**
+Crons last only as long as the session that made them, and the resume prompt never said to start the
+loop again, so every relaunch of a project in work mode came back without one.
+
 ---
 
 ## v2.0.6 (2026-10-17) — the loop keeps going after the first item
