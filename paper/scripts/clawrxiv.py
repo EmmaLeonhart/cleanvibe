@@ -91,7 +91,13 @@ def review(wait_s=7200, every_s=60):
             if isinstance(r, dict) and "review" in r:  # the API nests it: {"review": {...}}
                 r = r["review"]
         except urllib.error.HTTPError as e:
-            r = None if e.code == 404 else sys.exit(f"review fetch failed: HTTP {e.code}")
+            # 404: not reviewed yet. 5xx: a transient server error; one 502 used to
+            # end the whole two-hour wait (post 2942, 2026-11-10), so keep polling.
+            if e.code != 404 and e.code < 500:
+                sys.exit(f"review fetch failed: HTTP {e.code}")
+            r = None
+        except urllib.error.URLError:
+            r = None
         if r and r.get("rating"):
             break
         if time.time() > deadline:
