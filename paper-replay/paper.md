@@ -16,12 +16,13 @@ commits had made false, all 60 updated the file and 59 corrected the
 sentence, in every condition. In 31 completed replays of the declining
 session itself, resumed from its transcript at one of the ticks where it
 had declined, 30 updated the file, again in every condition, and replays at
-each of the eight ticks where it had declined updated it 14 times in 16. The
-cue made
+each of the eight ticks where it had declined updated it 14 times in 16.
+Five interactive replays, run in a console as the live session was, all
+updated it, so headless mode is not the difference. The cue made
 no measurable difference because in neither setting was there a lapse to
 fix: an agent at the same point of the same transcript updates the file
-about 92% of the time (24 of 26 with the reminder), while the live session
-did not eight times running (probability at most 1.6 × 10⁻⁵ even at the
+about 94% of the time (29 of 31 with the reminder), while the live session
+did not eight times running (probability at most 4.4 × 10⁻⁶ even at the
 upper 95% bound of the replays' decline rate). The lapse
 depends on something a live long-running session has and a replay of its
 transcript does not. We conclude that fixes for agent lapses cannot be
@@ -135,6 +136,14 @@ tick, so the later ones carry the earlier declines in their context. Two
 finished replays per tick (one further run was cut off by the usage
 limit and is excluded).
 
+**Experiment 2c: interactive replays.** The live session ran in an
+interactive console, the replays above headless. To separate the two, the
+20:48 replay was repeated in interactive mode
+(`paper/experiment/interactive.py`): the same fork, opened as cleanvibe
+opens a session (a console window running `claude --resume <id>
+--fork-session` with the reminder prompt), left until the session went
+idle, then scored the same way. Five trials.
+
 ## 4. Results
 
 | Experiment | Condition | Trials | Updated | Corrected |
@@ -146,6 +155,7 @@ limit and is excluded).
 | | reminder | 10 | 10 | — |
 | | age | 10 | 10 | — |
 | 2b, replay of each declining tick | reminder | 16 (2 per tick) | 14 | — |
+| 2c, interactive replay of 20:48 | reminder | 5 | 5 | — |
 
 Neither experiment shows an effect of the cue (experiment 2, age against
 none: 10/10 against 10/11, Fisher's exact p = 1). Both are at ceiling. For
@@ -158,13 +168,16 @@ declined updated the file 30 times in 31.
 
 Replays at the eight declining ticks updated 14 times in 16; the two
 declines fell at 18:18 and 18:48, each in one of that tick's two replays.
-Replays can therefore decline, but rarely.
+Replays can therefore decline, but rarely. All five interactive replays
+updated the file (112 to 182 s each), so running headless does not explain
+why the replays update and the live session did not.
 
 The contrast is between the live session and its replays. With the
-reminder prompt the live session received, replays declined 2 times in 26
-(experiments 2 and 2b), a rate of 7.7% with an upper 95% bound of 25%.
-Eight consecutive live declines would have probability 1.2 × 10⁻⁹ at the
-observed rate and at most 1.6 × 10⁻⁵ at the bound. The transcript
+reminder prompt the live session received, replays declined 2 times in 31
+(experiments 2, 2b and 2c), a rate of 6.5% with an upper 95% bound
+(Clopper-Pearson) of 21%. Eight consecutive live declines would have
+probability 3.0 × 10⁻¹⁰ at the observed rate and at most 4.4 × 10⁻⁶ at the
+bound. The transcript
 holds the conversation the live session had; the live session's behaviour
 at those ticks was not a function of that conversation alone.
 
@@ -174,11 +187,13 @@ What a replay lacks is the open question. Candidates we cannot yet
 separate: state the harness keeps in a live session and does not write to
 the transcript (such as which file contents it treats as already read, and
 the reminders it attaches to tool results); the prompt cache, which a
-resumed session rebuilds from scratch; and the difference between headless
-and interactive mode. One candidate is ruled out by the design: that the
-live session declined because its earlier declines were in view. Replays
-of the later ticks carried those earlier declines in their context and
-still updated.
+resumed session rebuilds from scratch; and conditions of the live run
+outside the session, such as load on the machine (it was running two
+six-way parallel chess matches at the time; the other session was stopped
+by Claude Code's low-memory warning that evening). Two candidates are ruled out. The first is that the live
+session declined because its earlier declines were in view: replays of the
+later ticks carried those declines in their context and still updated.
+The second is headless mode: interactive replays updated 5 times in 5.
 
 The practical consequence is about method. A natural way to test a fix for
 an agent's lapse is to take a transcript where the lapse happened, replay
@@ -193,10 +208,9 @@ evidence, but one pair is not enough to separate the hook from chance.
 
 The scope is one agent model (Claude Code), one scaffold and one session,
 with one author who built the scaffold; other agents and other lapses may
-replay differently. All replays were headless (`claude -p`, with a tool
-allowlist), while the live session was interactive; an interactive replay
-arm is built (`paper/experiment/interactive.py`) but was not run, so this
-difference is not separated from the others. Experiment 1's fixture is small, and its history was
+replay differently. Most replays were headless (`claude -p`, with a tool
+allowlist); the interactive arm has five trials at one tick, enough to
+rule out a large headless effect but not a small one. Experiment 1's fixture is small, and its history was
 synthesized. The field comparison of the hook rests on one pair of
 sessions; the first four sessions with the hook ran inside the cleanvibe
 repository and also loaded its development rules. All session

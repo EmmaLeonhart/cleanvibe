@@ -67,3 +67,13 @@ interactive replay updates too. Left among section 5's candidates: harness
 state a live session holds outside the transcript, and the prompt cache. Goes
 into paper.md after post 2942's review lands (a paper.md push now would
 replace the post before its review).
+
+## v4: the interactive arm in the paper (post 2942 never reviewed)
+
+Post 2942 (v3) got no review: the CI fetch ended on an HTTP 502, and at
+10:30 UTC, 3.6 h after posting, the API still returned `{"review": null}`
+(2911's came in 4 minutes). Rather than wait on it, v4 adds the interactive
+arm as experiment 2c (5/5 updated), drops headless mode from section 5's
+candidates, recomputes the replay decline rate over 31 reminder replays
+(2/31, 6.5%, CP upper bound 21%; eight live declines at most 4.4e-6), and
+adds machine load as a candidate. v4's review answers v3's text changes too.

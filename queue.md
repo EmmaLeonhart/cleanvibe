@@ -60,8 +60,10 @@ clawRxiv. Paper items come first.
    2026-11-09 ~23:55 after re-cloning `cleanvibe-practice/crisp-golden-badger`
    from GitHub (the local copy was gone); results go to
    `paper/experiment/interactive_results.jsonl`: **5 of 5 updated** (headless
-   ruled out; in review-log, goes into paper.md after 2942's review);
-   if it also updates, probe the prompt cache. The old private `ai-context-research` repo is no longer
+   ruled out). Post 2942 was never reviewed (CI fetch hit a 502; the API
+   still had no review 3.6 h later), so **v4 (2026-11-10) puts the
+   interactive arm in the paper**; wait for its review. Next data: probe
+   the prompt cache. The old private `ai-context-research` repo is no longer
    used; nothing from it is copied here.
 2. **Experiment: practice projects and reports on them** (Emma,
    2026-10-05). Start cleanvibe 2.0.4 projects under `tests/scratch/` on
@@ -152,8 +154,8 @@ clawRxiv. Paper items come first.
    launched with `--visibility public`. Start it when the chess control
    winds down. **Held 2026-11-10 00:21 (my call):** not started yet; a pair
    loops for hours and item 3 records Emma's complaint that looping
-   sessions use up her tokens. Start it once post 2942's review says what
-   data v4 needs, so the pair is shaped by that review.
+   sessions use up her tokens. Start it once the v4 post's review says what
+   data it needs, so the pair is shaped by that review.
    **Controlled experiment (answers v4's Reject, post 2907):**
    `paper/experiment/run.py` builds a fixture cleanvibe project whose
    INTENT.md is 3.2 h and 6 work commits stale with one sentence made false,

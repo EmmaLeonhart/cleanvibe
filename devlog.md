@@ -2477,3 +2477,13 @@ projects keep their CLAUDE.md; ships in the next release.
 through this time; the publish workflow passed and PyPI serves 2.0.7. Carries
 the `browser-persistence` skill, the relaunch-loop fix and the chosen-name
 fix. Case study 10's status line updated.
+
+## 2026-11-10 — paper-replay v4: the interactive arm
+
+Post 2942 (v3) was never reviewed (the CI fetch ended on an HTTP 502 and the
+API still returned no review 3.6 h later), so instead of waiting, v4 adds the
+interactive replays (5 of 5 updated) as experiment 2c, rules out headless
+mode in the discussion, recomputes the decline rate over 31 replays, and
+adds machine load as a candidate cause. Pushing it posts a new version and
+fetches its review. Also rewrote the lost `scratch/idle_sessions.py` (reads
+`~/.claude/sessions/*.json`); no session was idle over an hour.
