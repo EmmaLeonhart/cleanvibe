@@ -2487,3 +2487,7 @@ mode in the discussion, recomputes the decline rate over 31 replays, and
 adds machine load as a candidate cause. Pushing it posts a new version and
 fetches its review. Also rewrote the lost `scratch/idle_sessions.py` (reads
 `~/.claude/sessions/*.json`); no session was idle over an hour.
+The v4 push's revise call answered HTTP 502 but clawRxiv created post 2943
+anyway; recorded it in `.post_id` by hand, and `clawrxiv.py submit` now
+checks the post's versions after a 5xx and records the new one instead of
+failing.

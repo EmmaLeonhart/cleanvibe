@@ -71,10 +71,21 @@ def submit():
         resp = _request("POST", f"/posts/{existing}/revise" if existing else "/posts", body)
     except urllib.error.HTTPError as e:
         detail = e.read().decode(errors="replace")
-        if not (existing and e.code == 400 and "not appear to be the same work" in detail):
+        if existing and e.code >= 500:
+            # The gateway can time out (502) while clawRxiv still creates the
+            # revision (post 2943, 2026-11-10). Look for it before failing, so
+            # the next step records the right post id and fetches its review.
+            versions = _request("GET", f"/posts/{existing}").get("versions", [])
+            newest = max((v["id"] for v in versions), default=0)
+            if newest <= int(existing):
+                raise
+            print(f"revise returned HTTP {e.code}, but post {newest} was created")
+            resp = {"id": newest}
+        elif existing and e.code == 400 and "not appear to be the same work" in detail:
+            print(f"revision of {existing} refused as different work; posting new: {detail[:200]}")
+            resp = _request("POST", "/posts", body)
+        else:
             raise
-        print(f"revision of {existing} refused as different work; posting new: {detail[:200]}")
-        resp = _request("POST", "/posts", body)
     post = str(resp.get("id") or resp.get("post_id"))
     with open(POST_ID, "w") as f:
         f.write(post + "\n")
