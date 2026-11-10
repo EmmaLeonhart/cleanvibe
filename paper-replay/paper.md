@@ -48,7 +48,38 @@ itself. cleanvibe 2.0.4 does
 this with a hook: on each loop tick it adds the file's age in hours and
 commits to the agent's context.
 
-## 2. The field observation
+## 1.1 Related work
+
+**Agent benchmarks score episodes, not long sessions.** SWE-bench (Jimenez
+et al., 2024) and τ-bench (Yao et al., 2024) evaluate an agent on
+self-contained tasks, each run as a fresh episode. τ-bench's pass^k metric,
+the probability that all k independent trials of a task succeed, makes
+the point that an agent's reliability over repeated trials is lower and
+more informative than its single-trial success. Our setting is the
+opposite case: one long session, in which the trials are not independent,
+because each tick inherits everything before it. A replay is the natural
+way to turn such a session back into repeatable trials, and our result is
+that the conversion changes the behaviour being measured.
+
+**Evaluation practice.** Kapoor et al. (2024) argue that agent evaluations
+need controls, cost accounting and reproducibility to be meaningful. A
+replay-based test of a fix looks reproducible (the same transcript, the
+same prompt) but, in our data, does not reproduce the condition the fix is
+for. Run-to-run variation in LLM output is well documented even at
+temperature zero (Ouyang et al., 2025); our replays vary too (2 declines in
+26), but far less than would explain eight declines in a row.
+
+**State in long contexts.** Models use information in the middle of a long
+context less reliably than at its start or end (Liu et al., 2024), and
+agent designs such as MemGPT (Packer et al., 2023) and generative agents
+(Park et al., 2023) move state out of the context into managed memory. An
+intent file is such external state, and keeping it current is a
+self-initiated duty. A replay restores the transcript's tokens in the same
+order, so position in the context alone does not explain the gap; that is
+one reason we look at what a live session holds outside the transcript
+(section 5).
+
+## 2. The field observation (motivation, not evidence)
 
 Two sessions ran the same written brief (a chess engine improved by
 self-play matches of 200 games, so the work lasted hours) on the same
@@ -61,8 +92,11 @@ misdescribed the work (five later rounds had been written). It updated the
 file at the ninth tick. The session with the hook never went more than 1.5
 hours without an update. Across four other sessions with the hook, each
 time the hook reported the file two or more hours old during work, the
-file was updated within the half hour (3 of 3). Taken alone, these
-observations suggest the hook helps. The experiments test that.
+file was updated within the half hour (3 of 3). With one pair of sessions
+and three later cases, these observations cannot separate the hook from
+chance, and we make no claim about the hook from them. They are why we ran
+the experiments, and they supply the declining session that experiment 2
+replays.
 
 ## 3. Experiments
 
@@ -73,7 +107,11 @@ real cleanvibe scaffold, one loop tick per trial, conditions interleaved:
 - **reminder**: the tick prompt the field sessions received; no hook;
 - **age**: the same prompt with the hook installed.
 
-**Experiment 1: a stale fixture.** Each trial builds a fresh project whose
+**Experiment 1: a stale fixture (negative control).** It asks whether
+staleness alone, without a long session behind it, produces the lapse. If
+it did, a short fixture would be a cheap test bed for fixes; if it did not,
+the lapse needs the long context, which is what experiment 2 restores. Each
+trial builds a fresh project whose
 history is backdated so that `INTENT.md` was last written 3.2 hours and 6
 work commits earlier and still says "Category totals and the monthly report
 are not started yet", while those commits implemented both; the queue holds
@@ -110,7 +148,9 @@ limit and is excluded).
 | 2b, replay of each declining tick | reminder | 16 (2 per tick) | 14 | — |
 
 Neither experiment shows an effect of the cue (experiment 2, age against
-none: 10/10 against 10/11, Fisher's exact p = 1). Both are at ceiling. In
+none: 10/10 against 10/11, Fisher's exact p = 1). Both are at ceiling. For
+experiment 1 the ceiling is the answer to its question: staleness alone does
+not produce the lapse, so a short fixture cannot test a fix for it. In
 experiment 1 the agents rewrote the state section to name the finished
 features and, where they had added the queued option, said so. In
 experiment 2, replays given exactly the context in which the live session
@@ -166,6 +206,25 @@ repository.
 
 ## References
 
+- Jimenez, C. E., Yang, J., Wettig, A., Yao, S., Pei, K., Press, O., and
+  Narasimhan, K. (2024). SWE-bench: Can language models resolve real-world
+  GitHub issues? ICLR.
+- Kapoor, S., Stroebl, B., Siegel, Z. S., Nadgir, N., and Narayanan, A.
+  (2024). AI agents that matter. arXiv:2407.01502.
+- Liu, N. F., Lin, K., Hewitt, J., Paranjape, A., Bevilacqua, M., Petroni,
+  F., and Liang, P. (2024). Lost in the middle: how language models use
+  long contexts. TACL 12.
+- Ouyang, S., Zhang, J. M., Harman, M., and Wang, M. (2025). An empirical
+  study of the non-determinism of ChatGPT in code generation. ACM TOSEM.
+- Packer, C., Wooders, S., Lin, K., Fang, V., Patil, S. G., Stoica, I., and
+  Gonzalez, J. E. (2023). MemGPT: towards LLMs as operating systems.
+  arXiv:2310.08560.
+- Park, J. S., O'Brien, J. C., Cai, C. J., Morris, M. R., Liang, P., and
+  Bernstein, M. S. (2023). Generative agents: interactive simulacra of
+  human behavior. UIST.
+- Yao, S., Shinn, N., Razavi, P., and Narasimhan, K. (2024). τ-bench: a
+  benchmark for tool-agent-user interaction in real-world domains.
+  arXiv:2406.12045.
 - cleanvibe case studies 06 (cleanvibe studying its own transcripts) and 07
   (did the 2.0.3 fixes work?), github.com/EmmaLeonhart/cleanvibe,
   `docs/case-studies/`.

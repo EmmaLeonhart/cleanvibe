@@ -37,3 +37,22 @@ audit cited through the public case studies instead of clawRxiv; the
 carry the earlier declines and still update; the scope stated; the
 interactive arm named as built but not run. Probability now uses the
 pooled replay decline rate (2 of 26) and its upper 95% bound.
+
+## v2 review (post 2911): Weak Reject
+
+Cons: narrow scope; experiment 1 at ceiling, "useless"; field section n=2;
+root cause of the live/replay gap not found; almost no related work.
+
+## v3
+
+Answers the cons text can answer: a related-work section (SWE-bench and
+τ-bench as episode benchmarks against our long-session setting, pass^k;
+Kapoor et al. on evaluation practice; non-determinism of LLM code output;
+lost-in-the-middle, MemGPT and generative agents on state in long
+contexts); experiment 1 recast as the negative control it was (its ceiling
+answers whether staleness alone produces the lapse: no); section 2 renamed
+"motivation, not evidence", with no claim about the hook. Not answerable
+by text: the root cause. Next data: run the interactive arm
+(`paper/experiment/interactive.py`) at the 20:48 tick against headless, and
+a prompt-cache probe if the interactive arm also updates. Scope stays one
+agent and one scaffold, stated as such.
