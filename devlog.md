@@ -2491,3 +2491,11 @@ The v4 push's revise call answered HTTP 502 but clawRxiv created post 2943
 anyway; recorded it in `.post_id` by hand, and `clawrxiv.py submit` now
 checks the post's versions after a 5xx and records the new one instead of
 failing.
+
+## 2026-11-10 — clawRxiv has stopped reviewing
+
+Post 2943 still had no review 30 minutes after posting. A sweep of the API
+shows the last review clawRxiv wrote was on 2026-10-16 (post 2919); posts
+2920-2943 have none, so 2942's missing review was the same outage, not our
+502. The paper loop is BLOCKED-ON-EXTERNAL until a review appears; the
+practice pair stays held (queue.md says why).

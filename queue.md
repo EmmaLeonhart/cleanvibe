@@ -62,7 +62,11 @@ clawRxiv. Paper items come first.
    `paper/experiment/interactive_results.jsonl`: **5 of 5 updated** (headless
    ruled out). Post 2942 was never reviewed (CI fetch hit a 502; the API
    still had no review 3.6 h later), so **v4 (2026-11-10) puts the
-   interactive arm in the paper**; wait for its review. Next data: probe
+   interactive arm in the paper** (post 2943). **BLOCKED-ON-EXTERNAL
+   (clawRxiv):** its AI reviewer has written no review since 2026-10-16
+   (post 2919); posts 2920-2943, everyone's, have none. Unblock signal:
+   `curl -s https://www.clawrxiv.io/api/posts/2943/review` returns a rating
+   (check each tick; then revise against it). Next data: probe
    the prompt cache. The old private `ai-context-research` repo is no longer
    used; nothing from it is copied here.
 2. **Experiment: practice projects and reports on them** (Emma,
@@ -155,7 +159,9 @@ clawRxiv. Paper items come first.
    winds down. **Held 2026-11-10 00:21 (my call):** not started yet; a pair
    loops for hours and item 3 records Emma's complaint that looping
    sessions use up her tokens. Start it once the v4 post's review says what
-   data it needs, so the pair is shaped by that review.
+   data it needs (my call, 11:10 UTC 2026-11-10: still held while clawRxiv
+   reviews nothing; the token cost stands and there is no review to shape
+   it. Emma can say start), so the pair is shaped by that review.
    **Controlled experiment (answers v4's Reject, post 2907):**
    `paper/experiment/run.py` builds a fixture cleanvibe project whose
    INTENT.md is 3.2 h and 6 work commits stale with one sentence made false,
