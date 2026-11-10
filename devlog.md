@@ -2455,3 +2455,18 @@ stay on in every repo that uses them and no state is a reason to leave them
 off; and on 2026-11-09 she asked why this repo wasn't starting its loop. An
 idle tick stays cheap (one line). If token use from many loops is still a
 problem, that's a question for Emma, not a change to make on her behalf.
+
+## 2026-11-10 — A name Emma chose is the repo name
+
+Queued by pc-manager at Emma's word (2026-10-30): sessions threw out names she
+gave (e.g. `astronism`) for longer "descriptive" ones, because the v2
+CLAUDE.md and first prompt said to use a descriptive name, not the folder
+name. Her fix: cleanvibe decides at creation and writes one of two texts, so
+the agent never works out which case it is in. `v2_claude_md` now renders,
+for a chosen name, `gh repo create <that name>` in *Publishing*, "named
+`<name>`" in the commit bullet, and a work-mode step 3 that says keep the
+folder name and don't replace it; a generated name keeps the descriptive-name
+text and says the folder name means nothing. The first prompt matches
+(`_repo_clause(visibility, auto_named)`). Test
+`test_chosen_name_is_the_repo_name`; 286 tests OK; doctor clean. Existing
+projects keep their CLAUDE.md; ships in the next release.

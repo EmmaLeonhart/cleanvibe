@@ -205,8 +205,10 @@ class TestV2Prompts(unittest.TestCase):
         self.assertIn("a guess about why the project exists is not a task", named)
         for prompt in (named, auto):
             self.assertIn("starts in chat mode", prompt)
-            self.assertIn("GitHub repo with a descriptive name, public or private as CLAUDE.md describes", prompt)
+            self.assertIn("public or private as CLAUDE.md describes", prompt)
             self.assertIn("does not need my consent to continue", prompt)
+        self.assertIn("GitHub repo with a descriptive name", auto)
+        self.assertIn("GitHub repo named after this folder, the name I chose", named)
         for prompt in (named, auto):
             self.assertIn("low information", prompt)
             self.assertIn("CronCreate", prompt)
@@ -275,6 +277,20 @@ class TestResearchFixes203(unittest.TestCase):
     def test_prompts_name_the_update_check(self):
         self.assertIn("cleanvibe-update-check", templates.v2_resume_prompt("/home/e/p"))
         self.assertIn("cleanvibe-update-check", templates.v2_first_prompt("/home/e/p", True))
+
+    def test_chosen_name_is_the_repo_name(self):
+        # Emma, 2026-10-30: two different CLAUDE.md texts, decided at creation.
+        chosen = templates.v2_claude_md("astronism", auto_named=False)
+        generated = templates.v2_claude_md("golden-swift-otter", auto_named=True)
+        step = lambda md: next(l for l in md.splitlines() if l.startswith("3. Create the GitHub"))
+        self.assertIn("named `astronism`", step(chosen))
+        self.assertIn("descriptive", step(generated))
+        self.assertNotEqual(step(chosen), step(generated))
+        self.assertIn("gh repo create astronism --public", chosen)
+        self.assertNotIn("<descriptive-name>", chosen)
+        self.assertIn("<descriptive-name>", generated)
+        self.assertNotIn("descriptive name,", templates.v2_first_prompt("/x/astronism", False))
+        self.assertIn("descriptive name", templates.v2_first_prompt("/x/g", True))
 
     def test_resume_prompt_restarts_the_loop(self):
         # Crons are session-local: a relaunch via !runClaude.bat had no loop (2026-11-09).

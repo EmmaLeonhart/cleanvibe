@@ -3208,16 +3208,18 @@ def _name_clue(auto_named: bool) -> str:
             "task, usually it is at most a hint.")
 
 
-def _repo_clause(visibility) -> str:
-    """How the first prompt describes the GitHub repo for ``visibility``."""
+def _repo_clause(visibility, auto_named: bool = True) -> str:
+    """How the first prompt describes the GitHub repo for ``visibility``.
+
+    A name the user chose is the repo name; only a generated one is replaced by
+    a descriptive name (Emma, 2026-10-30: sessions kept discarding her names)."""
     if visibility == "local":
         return "no GitHub repo (I chose to keep this project local)"
-    if visibility == "public":
-        return "a public GitHub repo with a descriptive name (I chose public)"
-    if visibility == "private":
-        return "a private GitHub repo with a descriptive name (I chose private)"
-    return ("a GitHub repo with a descriptive name, public or private as "
-            "CLAUDE.md describes")
+    named = ("with a descriptive name" if auto_named
+             else "named after this folder, the name I chose")
+    if visibility in ("public", "private"):
+        return f"a {visibility} GitHub repo {named} (I chose {visibility})"
+    return f"a GitHub repo {named}, public or private as CLAUDE.md describes"
 
 
 def _extra_prompt(text) -> str:
@@ -3268,7 +3270,7 @@ def v2_first_prompt(path, auto_named: bool, visibility=None, extra=None) -> str:
         f"and conversational, and do not edit files, commit, plan or offer me "
         f"options until I tell you to start working or I have been quiet for an "
         f"hour. Then work mode starts as CLAUDE.md describes, including INTENT.md, "
-        f"{_repo_clause(visibility)}, and the "
+        f"{_repo_clause(visibility, auto_named)}, and the "
         f"cleanvibe-update-check skill if its weekly check is due. For now, look "
         f"at what is in this folder and greet me in a line or two. Only use "
         f"AskUserQuestion if I am clearly here and replying. If I say nothing, "
@@ -3398,25 +3400,49 @@ def _setup_section(auto_named: bool, visibility, has_prompt: bool) -> str:
     return "\n".join(["## This project's setup", name, repo, prompt])
 
 
-def _publishing_section(visibility) -> str:
+def _repo_name(project_name: str, auto_named: bool) -> str:
+    """The repo name in CLAUDE.md's `gh repo create` commands."""
+    return "<descriptive-name>" if auto_named else project_name
+
+
+def _publishing_section(visibility, project_name: str = "", auto_named: bool = True) -> str:
     """CLAUDE.md's rule for where the repo goes."""
+    repo = _repo_name(project_name, auto_named)
     if visibility == "local":
         how = ("The user chose to keep this project **local**: do not create a "
                "remote. Commit locally as usual.")
     elif visibility in ("public", "private"):
-        how = (f"The user chose **{visibility}**: `gh repo create <descriptive-name> "
+        how = (f"The user chose **{visibility}**: `gh repo create {repo} "
                f"--{visibility} --source=. --push`.")
     else:
         how = ("Push to a GitHub remote unless the user says to keep the project "
                "local. Visibility follows any signal: anything suggesting it should "
                "be public (the user says so, the material says so, it is meant to "
                "be shown or shared) makes it public "
-               "(`gh repo create <descriptive-name> --public --source=. --push`); "
+               f"(`gh repo create {repo} --public --source=. --push`); "
                "anything suggesting it should be private makes it private "
                "(`--private`). With no signal, or signals both ways, it is private.")
     return "## Publishing\n" + how + (
         " If the user's wishes change later, change the repository to match "
         "(`gh repo edit --visibility ...`).")
+
+
+def _repo_name_phrase(project_name: str, auto_named: bool) -> str:
+    if auto_named:
+        return "under a descriptive name"
+    return f"named `{project_name}`"
+
+
+def _repo_step(project_name: str, auto_named: bool) -> str:
+    """Work-mode step 3. Two different texts, chosen here, so the agent never has
+    to work out which case it is in (Emma, 2026-10-30)."""
+    if auto_named:
+        return ("Create the GitHub repository as *Publishing* says, under a descriptive\n"
+                "   kebab-case name that says what the project is about. The folder name\n"
+                "   was generated and says nothing, so do not use it.")
+    return (f"Create the GitHub repository as *Publishing* says, named `{project_name}`:\n"
+            f"   the folder name, which the user chose. Keep it; do not replace it with a\n"
+            f"   longer descriptive name.")
 
 
 def v2_claude_md(project_name: str, auto_named: bool = False, visibility=None,
@@ -3428,7 +3454,7 @@ def v2_claude_md(project_name: str, auto_named: bool = False, visibility=None,
 
 {_setup_section(auto_named, visibility, has_prompt)}
 
-{_publishing_section(visibility)}
+{_publishing_section(visibility, project_name, auto_named)}
 
 ## How this project works
 Nothing was decided up front about what this project is. cleanvibe projects are
@@ -3502,9 +3528,9 @@ the folder and dropped material into it, expecting you to get on with it.
   again, with a clear name and a line saying what it is for. Delete what is no
   longer used.
 - **Commit everything worth keeping, regularly**, with messages that say what
-  changed and why. When work mode starts, the repo goes to GitHub under a
-  descriptive name as *Publishing* says, and from then on every commit is
-  pushed.
+  changed and why. When work mode starts, the repo goes to GitHub
+  {_repo_name_phrase(project_name, auto_named)} as *Publishing* says, and from
+  then on every commit is pushed.
 - **Keep going without asking.** Work that is already planned or under way
   does not need the user's consent to continue, even when it is slow or has to
   be redone (a test run to restart, a long job to rerun). If a decision is
@@ -3545,9 +3571,7 @@ When work mode starts, do this once, in order, and commit as you go:
    subject by default; add what the material and the name say.
 2. Write `INTENT.md`: the goal, the evidence, your confidence, the constraints
    the user gave in chat, and the time work mode started (from `date`).
-3. Create the GitHub repository as *Publishing* says, under a descriptive
-   kebab-case name that says what the project is about, not the folder name
-   (which may be generated).
+3. {_repo_step(project_name, auto_named)}
    If `gh` is missing or not logged in, record that in `INTENT.md` as
    BLOCKED-ON-USER-ACTION and carry on locally.
 4. Fill in `README.md`, and run the `cleanvibe-update-check` skill if its
