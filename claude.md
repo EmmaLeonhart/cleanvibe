@@ -110,6 +110,12 @@ devlog.md current.
 - **Last cleanvibe update check:** `never`
 - **Updates source:** <https://cleanvibe.emmaleonhart.com/updates.md>
 
+## Session start: turn the loop on first
+**The very first action of every session in this repo is to start the
+`autonomous-loop` cron** (one `CronCreate`, `7,37 * * * *`, the prompt from the
+skill), without asking and before anything else. Emma, 2026-11-09: this was the
+only repo that didn't, because nothing here said so.
+
 ## Hourly status-report cron for extensive work
 (Heading kept for old links; the loop is no longer hourly or a status report.)
 The source of truth is the `autonomous-loop` skill (`.claude/skills/autonomous-loop/SKILL.md`,
