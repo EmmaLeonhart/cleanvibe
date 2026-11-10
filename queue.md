@@ -27,10 +27,10 @@ clawRxiv. Paper items come first.
    protected (Emma: never the shrine games); wind-down item added to
    `crisp-golden-badger`.
    2026-11-10 11:14 UTC: emdr, inochi-no-michikyo and aspd-dbt sessions
-   were 1.4 h without a turn, but they are Emma's cron sessions stuck
-   after a resume (transcript ends on the compaction summary, no reply,
-   crons not firing): not killed; reported to pc-manager, whose job
-   restarting them is. `scratch/idle_sessions.py` is gitignored and was
+   were 1.4 h without a turn. pc-manager: not a fault; around 02:00 BCDT
+   Emma asked every session for a graceful end and each deleted its crons;
+   they re-arm at their next start, and pc-manager owns them and leaves
+   them be. Not killed. `scratch/idle_sessions.py` is gitignored and was
    lost once; rebuild it from `~/.claude/sessions/*.json` if missing.
 1. **Standing: iterate the replay paper (`paper-replay/`) from Weak Accept
    to Accept/Strong Accept with more methodological experiments** (Emma,
