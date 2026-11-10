@@ -2430,3 +2430,16 @@ v2.0.4. BLOCKED-ON-USER-ACTION (Emma): create the release or allow it. The
 queue item stays at the top, cut down to that step; release notes are in
 gitignored `scratch/release-2.0.7.md`.
 
+
+## 2026-11-09 — Relaunch restarts the work loop
+
+Emma: "the runclaude thing is defective". Crons end with the session that
+made them, and the v2 resume prompt (what `!runClaude.bat` and `open_project`
+send) never said to start the loop again, so every relaunch of a project in
+work mode came back with no loop. The resume prompt now says: if work mode has
+started, start the work loop (`autonomous-loop`) before anything else. Test
+`test_resume_prompt_restarts_the_loop`. This repo's own `!runClaude.bat` sent
+no prompt at all and printed "ECHO is off." for a blank `echo`; it now prints
+the folder and sends a prompt that starts the loop. CLAUDE.md also says to
+start the loop as the first action of a session here. Existing projects keep
+their old `.bat` until regenerated; ships in the next release.

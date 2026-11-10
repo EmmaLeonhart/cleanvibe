@@ -276,6 +276,12 @@ class TestResearchFixes203(unittest.TestCase):
         self.assertIn("cleanvibe-update-check", templates.v2_resume_prompt("/home/e/p"))
         self.assertIn("cleanvibe-update-check", templates.v2_first_prompt("/home/e/p", True))
 
+    def test_resume_prompt_restarts_the_loop(self):
+        # Crons are session-local: a relaunch via !runClaude.bat had no loop (2026-11-09).
+        prompt = templates.v2_resume_prompt("/home/e/p")
+        self.assertIn("autonomous-loop", prompt)
+        self.assertIn("autonomous-loop", templates.v2_runclaude_bat("/home/e/p"))
+
     def test_claude_md_states_the_new_rules(self):
         md = templates.v2_claude_md("p")
         self.assertIn("Times come from the clock", md)                  # M3
