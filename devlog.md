@@ -2443,3 +2443,15 @@ no prompt at all and printed "ECHO is off." for a blank `echo`; it now prints
 the folder and sends a prompt that starts the loop. CLAUDE.md also says to
 start the loop as the first action of a session here. Existing projects keep
 their old `.bat` until regenerated; ships in the next release.
+
+## 2026-11-10 — Queue item "a session ends its crons when its work is finished" closed, superseded
+
+Queued 2026-10-07 from a pc-manager relay (looping sessions use up Emma's
+tokens): delete the loop cron when the queue and `todo.md` are empty. Not
+done, by decision: every later word from Emma says the opposite. The
+`autonomous-loop` skill since v2.0.6 (2026-10-17) says only the user turns
+the cron off, "not because the queue is empty"; her global rule says crons
+stay on in every repo that uses them and no state is a reason to leave them
+off; and on 2026-11-09 she asked why this repo wasn't starting its loop. An
+idle tick stays cheap (one line). If token use from many loops is still a
+problem, that's a question for Emma, not a change to make on her behalf.
