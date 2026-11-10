@@ -46,6 +46,11 @@ skill, before anything else: crons end with the session that made them, so a rel
 Crons last only as long as the session that made them, and the resume prompt never said to start the
 loop again, so every relaunch of a project in work mode came back without one.
 
+**A name you chose is the repo name (existing repos: in CLAUDE.md, replace the descriptive-name
+`gh repo create` and work-mode step 3 with the folder name, if you chose it).** Sessions replaced names
+the user gave with longer "descriptive" ones. cleanvibe now writes one of two CLAUDE.md texts at
+creation: a chosen name is kept as the repo name; only a generated passphrase gets a descriptive one.
+
 ---
 
 ## v2.0.6 (2026-10-17) — the loop keeps going after the first item
