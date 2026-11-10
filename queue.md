@@ -26,6 +26,12 @@ clawRxiv. Paper items come first.
    `genealogy-1e` (10.5 h); the shrine-management session is idle but
    protected (Emma: never the shrine games); wind-down item added to
    `crisp-golden-badger`.
+   2026-11-10 11:14 UTC: emdr, inochi-no-michikyo and aspd-dbt sessions
+   were 1.4 h without a turn, but they are Emma's cron sessions stuck
+   after a resume (transcript ends on the compaction summary, no reply,
+   crons not firing): not killed; reported to pc-manager, whose job
+   restarting them is. `scratch/idle_sessions.py` is gitignored and was
+   lost once; rebuild it from `~/.claude/sessions/*.json` if missing.
 1. **Standing: iterate the replay paper (`paper-replay/`) from Weak Accept
    to Accept/Strong Accept with more methodological experiments** (Emma,
    2026-10-07: focus on that one). The hook paper waits. Background: (Emma,
