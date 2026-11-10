@@ -158,7 +158,10 @@ status line, delete this item and log it in `devlog.md`.
    main con): one hook/no-hook pair at a time, outside this repo, a long
    brief whose work comes in many short turns (so cues can arrive),
    launched with `--visibility public`. Start it when the chess control
-   winds down.
+   winds down. **Held 2026-11-10 00:21 (my call):** not started yet; a pair
+   loops for hours and item 3 records Emma's complaint that looping
+   sessions use up her tokens. Start it once post 2942's review says what
+   data v4 needs, so the pair is shaped by that review.
    **Controlled experiment (answers v4's Reject, post 2907):**
    `paper/experiment/run.py` builds a fixture cleanvibe project whose
    INTENT.md is 3.2 h and 6 work commits stale with one sentence made false,
