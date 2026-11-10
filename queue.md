@@ -67,7 +67,8 @@ status line, delete this item and log it in `devlog.md`.
    (`paper/experiment/interactive.py`, 5 trials at the 20:48 tick) started
    2026-11-09 ~23:55 after re-cloning `cleanvibe-practice/crisp-golden-badger`
    from GitHub (the local copy was gone); results go to
-   `paper/experiment/interactive_results.jsonl`; compare with headless;
+   `paper/experiment/interactive_results.jsonl`: **5 of 5 updated** (headless
+   ruled out; in review-log, goes into paper.md after 2942's review);
    if it also updates, probe the prompt cache. The old private `ai-context-research` repo is no longer
    used; nothing from it is copied here.
 2. **Experiment: practice projects and reports on them** (Emma,

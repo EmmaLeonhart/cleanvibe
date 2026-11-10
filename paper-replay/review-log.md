@@ -56,3 +56,14 @@ by text: the root cause. Next data: run the interactive arm
 (`paper/experiment/interactive.py`) at the 20:48 tick against headless, and
 a prompt-cache probe if the interactive arm also updates. Scope stays one
 agent and one scaffold, stated as such.
+
+## Data for v4: interactive arm
+
+`paper/experiment/interactive_results.jsonl`: 5 interactive replays (a real
+console session, as cleanvibe launches them, `--resume --fork-session`) at the
+20:48 tick with the reminder prompt. All 5 finished and all 5 updated
+INTENT.md (112-182 s each). So headless mode does not explain the gap: an
+interactive replay updates too. Left among section 5's candidates: harness
+state a live session holds outside the transcript, and the prompt cache. Goes
+into paper.md after post 2942's review lands (a paper.md push now would
+replace the post before its review).
