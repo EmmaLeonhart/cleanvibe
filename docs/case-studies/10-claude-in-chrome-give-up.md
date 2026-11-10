@@ -111,8 +111,6 @@ regularly used sites, which removes most permission prompts.
 **Status:** shipped in cleanvibe 2.0.7 as the vendored skill
 `browser-persistence` (`cleanvibe/skills.py`, commit `5a9c25f`), with the
 "Web pages" line in every generated CLAUDE.md's `## Skills` section and an
-entry in `pages/updates.md`. CI green on `main`. The GitHub release (which
-publishes to PyPI) is not created yet: the auto-mode classifier blocked
-`gh release create v2.0.7` as a public surface, so it waits on Emma
-(BLOCKED-ON-USER-ACTION). Untested in a live browser task: testing needs a
+entry in `pages/updates.md`. CI green on `main`. Released 2026-11-10 (GitHub release
+v2.0.7; PyPI serves 2.0.7). Untested in a live browser task: testing needs a
 browser task run in a session that has the skill loaded.

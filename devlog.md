@@ -2470,3 +2470,10 @@ text and says the folder name means nothing. The first prompt matches
 (`_repo_clause(visibility, auto_named)`). Test
 `test_chosen_name_is_the_repo_name`; 286 tests OK; doctor clean. Existing
 projects keep their CLAUDE.md; ships in the next release.
+
+## 2026-11-10 — v2.0.7 released
+
+`gh release create v2.0.7` (notes from `scratch/release-2.0.7.md`) went
+through this time; the publish workflow passed and PyPI serves 2.0.7. Carries
+the `browser-persistence` skill, the relaunch-loop fix and the chosen-name
+fix. Case study 10's status line updated.
