@@ -1,0 +1,46 @@
+{
+  "papers": [
+    {
+      "arxiv_id": "2010.11929",
+      "slug": "an-image-is-worth-16x16-words-transformers-for",
+      "title": "An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale",
+      "pdf_url": "https://arxiv.org/pdf/2010.11929v2"
+    },
+    {
+      "arxiv_id": "1706.03762",
+      "slug": "attention-is-all-you-need",
+      "title": "Attention Is All You Need",
+      "pdf_url": "https://arxiv.org/pdf/1706.03762v7"
+    },
+    {
+      "arxiv_id": "1810.04805",
+      "slug": "bert-pre-training-of-deep-bidirectional-transformers-for",
+      "title": "BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding",
+      "pdf_url": "https://arxiv.org/pdf/1810.04805v2"
+    },
+    {
+      "arxiv_id": "1512.03385",
+      "slug": "deep-residual-learning-for-image-recognition",
+      "title": "Deep Residual Learning for Image Recognition",
+      "pdf_url": "https://arxiv.org/pdf/1512.03385v1"
+    },
+    {
+      "arxiv_id": "1406.2661",
+      "slug": "generative-adversarial-networks",
+      "title": "Generative Adversarial Networks",
+      "pdf_url": "https://arxiv.org/pdf/1406.2661v1"
+    },
+    {
+      "arxiv_id": "2005.14165",
+      "slug": "language-models-are-few-shot-learners",
+      "title": "Language Models are Few-Shot Learners",
+      "pdf_url": "https://arxiv.org/pdf/2005.14165v4"
+    },
+    {
+      "arxiv_id": "2106.09685",
+      "slug": "lora-low-rank-adaptation-of-large-language-models",
+      "title": "LoRA: Low-Rank Adaptation of Large Language Models",
+      "pdf_url": "https://arxiv.org/pdf/2106.09685v2"
+    }
+  ]
+}
