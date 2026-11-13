@@ -2528,3 +2528,14 @@ this repo's vendored copy is refreshed and `pages/updates.md` has an
 "Unreleased (next: v2.0.8)" entry. Why: job-hunt recorded one as "resume
 only on Emma's say-so". `tests/test_graceful_stop.py` keeps the wording in.
 Tests 288 pass; doctor clean.
+
+## 2026-11-13 — The data lake is a staging area
+
+Queue item (Emma, via the Topaz Wellness queue: "almost everything is
+supposed to be moved out of the data lake once it is done there"). The v2
+CLAUDE.md's "The data lake" section now says material that has been dealt
+with is `git mv`ed out to where it belongs, with a commit saying where and
+why; move, never delete; what is left in `data_lake/` is unfinished intake.
+The file list calls `data_lake/` incoming material not yet dealt with.
+Entry added to `pages/updates.md` (Unreleased, next v2.0.8);
+`tests/test_data_lake_staging.py` keeps it in. Tests 289 pass; doctor clean.

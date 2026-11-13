@@ -3602,6 +3602,14 @@ landed first (so its starting point is on record), then `git mv` it into
 `data_lake/downloads/`, so the user's own material stays distinguishable
 from what the agent added.
 
+**The data lake is a staging area, not a permanent home.** Once a piece of
+material has been dealt with (its spec turned into work, its notes written
+up, its dataset wired into the code), `git mv` it out to where it belongs in
+the project (`docs/`, `research/`, the code's data folder, and so on) and
+commit, saying where it went and why. Move, never delete. What is left in
+`data_lake/` is material nobody has dealt with yet, so a full data lake means
+unfinished intake.
+
 ## Thirty-minute intake (first session only)
 In the very first session, before anything else, schedule this with
 `CronCreate`: a one-time job (`recurring: false`) at the local time 30 minutes
@@ -3658,7 +3666,7 @@ hand.
 
 ## Files
 - `INTENT.md`: your running read of what this project is for.
-- `data_lake/`: the material the project works from (committed).
+- `data_lake/`: incoming material not yet dealt with (committed; moved out once done).
 - `README.md`: for people; fill it in once the purpose is clear.
 - `sessions/`: session transcripts (automatic).
 - `scratch/`: one-off work, gitignored.

@@ -35,6 +35,11 @@ add it by hand). Why: on 2026-11-10 a session recorded a graceful stop as "resum
 say-so" in its INTENT.md. Emma: "The only purpose of a graceful stop is to stop that specific
 window ... It is not intended as stopping any work from happening at all."
 
+**CLAUDE.md template (v2): "The data lake" gains a paragraph** (existing repos: add it by hand).
+`data_lake/` is a staging area: once material is dealt with, `git mv` it out to where it belongs and
+commit; move, never delete; what is left is unfinished intake. Emma: "almost everything is supposed to
+be moved out of the data lake once it is done there."
+
 ## v2.0.7 (2026-10-30) — new skill: `browser-persistence`
 
 **New skill `browser-persistence` (existing repos: copy `.claude/skills/browser-persistence/SKILL.md`
