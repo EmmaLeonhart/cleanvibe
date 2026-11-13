@@ -228,8 +228,6 @@ bumped).
 
 ---
 
----
-
 ## Pointers
 
 - Completed work (chronological, with releases): `devlog.md`. Long-horizon backlog: `todo.md`.
