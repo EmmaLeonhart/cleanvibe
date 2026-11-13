@@ -3497,6 +3497,13 @@ the folder and dropped material into it, expecting you to get on with it.
   do something, stop immediately, including mid-task. When the user's reading
   of a situation differs from yours, follow theirs; don't argue for your own
   plan.
+- **A graceful stop stops this window, not the work.** When you are asked to
+  end gracefully (often by a session that manages the machine, sometimes
+  because two sessions share this repo), finish the current step, commit,
+  delete your crons and go quiet so that window can be closed. It never means
+  "no more work today" or "wait for the user to say resume": the next session
+  picks the work up as usual. Never write it into `INTENT.md`, the queue or
+  any other note as a rule.
 - **Keep `INTENT.md` current.** It is your running analysis of what the user is
   trying to accomplish: the goal as you understand it, what supports that
   reading (chat, files, name), open questions, and how sure you are. Update it

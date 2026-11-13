@@ -76,6 +76,10 @@ These are how the work is done, not reasons to stop the loop.
   because a tick failed, not because something looks risky, and not at the
   end of a burst of work. Only the user stops it (directly, or through the
   `emergency-stop` skill).
+- **A graceful stop ends this window only.** Asked to end gracefully, delete
+  the cron and go quiet so the window can be closed. The next session starts
+  the loop again as usual: a graceful stop is not a standing order, and it
+  never goes into `INTENT.md` or the queue as one.
 - If something goes wrong, say so plainly in your next message and carry on
   with whatever is still safe to do.
 - In a cleanvibe project, the switch to work mode in CLAUDE.md decides when

@@ -25,6 +25,16 @@ self-exempting for replication-style bounded work.
 
 ---
 
+## Unreleased (next: v2.0.8) — a graceful stop is not a standing order
+
+**`autonomous-loop`: new bullet under "Keep it running" (copy it from a fresh project).** A graceful
+stop ends one window only: delete the cron, go quiet so the window can be closed; the next session
+starts the loop again. It is never a standing order and never goes into `INTENT.md` or the queue as
+one. **CLAUDE.md template (v2): new rule after "Stop" and "don't"** saying the same (existing repos:
+add it by hand). Why: on 2026-11-10 a session recorded a graceful stop as "resume only on Emma's
+say-so" in its INTENT.md. Emma: "The only purpose of a graceful stop is to stop that specific
+window ... It is not intended as stopping any work from happening at all."
+
 ## v2.0.7 (2026-10-30) — new skill: `browser-persistence`
 
 **New skill `browser-persistence` (existing repos: copy `.claude/skills/browser-persistence/SKILL.md`

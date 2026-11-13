@@ -2515,3 +2515,16 @@ exchange with another person. Publishing those is Emma's call, asked in
 plain text; item 3 now carries only that question.
 Separately noticed: a tracked submodule `scratch-2026-09-25` (in
 `.gitmodules`) also points at the helping-with-arxiv repo; left as is.
+
+## 2026-11-13 — A graceful stop is not a standing order
+
+Queue item (Emma, 2026-11-10, relayed by pc-manager). The v2 CLAUDE.md
+template gains a rule after "Stop" and "don't": a graceful stop ends this
+window only (finish the step, commit, delete the crons, go quiet so the
+window can be closed), never means "no more work today" or "wait for the
+user to resume", and is never written into INTENT.md, the queue or notes as
+a rule. The `autonomous-loop` skill says the same under "Keep it running";
+this repo's vendored copy is refreshed and `pages/updates.md` has an
+"Unreleased (next: v2.0.8)" entry. Why: job-hunt recorded one as "resume
+only on Emma's say-so". `tests/test_graceful_stop.py` keeps the wording in.
+Tests 288 pass; doctor clean.
