@@ -228,11 +228,6 @@ bumped).
 
 ---
 
-**Data lake is a staging area (Emma, via the Topaz Wellness queue).** "with basically all clean vibe
-projects, the data lake is not properly treated ... almost everything is supposed to be moved out of the
-data lake once it is done there." The CLAUDE.md template only says material goes into data_lake/; add that
-finished material moves out of it.
-
 ---
 
 ## Pointers

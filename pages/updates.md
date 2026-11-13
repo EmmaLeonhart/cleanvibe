@@ -25,7 +25,7 @@ self-exempting for replication-style bounded work.
 
 ---
 
-## Unreleased (next: v2.0.8) — a graceful stop is not a standing order
+## Unreleased (next: v2.0.8) — a graceful stop is not a standing order; the data lake is a staging area
 
 **`autonomous-loop`: new bullet under "Keep it running" (copy it from a fresh project).** A graceful
 stop ends one window only: delete the cron, go quiet so the window can be closed; the next session
