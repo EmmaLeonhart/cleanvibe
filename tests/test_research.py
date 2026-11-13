@@ -17,6 +17,9 @@ from cleanvibe import templates
 from cleanvibe.cli import main
 from cleanvibe.research import research_project
 
+import cleanvibe.cli as _cli_launch
+_cli_launch.LAUNCH = False  # never start Claude from the tests
+
 IS_WINDOWS = platform.system() == "Windows"
 
 
@@ -204,7 +207,7 @@ class TestResearchCliDispatch(unittest.TestCase):
             proj = Path(tmp) / "proj"
             buf = io.StringIO()
             with redirect_stdout(buf):
-                main(["legacy", "research", str(proj), "--no-claude"])
+                main(["legacy", "research", str(proj)])
             self.assertTrue((proj / "docs" / "index.html").is_file())
             self.assertTrue((proj / "literature" / ".gitkeep").is_file())
 
@@ -213,7 +216,7 @@ class TestResearchCliDispatch(unittest.TestCase):
             proj = Path(tmp) / "proj"
             buf = io.StringIO()
             with redirect_stdout(buf):
-                main(["legacy", "new", str(proj), "--research", "--no-claude"])
+                main(["legacy", "new", str(proj), "--research"])
             # Routed to the research scaffold (has docs/ + literature/), not the
             # plain `new` one.
             self.assertTrue((proj / "docs" / "index.html").is_file())
@@ -224,8 +227,7 @@ class TestResearchCliDispatch(unittest.TestCase):
             proj = Path(tmp) / "proj"
             buf = io.StringIO()
             with redirect_stdout(buf):
-                main(["legacy", "research", str(proj), "--question", "Why does Z happen?",
-                      "--no-claude"])
+                main(["legacy", "research", str(proj), "--question", "Why does Z happen?"])
             readme = (proj / "README.md").read_text(encoding="utf-8")
             html = (proj / "docs" / "index.html").read_text(encoding="utf-8")
             self.assertIn("Why does Z happen?", readme)
@@ -238,7 +240,7 @@ class TestResearchCliDispatch(unittest.TestCase):
             proj = Path(tmp) / "proj"
             buf = io.StringIO()
             with redirect_stdout(buf):
-                main(["legacy", "new", str(proj), "--no-claude"])
+                main(["legacy", "new", str(proj)])
             self.assertFalse((proj / "docs").exists())
             self.assertFalse((proj / "literature").exists())
 

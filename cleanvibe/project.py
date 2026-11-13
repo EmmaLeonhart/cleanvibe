@@ -160,7 +160,7 @@ def open_project(path: Path, dry_run: bool = False, no_claude: bool = False) -> 
         print(f"[dry-run] Would open a new session in {path.resolve()} (resume prompt, --remote-control)")
         return
     if no_claude:
-        print(f"{path.resolve()} is a cleanvibe project; not launching Claude (--no-claude).")
+        print(f"{path.resolve()} is a cleanvibe project; not launching Claude.")
         return
     print(f"Opening cleanvibe project: {path.resolve()}")
     _launch_claude(

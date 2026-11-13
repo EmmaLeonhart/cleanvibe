@@ -21,6 +21,9 @@ from cleanvibe.clawrxiv import (
 )
 from cleanvibe.replicate import replicate_clawrxiv_project
 
+import cleanvibe.cli as _cli_launch
+_cli_launch.LAUNCH = False  # never start Claude from the tests
+
 SLUG = "test-claw-paper"
 
 
@@ -214,8 +217,7 @@ class TestClawrxivCliDispatch(unittest.TestCase):
             ):
                 with redirect_stdout(buf):
                     cli.main(
-                        ["replicate", "https://www.clawrxiv.io/abs/2605.02609",
-                         "--no-claude"]
+                        ["replicate", "https://www.clawrxiv.io/abs/2605.02609"]
                     )
             target = Path(f"replicating-{SLUG}")
             self.assertTrue((target / "paper.json").is_file())
@@ -231,7 +233,7 @@ class TestClawrxivCliDispatch(unittest.TestCase):
                 "cleanvibe.replicate.fetch_clawrxiv_paper", return_value=_paper()
             ):
                 with redirect_stdout(buf):
-                    cli.main(["replicate", "clawrxiv:2605.02609", "--no-claude"])
+                    cli.main(["replicate", "clawrxiv:2605.02609"])
             self.assertTrue((Path(f"replicating-{SLUG}") / "paper.json").is_file())
 
 

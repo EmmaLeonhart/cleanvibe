@@ -22,6 +22,9 @@ from cleanvibe import chat, templates
 from cleanvibe.chat import chat_project, default_chat_path
 from cleanvibe.cli import main
 
+import cleanvibe.cli as _cli_launch
+_cli_launch.LAUNCH = False  # never start Claude from the tests
+
 IS_WINDOWS = platform.system() == "Windows"
 
 
@@ -120,7 +123,7 @@ class TestChatCli(unittest.TestCase):
         tmp = tempfile.mkdtemp()
         proj = Path(tmp) / "mychat"
         with redirect_stdout(io.StringIO()):
-            main(["legacy", "chat", str(proj), "--topic", "Tea", "--no-claude"])
+            main(["legacy", "chat", str(proj), "--topic", "Tea"])
         self.assertIn("Tea", (proj / "README.md").read_text(encoding="utf-8"))
 
     def test_cli_without_name_uses_default(self):
@@ -128,7 +131,7 @@ class TestChatCli(unittest.TestCase):
         with mock.patch.object(chat, "default_chat_path", return_value=tmp / "chat-x"), \
                 mock.patch("cleanvibe.cli.default_chat_path", return_value=tmp / "chat-x"), \
                 redirect_stdout(io.StringIO()):
-            main(["legacy", "chat", "--no-claude"])
+            main(["legacy", "chat"])
         self.assertTrue((tmp / "chat-x" / "CLAUDE.md").is_file())
 
 

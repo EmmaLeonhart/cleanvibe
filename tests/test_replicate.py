@@ -22,6 +22,9 @@ from cleanvibe.replicate import (
     replicate_url_project,
 )
 
+import cleanvibe.cli as _cli_launch
+_cli_launch.LAUNCH = False  # never start Claude from the tests
+
 
 def _paper() -> ArxivPaper:
     return ArxivPaper(
@@ -469,7 +472,7 @@ class TestReplicateCliDispatch(unittest.TestCase):
             ):
                 with redirect_stdout(buf):
                     cli.main(
-                        ["replicate", "https://lab.example.org/cool.pdf", "--no-claude"]
+                        ["replicate", "https://lab.example.org/cool.pdf"]
                     )
             target = Path("replicating-cool")
             self.assertTrue((target / "source.json").is_file())
@@ -481,7 +484,7 @@ class TestReplicateCliDispatch(unittest.TestCase):
         with _in_tmp_cwd():
             buf = io.StringIO()
             with redirect_stdout(buf):
-                cli.main(["replicate", "some-cool-paper", "--no-claude"])
+                cli.main(["replicate", "some-cool-paper"])
             self.assertTrue((Path("some-cool-paper") / "SKILL.md").is_file())
             self.assertFalse((Path("some-cool-paper") / "paper.json").exists())
 
@@ -494,8 +497,7 @@ class TestReplicateCliDispatch(unittest.TestCase):
                     patch("cleanvibe.replicate._run_extraction") as extract:
                 with redirect_stdout(buf):
                     cli.main(
-                        ["replicate", "https://www.alphaxiv.org/overview/1706.03762",
-                         "--no-claude"]
+                        ["replicate", "https://www.alphaxiv.org/overview/1706.03762"]
                     )
             target = Path(f"replicating-{SLUG}")
             self.assertTrue((target / "paper.json").is_file())

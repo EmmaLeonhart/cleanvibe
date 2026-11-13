@@ -12,6 +12,9 @@ from unittest import mock
 
 from cleanvibe import cli, project
 
+import cleanvibe.cli as _cli_launch
+_cli_launch.LAUNCH = False  # never start Claude from the tests
+
 
 # Never let a launch-path test write the real ~/.claude.json (cleanvibe.trust
 # pre-trusts new project folders there). Set before any test runs, whether or
@@ -43,7 +46,7 @@ class _InTempDir(unittest.TestCase):
 
 class TestDefault(_InTempDir):
     def test_outside_a_project_creates_an_auto_named_one(self):
-        code, _, _ = self.run_cli("--no-claude")
+        code, _, _ = self.run_cli()
         self.assertEqual(code, 0)
         made = [p for p in self.tmp.iterdir() if p.is_dir()]
         self.assertEqual(len(made), 1)
@@ -51,7 +54,7 @@ class TestDefault(_InTempDir):
         self.assertTrue(project.is_cleanvibe_repo(made[0]))
 
     def test_inside_a_project_opens_it_instead(self):
-        self.run_cli("new", "proj", "--no-claude")
+        self.run_cli("new", "proj")
         os.chdir(self.tmp / "proj")
         with mock.patch.object(cli, "open_project") as open_project, \
                 mock.patch.object(cli, "new_project") as new_project:
@@ -60,7 +63,8 @@ class TestDefault(_InTempDir):
         new_project.assert_not_called()
 
     def test_default_launches_the_first_session(self):
-        with mock.patch.object(project, "_launch_claude") as launch:
+        with mock.patch.object(project, "_launch_claude") as launch, \
+                mock.patch.object(cli, "LAUNCH", True):
             self.run_cli()
         args, kwargs = launch.call_args
         self.assertIn("first ever session", args[1])
@@ -70,20 +74,20 @@ class TestDefault(_InTempDir):
 
 class TestNew(_InTempDir):
     def test_named(self):
-        code, _, _ = self.run_cli("new", "oolong", "--no-claude")
+        code, _, _ = self.run_cli("new", "oolong")
         self.assertEqual(code, 0)
         self.assertTrue((self.tmp / "oolong" / ".cleanvibe.json").is_file())
 
     def test_unnamed_is_auto_named(self):
-        self.run_cli("new", "--no-claude")
+        self.run_cli("new")
         auto, = [p for p in self.tmp.iterdir() if p.is_dir()]
         self.assertIn("created without a name", (auto / "INTENT.md").read_text(encoding="utf-8"))
 
     def test_existing_project_is_opened_not_overwritten(self):
-        self.run_cli("new", "oolong", "--no-claude")
+        self.run_cli("new", "oolong")
         intent = self.tmp / "oolong" / "INTENT.md"
         intent.write_text("edited", encoding="utf-8")
-        code, out, _ = self.run_cli("new", "oolong", "--no-claude")
+        code, out, _ = self.run_cli("new", "oolong")
         self.assertEqual(code, 0)
         self.assertIn("already a cleanvibe project", out)
         self.assertEqual(intent.read_text(encoding="utf-8"), "edited")
@@ -91,20 +95,20 @@ class TestNew(_InTempDir):
     def test_non_empty_non_project_is_refused(self):
         (self.tmp / "stuff").mkdir()
         (self.tmp / "stuff" / "notes.txt").write_text("mine", encoding="utf-8")
-        code, _, err = self.run_cli("new", "stuff", "--no-claude")
+        code, _, err = self.run_cli("new", "stuff")
         self.assertEqual(code, 2)
         self.assertIn("legacy convert", err)
         self.assertEqual(sorted(p.name for p in (self.tmp / "stuff").iterdir()), ["notes.txt"])
 
     def test_empty_existing_dir_is_used(self):
         (self.tmp / "empty").mkdir()
-        self.run_cli("new", "empty", "--no-claude")
+        self.run_cli("new", "empty")
         self.assertTrue((self.tmp / "empty" / "CLAUDE.md").is_file())
 
 
 class TestLegacy(_InTempDir):
     def test_legacy_runs_with_a_deprecation_warning(self):
-        code, _, err = self.run_cli("legacy", "research", "study", "--no-claude")
+        code, _, err = self.run_cli("legacy", "research", "study")
         self.assertEqual(code, 0)
         self.assertIn("DEPRECATED", err)
         self.assertTrue((self.tmp / "study" / "literature").is_dir())
@@ -122,7 +126,7 @@ class TestLegacy(_InTempDir):
         self.assertEqual(code, 2)
 
     def test_replicate_is_not_legacy(self):
-        code, _, err = self.run_cli("replicate", "some-paper", "--no-claude")
+        code, _, err = self.run_cli("replicate", "some-paper")
         self.assertEqual(code, 0)
         self.assertNotIn("DEPRECATED", err)
         self.assertTrue((self.tmp / "some-paper" / "replication_target").is_dir())
@@ -130,3 +134,20 @@ class TestLegacy(_InTempDir):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestNoClaudeFlagIsGone(unittest.TestCase):
+    """--no-claude was removed in 2.0.8: it left projects that never got their
+    first session (Emma, 2026-11-13). Every command must refuse it."""
+
+    def test_new_rejects_no_claude(self):
+        err = io.StringIO()
+        with redirect_stderr(err), self.assertRaises(SystemExit) as ctx:
+            cli.main(["new", "x", "--no-claude"])
+        self.assertEqual(ctx.exception.code, 2)
+        self.assertIn("--no-claude", err.getvalue())
+
+    def test_replicate_rejects_no_claude(self):
+        with redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as ctx:
+            cli.main(["replicate", "2605.20919", "--no-claude"])
+        self.assertEqual(ctx.exception.code, 2)

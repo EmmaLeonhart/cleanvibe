@@ -11,6 +11,9 @@ from pathlib import Path
 from cleanvibe import cli
 from cleanvibe.replicate import load_batch
 
+import cleanvibe.cli as _cli_launch
+_cli_launch.LAUNCH = False  # never start Claude from the tests
+
 CORPUS = Path(__file__).resolve().parent.parent / "docs" / "replication-examples" / "papers.json"
 
 

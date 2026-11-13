@@ -18,6 +18,9 @@ from cleanvibe import templates
 from cleanvibe.cli import main
 from cleanvibe.original import original_project
 
+import cleanvibe.cli as _cli_launch
+_cli_launch.LAUNCH = False  # never start Claude from the tests
+
 IS_WINDOWS = platform.system() == "Windows"
 
 
@@ -206,7 +209,7 @@ class TestOriginalCliDispatch(unittest.TestCase):
             proj = Path(tmp) / "proj"
             buf = io.StringIO()
             with redirect_stdout(buf):
-                main(["legacy", "original", str(proj), "--no-claude"])
+                main(["legacy", "original", str(proj)])
             self.assertTrue((proj / "docs" / "index.html").is_file())
             self.assertTrue((proj / "topics" / ".gitkeep").is_file())
             self.assertTrue((proj / "literature" / ".gitkeep").is_file())
@@ -216,7 +219,7 @@ class TestOriginalCliDispatch(unittest.TestCase):
             proj = Path(tmp) / "proj"
             buf = io.StringIO()
             with redirect_stdout(buf):
-                main(["legacy", "new", str(proj), "--original", "--no-claude"])
+                main(["legacy", "new", str(proj), "--original"])
             # Routed to the original scaffold (has topics/), not plain `new`.
             self.assertTrue((proj / "topics" / ".gitkeep").is_file())
             self.assertTrue((proj / "docs" / "index.html").is_file())
@@ -226,8 +229,7 @@ class TestOriginalCliDispatch(unittest.TestCase):
             proj = Path(tmp) / "proj"
             buf = io.StringIO()
             with redirect_stdout(buf):
-                main(["legacy", "original", str(proj), "--area", "tensor network compilers",
-                      "--no-claude"])
+                main(["legacy", "original", str(proj), "--area", "tensor network compilers"])
             readme = (proj / "README.md").read_text(encoding="utf-8")
             claude = (proj / "CLAUDE.md").read_text(encoding="utf-8")
             self.assertIn("tensor network compilers", readme)
@@ -238,7 +240,7 @@ class TestOriginalCliDispatch(unittest.TestCase):
             proj = Path(tmp) / "proj"
             buf = io.StringIO()
             with redirect_stdout(buf):
-                main(["legacy", "new", str(proj), "--no-claude"])
+                main(["legacy", "new", str(proj)])
             self.assertFalse((proj / "topics").exists())
             self.assertFalse((proj / "docs").exists())
 

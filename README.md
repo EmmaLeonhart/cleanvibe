@@ -353,7 +353,6 @@ writes at the project root. Exits `1` if anything matched.
 ```
 cleanvibe --dry-run                       # Preview what bare `cleanvibe` would do here
 cleanvibe new NAME --dry-run              # Preview a new project
-cleanvibe new NAME --no-claude            # Create it without launching Claude
 cleanvibe replicate URL --dry-run         # Preview a replication scaffold
 cleanvibe doctor                          # Audit the current project for drift (read-only)
 cleanvibe scan                            # Pattern-scan third-party code before running it (read-only)

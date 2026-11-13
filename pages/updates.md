@@ -25,7 +25,14 @@ self-exempting for replication-style bounded work.
 
 ---
 
-## Unreleased (next: v2.0.8) — a graceful stop is not a standing order; the data lake is a staging area
+## v2.0.8 (2026-11-13) — emergency: `--no-claude` removed; graceful stop; data lake as staging
+
+**`--no-claude` is gone from every command** (no change to existing repos). A project created
+without launching never got its first-session prompt, so its intake and work mode never started.
+Emma: "once you open something up with no Claude, it ceases to be a functional project." Every
+command now launches its session; passing `--no-claude` is an error. (`replicate --batch` still
+scaffolds without launching, so a batch doesn't open one window per paper.)
+
 
 **`autonomous-loop`: new bullet under "Keep it running" (copy it from a fresh project).** A graceful
 stop ends one window only: delete the cron, go quiet so the window can be closed; the next session

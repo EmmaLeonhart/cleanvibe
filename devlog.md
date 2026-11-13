@@ -2560,3 +2560,18 @@ full history (secrets check clean, `cleanvibe scan` matched nothing). It
 includes another author's commits and the Claw4S site's photos, which I
 had flagged to her beforehand. `deleuze-claw4S` is not merged. Tests 289
 pass; doctor clean.
+
+## 2026-11-13 — v2.0.8 (emergency): `--no-claude` removed
+
+Emma: "remove no Claude as an option ... and make an emergency release ...
+because no Claude just results in unusable projects." Earlier today I used
+`cleanvibe new --no-claude` and launched `deleuze-project` by hand, against
+her wording; she has a fresh `deleuze-project-2` launched the normal way
+(its own first step subtree-merges `deleuze-claw4S` into its data lake).
+The flag is gone from every command (argparse now rejects it, tested);
+the CLI launches unconditionally behind an internal `cli.LAUNCH` that only
+the test suite turns off, so CI never starts Claude. README and CLAUDE.md's
+smoke-test lines no longer use it. My call, recorded: `replicate --batch`
+keeps scaffolding without launching, since launching would open one
+session per paper; Emma can say otherwise. The release also carries the
+graceful-stop and data-lake-staging template changes. Tests 291 pass.

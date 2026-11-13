@@ -15,6 +15,9 @@ from unittest.mock import patch
 
 from cleanvibe.cli import _suggest_name, main
 
+import cleanvibe.cli as _cli_launch
+_cli_launch.LAUNCH = False  # never start Claude from the tests
+
 
 _GIT_ENV = {
     "GIT_AUTHOR_NAME": "cleanvibe-test",
@@ -49,7 +52,7 @@ class TestNewPrompt(unittest.TestCase):
             buf = io.StringIO()
             with patch("cleanvibe.cli._ask", side_effect=["y"]):
                 with redirect_stdout(buf):
-                    main(["legacy", "new", str(d), "--no-claude"])
+                    main(["legacy", "new", str(d)])
             self.assertTrue((d / ".git").is_dir())
             self.assertTrue((d / "CLAUDE.md").is_file())
             self.assertTrue((d / "existing.txt").is_file())  # original kept
@@ -66,7 +69,7 @@ class TestNewPrompt(unittest.TestCase):
             buf = io.StringIO()
             with patch("cleanvibe.cli._ask", side_effect=["n", str(chosen)]):
                 with redirect_stdout(buf):
-                    main(["legacy", "new", str(d), "--no-claude"])
+                    main(["legacy", "new", str(d)])
             self.assertTrue((chosen / "CLAUDE.md").is_file())
             # The original directory was not converted (no scaffold injected).
             self.assertFalse((d / "CLAUDE.md").exists())
@@ -79,7 +82,7 @@ class TestNewPrompt(unittest.TestCase):
             buf = io.StringIO()
             with patch("cleanvibe.cli._ask", side_effect=["n", ""]):
                 with redirect_stdout(buf):
-                    main(["legacy", "new", str(d), "--no-claude"])
+                    main(["legacy", "new", str(d)])
             self.assertTrue((expected / "CLAUDE.md").is_file())
 
     def test_dry_run_never_blocks_on_input(self):
@@ -91,7 +94,7 @@ class TestNewPrompt(unittest.TestCase):
             buf = io.StringIO()
             with patch("cleanvibe.cli._ask", side_effect=_boom):
                 with redirect_stdout(buf):
-                    main(["legacy", "new", str(d), "--dry-run", "--no-claude"])
+                    main(["legacy", "new", str(d), "--dry-run"])
             out = buf.getvalue()
             self.assertIn("[dry-run]", out)
             self.assertFalse((d / "CLAUDE.md").exists())

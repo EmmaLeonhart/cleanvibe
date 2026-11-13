@@ -1,7 +1,7 @@
 """Cross-platform tests for cleanvibe.
 
 Uses stdlib unittest to match the project's zero-dependency philosophy.
-All tests pass --no-claude so Claude Code is never launched (no Claude install required in CI).
+All tests set cleanvibe.cli.LAUNCH = False so Claude Code is never launched (no Claude install required in CI).
 """
 
 import io
@@ -18,6 +18,9 @@ from cleanvibe.cli import main
 from cleanvibe.scaffold import (
     convert_project, create_project, find_planning_artifacts,
 )
+
+import cleanvibe.cli as _cli_launch
+_cli_launch.LAUNCH = False  # never start Claude from the tests
 
 
 IS_WINDOWS = platform.system() == "Windows"

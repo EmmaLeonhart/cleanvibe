@@ -49,6 +49,12 @@ LEGACY_COMMANDS = ("new", "research", "original", "chat", "clone", "convert")
 MOVED_COMMANDS = ("research", "original", "chat", "clone", "convert")
 
 
+
+# Every command launches its Claude session; there is no --no-claude flag
+# (removed in 2.0.8, Emma 2026-11-13: "no Claude just results in unusable
+# projects"). The test suite sets this to False so CI never starts Claude.
+LAUNCH = True
+
 def _ask(prompt: str) -> str:
     """Thin wrapper around input() so tests can monkeypatch the prompt seam."""
     return input(prompt)
@@ -88,17 +94,17 @@ def _do_default(args) -> None:
     otherwise create an auto-named project in the cwd and open that."""
     here = Path(".")
     if is_cleanvibe_repo(here):
-        open_project(here, dry_run=args.dry_run, no_claude=args.no_claude)
+        open_project(here, dry_run=args.dry_run, no_claude=(not LAUNCH))
         return
     new_project(auto_project_path(here), auto_named=True,
-                dry_run=args.dry_run, no_claude=args.no_claude, **_create_opts(args))
+                dry_run=args.dry_run, no_claude=(not LAUNCH), **_create_opts(args))
 
 
 def _do_new(args) -> None:
     """`cleanvibe new [NAME]`."""
     if args.name is None:
         new_project(auto_project_path(), auto_named=True,
-                    dry_run=args.dry_run, no_claude=args.no_claude, **_create_opts(args))
+                    dry_run=args.dry_run, no_claude=(not LAUNCH), **_create_opts(args))
         return
     path = args.name
     if path.exists() and not path.is_dir():
@@ -106,7 +112,7 @@ def _do_new(args) -> None:
         sys.exit(2)
     if path.is_dir() and is_cleanvibe_repo(path):
         print(f"{path} is already a cleanvibe project; opening it.")
-        open_project(path, dry_run=args.dry_run, no_claude=args.no_claude)
+        open_project(path, dry_run=args.dry_run, no_claude=(not LAUNCH))
         return
     if path.is_dir() and any(path.iterdir()):
         print(
@@ -115,7 +121,7 @@ def _do_new(args) -> None:
             file=sys.stderr,
         )
         sys.exit(2)
-    new_project(path, auto_named=False, dry_run=args.dry_run, no_claude=args.no_claude,
+    new_project(path, auto_named=False, dry_run=args.dry_run, no_claude=(not LAUNCH),
                 **_create_opts(args))
 
 
@@ -135,7 +141,7 @@ def _do_replicate(args) -> None:
         print("cleanvibe replicate: a target (paper ref, URL or folder) or "
               "--batch FILE is required", file=sys.stderr)
         sys.exit(2)
-    _replicate_one(args.target, args.path, args.dry_run, args.no_claude)
+    _replicate_one(args.target, args.path, args.dry_run, (not LAUNCH))
 
 
 def _replicate_one(target, path, dry_run, no_claude) -> None:
@@ -247,7 +253,7 @@ def _do_research(args) -> None:
         print(f"{path} already exists and is not empty; using {suggestion} instead.")
         path = suggestion
     research_project(
-        path, question=question, dry_run=args.dry_run, no_claude=args.no_claude
+        path, question=question, dry_run=args.dry_run, no_claude=(not LAUNCH)
     )
 
 
@@ -266,7 +272,7 @@ def _do_original(args) -> None:
         print(f"{path} already exists and is not empty; using {suggestion} instead.")
         path = suggestion
     original_project(
-        path, area=area, dry_run=args.dry_run, no_claude=args.no_claude
+        path, area=area, dry_run=args.dry_run, no_claude=(not LAUNCH)
     )
 
 
@@ -282,7 +288,7 @@ def _do_chat(args) -> None:
         suggestion = _suggest_name(path)
         print(f"{path} already exists and is not empty; using {suggestion} instead.")
         path = suggestion
-    chat_project(path, topic=args.topic, dry_run=args.dry_run, no_claude=args.no_claude)
+    chat_project(path, topic=args.topic, dry_run=args.dry_run, no_claude=(not LAUNCH))
 
 
 def _do_legacy_new(args) -> None:
@@ -301,13 +307,13 @@ def _do_legacy_new(args) -> None:
             print(f"[dry-run] Would prompt: convert it in place (like "
                   f"`cleanvibe legacy convert`), or create under a different name.")
             print(f"[dry-run] In-place (convert) preview:")
-            convert_project(args.path, dry_run=True, no_claude=args.no_claude)
+            convert_project(args.path, dry_run=True, no_claude=(not LAUNCH))
             return
         print(f"{args.path} already exists and is not empty.")
         if _confirm("Turn this existing directory into a git repo with "
                     "cleanvibe scaffolding and start work?"):
             print(f"Converting existing directory in place: {args.path}")
-            convert_project(args.path, no_claude=args.no_claude)
+            convert_project(args.path, no_claude=(not LAUNCH))
             return
         # NO: offer a different name (suggest one; user may type their own).
         suggestion = _suggest_name(args.path)
@@ -321,10 +327,10 @@ def _do_legacy_new(args) -> None:
             print(f"{target} is also non-empty; using {fallback} instead.")
             target = fallback
         print(f"Creating project: {target}")
-        create_project(target, dry_run=args.dry_run, no_claude=args.no_claude)
+        create_project(target, dry_run=args.dry_run, no_claude=(not LAUNCH))
         return
     print(f"Creating project: {args.path}")
-    create_project(args.path, dry_run=args.dry_run, no_claude=args.no_claude)
+    create_project(args.path, dry_run=args.dry_run, no_claude=(not LAUNCH))
 
 
 def _do_convert(args) -> None:
@@ -335,7 +341,7 @@ def _do_convert(args) -> None:
         print(f"Error: {args.path} is not a directory.", file=sys.stderr)
         sys.exit(1)
     print(f"Converting existing directory: {args.path}")
-    convert_project(args.path, dry_run=args.dry_run, no_claude=args.no_claude)
+    convert_project(args.path, dry_run=args.dry_run, no_claude=(not LAUNCH))
 
 
 def _do_clone(args) -> None:
@@ -346,7 +352,7 @@ def _do_clone(args) -> None:
             repo_name = repo_name[:-4]
         args.path = Path(repo_name)
     print(f"Cloning {args.repo} -> {args.path}")
-    clone_project(args.repo, args.path, dry_run=args.dry_run, no_claude=args.no_claude)
+    clone_project(args.repo, args.path, dry_run=args.dry_run, no_claude=(not LAUNCH))
 
 
 _LEGACY_HANDLERS = {
@@ -377,9 +383,6 @@ def _add_run_flags(parser, verb: str = "created") -> None:
     parser.add_argument(
         "--dry-run", action="store_true",
         help=f"Show what would be {verb} without writing anything",
-    )
-    parser.add_argument(
-        "--no-claude", action="store_true", help="Don't launch Claude Code afterwards"
     )
 
 
