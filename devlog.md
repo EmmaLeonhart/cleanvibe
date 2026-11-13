@@ -2499,3 +2499,19 @@ shows the last review clawRxiv wrote was on 2026-10-16 (post 2919); posts
 2920-2943 have none, so 2942's missing review was the same outage, not our
 502. The paper loop is BLOCKED-ON-EXTERNAL until a review appears; the
 practice pair stays held (queue.md says why).
+
+## 2026-11-13 — subtrees/: replication_skill merged, helping-with-arxiv moved
+
+Queue item 3, the parts that publish nothing new. `replication_skill`
+(already public) is subtree-merged with its history at
+`subtrees/replication_skill/`; `cleanvibe scan` finds no risky patterns in
+it. `helping-with-arxiv/` moved to `subtrees/helping-with-arxiv/` and its
+boilerplate research-mode `queue.md` deleted; CLAUDE.md's tree and todo.md
+point at the new path. Tests (286) pass; doctor clean.
+The other two repos stay out: their histories have no secrets, but
+`clawrxiv_clone` is half another author's commits with no license plus the
+Claw4S organisers' photos, and `deleuze-claw4S` holds a raw Discord
+exchange with another person. Publishing those is Emma's call, asked in
+plain text; item 3 now carries only that question.
+Separately noticed: a tracked submodule `scratch-2026-09-25` (in
+`.gitmodules`) also points at the helping-with-arxiv repo; left as is.

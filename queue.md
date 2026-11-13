@@ -204,13 +204,15 @@ clawRxiv. Paper items come first.
    **Next data for v6:** live sessions run to the lapse, with and without
    the hook, several pairs; and a probe of what a replay lacks (e.g.
    resume the live session itself interactively at a stale tick).
-3. **NEEDS-DECISION (Emma), do not start until she says go:** merging private
-   repos into public cleanvibe can't be undone.
-   **Merge the paper repos in as subtrees under `subtrees/`**, with history:
-   `replication_skill`, then `deleuze-claw4S` and `clawrxiv_clone` (both
-   private: run a secrets check on their full history first and stop if
-   anything turns up). Move `helping-with-arxiv/` to `subtrees/` and delete its
-   boilerplate `queue.md`.
+3. **NEEDS-DECISION (Emma): may `deleuze-claw4S` and `clawrxiv_clone` go
+   public?** Merging them into public cleanvibe as subtrees under
+   `subtrees/`, with history, can't be undone. Secrets check of both full
+   histories (2026-11-13): clean, only placeholder keys. But
+   `clawrxiv_clone` is 28 of 57 commits by Yingcheng Charles Wu, has no
+   license, and carries the Claw4S organisers' photos; `deleuze-claw4S`'s
+   `docs/discussion-log.md` is a raw Discord exchange with another person.
+   Asked Emma in plain text 2026-11-13: yes / no / only her own parts.
+   (`replication_skill` merged and `helping-with-arxiv/` moved: devlog.)
 4. **Quatrix arXiv submission:** BLOCKED-ON-USER-ACTION. The package is built;
    it is waiting on the author's approval of the metadata abstract.
 
