@@ -226,6 +226,20 @@ bumped).
 
 ---
 
+**Graceful stop is never a standing order (Emma, 2026-11-10, relayed by pc-manager).** Make the skills and
+the CLAUDE.md template say plainly: a graceful stop from pc-manager stops ONE WINDOW only, so pc-manager can
+close it once idle. It never means "no more work today" and must never be written into a repo's notes as
+a rule. Her words: "The only purpose of a graceful stop is to stop that specific window ... It is not
+intended as stopping any work from happening at all." It is often run because two sessions share a repo.
+On 2026-11-10 job-hunt's INTENT.md had recorded one as "resume only on Emma's say-so".
+
+**Data lake is a staging area (Emma, via the Topaz Wellness queue).** "with basically all clean vibe
+projects, the data lake is not properly treated ... almost everything is supposed to be moved out of the
+data lake once it is done there." The CLAUDE.md template only says material goes into data_lake/; add that
+finished material moves out of it.
+
+---
+
 ## Pointers
 
 - Completed work (chronological, with releases): `devlog.md`. Long-horizon backlog: `todo.md`.
