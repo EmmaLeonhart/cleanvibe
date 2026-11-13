@@ -26,7 +26,7 @@ cleanvibe/
 │   └── templates.py     # all generated text: v2 (v2_*, V2_INTAKE_PY), 1.x modes, replication, the session-log hook script
 ├── tests/               # stdlib unittest, run by CI on win/mac/linux
 ├── docs/                # replication_framing.md (vision) + replication-examples/ (reference corpus)
-├── subtrees/            # merged repos, with history: helping-with-arxiv/ (Quatrix arXiv prep), replication_skill/ (origin of `replicate`)
+├── subtrees/            # merged repos, with history: helping-with-arxiv/ (Quatrix arXiv prep), replication_skill/ (origin of `replicate`), clawrxiv_clone/ (Claw4S/clawRxiv clone)
 ├── pages/                # static GitHub Pages site (index.html/identity.css/CNAME → cleanvibe.emmaleonhart.com)
 ├── .github/workflows/
 │   ├── ci.yml           # 3-OS x 2-py-version matrix

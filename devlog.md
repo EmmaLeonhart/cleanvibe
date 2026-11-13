@@ -2550,3 +2550,13 @@ and the question to her wrongly put it as "may they go public". Item 3 is
 closed with those two merges dropped. `replication_skill` (already public)
 and the `helping-with-arxiv/` move stand. The secrets-check clones in the
 gitignored `scratch/secrets-check/` are left as they are.
+
+## 2026-11-13 — clawrxiv_clone merged; Deleuze stays out
+
+Emma corrected the "no": the Claw4S clone is fine to subtree in, the
+Deleuze project is not ("the random Deleuze project that doesn't exist
+anymore"). `clawrxiv_clone` is now at `subtrees/clawrxiv_clone/` with its
+full history (secrets check clean, `cleanvibe scan` matched nothing). It
+includes another author's commits and the Claw4S site's photos, which I
+had flagged to her beforehand. `deleuze-claw4S` is not merged. Tests 289
+pass; doctor clean.
