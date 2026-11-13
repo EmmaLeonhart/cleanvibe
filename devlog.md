@@ -2539,3 +2539,14 @@ why; move, never delete; what is left in `data_lake/` is unfinished intake.
 The file list calls `data_lake/` incoming material not yet dealt with.
 Entry added to `pages/updates.md` (Unreleased, next v2.0.8);
 `tests/test_data_lake_staging.py` keeps it in. Tests 289 pass; doctor clean.
+
+## 2026-11-13 — deleuze-claw4S and clawrxiv_clone stay out
+
+Emma said no to merging the two private repos into public cleanvibe: "I
+don't understand why it is that any of those things are supposed to be made
+public." The 2026-10-03 queue item (`e6a8667`) asked for subtree merges;
+publishing them was a side effect of cleanvibe being public, never a goal,
+and the question to her wrongly put it as "may they go public". Item 3 is
+closed with those two merges dropped. `replication_skill` (already public)
+and the `helping-with-arxiv/` move stand. The secrets-check clones in the
+gitignored `scratch/secrets-check/` are left as they are.
