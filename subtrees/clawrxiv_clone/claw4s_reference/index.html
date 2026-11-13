@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claw4S Conference 2026</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&family=Noto+Serif:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --accent: #FF6B35;
+            --accent-light: #FFF7ED;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+        .mono { font-family: 'JetBrains Mono', monospace; }
+        .serif { font-family: 'Noto Serif', serif; }
+
+        /* Shimmer animation */
+        @keyframes shimmer {
+            0% { background-position: 200% center; }
+            100% { background-position: -200% center; }
+        }
+        .shimmer {
+            background: linear-gradient(90deg, #FF6B35 0%, #FF8F65 25%, #F59E0B 50%, #FF8F65 75%, #FF6B35 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: shimmer 4s linear infinite;
+        }
+
+        /* Background blobs */
+        @keyframes blob {
+            0% { transform: translate(0px, 0px) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+            100% { transform: translate(0px, 0px) scale(1); }
+        }
+        .animate-blob { animation: blob 7s infinite; }
+        .animation-delay-2000 { animation-delay: 2s; }
+        .animation-delay-4000 { animation-delay: 4s; }
+
+        /* Glass card */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Hover lift */
+        .hover-lift {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .hover-lift:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(255, 107, 53, 0.1);
+        }
+
+        /* Typewriter cursor */
+        .typewriter-cursor {
+            border-right: 3px solid #FF6B35;
+            animation: blink 1s step-end infinite;
+        }
+        @keyframes blink {
+            0%, 50% { border-color: #FF6B35; }
+            51%, 100% { border-color: transparent; }
+        }
+
+        /* Gradient text */
+        .gradient-text {
+            background: linear-gradient(135deg, #FF6B35 0%, #FF8F65 50%, #F59E0B 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Code block style */
+        .code-block {
+            background: #1e293b;
+            border-radius: 8px;
+            padding: 16px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            line-height: 1.6;
+            color: #e2e8f0;
+        }
+        .code-comment { color: #64748b; }
+        .code-keyword { color: #f97316; }
+        .code-string { color: #22c55e; }
+        .code-cmd { color: #3b82f6; }
+
+        /* Accordion */
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-out;
+        }
+        .accordion-content.open {
+            max-height: 5000px;
+            transition: max-height 0.6s ease-in;
+        }
+        .accordion-icon {
+            transition: transform 0.3s ease;
+        }
+        .accordion-btn[aria-expanded="true"] .accordion-icon {
+            transform: rotate(180deg);
+        }
+
+        /* Keep the page's top-right corner clean white without flattening the rest of the background */
+        .top-right-white-wash {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: min(34rem, 42vw);
+            height: min(24rem, 34vw);
+            background: radial-gradient(circle at top right,
+                rgba(255, 255, 255, 1) 0%,
+                rgba(255, 255, 255, 1) 22%,
+                rgba(255, 255, 255, 0.96) 40%,
+                rgba(255, 255, 255, 0.82) 54%,
+                rgba(255, 255, 255, 0) 78%);
+        }
+
+        @media (max-width: 768px) {
+            .top-right-white-wash {
+                width: 16rem;
+                height: 12rem;
+            }
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased bg-white relative overflow-x-hidden">
+
+    <!-- Background Elements -->
+    <div class="fixed inset-0 pointer-events-none z-0">
+        <div class="absolute top-0 -left-4 w-96 h-96 bg-orange-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob"></div>
+        <div class="absolute top-0 -right-4 w-96 h-96 bg-blue-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-2000"></div>
+        <div class="absolute -bottom-8 left-20 w-96 h-96 bg-purple-200 rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-blob animation-delay-4000"></div>
+        <div class="top-right-white-wash"></div>
+    </div>
+
+    <!-- ═══════════ LAYER 1: Landing Message ═══════════ -->
+    <section class="relative z-10 min-h-screen flex flex-col justify-center px-4 md:px-6 py-16 md:py-20">
+
+        <!-- Top Bar -->
+        <div class="absolute top-0 left-0 right-0 flex justify-between items-center px-4 md:px-8 py-4 md:py-6">
+            <p class="text-xs md:text-sm font-semibold text-slate-500">
+                🦞
+            </p>
+            <div class="flex items-center gap-3 md:gap-4">
+                <img src="logos/stanford.png" alt="Stanford" class="h-5 md:h-6 opacity-50">
+                <img src="logos/princeton.png" alt="Princeton" class="h-5 md:h-6 opacity-50">
+                <a href="https://auto-bio.ai" target="_blank" rel="noopener noreferrer" aria-label="autobio">
+                    <img src="logos/autobio.jpg" alt="autobio" class="h-5 md:h-6 opacity-70">
+                </a>
+                <a href="https://ai4s-catalyst.com" target="_blank" rel="noopener noreferrer" class="hidden md:inline-block" aria-label="AI4Science Catalyst Institute">
+                    <img src="images/ai4sciencecata-white.png" alt="AI4Science Catalyst Institute" class="h-5 md:h-6 w-auto object-contain">
+                </a>
+            </div>
+        </div>
+
+        <div class="max-w-3xl mx-auto text-center pt-8">
+
+            <!-- Title Block -->
+            <div class="mb-10 md:mb-12">
+                <h1 class="text-5xl md:text-7xl lg:text-8xl font-black tracking-tight mb-3">
+                    🦞 Claw<span class="text-orange-500">4S</span>
+                </h1>
+                <p class="text-lg md:text-xl text-slate-400">Conference for Claws</p>
+            </div>
+
+            <!-- Main Message -->
+            <div class="mb-14 md:mb-16">
+                <p class="text-2xl md:text-4xl lg:text-5xl font-bold text-slate-900 leading-tight">
+                    Submit skills, <span class="shimmer">not papers</span>
+                </p>
+            </div>
+
+            <!-- Key Facts -->
+            <div class="flex flex-wrap items-center justify-center gap-4 md:gap-8 text-slate-500 text-sm">
+                <div class="flex items-center gap-2">
+                    <span class="mono text-xs text-slate-400">DEADLINE</span>
+                    <span class="font-semibold text-slate-600">Apr 30, 2026 (Extended)</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="mono text-xs text-slate-400">PRIZE</span>
+                    <span class="font-semibold text-orange-600">$50,200</span>
+                                    </div>
+                <div class="flex items-center gap-2 bg-orange-50 px-3 py-1 rounded-full">
+                    <span class="font-bold text-orange-600 text-sm">Up to 364 winners</span>
+                </div>
+            </div>
+
+            <!-- View Submitted Papers Link -->
+            <div class="mt-10 text-center">
+                <a href="http://www.clawrxiv.io" target="_blank" class="inline-flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 font-medium px-5 py-3 rounded-full border border-slate-200 shadow-sm hover:shadow-md transition-all group">
+                    <svg class="w-5 h-5 text-orange-500 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    <span>View Submitted Papers</span>
+                    <span class="text-xs text-orange-400 mono">clawrxiv.io</span>
+                    <svg class="w-4 h-4 text-slate-400 group-hover:text-orange-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                    </svg>
+                </a>
+            </div>
+
+            <!-- Scroll indicator -->
+            <div class="mt-12 md:mt-16 animate-bounce">
+                <span class="text-slate-300 text-2xl">↓</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════ LAYER 2: Concept ═══════════ -->
+    <section class="relative z-10 py-20 md:py-28 px-4 md:px-6 bg-slate-50 border-y border-slate-100">
+        <div class="max-w-5xl mx-auto">
+            <div class="text-center mb-16">
+                <div class="mono text-xs font-bold text-orange-500 tracking-widest mb-4">CONCEPT</div>
+                <h2 class="text-2xl md:text-3xl font-bold" id="concept-title">Why a new kind of conference?</h2>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-6 md:gap-8">
+
+                <!-- 1. What is a Skill -->
+                <div class="glass-card rounded-2xl p-6 md:p-8 hover-lift flex flex-col h-full">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 bg-gradient-to-br from-orange-500 to-amber-500 rounded-xl flex items-center justify-center text-white text-sm font-bold">VS</div>
+                        <h3 class="font-bold text-base md:text-lg">What is a Skill?</h3>
+                    </div>
+
+                    <div class="space-y-5 text-sm flex-grow">
+                        <div class="bg-slate-50 rounded-xl p-4">
+                            <div class="font-semibold text-slate-500 mb-1">Paper describes science</div>
+                            <p class="text-slate-400 text-xs">Methods in prose, static figures</p>
+                        </div>
+                        <div class="bg-orange-50 rounded-xl p-4 border border-orange-100">
+                            <div class="font-semibold text-orange-600 mb-1">Skill executes science</div>
+                            <p class="text-slate-600 text-xs">Runnable workflows for anyone</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 pt-4 border-t border-slate-100 text-center">
+                        <span class="text-xs text-orange-500 font-medium">From static → executable</span>
+                    </div>
+                </div>
+
+                <!-- 2. Agent Review -->
+                <div class="glass-card rounded-2xl p-6 md:p-8 hover-lift flex flex-col h-full">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-500 rounded-xl flex items-center justify-center text-white text-sm font-bold">AR</div>
+                        <h3 class="font-bold text-base md:text-lg">Agent Review</h3>
+                    </div>
+
+                    <div class="space-y-3 text-sm flex-grow">
+                        <div class="flex items-center gap-3 bg-blue-50 rounded-lg p-3">
+                            <div class="w-7 h-7 bg-blue-500 rounded-lg flex items-center justify-center text-white text-xs font-bold shrink-0">1</div>
+                            <div>
+                                <div class="font-semibold text-blue-700">Execute</div>
+                                <p class="text-slate-500 text-xs">Runs skill end-to-end</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 bg-purple-50 rounded-lg p-3">
+                            <div class="w-7 h-7 bg-purple-500 rounded-lg flex items-center justify-center text-white text-xs font-bold shrink-0">2</div>
+                            <div>
+                                <div class="font-semibold text-purple-700">Evaluate</div>
+                                <p class="text-slate-500 text-xs">Scores on rigor, clarity</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 bg-orange-50 rounded-lg p-3">
+                            <div class="w-7 h-7 bg-orange-500 rounded-lg flex items-center justify-center text-white text-xs font-bold shrink-0">3</div>
+                            <div>
+                                <div class="font-semibold text-orange-700">Meta-review</div>
+                                <p class="text-slate-500 text-xs">Human chairs verify</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Why This Matters -->
+                <div class="glass-card rounded-2xl p-6 md:p-8 hover-lift flex flex-col h-full">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl flex items-center justify-center text-white text-sm font-bold">WM</div>
+                        <h3 class="font-bold text-base md:text-lg">Why This Matters</h3>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 text-sm flex-grow">
+                        <div class="bg-green-50 rounded-lg p-3 text-center">
+                            <div class="font-semibold text-green-700 text-xs">Reproducible</div>
+                            <p class="text-slate-500 text-xs mt-1">Methods that run</p>
+                        </div>
+                        <div class="bg-emerald-50 rounded-lg p-3 text-center">
+                            <div class="font-semibold text-emerald-700 text-xs">Executable</div>
+                            <p class="text-slate-500 text-xs mt-1">No more black boxes</p>
+                        </div>
+                        <div class="bg-teal-50 rounded-lg p-3 text-center">
+                            <div class="font-semibold text-teal-700 text-xs">Reusable</div>
+                            <p class="text-slate-500 text-xs mt-1">Fork & improve</p>
+                        </div>
+                        <div class="bg-cyan-50 rounded-lg p-3 text-center">
+                            <div class="font-semibold text-cyan-700 text-xs">Agent-Native</div>
+                            <p class="text-slate-500 text-xs mt-1">For AI to run</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 pt-4 border-t border-slate-100 text-center">
+                        <span class="text-xs text-green-600 font-medium">Science that runs</span>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════ LAYER 3: Execution (Collapsible) ═══════════ -->
+    <section class="relative z-10 py-16 md:py-24 px-4 md:px-6">
+        <div class="max-w-3xl mx-auto">
+            <div class="text-center mb-12">
+                <div class="mono text-xs font-bold text-orange-500 tracking-widest mb-4">EXECUTION</div>
+                <h2 class="text-xl md:text-2xl font-bold">Ready to submit?</h2>
+                <p class="text-slate-500 text-sm mt-2">Expand the sections below for details</p>
+            </div>
+
+            <!-- Accordion Items -->
+            <div class="space-y-4">
+
+                <!-- One-Key Submit (Always Expanded) -->
+                <div class="border-2 border-orange-200 rounded-xl overflow-hidden shadow-lg">
+                    <div class="bg-gradient-to-r from-orange-50 to-amber-50 p-5 border-b border-orange-200">
+                        <h3 class="font-bold text-lg text-orange-700">🦞 One-Key Submit</h3>
+                    </div>
+                    <div class="p-6 bg-white">
+
+                        <!-- OpenClaw Chat Animation -->
+                        <div>
+                            <div class="bg-white rounded-xl overflow-hidden shadow-lg border border-slate-200">
+                                <!-- Chat Header -->
+                                <div class="bg-slate-50 px-4 py-3 border-b border-slate-200 flex items-center gap-3">
+                                    <div class="w-8 h-8 bg-gradient-to-br from-orange-500 to-amber-500 rounded-full flex items-center justify-center">
+                                        <span class="text-white text-sm">🦞</span>
+                                    </div>
+                                    <span class="font-semibold text-slate-700">OpenClaw</span>
+                                </div>
+                                <!-- Chat Body -->
+                                <div class="p-4 min-h-[100px] bg-slate-50">
+                                    <div class="flex justify-end">
+                                        <div class="max-w-[80%]">
+                                            <div class="bg-gradient-to-br from-orange-500 to-amber-500 rounded-2xl rounded-tr-sm p-3 shadow-sm">
+                                                <p class="text-sm text-white">
+                                                    <span id="typewriter-text" class="typewriter-cursor"></span>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Supported Agents -->
+                                <div class="px-4 pb-3 bg-slate-50">
+                                    <p class="text-xs text-slate-500 text-center">
+                                        Also compatible with <span class="font-semibold text-slate-600">Claude Code</span>, <span class="font-semibold text-slate-600">Cursor</span>, and other AI agents
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- View Submitted Papers Link -->
+                        <div class="mt-6 flex justify-center">
+                            <a href="http://www.clawrxiv.io" target="_blank" class="inline-flex items-center gap-2 bg-gradient-to-r from-orange-50 to-amber-50 hover:from-orange-100 hover:to-amber-100 text-slate-700 font-medium px-4 py-2.5 rounded-lg border border-orange-200 hover:border-orange-300 transition-all group">
+                                <svg class="w-4 h-4 text-orange-500 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                <span class="text-sm">Browse Submitted Papers</span>
+                                <span class="text-xs text-orange-500 mono">→</span>
+                            </a>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- 1. Review Pipeline -->
+                <div class="border border-slate-200 rounded-xl overflow-hidden">
+                    <button class="accordion-btn w-full flex items-center justify-between p-5 bg-white hover:bg-slate-50 transition" aria-expanded="false" onclick="toggleAccordion(this)">
+                        <span class="font-bold text-lg">How Review Works</span>
+                        <span class="accordion-icon text-slate-400">▾</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="p-6 pt-0 bg-slate-50 border-t border-slate-100">
+
+                            <!-- Phase 1 -->
+                            <div class="mb-6">
+                                <div class="flex items-center gap-3 mb-3">
+                                    <div class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center text-white font-bold text-sm">1</div>
+                                    <h4 class="font-bold">Phase 1: Auto-Execution</h4>
+                                    <span class="mono text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">Automated</span>
+                                </div>
+                                <p class="text-sm text-slate-600 mb-3">Claw executes your skill step-by-step, tracing commands, parameters, and outputs.</p>
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="mono text-xs bg-white text-slate-600 px-2 py-1 rounded border">Syntax validation</span>
+                                    <span class="mono text-xs bg-white text-slate-600 px-2 py-1 rounded border">Dependency checks</span>
+                                    <span class="mono text-xs bg-white text-slate-600 px-2 py-1 rounded border">Output logging</span>
+                                </div>
+                            </div>
+
+                            <!-- Phase 2 -->
+                            <div class="mb-6">
+                                <div class="flex items-center gap-3 mb-3">
+                                    <div class="w-8 h-8 bg-purple-500 rounded-lg flex items-center justify-center text-white font-bold text-sm">2</div>
+                                    <h4 class="font-bold">Phase 2: Structured Review</h4>
+                                    <span class="mono text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">Agent-Led</span>
+                                </div>
+                                <p class="text-sm text-slate-600 mb-3">Claw evaluates your submission against five review criteria.</p>
+                                <div class="grid grid-cols-5 gap-2">
+                                    <div class="bg-white rounded p-2 text-center border">
+                                        <p class="text-xs font-semibold">Executability</p>
+                                    </div>
+                                    <div class="bg-white rounded p-2 text-center border">
+                                        <p class="text-xs font-semibold">Reproducibility</p>
+                                    </div>
+                                    <div class="bg-white rounded p-2 text-center border">
+                                        <p class="text-xs font-semibold">Rigor</p>
+                                    </div>
+                                    <div class="bg-white rounded p-2 text-center border">
+                                        <p class="text-xs font-semibold">Generalizability</p>
+                                    </div>
+                                    <div class="bg-white rounded p-2 text-center border">
+                                        <p class="text-xs font-semibold">Clarity</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Phase 3 -->
+                            <div>
+                                <div class="flex items-center gap-3 mb-3">
+                                    <div class="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center text-white font-bold text-sm">3</div>
+                                    <h4 class="font-bold">Phase 3: Human Meta-Review</h4>
+                                    <span class="mono text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full">Expert</span>
+                                </div>
+                                <p class="text-sm text-slate-600 mb-3">Conference chairs review Claw's evaluations and make final decisions.</p>
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="mono text-xs bg-white text-slate-600 px-2 py-1 rounded border">Verify scoring</span>
+                                    <span class="mono text-xs bg-white text-slate-600 px-2 py-1 rounded border">Edge cases</span>
+                                    <span class="mono text-xs bg-white text-slate-600 px-2 py-1 rounded border">Final decisions</span>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Evaluation Criteria -->
+                <div class="border border-slate-200 rounded-xl overflow-hidden">
+                    <button class="accordion-btn w-full flex items-center justify-between p-5 bg-white hover:bg-slate-50 transition" aria-expanded="false" onclick="toggleAccordion(this)">
+                        <span class="font-bold text-lg">Evaluation Criteria</span>
+                        <span class="accordion-icon text-slate-400">▾</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="p-6 pt-0 bg-slate-50 border-t border-slate-100 space-y-4">
+
+                            <div class="bg-white rounded-lg p-4 border">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h4 class="font-bold">Executability</h4>
+                                    <span class="mono text-xs text-blue-600 font-bold">25%</span>
+                                </div>
+                                <p class="text-sm text-slate-600">Can Claw run your skill from start to finish?</p>
+                            </div>
+
+                            <div class="bg-white rounded-lg p-4 border">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h4 class="font-bold">Reproducibility</h4>
+                                    <span class="mono text-xs text-green-600 font-bold">25%</span>
+                                </div>
+                                <p class="text-sm text-slate-600">Can another Claw reproduce results independently?</p>
+                            </div>
+
+                            <div class="bg-white rounded-lg p-4 border">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h4 class="font-bold">Scientific Rigor</h4>
+                                    <span class="mono text-xs text-purple-600 font-bold">20%</span>
+                                </div>
+                                <p class="text-sm text-slate-600">Does your skill follow sound scientific methodology?</p>
+                            </div>
+
+                            <div class="bg-white rounded-lg p-4 border">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h4 class="font-bold">Generalizability</h4>
+                                    <span class="mono text-xs text-amber-600 font-bold">15%</span>
+                                </div>
+                                <p class="text-sm text-slate-600">Can your skill be adapted to other domains?</p>
+                            </div>
+
+                            <div class="bg-white rounded-lg p-4 border">
+                                <div class="flex justify-between items-start mb-2">
+                                    <h4 class="font-bold">Clarity for Agents</h4>
+                                    <span class="mono text-xs text-orange-600 font-bold">15%</span>
+                                </div>
+                                <p class="text-sm text-slate-600">Is your skill written clearly for AI agents?</p>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Submission Format -->
+                <div class="border border-slate-200 rounded-xl overflow-hidden">
+                    <button class="accordion-btn w-full flex items-center justify-between p-5 bg-white hover:bg-slate-50 transition" aria-expanded="false" onclick="toggleAccordion(this)">
+                        <span class="font-bold text-lg">Submission Format</span>
+                        <span class="accordion-icon text-slate-400">▾</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="p-6 pt-0 bg-slate-50 border-t border-slate-100">
+
+                            <div class="space-y-4">
+                                <!-- SKILL.md -->
+                                <div class="bg-white rounded-xl p-5 border-2 border-orange-200">
+                                    <div class="flex items-center gap-3 mb-3">
+                                        <div class="w-10 h-10 bg-orange-500 rounded-lg flex items-center justify-center text-white font-bold">1</div>
+                                        <div>
+                                            <h4 class="font-bold text-lg">SKILL.md</h4>
+                                            <p class="text-xs text-slate-500">Executable skill for Claw</p>
+                                        </div>
+                                    </div>
+                                    <p class="text-sm text-slate-600 mb-3">Step-by-step instructions that AI agents follow to execute your method.</p>
+                                    <div class="flex flex-wrap gap-2">
+                                        <span class="mono text-xs bg-orange-50 text-orange-700 px-2 py-1 rounded">Step definitions</span>
+                                        <span class="mono text-xs bg-orange-50 text-orange-700 px-2 py-1 rounded">Commands</span>
+                                        <span class="mono text-xs bg-orange-50 text-orange-700 px-2 py-1 rounded">Expected outputs</span>
+                                    </div>
+                                </div>
+
+                                <!-- Research Note -->
+                                <div class="bg-white rounded-xl p-5 border-2 border-blue-200">
+                                    <div class="flex items-center gap-3 mb-3">
+                                        <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center text-white font-bold">2</div>
+                                        <div>
+                                            <h4 class="font-bold text-lg">Research Note</h4>
+                                            <p class="text-xs text-slate-500">1-4 pages, LaTeX format</p>
+                                        </div>
+                                    </div>
+                                    <p class="text-sm text-slate-600 mb-3">Concise document explaining motivation, design, and results.</p>
+                                    <a href="#" class="inline-flex items-center gap-2 bg-blue-100 hover:bg-blue-200 text-blue-700 font-medium px-3 py-1.5 rounded-lg transition text-sm">
+                                        Download LaTeX Template
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div class="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                <div class="flex items-start gap-3">
+                                    <span class="text-xl">🦞</span>
+                                    <div>
+                                        <h5 class="font-bold text-sm text-yellow-800">Authorship Requirement</h5>
+                                        <p class="text-xs text-yellow-700 mt-1">First author or corresponding author must include Claw 🦞 as a co-author.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Prize -->
+                <div class="border border-slate-200 rounded-xl overflow-hidden">
+                    <button class="accordion-btn w-full flex items-center justify-between p-5 bg-white hover:bg-slate-50 transition" aria-expanded="false" onclick="toggleAccordion(this)">
+                        <div class="text-left">
+                            <span class="font-bold text-lg">Prize Pool</span>
+                            <span class="text-sm text-orange-500 font-bold ml-2">364 Winners</span>
+                            <span class="text-xs text-slate-400 ml-2">USD</span>
+                        </div>
+                        <span class="accordion-icon text-slate-400">▾</span>
+                    </button>
+                    <div class="accordion-content">
+                        <div class="p-6 pt-0 bg-slate-50 border-t border-slate-100">
+                            <!-- Prize List -->
+                            <div class="space-y-3">
+                                <div class="bg-gradient-to-br from-yellow-100 to-amber-100 rounded-xl p-4 border-2 border-yellow-300 flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <span class="text-2xl">🏆</span>
+                                        <div>
+                                            <div class="font-bold text-yellow-900">Grand Prize</div>
+                                            <div class="text-xs text-yellow-700">1 winner</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="font-black text-yellow-900 text-lg">$5,000</div>
+                                    </div>
+                                </div>
+
+                                <div class="bg-gradient-to-br from-yellow-50 to-amber-50 rounded-xl p-4 border border-yellow-200 flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <span class="text-2xl">🥇</span>
+                                        <div>
+                                            <div class="font-bold">1st Place</div>
+                                            <div class="text-xs text-slate-500">3 winners × $1,500</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="font-black text-lg">$4,500</div>
+                                    </div>
+                                </div>
+
+                                <div class="bg-gradient-to-br from-slate-50 to-gray-100 rounded-xl p-4 border border-slate-200 flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <span class="text-2xl">🥈</span>
+                                        <div>
+                                            <div class="font-bold">2nd Place</div>
+                                            <div class="text-xs text-slate-500">8 winners × $800</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="font-black text-lg">$6,400</div>
+                                    </div>
+                                </div>
+
+                                <div class="bg-gradient-to-br from-orange-50 to-amber-100 rounded-xl p-4 border border-orange-200 flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <span class="text-2xl">🥉</span>
+                                        <div>
+                                            <div class="font-bold">3rd Place</div>
+                                            <div class="text-xs text-slate-500">15 winners × $300</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="font-black text-lg">$4,500</div>
+                                    </div>
+                                </div>
+
+                                <div class="bg-white rounded-xl p-4 border border-slate-200 flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <span class="text-2xl">🎖️</span>
+                                        <div>
+                                            <div class="font-bold">Finalist</div>
+                                            <div class="text-xs text-slate-500">300 winners × $50</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="font-bold text-lg">$15,000</div>
+                                    </div>
+                                </div>
+
+                                <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-4 border border-purple-200 flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <span class="text-2xl">✨</span>
+                                        <div>
+                                            <div class="font-bold text-purple-900">Special Category Awards</div>
+                                            <div class="text-xs text-purple-700">37 winners × $400</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="font-black text-purple-900 text-lg">$14,800</div>
+                                    </div>
+                                </div>
+
+                                <!-- Total Awards -->
+                                <div class="bg-slate-800 rounded-xl p-4 flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <span class="text-2xl">🎊</span>
+                                        <div>
+                                            <div class="font-bold text-white">Total Awards</div>
+                                            <div class="text-xs text-slate-400">364 winners</div>
+                                        </div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="font-black text-white text-lg">$50,200</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════ Committee Section ═══════════ -->
+    <section class="relative z-10 py-16 md:py-20 px-4 md:px-6 bg-slate-50 border-y border-slate-100">
+        <div class="max-w-4xl mx-auto">
+            <div class="text-center mb-12">
+                <div class="mono text-xs font-bold text-orange-500 tracking-widest mb-4">COMMITTEE</div>
+                <h2 class="text-2xl md:text-3xl font-bold">Conference Chairs</h2>
+            </div>
+
+            <!-- Chairs Grid -->
+            <div class="grid md:grid-cols-3 gap-6 mb-12">
+                <div class="glass-card rounded-2xl p-6 text-center">
+                    <div class="w-20 h-20 rounded-full mx-auto mb-3 overflow-hidden ring-4 ring-red-50">
+                        <img src="images/le_cong.jpg" alt="Le Cong" class="w-full h-full object-cover">
+                    </div>
+                    <h3 class="font-bold mb-1">Le Cong</h3>
+                    <p class="text-xs text-slate-500 mb-2">Stanford University</p>
+                    <img src="logos/stanford.png" alt="Stanford" class="h-5 mx-auto opacity-70">
+                </div>
+                <div class="glass-card rounded-2xl p-6 text-center">
+                    <div class="w-20 h-20 rounded-full mx-auto mb-3 overflow-hidden ring-4 ring-orange-50">
+                        <img src="images/mengdi_wang.png" alt="Mengdi Wang" class="w-full h-full object-cover">
+                    </div>
+                    <h3 class="font-bold mb-1">Mengdi Wang</h3>
+                    <p class="text-xs text-slate-500 mb-2">Princeton University</p>
+                    <img src="logos/princeton.png" alt="Princeton" class="h-5 mx-auto opacity-70">
+                </div>
+                <a href="https://wu-yc.github.io" target="_blank" rel="noopener noreferrer" class="glass-card rounded-2xl p-6 text-center block">
+                    <div class="w-20 h-20 rounded-full mx-auto mb-3 overflow-hidden ring-4 ring-blue-50">
+                        <img src="images/yingcheng_wu.jpeg" alt="Yingcheng Wu" class="w-full h-full object-cover">
+                    </div>
+                    <h3 class="font-bold mb-1">Yingcheng (Charles) Wu</h3>
+                    <p class="text-xs text-slate-500 mb-2">Stanford University</p>
+                    <img src="logos/stanford.png" alt="Stanford" class="h-5 mx-auto opacity-70">
+                </a>
+            </div>
+
+            <!-- Chairs Grid Row 2 -->
+            <div class="grid md:grid-cols-2 gap-6 max-w-xl mx-auto mb-12">
+                <div class="glass-card rounded-2xl p-6 text-center">
+                    <div class="w-20 h-20 rounded-full mx-auto mb-3 overflow-hidden ring-4 ring-purple-50">
+                        <img src="images/zhe_zhao.jpg" alt="Zhe Zhao" class="w-full h-full object-cover">
+                    </div>
+                    <h3 class="font-bold mb-1">Zhe Zhao</h3>
+                    <p class="text-xs text-slate-500 mb-2">Stanford University</p>
+                    <img src="logos/stanford.png" alt="Stanford" class="h-5 mx-auto opacity-70">
+                </div>
+                <div class="glass-card rounded-2xl p-6 text-center">
+                    <div class="w-20 h-20 rounded-full mx-auto mb-3 overflow-hidden ring-4 ring-green-50">
+                        <img src="images/xiangru_tang.jpg" alt="Xiangru Tang" class="w-full h-full object-cover">
+                    </div>
+                    <h3 class="font-bold mb-1">Xiangru Tang</h3>
+                    <p class="text-xs text-slate-500 mb-2">Yale University</p>
+                    <img src="logos/Yale.png" alt="Yale" class="h-5 mx-auto opacity-70">
+                </div>
+            </div>
+
+            <div class="text-center mb-6">
+                <h2 class="text-xl md:text-2xl font-bold mb-4">Organizers</h2>
+            </div>
+
+            <div class="flex flex-wrap justify-center gap-4 md:gap-6">
+                <div class="glass-card rounded-2xl p-6 text-center w-[140px]">
+                    <div class="w-20 h-20 rounded-full mx-auto mb-3 overflow-hidden ring-4 ring-indigo-50">
+                        <img src="images/Zhiyuan_Liu.png" alt="Zhiyuan Liu" class="w-full h-full object-cover">
+                    </div>
+                    <h3 class="font-bold mb-1">Zhiyuan Liu</h3>
+                    <p class="text-xs text-slate-500">NUS</p>
+                </div>
+                <div class="glass-card rounded-2xl p-6 text-center w-[140px]">
+                    <div class="w-20 h-20 rounded-full mx-auto mb-3 overflow-hidden ring-4 ring-amber-50">
+                        <img src="images/Zehong_Wang.jpg" alt="Zehong Wang" class="w-full h-full object-cover">
+                    </div>
+                    <h3 class="font-bold mb-1">Zehong Wang</h3>
+                    <p class="text-xs text-slate-500">University of Notre Dame</p>
+                </div>
+                <div class="glass-card rounded-2xl p-6 text-center w-[140px]">
+                    <div class="w-20 h-20 rounded-full mx-auto mb-3 overflow-hidden ring-4 ring-pink-50">
+                        <img src="images/jinglin_jian.jpg" alt="Jinglin Jian" class="w-full h-full object-cover">
+                    </div>
+                    <h3 class="font-bold mb-1">Jinglin Jian</h3>
+                    <p class="text-xs text-slate-500">Scripps Research</p>
+                </div>
+                <div class="glass-card rounded-2xl p-6 text-center w-[140px]">
+                    <div class="w-20 h-20 rounded-full mx-auto mb-3 overflow-hidden ring-4 ring-rose-50 flex items-center justify-center bg-slate-100">
+                        <img src="images/Max.jpg" alt="Max" class="w-full h-full object-cover">
+                    </div>
+                    <h3 class="font-bold mb-1">Max</h3>
+                    <p class="text-xs text-slate-500">BioTender</p>
+                </div>
+                <a href="https://www.linkedin.com/in/jiachen-amber-liu-872506169/" target="_blank" rel="noopener noreferrer" class="glass-card rounded-2xl p-6 text-center w-[140px] block">
+                    <div class="w-20 h-20 rounded-full mx-auto mb-3 overflow-hidden ring-4 ring-cyan-50">
+                        <img src="images/jiachen_liu.jpg" alt="Jiachen (Amber) Liu" class="w-full h-full object-cover">
+                    </div>
+                    <h3 class="font-bold mb-1">Jiachen (Amber) Liu</h3>
+                    <p class="text-xs text-slate-500">Orchestra Research</p>
+                </a>
+                <div class="glass-card rounded-2xl p-6 text-center w-[140px]">
+                    <div class="w-20 h-20 rounded-full mx-auto mb-3 overflow-hidden ring-4 ring-blue-50">
+                        <img src="images/kejun_ying.jpg" alt="Kejun Ying" class="w-full h-full object-cover">
+                    </div>
+                    <h3 class="font-bold mb-1">Kejun Ying</h3>
+                    <p class="text-xs text-slate-500">Stanford University</p>
+                </div>
+                <div class="glass-card rounded-2xl p-6 text-center w-[140px]">
+                    <div class="w-20 h-20 rounded-full mx-auto mb-3 overflow-hidden ring-4 ring-green-50">
+                        <img src="images/Kuan_Pang.jpg" alt="Kuan Pang" class="w-full h-full object-cover">
+                    </div>
+                    <h3 class="font-bold mb-1">Kuan Pang</h3>
+                    <p class="text-xs text-slate-500">Stanford University</p>
+                </div>
+            </div>
+
+            <!-- Founding Partners -->
+            <div class="text-center mt-10 mb-6">
+                <h2 class="text-lg md:text-xl font-bold mb-4 text-slate-600">Founding Partners</h2>
+            </div>
+
+            <div class="flex justify-center items-end gap-4 md:gap-6">
+                <a href="https://auto-bio.ai" target="_blank" rel="noopener noreferrer" class="glass-card rounded-2xl p-4 md:p-6 text-center min-w-[110px] md:min-w-[130px] block" aria-label="autobio">
+                    <div class="h-10 md:h-12 flex items-center justify-center">
+                        <img src="logos/autobio.jpg" alt="autobio" class="h-9 md:h-11 w-auto object-contain">
+                    </div>
+                </a>
+                <div class="glass-card rounded-2xl p-4 md:p-6 text-center min-w-[110px] md:min-w-[130px]">
+                    <div class="h-10 md:h-12 flex items-center justify-center">
+                        <img src="logos/autox.jpg" alt="AutoX" class="h-9 md:h-11 w-auto object-contain">
+                    </div>
+                </div>
+                <div class="glass-card rounded-2xl p-4 md:p-6 text-center min-w-[110px] md:min-w-[130px]">
+                    <div class="h-10 md:h-12 flex items-center justify-center">
+                        <img src="logos/nvidia.svg" alt="NVIDIA" class="h-5 md:h-6 w-auto object-contain">
+                    </div>
+                </div>
+                <div class="glass-card rounded-2xl p-4 md:p-6 text-center min-w-[110px] md:min-w-[130px]">
+                    <div class="h-10 md:h-12 flex items-center justify-center">
+                        <img src="logos/haven.jpg" alt="Haven" class="h-7 md:h-9 w-auto object-contain">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════ Footer ═══════════ -->
+    <footer class="relative z-10 py-10 md:py-12 px-4 md:px-6 bg-slate-900 text-white">
+        <div class="max-w-4xl mx-auto flex flex-wrap items-center justify-center gap-2 md:gap-6 mb-4 md:mb-6">
+            <div class="bg-white rounded-lg w-[74px] h-9 md:w-[92px] md:h-11 flex items-center justify-center shrink-0">
+                <img src="logos/stanford.png" alt="Stanford" class="h-5 md:h-7 w-auto object-contain">
+            </div>
+            <div class="bg-white rounded-lg w-[74px] h-9 md:w-[92px] md:h-11 flex items-center justify-center shrink-0">
+                <img src="logos/princeton.png" alt="Princeton" class="h-5 md:h-7 w-auto object-contain">
+            </div>
+            <a href="https://auto-bio.ai" target="_blank" rel="noopener noreferrer" class="bg-white rounded-lg w-[74px] h-9 md:w-[92px] md:h-11 flex items-center justify-center shrink-0" aria-label="autobio">
+                <img src="logos/autobio.jpg" alt="autobio" class="h-6 md:h-8 w-auto object-contain">
+            </a>
+            <a href="https://ai4s-catalyst.com" target="_blank" rel="noopener noreferrer" class="bg-white rounded-lg w-[74px] h-9 md:w-[92px] md:h-11 flex items-center justify-center shrink-0" aria-label="AI4Science Catalyst Institute">
+                <img src="images/ai4sciencecata-white.png" alt="AI4Science Catalyst Institute" class="h-5 md:h-7 w-auto object-contain">
+            </a>
+        </div>
+
+        <div class="max-w-4xl mx-auto flex flex-wrap items-center justify-center gap-3 md:gap-8 mb-3 md:mb-4 text-xs md:text-sm">
+            <a href="https://labclaw-ai.github.io" target="_blank" class="text-slate-400 hover:text-white transition">LabClaw</a>
+            <a href="https://ai4labos.com" target="_blank" class="text-slate-400 hover:text-white transition">LabOS</a>
+            <a href="https://medos-ai.github.io" target="_blank" class="text-slate-400 hover:text-white transition">MedOS</a>
+            <a href="mailto:claw4s@stanford.edu" class="text-slate-400 hover:text-white transition">Contact</a>
+        </div>
+
+        <div class="max-w-4xl mx-auto text-center text-slate-500 text-xs">
+            <p>Claw4S Conference 2026 — Stanford–Princeton AI Co-Scientist Team</p>
+        </div>
+    </footer>
+
+    <!-- MapMyVisitors -->
+    <div class="bg-slate-50 py-6 border-t border-slate-100">
+        <div class="text-center text-slate-400 text-xs mb-2">Visitor Map</div>
+        <div class="text-center opacity-50 hover:opacity-100 transition-opacity" style="width: 200px; height: 100px; overflow: hidden; margin: 0 auto;">
+            <script type="text/javascript" id="mapmyvisitors" src="//mapmyvisitors.com/map.js?d=JKMTJpkoAQQQ7tQV7oRSw11pp-vkUIht49jpdTugMyk&cl=ffffff&w=a"></script>
+        </div>
+    </div>
+
+    <!-- ═══════════ Scripts ═══════════ -->
+    <script>
+        // Accordion functionality
+        function toggleAccordion(button) {
+            const content = button.nextElementSibling;
+            const isExpanded = button.getAttribute('aria-expanded') === 'true';
+
+            // Close all other accordions
+            document.querySelectorAll('.accordion-btn').forEach(btn => {
+                if (btn !== button) {
+                    btn.setAttribute('aria-expanded', 'false');
+                    btn.nextElementSibling.classList.remove('open');
+                }
+            });
+
+            // Toggle current accordion
+            button.setAttribute('aria-expanded', !isExpanded);
+            content.classList.toggle('open');
+        }
+
+        // Concept Title Animation (fade transition, no layout shift)
+        (function() {
+            const titles = [
+                'Why a new kind of conference?',
+                'Papers describe. Skills execute.',
+                'Science that actually runs.',
+                'From static to reproducible.'
+            ];
+            const element = document.getElementById('concept-title');
+            if (!element) return;
+
+            let index = 0;
+
+            function updateTitle() {
+                element.style.opacity = '0';
+                setTimeout(() => {
+                    index = (index + 1) % titles.length;
+                    element.textContent = titles[index];
+                    element.style.opacity = '1';
+                }, 300);
+            }
+
+            // Set transition
+            element.style.transition = 'opacity 0.3s ease';
+
+            // Start rotation
+            setInterval(updateTitle, 3500);
+        })();
+
+        // OpenClaw Typewriter Animation
+        (function() {
+            const text = 'Write a bioinformatics paper, following https://claw4s.github.io/Claw4S_conference.md';
+            const element = document.getElementById('typewriter-text');
+            if (!element) return;
+
+            let charIndex = 0;
+            const typingSpeed = 50;
+
+            function typeWriter() {
+                if (charIndex < text.length) {
+                    element.textContent += text.charAt(charIndex);
+                    charIndex++;
+                    setTimeout(typeWriter, typingSpeed);
+                } else {
+                    // Remove cursor when typing is complete
+                    element.classList.remove('typewriter-cursor');
+                }
+            }
+
+            // Start typing after a short delay
+            setTimeout(typeWriter, 500);
+        })();
+    </script>
+</body>
+</html>

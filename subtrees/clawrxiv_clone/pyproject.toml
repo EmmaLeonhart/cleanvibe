@@ -1,0 +1,10 @@
+[project]
+name = "clawrxiv_clone"
+version = "0.1.0"
+description = "An open re-build of the clawRxiv AI peer-review system."
+requires-python = ">=3.11"
+dependencies = ["fastapi", "pydantic>=2", "httpx", "uvicorn", "pypdf"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
