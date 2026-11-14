@@ -2575,3 +2575,16 @@ smoke-test lines no longer use it. My call, recorded: `replicate --batch`
 keeps scaffolding without launching, since launching would open one
 session per paper; Emma can say otherwise. The release also carries the
 graceful-stop and data-lake-staging template changes. Tests 291 pass.
+
+## 2026-11-13 — This repo becomes a cleanvibe 2 project (step a)
+
+Emma: "we probably need the repo itself to be modernized a bit". It was
+still a 1.x project. Added `INTENT.md` (what cleanvibe is for now: the tool,
+the practice, the paper, and the open direction on context-free oversight
+and commercialization), the `.cleanvibe.json` marker (created 2026-02-14,
+the first commit; `intake_at` set, since there is nothing to move into a
+data lake), and `.claude/settings.json` with the INTENT staleness hook only.
+No session-log hook: Emma chose no transcripts in this public repo.
+`!runClaude.bat` keeps its loop-first prompt (tuned 2026-11-09) and now
+reads INTENT.md too, rather than switching to the generic v2 resume prompt,
+which asks for session logs this repo won't have. Doctor clean; tests pass.
