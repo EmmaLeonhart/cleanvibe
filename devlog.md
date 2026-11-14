@@ -2601,7 +2601,7 @@ it. Two tests in `tests/test_doctor.py`. Doctor clean; 293 tests pass.
 
 ## 2026-11-13 — CLAUDE.md trimmed to what is current (step b)
 
-CLAUDE.md went from 41 KB to about 22 KB. The 28 "Key Decisions" entries for
+CLAUDE.md went from 41 KB to about 22 KB. The 18 "Key Decisions" entries for
 `replicate` and the 1.x modes (replication architecture, consent gate,
 copyright rule, clawRxiv, report theme, research/original/chat, clone and
 convert, the 1.x scaffold and defaults) moved verbatim to
@@ -2610,3 +2610,12 @@ v2 spec and everything cross-cutting (tests, zero deps, launch, `--dry-run`,
 doctor, scan, website, devlog convention, packaging, `main`, Python 3.9).
 The architecture tree now shows INTENT.md, the marker, paper/,
 paper-replay/, subtrees/ and clawrxiv.yml. Nothing was deleted.
+
+## 2026-11-13 — CI: Python 3.9 on Ubuntu 24.04; smoke test without --no-claude (step c)
+
+Every CI run since before 2026-11-12 failed in one job: "3.9 on
+ubuntu-latest" could not set up Python, because ubuntu-latest is now 26.04
+and has no 3.9 build. The matrix now runs 3.9 on ubuntu-24.04 instead. The
+dry-run smoke step still passed `--no-claude`, which 2.0.8 rejects; a dry
+run never launches, so the flag is simply gone. (Also corrects the step b
+entry: 18 entries moved, not 28.) Modernization item closed.

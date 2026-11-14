@@ -18,6 +18,13 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         python-version: ["3.9", "3.13"]
+        # ubuntu-latest is 26.04, which has no Python 3.9 build: run 3.9 on 24.04.
+        exclude:
+          - os: ubuntu-latest
+            python-version: "3.9"
+        include:
+          - os: ubuntu-24.04
+            python-version: "3.9"
 
     steps:
       - uses: actions/checkout@v4
@@ -42,4 +49,4 @@ jobs:
         run: cleanvibe --version
 
       - name: Smoke test dry-run
-        run: cleanvibe new smoke_proj --dry-run --no-claude
+        run: cleanvibe new smoke_proj --dry-run

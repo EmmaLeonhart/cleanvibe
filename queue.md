@@ -204,14 +204,7 @@ clawRxiv. Paper items come first.
    **Next data for v6:** live sessions run to the lapse, with and without
    the hook, several pairs; and a probe of what a replay lacks (e.g.
    resume the live session itself interactively at a stale tick).
-3. **Modernize this repo to cleanvibe 2** (Emma, 2026-11-13: "we probably
-   need the repo itself to be modernized a bit"). It is still a 1.x project.
-   Emma chose: **no session transcripts here** (public repo; they carry
-   personal details). Steps, one commit each:
-   c. Fix CI: the "3.9 on ubuntu-latest" job fails at setup because
-      ubuntu-latest is now 26.04 with no Python 3.9; pin that job to an
-      older Ubuntu.
-4. **Quatrix arXiv submission:** BLOCKED-ON-USER-ACTION. The package is built;
+3. **Quatrix arXiv submission:** BLOCKED-ON-USER-ACTION. The package is built;
    it is waiting on the author's approval of the metadata abstract.
 
 **Not in this queue:** `Documents/GitHub/Should_be_submodules/` (INBE,
