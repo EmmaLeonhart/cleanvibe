@@ -33,6 +33,9 @@ written down as standing policy), and whether cleanvibe can be commercialized.
 - `queue.md`: the paper goal (Emma, 2026-10-03) and the standing duties.
 - 2026-11-13: Emma asked for this repo itself to be modernized to cleanvibe 2,
   with no session transcripts committed (public repo, personal details).
+  Done the same day: INTENT.md, marker (`"session_log": false`), staleness
+  hook, CLAUDE.md trimmed (1.x/replicate decisions in
+  `docs/legacy-decisions.md`), CI green again.
 
 ## Constraints from Emma
 
