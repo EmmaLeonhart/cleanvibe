@@ -4,5 +4,6 @@
   "created": "2026-02-14",
   "auto_named": false,
   "intake_at": "2026-11-13T17:17:07",
-  "note": "Modernized from a 1.x project on 2026-11-13; no intake (nothing to move), no session-log hook (public repo)."
+  "note": "Modernized from a 1.x project on 2026-11-13; no intake (nothing to move), no session-log hook (public repo).",
+  "session_log": false
 }

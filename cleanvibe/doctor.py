@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import re
 import subprocess
+import json
 import sys
 from dataclasses import dataclass
 from pathlib import Path
@@ -69,7 +70,18 @@ def _read(path: Path) -> str | None:
 
 
 def check_files(root: Path) -> list:
-    required = V2_CORE_FILES if (root / V2_MARKER).is_file() else CORE_FILES
+    marker = root / V2_MARKER
+    required = V2_CORE_FILES if marker.is_file() else CORE_FILES
+    if marker.is_file():
+        # A project can opt out of committed transcripts with
+        # "session_log": false in its marker (cleanvibe itself: a public repo,
+        # Emma 2026-11-13); then the session-log hook is not drift.
+        try:
+            opted_out = json.loads(_read(marker) or "{}").get("session_log") is False
+        except ValueError:
+            opted_out = False
+        if opted_out:
+            required = tuple(n for n in required if not n.endswith("save_session_log.py"))
     return [
         Finding("files", name, "missing")
         for name in required

@@ -2587,4 +2587,14 @@ data lake), and `.claude/settings.json` with the INTENT staleness hook only.
 No session-log hook: Emma chose no transcripts in this public repo.
 `!runClaude.bat` keeps its loop-first prompt (tuned 2026-11-09) and now
 reads INTENT.md too, rather than switching to the generic v2 resume prompt,
-which asks for session logs this repo won't have. Doctor clean; tests pass.
+which asks for session logs this repo won't have. (The commit said doctor
+was clean; it wasn't: see the next entry.)
+
+## 2026-11-13 — doctor: a marker can opt out of the session-log hook
+
+After step a, doctor reported two missing files here: the session-log hook
+(left out on purpose) and the intake script. The intake script is now in
+place (harmless: `intake_at` is set, so it never moves anything). For the
+hook, `.cleanvibe.json` takes `"session_log": false`, and doctor's `files`
+check then doesn't require `save_session_log.py`; this repo's marker sets
+it. Two tests in `tests/test_doctor.py`. Doctor clean; 293 tests pass.

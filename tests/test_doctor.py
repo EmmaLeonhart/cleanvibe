@@ -141,6 +141,29 @@ class TestChecks(unittest.TestCase):
         self.assertEqual(doc.check_pages_gate(self.proj), [])
 
 
+
+class TestSessionLogOptOut(unittest.TestCase):
+    """A v2 project can opt out of committed transcripts ("session_log": false
+    in its marker); then a missing session-log hook is not drift."""
+
+    def setUp(self):
+        self.proj = _scaffold(new_project)
+        (self.proj / ".claude" / "hooks" / "save_session_log.py").unlink()
+
+    def _marker(self, **extra):
+        import json
+        path = self.proj / ".cleanvibe.json"
+        data = json.loads(path.read_text(encoding="utf-8"))
+        data.update(extra)
+        path.write_text(json.dumps(data), encoding="utf-8")
+
+    def test_missing_hook_is_drift_by_default(self):
+        self.assertIn("files", _checks(doc.check_files(self.proj)))
+
+    def test_opt_out_accepts_missing_hook(self):
+        self._marker(session_log=False)
+        self.assertEqual(doc.check_files(self.proj), [])
+
 class TestDoctorCli(unittest.TestCase):
     def _run(self, path):
         buf = io.StringIO()
