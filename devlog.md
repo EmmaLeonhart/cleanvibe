@@ -2598,3 +2598,15 @@ place (harmless: `intake_at` is set, so it never moves anything). For the
 hook, `.cleanvibe.json` takes `"session_log": false`, and doctor's `files`
 check then doesn't require `save_session_log.py`; this repo's marker sets
 it. Two tests in `tests/test_doctor.py`. Doctor clean; 293 tests pass.
+
+## 2026-11-13 — CLAUDE.md trimmed to what is current (step b)
+
+CLAUDE.md went from 41 KB to about 22 KB. The 28 "Key Decisions" entries for
+`replicate` and the 1.x modes (replication architecture, consent gate,
+copyright rule, clawRxiv, report theme, research/original/chat, clone and
+convert, the 1.x scaffold and defaults) moved verbatim to
+`docs/legacy-decisions.md`; CLAUDE.md points there. Kept in CLAUDE.md: the
+v2 spec and everything cross-cutting (tests, zero deps, launch, `--dry-run`,
+doctor, scan, website, devlog convention, packaging, `main`, Python 3.9).
+The architecture tree now shows INTENT.md, the marker, paper/,
+paper-replay/, subtrees/ and clawrxiv.yml. Nothing was deleted.

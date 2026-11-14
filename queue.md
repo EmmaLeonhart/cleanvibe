@@ -208,9 +208,6 @@ clawRxiv. Paper items come first.
    need the repo itself to be modernized a bit"). It is still a 1.x project.
    Emma chose: **no session transcripts here** (public repo; they carry
    personal details). Steps, one commit each:
-   b. Trim CLAUDE.md to what is current (v2 rules, architecture, live
-      conventions); history that only explains past versions moves to, or
-      is already in, `devlog.md`. Run doctor and the tests after.
    c. Fix CI: the "3.9 on ubuntu-latest" job fails at setup because
       ubuntu-latest is now 26.04 with no Python 3.9; pin that job to an
       older Ubuntu.
