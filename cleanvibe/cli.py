@@ -10,6 +10,7 @@ cleanvibe 2 usage:
     cleanvibe replicate --batch FILE [--into DIR]
                                 One replication project per paper listed in FILE
     cleanvibe doctor [PATH]     Read-only audit of a cleanvibe project for drift
+    cleanvibe refresh [PATH]    Bring the files cleanvibe ships up to this version
     cleanvibe scan [PATH...]    Read-only pattern scan of third-party code before running it
     cleanvibe legacy CMD ...    The deprecated cleanvibe 1.x modes:
                                 new, research, original, chat, clone, convert
@@ -41,6 +42,7 @@ from .doctor import doctor
 from .original import original_project
 from .project import (
     auto_project_path, default_base, is_cleanvibe_repo, new_project, open_project,
+    refresh_project,
 )
 from .research import research_project
 from .scan import scan_cli
@@ -483,6 +485,21 @@ def _add_legacy_parsers(subparsers) -> None:
     _add_run_flags(convert_parser, "done")
 
 
+def _do_refresh(args) -> int:
+    """`cleanvibe refresh [PATH] [--dry-run]`. Exit 0 ok, 2 not a v2 project."""
+    try:
+        changed = refresh_project(args.path, dry_run=args.dry_run)
+    except ValueError as e:
+        print(f"cleanvibe refresh: {e}", file=sys.stderr)
+        return 2
+    verb = "Would update" if args.dry_run else "Updated"
+    for rel in changed:
+        print(f"  {verb} {rel}")
+    print(f"cleanvibe refresh: {len(changed)} file(s) "
+          f"{'would change' if args.dry_run else 'changed'} (cleanvibe v{__version__}).")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="cleanvibe",
@@ -552,6 +569,19 @@ def build_parser() -> argparse.ArgumentParser:
         help="Project to audit (defaults to the current directory)",
     )
 
+    refresh_parser = subparsers.add_parser(
+        "refresh",
+        help="Bring the files cleanvibe ships (skills, RULES.md, hooks, intake "
+        "script, its settings.json hook entries) up to this version. Never "
+        "touches CLAUDE.md or the project's own files",
+    )
+    refresh_parser.add_argument(
+        "path", nargs="?", type=Path, default=Path("."),
+        help="Project to refresh (defaults to the current directory)",
+    )
+    refresh_parser.add_argument("--dry-run", action="store_true",
+                                help="List what would change; write nothing")
+
     scan_parser = subparsers.add_parser(
         "scan",
         help="Read-only pattern scan of code you did not write (a replication's "
@@ -591,6 +621,8 @@ def main(argv: list[str] | None = None) -> None:
         _do_replicate(args)
     elif args.command == "doctor":
         sys.exit(doctor(args.path))
+    elif args.command == "refresh":
+        sys.exit(_do_refresh(args))
     elif args.command == "scan":
         sys.exit(scan_cli(args.paths))
     elif args.command == "legacy":

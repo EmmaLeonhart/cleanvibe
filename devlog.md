@@ -2682,3 +2682,12 @@ prompts point at "the project rules"; doctor gains a `rules` check and
 section-refs read the imported file. Import verified with `claude -p`
 first. Migration of existing projects is next. 300 tests pass; doctor clean
 (9 checks). From cleanvibe-commercial.
+
+## 2026-11-20 - cleanvibe refresh
+
+New `cleanvibe refresh [PATH] [--dry-run]` (`project.refresh_project`):
+rewrites every shipped file from the installed version (skills, RULES.md
+when imported, hooks, intake script), merges only cleanvibe's hook entries
+into settings.json, respects the session-log opt-out, never touches
+CLAUDE.md or project files. `cleanvibe-update-check` step 0 runs it. 7 tests
+(`tests/test_refresh.py`); 307 pass; doctor clean. From cleanvibe-commercial.

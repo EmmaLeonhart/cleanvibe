@@ -62,6 +62,14 @@ point at "the project rules". Why: CLAUDE.md mixed shipped rules with each proje
 every rule change needed "existing repos: add it by hand" (cleanvibe-commercial,
 `docs/data-vs-code-in-cleanvibe.md`). The import was verified with `claude -p` before the split.
 
+**New command `cleanvibe refresh [PATH] [--dry-run]`, and `cleanvibe-update-check` gains a step 0
+that runs it** (existing repos: copy the skill from a fresh project, or let `cleanvibe refresh`
+do it). Refresh rewrites what cleanvibe ships from the installed version: every skill, `RULES.md`
+(only when CLAUDE.md imports it), the hooks and the intake script. It adds cleanvibe's hook
+entries to `.claude/settings.json` and leaves every other entry alone, and it respects
+`"session_log": false`. It never touches CLAUDE.md, INTENT.md or any other project file. Why:
+updates had been made by copying text from this page by hand, and that kept going wrong.
+
 **Resume prompt (no change to existing repos; new sessions get it from the installed cleanvibe):**
 a reopened project now runs `git status` first and treats uncommitted changes as work an
 interrupted session left on the first queue item: finish it or commit what is good, never discard.

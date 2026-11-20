@@ -195,6 +195,74 @@ def new_project(
         )
 
 
+def _merge_settings(existing: str | None, shipped: str) -> str:
+    """Add cleanvibe's hook entries to a project's settings.json where the same
+    command isn't already there. Every other key and entry is left as it was."""
+    import json
+    data = json.loads(existing) if existing and existing.strip() else {}
+    hooks = data.setdefault("hooks", {})
+    for event, entries in json.loads(shipped)["hooks"].items():
+        have = hooks.setdefault(event, [])
+        commands = {h.get("command") for e in have for h in e.get("hooks", [])}
+        for entry in entries:
+            if not {h["command"] for h in entry["hooks"]} <= commands:
+                have.append(entry)
+    return json.dumps(data, indent=2) + "\n"
+
+
+def refresh_project(path: Path, dry_run: bool = False) -> list:
+    """`cleanvibe refresh`: bring the files cleanvibe ships up to this version.
+
+    Rewrites every skill, `.claude/cleanvibe/RULES.md` (only when CLAUDE.md
+    imports it), the hooks and the intake script, and adds cleanvibe's hook
+    entries to `.claude/settings.json` without touching anything else there.
+    Never touches CLAUDE.md, INTENT.md or any other project file. Returns the
+    relative paths that changed (or would change, with ``dry_run``).
+    """
+    import json
+    path = Path(path)
+    marker = path / MARKER
+    if not marker.is_file():
+        raise ValueError(f"{path} is not a cleanvibe 2 project (no {MARKER})")
+    try:
+        opted_out = json.loads(marker.read_text(encoding="utf-8")).get("session_log") is False
+    except ValueError:
+        opted_out = False
+
+    wanted = {f".claude/skills/{slug}/SKILL.md": body for slug, body in skills.SKILLS.items()}
+    claude = (path / "CLAUDE.md").read_text(encoding="utf-8") if (path / "CLAUDE.md").is_file() else ""
+    if ("@" + templates.V2_RULES_PATH) in claude:
+        wanted[templates.V2_RULES_PATH] = templates.v2_rules_md()
+    wanted[".claude/hooks/intent_staleness.py"] = templates.INTENT_STALENESS_PY
+    wanted[".claude/scripts/data_lake_intake.py"] = templates.V2_INTAKE_PY
+    if not opted_out:
+        wanted[".claude/hooks/save_session_log.py"] = templates.CHAT_SAVE_SESSION_LOG_PY
+
+    settings_path = path / ".claude" / "settings.json"
+    old_settings = settings_path.read_text(encoding="utf-8") if settings_path.is_file() else None
+    shipped = templates.v2_settings_json()
+    if opted_out:
+        shipped_data = json.loads(shipped)
+        for event in ("Stop", "SessionEnd"):
+            shipped_data["hooks"].pop(event, None)
+        shipped = json.dumps(shipped_data)
+    new_settings = _merge_settings(old_settings, shipped)
+    if old_settings is None or json.loads(old_settings or "{}") != json.loads(new_settings):
+        wanted[".claude/settings.json"] = new_settings
+
+    changed = []
+    for rel, text in wanted.items():
+        target = path / rel
+        current = target.read_text(encoding="utf-8") if target.is_file() else None
+        if current is not None and current.replace("\r\n", "\n") == text.replace("\r\n", "\n"):
+            continue
+        changed.append(rel)
+        if not dry_run:
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text(text, encoding="utf-8")
+    return changed
+
+
 def open_project(path: Path, dry_run: bool = False, no_claude: bool = False) -> None:
     """Open an existing cleanvibe project (2 or 1.x) as a new session."""
     path = Path(path)
