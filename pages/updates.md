@@ -25,7 +25,7 @@ self-exempting for replication-style bounded work.
 
 ---
 
-## Unreleased (next: v2.0.9) — a long queue is healthy; bare-prompt runs go to the GitHub folder
+## v2.0.9 (2026-11-20) — shipped rules in RULES.md, `cleanvibe refresh`; a long queue is healthy; bare-prompt runs go to the GitHub folder
 
 **`autonomous-loop` and `queue-driven-workflow`: one new bullet each (copy them from a fresh
 project).** `autonomous-loop`, under "The work keeps the project's normal standards": *A long

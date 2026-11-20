@@ -2706,3 +2706,11 @@ once. 5 tests in `tests/test_refresh_migrate.py`; 312 pass; doctor clean.
 
 `pages/index.html` gains a card for `cleanvibe refresh` (and `--migrate`),
 as this repo's CLAUDE.md asks for every subcommand.
+
+## 2026-11-20 - v2.0.9 released
+
+Tag `v2.0.9`, at Emma's request ("yes new cleanvibe release"). Contents: shipped
+rules in `.claude/cleanvibe/RULES.md` imported by CLAUDE.md; `cleanvibe refresh`
+and `--migrate`; bare-prompt runs default to the GitHub folder; the loop pulls
+before pushing; resume checks `git status`; long-queue, permission and
+short-question rules. 312 tests; doctor clean.
