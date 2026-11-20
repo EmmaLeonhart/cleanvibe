@@ -22,6 +22,7 @@ and `devlog.md` if they don't exist yet, and work this way from then on.
 - **`todo.md`** — the **long-term horizon** of the project. Multi-session goals, architectural ambitions, future capabilities. Items in `todo.md` are *abstract*: they describe a destination, not a step. When work begins, an item is pulled from `todo.md`, decomposed into concrete executable steps in `queue.md`, mirrored into the task tool, and executed. As `queue.md` drains, refill it from the next `todo.md` item.
 - **`devlog.md`** — where **"done" lives**. Every finished queue item is deleted from `queue.md` and appended as a dated entry here, in the same commit as the work. Releases (tag + one-line note) and notable milestones also go here.
 - **Flow:** `todo.md` (abstract horizons) → `queue.md` (concrete steps) → task tool (in-flight work) → `devlog.md` + `git log` (history). Items only ever flow forward.
+- **A long queue is healthy.** It is never a reason to rush, cut corners, or close items early: each item gets the same care whether there are three or eighty, and the queue drains over as many ticks as it takes.
 - **When to stop and hand back:** `queue.md` is empty, what is left in `todo.md` is still too abstract to break down, and tests (and CI, if the project has a remote) pass.
 
 ## Testing

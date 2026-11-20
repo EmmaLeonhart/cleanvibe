@@ -25,6 +25,19 @@ self-exempting for replication-style bounded work.
 
 ---
 
+## Unreleased (next: v2.0.9) — a long queue is healthy; bare-prompt runs go to the GitHub folder
+
+**`autonomous-loop` and `queue-driven-workflow`: one new bullet each (copy them from a fresh
+project).** `autonomous-loop`, under "The work keeps the project's normal standards": *A long
+queue is healthy, never a reason to rush.* Do each item to the same standard whether the queue
+holds three items or eighty; never shortcut, skip or batch-close items to make it shorter.
+`queue-driven-workflow`, under "Queue and longer-horizon work", says the same. Why: a session in
+inochi-no-michikyo rushed a long queue; Emma asked for agents to be told outright (2026-11-20).
+
+**CLI (no change to existing repos):** `cleanvibe` and `cleanvibe new [NAME]` run from a drive
+root, the home folder or the Windows system folder now create the project under
+`~/Documents/GitHub` (or `$CLEANVIBE_PROJECTS_DIR`) if it exists, and say so.
+
 ## v2.0.8 (2026-11-13) — emergency: `--no-claude` removed; graceful stop; data lake as staging
 
 **`--no-claude` is gone from every command** (no change to existing repos). A project created

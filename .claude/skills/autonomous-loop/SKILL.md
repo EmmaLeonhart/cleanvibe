@@ -68,6 +68,11 @@ work.
   test to get green; record the defect instead.
 - If you don't understand something well enough to do it, write the question
   down (a queue item, or `INTENT.md`) instead of guessing.
+- **A long queue is healthy, never a reason to rush.** Do each item to the
+  same standard whether the queue holds three items or eighty: the loop gets
+  through it over many ticks. Never shortcut, skip or batch-close items to
+  make the queue shorter. (Emma, 2026-11-20, after a session rushed a long
+  queue in inochi-no-michikyo.)
 
 These are how the work is done, not reasons to stop the loop.
 

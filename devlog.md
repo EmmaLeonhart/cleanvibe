@@ -2631,3 +2631,12 @@ folders are unchanged; absolute NAMEs are unchanged. Emma hit this bug and
 listed it in the cleanvibe-commercial founding brief. Fixed from the
 cleanvibe-commercial repo, where cleanvibe is a submodule. 3 new tests in
 `tests/test_project.py`; 296 pass.
+
+## 2026-11-20 — skills: a long queue is healthy
+
+`autonomous-loop` and `queue-driven-workflow` each gain a bullet: a long
+queue is never a reason to rush, shortcut, skip or batch-close items. From
+the cleanvibe-commercial founding brief (the inochi-no-michikyo failure).
+Own skills regenerated from `skills.py`; `pages/updates.md` has an
+"Unreleased (next: v2.0.9)" entry covering this and the bare-prompt fix.
+Doctor clean; 296 tests pass.
