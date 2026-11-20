@@ -2701,3 +2701,8 @@ only when it matches neither the current rules nor the 2.0.8 wording
 (fingerprints in `project._KNOWN_SHIPPED`, from the 2.0.8 generator output
 in `tests/fixtures/`). `cleanvibe-update-check` step 0 now says to run it
 once. 5 tests in `tests/test_refresh_migrate.py`; 312 pass; doctor clean.
+
+## 2026-11-20 - site: refresh card
+
+`pages/index.html` gains a card for `cleanvibe refresh` (and `--migrate`),
+as this repo's CLAUDE.md asks for every subcommand.

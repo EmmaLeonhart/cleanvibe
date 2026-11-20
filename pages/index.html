@@ -199,6 +199,11 @@
           <span class="c-name">cleanvibe doctor</span>
           <p class="c-desc">A read-only audit for drift: done markers left in <code>queue.md</code>, releases missing from <code>devlog.md</code>, outdated skills, references to <code>CLAUDE.md</code> sections that no longer exist, tests with no CI. Exits non-zero if it finds anything.</p>
         </div>
+        <div class="cmd cmd-c" data-cmd="refresh update upgrade skills rules migrate">
+          <span class="c-emoji">&#128260;</span>
+          <span class="c-name">cleanvibe refresh</span>
+          <p class="c-desc">Brings the files cleanvibe ships up to the installed version: the skills, <code>.claude/cleanvibe/RULES.md</code>, the hooks and the intake script. It adds its own hook entries to <code>settings.json</code> and never touches your <code>CLAUDE.md</code> or your other files. <code>--migrate</code> moves a project made before 2.0.9 to the split layout once, keeping a backup and flagging any rule you had edited. Preview with <code>--dry-run</code>.</p>
+        </div>
         <div class="cmd cmd-c" data-cmd="scan security safety consent third-party code replication">
           <span class="c-emoji">&#128270;</span>
           <span class="c-name">cleanvibe scan</span>
