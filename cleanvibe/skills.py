@@ -119,6 +119,13 @@ work.
   through it over many ticks. Never shortcut, skip or batch-close items to
   make the queue shorter. (Emma, 2026-11-20, after a session rushed a long
   queue in inochi-no-michikyo.)
+- **Settle permissions before the loop, not inside it.** Before arming the
+  cron, try once each kind of action the queue will need (a push, the tools
+  and scripts it calls), so a permission prompt comes up while the user is
+  still there. When a step is refused during the loop, by a permission
+  prompt or the auto-mode classifier, don't look for a way around it: record
+  it as a blocker the user has to clear (BLOCKED-ON-USER-ACTION, naming the
+  refused action), and carry on with the items that don't depend on it.
 
 These are how the work is done, not reasons to stop the loop.
 

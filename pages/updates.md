@@ -34,6 +34,13 @@ holds three items or eighty; never shortcut, skip or batch-close items to make i
 `queue-driven-workflow`, under "Queue and longer-horizon work", says the same. Why: a session in
 inochi-no-michikyo rushed a long queue; Emma asked for agents to be told outright (2026-11-20).
 
+**`autonomous-loop`: a second new bullet in the same section (copy it from a fresh project).**
+*Settle permissions before the loop, not inside it:* try each kind of action the queue needs once
+before arming the cron, so prompts come up while the user is there; a step refused during the loop
+(permission prompt or auto-mode classifier) is recorded as a BLOCKED-ON-USER-ACTION blocker naming
+the refused action, never worked around, and the loop carries on with what doesn't depend on it.
+From the cleanvibe-commercial founding brief (2026-11-20).
+
 **CLAUDE.md template (v2): the "AskUserQuestion only when the user is clearly here" bullet ends
 with a new sentence** (existing repos: add it by hand): *Keep every question short: one decision
 per question, a sentence or two, and say what you will do by default if there is no answer.*

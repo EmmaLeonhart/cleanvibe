@@ -2648,3 +2648,11 @@ question short, one decision per question, a sentence or two, with the
 default stated. From the cleanvibe-commercial founding brief. Test needle
 added in `test_claude_md_rules`; 296 pass, doctor clean; noted in the
 Unreleased entry of `pages/updates.md`.
+
+## 2026-11-20 - skills: settle permissions before the loop
+
+`autonomous-loop` gains a bullet: try each kind of action the queue needs
+once before arming the cron; a step refused during the loop becomes a
+BLOCKED-ON-USER-ACTION blocker, never a workaround. From the
+cleanvibe-commercial founding brief. Skills regenerated; doctor clean; 296
+tests pass; added to the Unreleased entry in `pages/updates.md`.
