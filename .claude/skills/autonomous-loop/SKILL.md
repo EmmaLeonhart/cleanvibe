@@ -25,6 +25,12 @@ That's the whole loop. Each time it fires:
 
 1. **Commit and push** everything that has changed, with messages that say what
    and why. Push only if the repo has a remote. No empty commits.
+   **Pull before you push:** after committing, run `git pull --rebase`, then
+   push. The user may have edited `queue.md` or another file on GitHub from
+   their phone, and without the pull every push after that is rejected. If
+   the rebase stops on a conflict, run `git rebase --abort` (your commits
+   are kept), record the conflict as a blocker for the user, and keep
+   working locally. Never force-push, and never reset away their commit.
 2. **Work the first item, then the new first item, one at a time.** Do the item
    at the top of `queue.md`, then delete it from `queue.md` and log it in
    `devlog.md` in the same commit. The item below it is now the first item: work

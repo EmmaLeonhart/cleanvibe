@@ -2664,3 +2664,11 @@ changes as work an interrupted session left (usually on the first queue
 item): finish it or commit what is good, never discard. From
 cleanvibe-commercial `docs/startup-and-restarts.md`. One new test; 297 pass;
 doctor clean; in the Unreleased entry of `pages/updates.md`.
+
+## 2026-11-20 - loop: pull before push
+
+`autonomous-loop` step 1 now says: after committing, `git pull --rebase`,
+then push; on a conflict, `git rebase --abort`, record a blocker, keep
+working locally; never force-push. A phone edit on GitHub would otherwise
+get every later push rejected. Found in cleanvibe-commercial. Doctor clean;
+297 pass; in the Unreleased entry.

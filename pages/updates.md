@@ -41,6 +41,11 @@ before arming the cron, so prompts come up while the user is there; a step refus
 the refused action, never worked around, and the loop carries on with what doesn't depend on it.
 From the cleanvibe-commercial founding brief (2026-11-20).
 
+**`autonomous-loop`: step 1 ("Commit and push") gains "Pull before you push"** (copy it from a fresh
+project): after committing, `git pull --rebase`, then push; on a conflict, `git rebase --abort`,
+record a blocker and keep working locally; never force-push. Why: an edit the user makes on GitHub
+(from their phone) otherwise gets every later push rejected.
+
 **CLAUDE.md template (v2): the "AskUserQuestion only when the user is clearly here" bullet ends
 with a new sentence** (existing repos: add it by hand): *Keep every question short: one decision
 per question, a sentence or two, and say what you will do by default if there is no answer.*
