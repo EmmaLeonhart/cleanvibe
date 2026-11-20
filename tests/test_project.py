@@ -82,7 +82,11 @@ class TestNewProject(unittest.TestCase):
         self.assertIn("directory name, `oolong-research`", intent)
 
     def test_claude_md_rules(self):
-        claude = (_new() / "CLAUDE.md").read_text(encoding="utf-8")
+        proj = _new()
+        # The rules live in RULES.md, which CLAUDE.md imports; together they are
+        # what the session sees.
+        claude = ((proj / "CLAUDE.md").read_text(encoding="utf-8")
+                  + (proj / templates.V2_RULES_PATH).read_text(encoding="utf-8"))
         for needle in ("work from low information", "The chat is the project, from the first message",
                        "INTENT.md", "AskUserQuestion only when the user is clearly here",
                        "one decision per question, a sentence or two",
@@ -327,7 +331,9 @@ class TestResearchFixes203(unittest.TestCase):
         # Emma, 2026-10-30: two different CLAUDE.md texts, decided at creation.
         chosen = templates.v2_claude_md("astronism", auto_named=False)
         generated = templates.v2_claude_md("golden-swift-otter", auto_named=True)
-        step = lambda md: next(l for l in md.splitlines() if l.startswith("3. Create the GitHub"))
+        # Work-mode step 3 (in RULES.md) points at CLAUDE.md's "Repository name".
+        self.assertIn("*Repository name* in", templates.v2_rules_md())
+        step = lambda md: md.split("## Repository name\n", 1)[1].split("\n## ", 1)[0]
         self.assertIn("named `astronism`", step(chosen))
         self.assertIn("descriptive", step(generated))
         self.assertNotEqual(step(chosen), step(generated))
@@ -343,8 +349,24 @@ class TestResearchFixes203(unittest.TestCase):
         self.assertIn("autonomous-loop", prompt)
         self.assertIn("autonomous-loop", templates.v2_runclaude_bat("/home/e/p"))
 
+    def test_rules_split_from_claude_md(self):
+        # 2026-11-20: shipped rules in their own file so updates can replace them
+        # whole; CLAUDE.md keeps only the project's own text and imports them.
+        rules = templates.v2_rules_md()
+        for name, auto in (("astronism", False), ("golden-swift-otter", True)):
+            md = templates.v2_claude_md(name, auto_named=auto)
+            self.assertIn("\n@" + templates.V2_RULES_PATH + "\n", md)
+            self.assertIn("## This project's own rules", md)
+            self.assertIn("**Last cleanvibe update check:** `never`", md)  # the date stays here
+            self.assertNotIn("## How this project works", md)
+            self.assertNotIn(name, rules)
+        self.assertNotIn("Last cleanvibe update check", rules)
+        self.assertEqual(rules, templates.v2_rules_md())  # identical for every project
+        proj = _new()
+        self.assertEqual((proj / templates.V2_RULES_PATH).read_text(encoding="utf-8"), rules)
+
     def test_claude_md_states_the_new_rules(self):
-        md = templates.v2_claude_md("p")
+        md = templates.v2_rules_md()
         self.assertIn("Times come from the clock", md)                  # M3
         self.assertIn("quote their own words", md)                      # M4
         self.assertIn("~/.claude/projects/.../memory/", md)             # M5: harness memory is outside

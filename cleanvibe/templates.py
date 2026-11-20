@@ -3430,26 +3430,28 @@ def _publishing_section(visibility, project_name: str = "", auto_named: bool = T
         "(`gh repo edit --visibility ...`).")
 
 
-def _repo_name_phrase(project_name: str, auto_named: bool) -> str:
-    if auto_named:
-        return "under a descriptive name"
-    return f"named `{project_name}`"
-
-
 def _repo_step(project_name: str, auto_named: bool) -> str:
-    """Work-mode step 3. Two different texts, chosen here, so the agent never has
-    to work out which case it is in (Emma, 2026-10-30)."""
+    """CLAUDE.md's "Repository name" section (work-mode step 3 points here). Two
+    different texts, chosen here, so the agent never has to work out which case
+    it is in (Emma, 2026-10-30)."""
     if auto_named:
         return ("Create the GitHub repository as *Publishing* says, under a descriptive\n"
-                "   kebab-case name that says what the project is about. The folder name\n"
-                "   was generated and says nothing, so do not use it.")
+                "kebab-case name that says what the project is about. The folder name\n"
+                "was generated and says nothing, so do not use it.")
     return (f"Create the GitHub repository as *Publishing* says, named `{project_name}`:\n"
-            f"   the folder name, which the user chose. Keep it; do not replace it with a\n"
-            f"   longer descriptive name.")
+            f"the folder name, which the user chose. Keep it; do not replace it with a\n"
+            f"longer descriptive name.")
+
+
+V2_RULES_PATH = ".claude/cleanvibe/RULES.md"
 
 
 def v2_claude_md(project_name: str, auto_named: bool = False, visibility=None,
                  has_prompt: bool = False) -> str:
+    """The project's own CLAUDE.md: only what belongs to this project. The rules
+    cleanvibe ships are in RULES.md (``v2_rules_md``), imported below, so an
+    update can replace them whole without touching this file (2026-11-20,
+    cleanvibe-commercial docs/data-vs-code-in-cleanvibe.md)."""
     date = datetime.now().strftime("%Y-%m-%d")
     return f"""# {project_name}
 
@@ -3458,6 +3460,37 @@ def v2_claude_md(project_name: str, auto_named: bool = False, visibility=None,
 {_setup_section(auto_named, visibility, has_prompt)}
 
 {_publishing_section(visibility, project_name, auto_named)}
+
+## Repository name
+{_repo_step(project_name, auto_named)}
+
+## This project's own rules
+_Rules, conventions and constraints for this project only go here, not in
+`{V2_RULES_PATH}`: cleanvibe replaces that file whole when it updates._
+
+## The rules cleanvibe ships
+How every cleanvibe project works, from chat mode to the work loop. Kept in
+their own file so updates never overwrite this one:
+
+@{V2_RULES_PATH}
+
+## Skills
+- **Last cleanvibe update check:** `never`
+- **Updates source:** <https://cleanvibe.emmaleonhart.com/updates.md>
+
+# currentDate
+Today's date is {date}.
+"""
+
+
+def v2_rules_md() -> str:
+    """The rules every cleanvibe 2 project follows, identical for every project
+    (no project name or setting in it), written to ``V2_RULES_PATH`` and
+    replaced whole on update. Project-specific text stays in CLAUDE.md."""
+    return f"""# The rules cleanvibe ships
+
+_Written by cleanvibe and replaced whole when it updates. Don't edit this
+file: put this project's own rules in CLAUDE.md._
 
 ## How this project works
 Nothing was decided up front about what this project is. cleanvibe projects are
@@ -3540,9 +3573,9 @@ the folder and dropped material into it, expecting you to get on with it.
   again, with a clear name and a line saying what it is for. Delete what is no
   longer used.
 - **Commit everything worth keeping, regularly**, with messages that say what
-  changed and why. When work mode starts, the repo goes to GitHub
-  {_repo_name_phrase(project_name, auto_named)} as *Publishing* says, and from
-  then on every commit is pushed.
+  changed and why. When work mode starts, the repo goes to GitHub as
+  *Publishing* and *Repository name* in CLAUDE.md say, and from then on every
+  commit is pushed.
 - **Keep going without asking.** Work that is already planned or under way
   does not need the user's consent to continue, even when it is slow or has to
   be redone (a test run to restart, a long job to rerun). If a decision is
@@ -3583,8 +3616,8 @@ When work mode starts, do this once, in order, and commit as you go:
    subject by default; add what the material and the name say.
 2. Write `INTENT.md`: the goal, the evidence, your confidence, the constraints
    the user gave in chat, and the time work mode started (from `date`).
-3. {_repo_step(project_name, auto_named)}
-   If `gh` is missing or not logged in, record that in `INTENT.md` as
+3. Create the GitHub repository as *Publishing* and *Repository name* in
+   CLAUDE.md say. If `gh` is missing or not logged in, record that in `INTENT.md` as
    BLOCKED-ON-USER-ACTION and carry on locally.
 4. Fill in `README.md`, and run the `cleanvibe-update-check` skill if its
    weekly check is due.
@@ -3679,14 +3712,19 @@ hand.
   check.
 - `.claude/hooks/intent_staleness.py`: on each loop tick, tells you how long
   `INTENT.md` has gone without a commit, so you can tell whether it is due.
+- `CLAUDE.md`: this project's own setup and rules. `{V2_RULES_PATH}`: these
+  shipped rules, imported by CLAUDE.md.
 
-{SKILLS_POINTER}
+{_V2_SKILLS_PROSE}
 
 {BEHAVIOR_RULES}
-
-# currentDate
-Today's date is {date}.
 """
+
+
+# The v2 Skills prose without the update-check date, which is the project's own
+# data and stays in CLAUDE.md's "## Skills" section.
+_V2_SKILLS_PROSE = "## How skills work\n" + SKILLS_POINTER.split("\n", 1)[1].split(
+    "\n- **Last cleanvibe update check:**", 1)[0].strip("\n")
 
 
 def v2_readme_md(project_name: str) -> str:

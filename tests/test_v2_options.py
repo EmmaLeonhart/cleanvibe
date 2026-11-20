@@ -64,7 +64,7 @@ class TestProjectFiles(unittest.TestCase):
         self.assertIn("**Starting prompt:** none was given.", md)
 
     def test_keep_going_rule(self):
-        md = (self.make("p") / "CLAUDE.md").read_text(encoding="utf-8")
+        md = (self.make("p") / ".claude" / "cleanvibe" / "RULES.md").read_text(encoding="utf-8")
         self.assertIn("**Keep going without asking.**", md)
 
 

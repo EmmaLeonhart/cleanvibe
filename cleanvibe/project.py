@@ -125,7 +125,7 @@ def new_project(
     if dry_run:
         print(f"[dry-run] New cleanvibe project: {path}" + (" (auto-named)" if auto_named else ""))
         for rel in (
-            "CLAUDE.md", "README.md", "INTENT.md", MARKER, ".gitignore",
+            "CLAUDE.md", templates.V2_RULES_PATH, "README.md", "INTENT.md", MARKER, ".gitignore",
             "sessions/.gitkeep", "data_lake/.gitkeep",
             ".claude/settings.json (session-log + INTENT staleness hooks)",
             ".claude/hooks/save_session_log.py",
@@ -146,6 +146,9 @@ def new_project(
 
     _write(path / "CLAUDE.md", templates.v2_claude_md(
         project_name, auto_named, visibility, has_prompt=bool(prompt)))
+    rules = path / templates.V2_RULES_PATH
+    rules.parent.mkdir(parents=True, exist_ok=True)
+    _write(rules, templates.v2_rules_md())
     _write(path / "README.md", templates.v2_readme_md(project_name))
     _write(path / "INTENT.md", templates.v2_intent_md(project_name, auto_named))
     _write(path / MARKER, templates.v2_marker_json(

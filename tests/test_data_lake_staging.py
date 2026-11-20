@@ -10,7 +10,7 @@ from cleanvibe import templates
 
 class DataLakeStagingTests(unittest.TestCase):
     def test_v2_claude_md_says_finished_material_moves_out(self):
-        md = templates.v2_claude_md("demo")
+        md = templates.v2_rules_md()
         self.assertIn("The data lake is a staging area", md)
         self.assertIn("Move, never delete", md)
 
