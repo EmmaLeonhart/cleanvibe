@@ -45,6 +45,10 @@ From the cleanvibe-commercial founding brief (2026-11-20).
 with a new sentence** (existing repos: add it by hand): *Keep every question short: one decision
 per question, a sentence or two, and say what you will do by default if there is no answer.*
 
+**Resume prompt (no change to existing repos; new sessions get it from the installed cleanvibe):**
+a reopened project now runs `git status` first and treats uncommitted changes as work an
+interrupted session left on the first queue item: finish it or commit what is good, never discard.
+
 **CLI (no change to existing repos):** `cleanvibe` and `cleanvibe new [NAME]` run from a drive
 root, the home folder or the Windows system folder now create the project under
 `~/Documents/GitHub` (or `$CLEANVIBE_PROJECTS_DIR`) if it exists, and say so.

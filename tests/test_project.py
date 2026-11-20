@@ -315,6 +315,14 @@ class TestResearchFixes203(unittest.TestCase):
         self.assertIn("cleanvibe-update-check", templates.v2_resume_prompt("/home/e/p"))
         self.assertIn("cleanvibe-update-check", templates.v2_first_prompt("/home/e/p", True))
 
+    def test_resume_picks_up_interrupted_work(self):
+        # 2026-11-20 (cleanvibe-commercial, docs/startup-and-restarts.md): a
+        # session cut off mid-item leaves uncommitted edits; the next one must
+        # find them before starting the first queue item again.
+        prompt = templates.v2_resume_prompt("/home/e/p")
+        self.assertIn("git status", prompt)
+        self.assertIn("never discard them", prompt)
+
     def test_chosen_name_is_the_repo_name(self):
         # Emma, 2026-10-30: two different CLAUDE.md texts, decided at creation.
         chosen = templates.v2_claude_md("astronism", auto_named=False)

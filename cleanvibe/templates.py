@@ -3287,7 +3287,10 @@ def v2_resume_prompt(path) -> str:
     prompt = (
         f"This is a new session in an existing cleanvibe project{_prompt_path(path)}. "
         f"Catch up before doing anything: read CLAUDE.md, INTENT.md and the newest "
-        f"session log in sessions/, and queue.md if there is one. If the "
+        f"session log in sessions/, and queue.md if there is one. Then run git "
+        f"status: uncommitted changes are work an earlier session left when it was "
+        f"cut off, usually on the first queue item. Finish that item or commit what "
+        f"is good, and never discard them. If the "
         f"Thirty-minute intake in CLAUDE.md has not run yet, schedule it again. "
         f"If it has run but work mode has not started, the project is still in "
         f"chat mode: stay conversational and schedule a Mode check for an hour "

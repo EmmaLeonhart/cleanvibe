@@ -2656,3 +2656,11 @@ once before arming the cron; a step refused during the loop becomes a
 BLOCKED-ON-USER-ACTION blocker, never a workaround. From the
 cleanvibe-commercial founding brief. Skills regenerated; doctor clean; 296
 tests pass; added to the Unreleased entry in `pages/updates.md`.
+
+## 2026-11-20 - resume prompt: pick up interrupted work
+
+The v2 resume prompt now runs `git status` first and treats uncommitted
+changes as work an interrupted session left (usually on the first queue
+item): finish it or commit what is good, never discard. From
+cleanvibe-commercial `docs/startup-and-restarts.md`. One new test; 297 pass;
+doctor clean; in the Unreleased entry of `pages/updates.md`.
