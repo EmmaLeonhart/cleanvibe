@@ -76,8 +76,6 @@ the folder and dropped material into it, expecting you to get on with it.
   record what the user believes or wants (in `INTENT.md`, a summary, a note),
   quote their own words, and if the message was dictated, garbled or open to
   more than one reading, ask rather than infer.
-  **Keep every question short:** one decision per question, a sentence or two,
-  and say what you will do by default if there is no answer.
 - **Times come from the clock.** Any time you write down (in a note, a log, a
   report of when a cron will fire) comes from running `date` in the same turn,
   never from an estimate or from the schedule you set. Scheduled jobs can fire

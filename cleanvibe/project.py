@@ -221,14 +221,17 @@ def _split_sections(text: str) -> tuple:
     return preamble, [(rest[i], rest[i + 1]) for i in range(0, len(rest), 2)]
 
 
-# Fingerprints of the rule sections cleanvibe 2.0.8 shipped (from
-# tests/fixtures/v2_0_8_CLAUDE_*.md, project name replaced by <PROJECT>), so a
-# migration can tell "older cleanvibe wording" from "edited locally" and only
-# flags the second. Add the previous release's sections here at each release.
+# Fingerprints of rule sections cleanvibe shipped before the split (project
+# name replaced by <PROJECT>), so a migration can tell "older cleanvibe
+# wording" from "edited locally" and only flags the second. Covers the v2.0.8
+# release (tests/fixtures/v2_0_8_CLAUDE_*.md, from `git archive v2.0.8`) and
+# main just before the split (0b782a7, which added the short-question
+# sentence). Add the previous release's sections here at each release.
 _KNOWN_SHIPPED = {
     "1f06a478d4e5355f", "26b1e8f3e03eb28a", "39e92862b1e62ae7", "56b9e625a55c55c8",
     "6bfcb96e036736c0", "9b7d8c2221752fcc", "a7217c37a7fd57b6", "a84e0248aa3f0411",
     "aadd2296b1d97bf5", "bef9dcb9485fa708", "c635ff87f7554c93", "df9ee3131cc17d3e",
+    "3001cdb3db2d098a", "bf48fa2b10d42f35",  # v2.0.8 release
 }
 
 
