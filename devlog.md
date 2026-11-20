@@ -2640,3 +2640,11 @@ the cleanvibe-commercial founding brief (the inochi-no-michikyo failure).
 Own skills regenerated from `skills.py`; `pages/updates.md` has an
 "Unreleased (next: v2.0.9)" entry covering this and the bare-prompt fix.
 Doctor clean; 296 tests pass.
+
+## 2026-11-20 — template: short questions
+
+The generated CLAUDE.md's AskUserQuestion bullet now ends: keep every
+question short, one decision per question, a sentence or two, with the
+default stated. From the cleanvibe-commercial founding brief. Test needle
+added in `test_claude_md_rules`; 296 pass, doctor clean; noted in the
+Unreleased entry of `pages/updates.md`.

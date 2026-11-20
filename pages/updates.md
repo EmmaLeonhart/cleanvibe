@@ -34,6 +34,10 @@ holds three items or eighty; never shortcut, skip or batch-close items to make i
 `queue-driven-workflow`, under "Queue and longer-horizon work", says the same. Why: a session in
 inochi-no-michikyo rushed a long queue; Emma asked for agents to be told outright (2026-11-20).
 
+**CLAUDE.md template (v2): the "AskUserQuestion only when the user is clearly here" bullet ends
+with a new sentence** (existing repos: add it by hand): *Keep every question short: one decision
+per question, a sentence or two, and say what you will do by default if there is no answer.*
+
 **CLI (no change to existing repos):** `cleanvibe` and `cleanvibe new [NAME]` run from a drive
 root, the home folder or the Windows system folder now create the project under
 `~/Documents/GitHub` (or `$CLEANVIBE_PROJECTS_DIR`) if it exists, and say so.

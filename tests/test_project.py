@@ -85,6 +85,7 @@ class TestNewProject(unittest.TestCase):
         claude = (_new() / "CLAUDE.md").read_text(encoding="utf-8")
         for needle in ("work from low information", "The chat is the project, from the first message",
                        "INTENT.md", "AskUserQuestion only when the user is clearly here",
+                       "one decision per question, a sentence or two",
                        "Material goes into `data_lake/`", "Thirty-minute intake",
                        "recurring: false", "data_lake_intake.py",
                        "## Chat mode, then work mode", "## Mode check",
