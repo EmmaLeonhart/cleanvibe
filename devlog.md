@@ -2672,3 +2672,13 @@ then push; on a conflict, `git rebase --abort`, record a blocker, keep
 working locally; never force-push. A phone edit on GitHub would otherwise
 get every later push rejected. Found in cleanvibe-commercial. Doctor clean;
 297 pass; in the Unreleased entry.
+
+## 2026-11-20 - v2: shipped rules in RULES.md
+
+New projects get `.claude/cleanvibe/RULES.md` (`templates.v2_rules_md()`,
+the same for every project), imported by a CLAUDE.md that holds only the
+project's own text, so updates can replace the rules whole. Prompts and cron
+prompts point at "the project rules"; doctor gains a `rules` check and
+section-refs read the imported file. Import verified with `claude -p`
+first. Migration of existing projects is next. 300 tests pass; doctor clean
+(9 checks). From cleanvibe-commercial.

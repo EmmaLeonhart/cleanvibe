@@ -50,6 +50,18 @@ record a blocker and keep working locally; never force-push. Why: an edit the us
 with a new sentence** (existing repos: add it by hand): *Keep every question short: one decision
 per question, a sentence or two, and say what you will do by default if there is no answer.*
 
+**New projects: the shipped rules move to `.claude/cleanvibe/RULES.md`** (existing repos: no
+change yet; a migration comes later). A new project's `CLAUDE.md` now holds only its own text:
+setup, Publishing, a *Repository name* section, an empty *This project's own rules* section, the
+import line `@.claude/cleanvibe/RULES.md`, and the update-check date under `## Skills`. Everything
+cleanvibe ships ("How this project works" through "Files", the skills prose, the behavior rules) is
+in `RULES.md`, identical for every project, so an update can replace it whole instead of asking
+for a hand merge. `cleanvibe doctor` has a new `rules` check: if CLAUDE.md imports RULES.md, it
+must exist and match. The first and resume prompts and the intake/Mode-check cron prompts now
+point at "the project rules". Why: CLAUDE.md mixed shipped rules with each project's own text, so
+every rule change needed "existing repos: add it by hand" (cleanvibe-commercial,
+`docs/data-vs-code-in-cleanvibe.md`). The import was verified with `claude -p` before the split.
+
 **Resume prompt (no change to existing repos; new sessions get it from the installed cleanvibe):**
 a reopened project now runs `git status` first and treats uncommitted changes as work an
 interrupted session left on the first queue item: finish it or commit what is good, never discard.

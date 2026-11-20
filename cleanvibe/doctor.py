@@ -6,6 +6,8 @@ Checks the conventions cleanvibe scaffolds, and that drift in practice:
                       devlog.md. cleanvibe 2 (``.cleanvibe.json``): CLAUDE.md,
                       README.md, INTENT.md, the marker, and the transcript hook.
 * ``skills``       — every vendored skill is present and matches this cleanvibe's copy.
+* ``rules``        — if CLAUDE.md imports .claude/cleanvibe/RULES.md, it exists and
+                      matches this cleanvibe's copy.
 * ``queue-done``   — "done" markers left in queue.md (ticked boxes, ✓, DONE, strikethrough).
                       queue.md is delete-only; done lives in devlog.md.
 * ``version``      — queue.md's "Current version" pointer matches pyproject.toml.
@@ -161,10 +163,35 @@ def check_devlog_tags(root: Path) -> list:
     return found
 
 
+_RULES_PATH = ".claude/cleanvibe/RULES.md"
+_RULES_IMPORT = re.compile(r"^@\.claude/cleanvibe/RULES\.md\s*$", re.M)
+
+
+def check_rules(root: Path) -> list:
+    """A project whose CLAUDE.md imports the shipped rules (v2, since the
+    2026-11-20 split) must have them, matching this cleanvibe's copy. A project
+    from before the split has no import line and is not checked here."""
+    from . import templates  # templates is large; only load it when needed
+    claude = _read(root / "CLAUDE.md")
+    if claude is None or not _RULES_IMPORT.search(claude):
+        return []
+    text = _read(root / _RULES_PATH)
+    if text is None:
+        return [Finding("rules", _RULES_PATH, "missing, but CLAUDE.md imports it")]
+    if text.replace("\r\n", "\n") != templates.v2_rules_md().replace("\r\n", "\n"):
+        return [Finding("rules", _RULES_PATH,
+                        "differs from this cleanvibe's copy (outdated, or edited locally: "
+                        "a project's own rules belong in CLAUDE.md)")]
+    return []
+
+
 def check_section_refs(root: Path) -> list:
     claude = _read(root / "CLAUDE.md")
     if claude is None:
         return []
+    if _RULES_IMPORT.search(claude):
+        # The imported rules are part of CLAUDE.md as the session sees it.
+        claude += "\n" + (_read(root / _RULES_PATH) or "")
     headings = {
         m.group(1).strip().lower()
         for m in re.finditer(r"^#{1,6}\s+(.+?)\s*$", claude, re.M)
@@ -215,6 +242,7 @@ def check_pages_gate(root: Path) -> list:
 CHECKS = (
     check_files,
     check_skills,
+    check_rules,
     check_queue_done,
     check_version,
     check_devlog_tags,

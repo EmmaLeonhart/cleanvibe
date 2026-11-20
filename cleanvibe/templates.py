@@ -3263,13 +3263,14 @@ def v2_first_prompt(path, auto_named: bool, visibility=None, extra=None) -> str:
         f"low information: I may say little or nothing, and I may not be here at "
         f"all. {clue} The path can tell you something too, but a guess about why "
         f"the project exists is not a task: do not invent work from it. Read "
-        f"CLAUDE.md first. Then, before "
+        f"CLAUDE.md and the rules it imports from .claude/cleanvibe/RULES.md "
+        f"first. Then, before "
         f"anything else, use CronCreate to schedule the one-time Thirty-minute "
-        f"intake exactly as CLAUDE.md describes, for 30 minutes from now. The "
+        f"intake exactly as the project rules describe, for 30 minutes from now. The "
         f"session starts in chat mode: the chat is the project, so keep it light "
         f"and conversational, and do not edit files, commit, plan or offer me "
         f"options until I tell you to start working or I have been quiet for an "
-        f"hour. Then work mode starts as CLAUDE.md describes, including INTENT.md, "
+        f"hour. Then work mode starts as the project rules describe, including INTENT.md, "
         f"{_repo_clause(visibility, auto_named)}, and the "
         f"cleanvibe-update-check skill if its weekly check is due. For now, look "
         f"at what is in this folder and greet me in a line or two. Only use "
@@ -3286,12 +3287,13 @@ def v2_resume_prompt(path) -> str:
     """Starting prompt when an existing cleanvibe project is reopened."""
     prompt = (
         f"This is a new session in an existing cleanvibe project{_prompt_path(path)}. "
-        f"Catch up before doing anything: read CLAUDE.md, INTENT.md and the newest "
+        f"Catch up before doing anything: read CLAUDE.md (and .claude/cleanvibe/RULES.md "
+        f"if it imports one), INTENT.md and the newest "
         f"session log in sessions/, and queue.md if there is one. Then run git "
         f"status: uncommitted changes are work an earlier session left when it was "
         f"cut off, usually on the first queue item. Finish that item or commit what "
         f"is good, and never discard them. If the "
-        f"Thirty-minute intake in CLAUDE.md has not run yet, schedule it again. "
+        f"Thirty-minute intake in the project rules has not run yet, schedule it again. "
         f"If it has run but work mode has not started, the project is still in "
         f"chat mode: stay conversational and schedule a Mode check for an hour "
         f"from now. If work mode has started, start the work loop now with the "
@@ -3653,7 +3655,7 @@ In the very first session, before anything else, schedule this with
 `CronCreate`: a one-time job (`recurring: false`) at the local time 30 minutes
 from now, with minute, hour, day and month pinned, and this prompt:
 
-    [cleanvibe cron] Thirty-minute intake: follow the Thirty-minute intake section of CLAUDE.md.
+    [cleanvibe cron] Thirty-minute intake: follow the Thirty-minute intake section of the project rules (.claude/cleanvibe/RULES.md).
 
 When it fires, do this:
 
@@ -3668,7 +3670,7 @@ When it fires, do this:
    - **CHAT MODE** (the user wrote within the last hour): stay in chat mode.
      Schedule the Mode check as a one-time `CronCreate` job at the time the
      report gives, with the prompt `[cleanvibe cron] Mode check: follow the
-     Mode check section of CLAUDE.md.`
+     Mode check section of the project rules (.claude/cleanvibe/RULES.md).`
    - **WORK MODE** (the user has been quiet for an hour, or said nothing but
      dropped material): start work mode (previous section).
    - **NAME ONLY** (no material, no chat, a name the user chose): start work

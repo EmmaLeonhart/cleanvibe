@@ -77,6 +77,26 @@ class TestChecks(unittest.TestCase):
         self.assertEqual([f.where for f in doc.check_files(proj)],
                          [".claude/hooks/intent_staleness.py"])
 
+    def test_shipped_rules_missing_or_edited(self):
+        # Since the 2026-11-20 split, CLAUDE.md imports .claude/cleanvibe/RULES.md.
+        proj = _scaffold(new_project)
+        rules = proj / ".claude/cleanvibe/RULES.md"
+        self.assertEqual(doc.check_rules(proj), [])
+        rules.write_text(rules.read_text(encoding="utf-8") + "\n- a local rule\n", encoding="utf-8")
+        self.assertIn("differs", doc.check_rules(proj)[0].message)
+        rules.unlink()
+        self.assertIn("missing", doc.check_rules(proj)[0].message)
+        # A project from before the split (no import line) is not checked.
+        claude = proj / "CLAUDE.md"
+        claude.write_text(claude.read_text(encoding="utf-8").replace(
+            "@.claude/cleanvibe/RULES.md", ""), encoding="utf-8")
+        self.assertEqual(doc.check_rules(proj), [])
+
+    def test_section_refs_see_the_imported_rules(self):
+        proj = _scaffold(new_project)
+        (proj / "README.md").write_text('See CLAUDE.md § "Mode check".\n', encoding="utf-8")
+        self.assertEqual(doc.check_section_refs(proj), [])  # the heading is in RULES.md
+
     def test_missing_and_edited_skills(self):
         slugs = list(skills.SKILLS)
         (self.proj / ".claude/skills" / slugs[0] / "SKILL.md").unlink()
