@@ -39,7 +39,9 @@ from .replicate import (
 from .chat import chat_project, default_chat_path
 from .doctor import doctor
 from .original import original_project
-from .project import auto_project_path, is_cleanvibe_repo, new_project, open_project
+from .project import (
+    auto_project_path, default_base, is_cleanvibe_repo, new_project, open_project,
+)
 from .research import research_project
 from .scan import scan_cli
 from .scaffold import clone_project, convert_project, create_project
@@ -96,17 +98,27 @@ def _do_default(args) -> None:
     if is_cleanvibe_repo(here):
         open_project(here, dry_run=args.dry_run, no_claude=(not LAUNCH))
         return
-    new_project(auto_project_path(here), auto_named=True,
+    new_project(auto_project_path(_base_for_new(here)), auto_named=True,
                 dry_run=args.dry_run, no_claude=(not LAUNCH), **_create_opts(args))
+
+
+def _base_for_new(cwd: Path) -> Path:
+    """The folder new projects go under, saying so when it isn't the cwd."""
+    base = default_base(cwd)
+    if base != cwd:
+        print(f"{cwd.resolve()} is not a place for projects; creating it in {base}.")
+    return base
 
 
 def _do_new(args) -> None:
     """`cleanvibe new [NAME]`."""
     if args.name is None:
-        new_project(auto_project_path(), auto_named=True,
+        new_project(auto_project_path(_base_for_new(Path("."))), auto_named=True,
                     dry_run=args.dry_run, no_claude=(not LAUNCH), **_create_opts(args))
         return
     path = args.name
+    if not path.is_absolute():
+        path = _base_for_new(Path(".")) / path
     if path.exists() and not path.is_dir():
         print(f"Error: {path} exists and is not a directory.", file=sys.stderr)
         sys.exit(2)

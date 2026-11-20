@@ -16,6 +16,7 @@ top-level sessions with Remote Control on (see ``launch.py``).
 
 from __future__ import annotations
 
+import os
 import platform
 from pathlib import Path
 
@@ -40,6 +41,44 @@ def is_cleanvibe_repo(path: Path) -> bool:
         return False
     has_workflow = (path / "queue.md").is_file() or (path / ".claude" / "skills").is_dir()
     return mentions and has_workflow
+
+
+def projects_home() -> Path:
+    """Where projects go when cleanvibe runs from a place no project belongs:
+    ``$CLEANVIBE_PROJECTS_DIR`` if set, else ``~/Documents/GitHub``."""
+    env = os.environ.get("CLEANVIBE_PROJECTS_DIR")
+    return Path(env).expanduser() if env else Path.home() / "Documents" / "GitHub"
+
+
+def is_bare_location(path: Path) -> bool:
+    """True where a bare command prompt opens: a drive or filesystem root, the
+    home folder itself, or the Windows system folder (``cmd`` run as admin
+    starts in System32). A project is never meant to land there."""
+    p = Path(path).resolve()
+    if p == Path(p.anchor):
+        return True
+    if p == Path.home().resolve():
+        return True
+    system_root = os.environ.get("SystemRoot") or os.environ.get("windir")
+    if system_root:
+        sr = Path(system_root).resolve()
+        if p == sr or sr in p.parents:
+            return True
+    return False
+
+
+def default_base(cwd: Path | None = None) -> Path:
+    """The folder a new project is created under. Normally the cwd. From a bare
+    location (see ``is_bare_location``) it is ``projects_home()`` if that folder
+    exists (Emma, 2026-11-20: running ``cleanvibe`` from the root or a bare
+    prompt should default to the GitHub directory). If it doesn't exist the cwd
+    is kept, so nothing is created somewhere the user never chose."""
+    cwd = Path(".") if cwd is None else Path(cwd)
+    if is_bare_location(cwd):
+        home = projects_home()
+        if home.is_dir():
+            return home
+    return cwd
 
 
 def auto_project_path(base: Path | None = None, rng=None) -> Path:

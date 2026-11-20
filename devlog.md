@@ -2619,3 +2619,15 @@ and has no 3.9 build. The matrix now runs 3.9 on ubuntu-24.04 instead. The
 dry-run smoke step still passed `--no-claude`, which 2.0.8 rejects; a dry
 run never launches, so the flag is simply gone. (Also corrects the step b
 entry: 18 entries moved, not 28.) Modernization item closed.
+
+## 2026-11-20 — bare-prompt runs default to the GitHub directory
+
+`cleanvibe` and `cleanvibe new [NAME]` run from a drive root, the home folder,
+or the Windows system folder (where `cmd` as admin opens) used to create the
+project right there. Now `project.default_base()` sends new projects to
+`projects_home()` (`$CLEANVIBE_PROJECTS_DIR`, else `~/Documents/GitHub`) when
+the cwd is such a bare location and that folder exists, and says so. Ordinary
+folders are unchanged; absolute NAMEs are unchanged. Emma hit this bug and
+listed it in the cleanvibe-commercial founding brief. Fixed from the
+cleanvibe-commercial repo, where cleanvibe is a submodule. 3 new tests in
+`tests/test_project.py`; 296 pass.

@@ -179,6 +179,42 @@ class TestRecognizeAndOpen(unittest.TestCase):
         with mock.patch.object(templates, "passphrase_name", return_value="calm-tidy-otter"):
             self.assertEqual(project.auto_project_path(base).name, "calm-tidy-otter-2")
 
+    def test_bare_locations(self):
+        root = Path(Path.cwd().anchor)
+        self.assertTrue(project.is_bare_location(root))
+        self.assertTrue(project.is_bare_location(Path.home()))
+        self.assertFalse(project.is_bare_location(Path(tempfile.mkdtemp())))
+        sysroot = Path(tempfile.mkdtemp())
+        with mock.patch.dict(os.environ, {"SystemRoot": str(sysroot)}):
+            self.assertTrue(project.is_bare_location(sysroot / "System32"))
+
+    def test_default_base_goes_to_projects_home_from_a_bare_prompt(self):
+        home = Path(tempfile.mkdtemp())
+        ordinary = Path(tempfile.mkdtemp())
+        root = Path(Path.cwd().anchor)
+        with mock.patch.dict(os.environ, {"CLEANVIBE_PROJECTS_DIR": str(home)}):
+            self.assertEqual(project.default_base(root), home)
+            self.assertEqual(project.default_base(Path.home()), home)
+            self.assertEqual(project.default_base(ordinary), ordinary)
+        missing = home / "does-not-exist"
+        with mock.patch.dict(os.environ, {"CLEANVIBE_PROJECTS_DIR": str(missing)}):
+            # Never invent a folder the user didn't choose: keep the cwd.
+            self.assertEqual(project.default_base(root), root)
+
+    def test_cli_new_name_from_bare_prompt_lands_in_projects_home(self):
+        from cleanvibe import cli
+        home = Path(tempfile.mkdtemp())
+        args = mock.Mock(name="args", dry_run=True)
+        args.name = Path("my-project")
+        # Stand in for "the cwd is a bare location": default_base redirects.
+        with mock.patch.object(cli, "new_project") as new, \
+                mock.patch.object(cli, "_create_opts", return_value={}), \
+                mock.patch.object(cli, "default_base", return_value=home), \
+                redirect_stdout(io.StringIO()) as out:
+            cli._do_new(args)
+        self.assertEqual(new.call_args[0][0], home / "my-project")
+        self.assertIn("not a place for projects", out.getvalue())
+
     def test_open_uses_resume_prompt_without_explorer(self):
         proj = _new()
         with mock.patch.object(project, "_launch_claude") as launch, redirect_stdout(io.StringIO()):
