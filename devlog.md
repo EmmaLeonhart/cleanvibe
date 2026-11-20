@@ -2691,3 +2691,13 @@ when imported, hooks, intake script), merges only cleanvibe's hook entries
 into settings.json, respects the session-log opt-out, never touches
 CLAUDE.md or project files. `cleanvibe-update-check` step 0 runs it. 7 tests
 (`tests/test_refresh.py`); 307 pass; doctor clean. From cleanvibe-commercial.
+
+## 2026-11-20 - cleanvibe refresh --migrate
+
+Moves a pre-2.0.9 project to the RULES.md split: rule sections out of
+CLAUDE.md, project sections and the update-check date kept, old file backed
+up to `.claude/cleanvibe/CLAUDE.pre-split.md`. A section is flagged CHECK
+only when it matches neither the current rules nor the 2.0.8 wording
+(fingerprints in `project._KNOWN_SHIPPED`, from the 2.0.8 generator output
+in `tests/fixtures/`). `cleanvibe-update-check` step 0 now says to run it
+once. 5 tests in `tests/test_refresh_migrate.py`; 312 pass; doctor clean.

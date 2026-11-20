@@ -42,7 +42,7 @@ from .doctor import doctor
 from .original import original_project
 from .project import (
     auto_project_path, default_base, is_cleanvibe_repo, new_project, open_project,
-    refresh_project,
+    refresh_project, migrate_project, MIGRATION_BACKUP,
 )
 from .research import research_project
 from .scan import scan_cli
@@ -486,13 +486,25 @@ def _add_legacy_parsers(subparsers) -> None:
 
 
 def _do_refresh(args) -> int:
-    """`cleanvibe refresh [PATH] [--dry-run]`. Exit 0 ok, 2 not a v2 project."""
+    """`cleanvibe refresh [PATH] [--migrate] [--dry-run]`. Exit 0 ok, 2 not a v2 project."""
+    verb = "Would update" if args.dry_run else "Updated"
     try:
+        if args.migrate:
+            result = migrate_project(args.path, dry_run=args.dry_run)
+            if result["already"]:
+                print("CLAUDE.md already imports the shipped rules; nothing to migrate.")
+            else:
+                print(f"  {verb} CLAUDE.md: {len(result['moved'])} shipped section(s) moved "
+                      f"to {templates.V2_RULES_PATH}"
+                      + ("" if args.dry_run else f"; the old file is kept at {MIGRATION_BACKUP}"))
+                for h in result["differing"]:
+                    print(f"  CHECK {h.lstrip('# ')}: its text differed from this version's. "
+                          f"If that was a local edit rather than an older cleanvibe's wording, "
+                          f"put it back under \"This project's own rules\" in CLAUDE.md.")
         changed = refresh_project(args.path, dry_run=args.dry_run)
     except ValueError as e:
         print(f"cleanvibe refresh: {e}", file=sys.stderr)
         return 2
-    verb = "Would update" if args.dry_run else "Updated"
     for rel in changed:
         print(f"  {verb} {rel}")
     print(f"cleanvibe refresh: {len(changed)} file(s) "
@@ -581,6 +593,10 @@ def build_parser() -> argparse.ArgumentParser:
     )
     refresh_parser.add_argument("--dry-run", action="store_true",
                                 help="List what would change; write nothing")
+    refresh_parser.add_argument(
+        "--migrate", action="store_true",
+        help="First move the shipped rules out of a pre-2.0.9 CLAUDE.md into "
+        ".claude/cleanvibe/RULES.md (the old file is kept as a backup)")
 
     scan_parser = subparsers.add_parser(
         "scan",

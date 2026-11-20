@@ -210,6 +210,121 @@ def _merge_settings(existing: str | None, shipped: str) -> str:
     return json.dumps(data, indent=2) + "\n"
 
 
+MIGRATION_BACKUP = ".claude/cleanvibe/CLAUDE.pre-split.md"
+
+
+def _split_sections(text: str) -> tuple:
+    """(preamble, [(heading line, body), ...]) on '## ' and '# ' headings."""
+    import re
+    parts = re.split(r"(?m)^(#{1,2} .*)$", text)
+    preamble, rest = parts[0], parts[1:]
+    return preamble, [(rest[i], rest[i + 1]) for i in range(0, len(rest), 2)]
+
+
+# Fingerprints of the rule sections cleanvibe 2.0.8 shipped (from
+# tests/fixtures/v2_0_8_CLAUDE_*.md, project name replaced by <PROJECT>), so a
+# migration can tell "older cleanvibe wording" from "edited locally" and only
+# flags the second. Add the previous release's sections here at each release.
+_KNOWN_SHIPPED = {
+    "1f06a478d4e5355f", "26b1e8f3e03eb28a", "39e92862b1e62ae7", "56b9e625a55c55c8",
+    "6bfcb96e036736c0", "9b7d8c2221752fcc", "a7217c37a7fd57b6", "a84e0248aa3f0411",
+    "aadd2296b1d97bf5", "bef9dcb9485fa708", "c635ff87f7554c93", "df9ee3131cc17d3e",
+}
+
+
+def _fingerprint(body: str, project_name: str) -> str:
+    import hashlib
+    norm = body.strip().replace(project_name, "<PROJECT>") if project_name else body.strip()
+    return hashlib.sha256(norm.encode("utf-8")).hexdigest()[:16]
+
+
+def _shipped_headings() -> dict:
+    """Heading -> body of every section the shipped RULES.md has."""
+    _, sections = _split_sections(templates.v2_rules_md())
+    return {h.strip(): b.strip() for h, b in sections if h.startswith("## ")}
+
+
+def migrate_claude_md(text: str, project_name: str, auto_named: bool) -> tuple:
+    """Turn a pre-split (cleanvibe <= 2.0.8) CLAUDE.md into the split layout.
+
+    Returns (new CLAUDE.md, moved headings, differing headings). Sections whose
+    heading is a shipped rule section leave CLAUDE.md (RULES.md replaces them);
+    "## Skills" becomes the short form, keeping the update-check date. Every
+    other section is the project's own and stays, in order. "differing" lists
+    moved sections whose text was not the current shipped text: an older
+    cleanvibe's wording or a local edit, which the caller reports, since only
+    a person can tell which (the old file is kept as a backup)."""
+    import re
+    shipped = _shipped_headings()
+    old_names = {"## Skills": "## How skills work"}
+    preamble, sections = _split_sections(text)
+    kept, moved, differing = [], [], []
+    date_line = "- **Last cleanvibe update check:** `never`"
+    for heading, body in sections:
+        h = heading.strip()
+        if h == "# currentDate":
+            continue  # regenerated below
+        if h == "## Skills":
+            m = re.search(r"^- \*\*Last cleanvibe update check:\*\*.*$", body, re.M)
+            if m:
+                date_line = m.group(0).strip()
+            moved.append(h)
+            continue
+        name = old_names.get(h, h)
+        if name in shipped:
+            moved.append(h)
+            if body.strip() != shipped[name] and \
+                    _fingerprint(body, project_name) not in _KNOWN_SHIPPED:
+                differing.append(h)
+            continue
+        kept.append(heading + body.rstrip("\n") + "\n")
+    has = {s.split("\n", 1)[0].strip() for s in kept}
+    out = (preamble.rstrip("\n") + "\n\n" if preamble.strip() else "") + "\n".join(kept)
+    if "## Repository name" not in has:
+        out += f"\n## Repository name\n{_repo_step_text(project_name, auto_named)}\n"
+    if "## This project's own rules" not in has:
+        out += ("\n## This project's own rules\n_Rules, conventions and constraints for this "
+                f"project only go here, not in\n`{templates.V2_RULES_PATH}`: cleanvibe replaces "
+                "that file whole when it updates._\n")
+    out += ("\n## The rules cleanvibe ships\nHow every cleanvibe project works, from chat mode "
+            "to the work loop. Kept in\ntheir own file so updates never overwrite this one:\n\n"
+            f"@{templates.V2_RULES_PATH}\n"
+            f"\n## Skills\n{date_line}\n"
+            "- **Updates source:** <https://cleanvibe.emmaleonhart.com/updates.md>\n")
+    from datetime import datetime
+    out += f"\n# currentDate\nToday's date is {datetime.now().strftime('%Y-%m-%d')}.\n"
+    return out, moved, differing
+
+
+def _repo_step_text(project_name: str, auto_named: bool) -> str:
+    return templates._repo_step(project_name, auto_named)
+
+
+def migrate_project(path: Path, dry_run: bool = False) -> dict:
+    """`cleanvibe refresh --migrate`: split a pre-2.0.9 project's CLAUDE.md.
+    Backs the old file up to MIGRATION_BACKUP, rewrites CLAUDE.md, writes
+    RULES.md. Does nothing to a project that already imports RULES.md."""
+    import json
+    path = Path(path)
+    if not (path / MARKER).is_file():
+        raise ValueError(f"{path} is not a cleanvibe 2 project (no {MARKER})")
+    claude_path = path / "CLAUDE.md"
+    text = claude_path.read_text(encoding="utf-8")
+    if ("@" + templates.V2_RULES_PATH) in text:
+        return {"already": True, "moved": [], "differing": []}
+    marker = json.loads((path / MARKER).read_text(encoding="utf-8"))
+    name = marker.get("name") or path.resolve().name
+    auto = bool(marker.get("auto_named", False))
+    new_text, moved, differing = migrate_claude_md(text, name, auto)
+    if not dry_run:
+        backup = path / MIGRATION_BACKUP
+        backup.parent.mkdir(parents=True, exist_ok=True)
+        backup.write_text(text, encoding="utf-8")
+        claude_path.write_text(new_text, encoding="utf-8")
+        (path / templates.V2_RULES_PATH).write_text(templates.v2_rules_md(), encoding="utf-8")
+    return {"already": False, "moved": moved, "differing": differing}
+
+
 def refresh_project(path: Path, dry_run: bool = False) -> list:
     """`cleanvibe refresh`: bring the files cleanvibe ships up to this version.
 

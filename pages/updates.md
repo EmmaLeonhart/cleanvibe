@@ -67,7 +67,16 @@ that runs it** (existing repos: copy the skill from a fresh project, or let `cle
 do it). Refresh rewrites what cleanvibe ships from the installed version: every skill, `RULES.md`
 (only when CLAUDE.md imports it), the hooks and the intake script. It adds cleanvibe's hook
 entries to `.claude/settings.json` and leaves every other entry alone, and it respects
-`"session_log": false`. It never touches CLAUDE.md, INTENT.md or any other project file. Why:
+`"session_log": false`. It never touches CLAUDE.md, INTENT.md or any other project file.
+**`cleanvibe refresh --migrate`** moves an existing project to the split once:
+- Rule sections leave CLAUDE.md, and RULES.md is written.
+- The project's own sections, and the update-check date, stay.
+- The old file is kept at `.claude/cleanvibe/CLAUDE.pre-split.md`.
+- Any rule section that was edited locally is printed as CHECK. It is
+  recognized against the 2.0.8 wording, so an untouched project prints
+  nothing.
+
+Why:
 updates had been made by copying text from this page by hand, and that kept going wrong.
 
 **Resume prompt (no change to existing repos; new sessions get it from the installed cleanvibe):**
