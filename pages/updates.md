@@ -25,6 +25,15 @@ self-exempting for replication-style bounded work.
 
 ---
 
+## Unreleased (next: v2.0.10) — pull with `--rebase=merges`
+
+**`autonomous-loop`: "Pull before you push" now says `git pull --rebase=merges`** (existing repos:
+`cleanvibe refresh`, or copy the skill from a fresh project). The 2.0.9 text said plain
+`git pull --rebase`, which flattens merge commits. On 2026-11-20, in cleanvibe-commercial, it took
+apart an unpushed `git subtree add` and replayed the merged repo's own history at the top level,
+with conflicts in every shared file. `git rebase --abort` restored it. Projects with any merge commit
+are affected.
+
 ## v2.0.9 (2026-11-20) — shipped rules in RULES.md, `cleanvibe refresh`; a long queue is healthy; bare-prompt runs go to the GitHub folder
 
 **`autonomous-loop` and `queue-driven-workflow`: one new bullet each (copy them from a fresh

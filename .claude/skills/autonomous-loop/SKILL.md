@@ -25,8 +25,10 @@ That's the whole loop. Each time it fires:
 
 1. **Commit and push** everything that has changed, with messages that say what
    and why. Push only if the repo has a remote. No empty commits.
-   **Pull before you push:** after committing, run `git pull --rebase`, then
-   push. The user may have edited `queue.md` or another file on GitHub from
+   **Pull before you push:** after committing, run `git pull --rebase=merges`,
+   then push. Plain `--rebase` flattens merge commits: on 2026-11-20 it took
+   apart a `git subtree add` and replayed the merged repo's own history at the
+   top level, with conflicts in every shared file. The user may have edited `queue.md` or another file on GitHub from
    their phone, and without the pull every push after that is rejected. If
    the rebase stops on a conflict, run `git rebase --abort` (your commits
    are kept), record the conflict as a blocker for the user, and keep

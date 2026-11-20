@@ -2714,3 +2714,10 @@ rules in `.claude/cleanvibe/RULES.md` imported by CLAUDE.md; `cleanvibe refresh`
 and `--migrate`; bare-prompt runs default to the GitHub folder; the loop pulls
 before pushing; resume checks `git status`; long-queue, permission and
 short-question rules. 312 tests; doctor clean.
+
+## 2026-11-20 - loop: pull with --rebase=merges
+
+2.0.9's "Pull before you push" said `git pull --rebase`, which flattens merge
+commits: in cleanvibe-commercial it took apart an unpushed `git subtree add`
+(aborted, nothing lost). The skill now says `git pull --rebase=merges`.
+Unreleased (next: v2.0.10).
