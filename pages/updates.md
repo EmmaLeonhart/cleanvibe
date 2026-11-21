@@ -32,6 +32,12 @@ writes it). It checks PyPI and, when a newer cleanvibe is out, upgrades the inst
 session at a time, under a lock in `~/.cleanvibe/`) and runs `cleanvibe refresh` on the project.
 `--check` only says what it would do.
 
+**Needs records gain a third kind, `report`** (`needs.py add --kind report`; the `needs-user`
+skill says when). It is odd behaviour the user should hear about even though nothing waits on them:
+a session did something they didn't ask for, a step hung or kept failing for hours, or a session
+gave up. Why: Emma, 2026-11-20, the PC manager is better "given like reports", after a job search
+signed her up for work needing a certificate she doesn't have and sign-ups hung unnoticed.
+
 **The loop-tick hook says when a release is out** (`.claude/hooks/intent_staleness.py`). It asks
 PyPI at most every 6 hours per machine and prints nothing on any problem.
 `cleanvibe-update-check` says to run the script that tick, without waiting for the weekly check.

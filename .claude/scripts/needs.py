@@ -41,7 +41,7 @@ DEFAULT_FILE = str(PROJECT_ROOT / _needs_file_name())
 HEADER = "# Needs you\n"
 REQUIRED = ["kind", "do", "blocks", "where", "raised", "status"]
 OPTIONAL = ["default", "notes"]
-KINDS = {"action", "decision"}
+KINDS = {"action", "decision", "report"}
 
 HEADING_RE = re.compile(r"^## NE-(\d+): (.+?)\s*$")
 FIELD_RE = re.compile(r"^- \*\*([a-z]+):\*\* (.*?)\s*$")
@@ -84,7 +84,7 @@ def validate(rec: Record) -> None:
     if unknown:
         raise RecordError(f"{rec.id}: unknown field(s): {', '.join(unknown)}")
     if rec.fields["kind"] not in KINDS:
-        raise RecordError(f"{rec.id}: kind must be action or decision, not {rec.fields['kind']!r}")
+        raise RecordError(f"{rec.id}: kind must be action, decision or report, not {rec.fields['kind']!r}")
     if not re.fullmatch(DATE, rec.fields["raised"]):
         raise RecordError(f"{rec.id}: raised must be YYYY-MM-DD, not {rec.fields['raised']!r}")
     if not STATUS_RE.match(rec.fields["status"]):

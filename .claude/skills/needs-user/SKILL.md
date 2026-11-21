@@ -25,6 +25,14 @@ reads every project's file and keeps pushing them until each item is done.
     approve something tied to their accounts;
   - a **decision** that is risky or irreversible, or that only they can know,
     or one they have kept for themselves. It must carry a default.
+  - a **report** of odd behaviour they should hear about even though nothing
+    waits on them: a session did something they didn't ask for (signed them
+    up for something, made a repo public, deleted work), a step hung or kept
+    failing for hours, or a session gave up on a task. `do` says what happened
+    and what they might want to do about it; `blocks` says "nothing" if
+    nothing does. Emma (2026-11-20): it is better for the PC manager "to be
+    given like reports", after a job search signed her up for work needing a
+    first-aid certificate and sign-ups hung for hours unnoticed.
 
 ## Record them up front, when you plan
 

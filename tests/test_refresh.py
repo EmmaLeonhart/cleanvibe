@@ -94,6 +94,13 @@ class TestRefresh(unittest.TestCase):
         text = (proj / "NEEDS-USER.md").read_text(encoding="utf-8")
         self.assertTrue(text.startswith("# Needs you\n"))
         self.assertIn("## NE-1: Sign it", text)
+        # A report: odd behaviour the user should hear about (since 2.0.12).
+        r = subprocess.run([sys.executable, str(script), "add", "--kind", "report",
+                            "--title", "A sign-up hung for hours", "--do", "Check it.",
+                            "--blocks", "nothing", "--where", "any device"],
+                           capture_output=True, text=True)
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertIn("- **kind:** report", (proj / "NEEDS-USER.md").read_text(encoding="utf-8"))
         script.unlink()
         self.assertIn(".claude/scripts/needs.py", project.refresh_project(proj))
 

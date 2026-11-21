@@ -2770,3 +2770,10 @@ installed cleanvibe under a lock and refreshes the project; the loop-tick
 hook says when PyPI has a newer version (cached 6 hours). From
 cleanvibe-commercial's transcript check (chat:410, "there's always going to
 be an update"). 327 tests.
+
+## 2026-11-21 - needs records: a "report" kind
+
+`needs.py` accepts `--kind report` for odd behaviour the user should hear
+about (a session doing what they didn't ask, a step hung for hours); the
+needs-user skill says when to write one. From cleanvibe-commercial's
+transcript check (chat:329). Part of the unreleased v2.0.12.
