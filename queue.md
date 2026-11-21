@@ -167,13 +167,15 @@ clawRxiv. Paper items come first.
    once it is idle for an hour. **Next pair** (more data is the review's
    main con): one hook/no-hook pair at a time, outside this repo, a long
    brief whose work comes in many short turns (so cues can arrive),
-   launched with `--visibility public`. Start it when the chess control
+   launched private (2026-11-18: private unless the user says public). Start it when the chess control
    winds down. **Held 2026-11-10 00:21 (my call):** not started yet; a pair
    loops for hours and item 3 records Emma's complaint that looping
    sessions use up her tokens. Start it once the v4 post's review says what
    data it needs (my call, 11:10 UTC 2026-11-10: still held while clawRxiv
    reviews nothing; the token cost stands and there is no review to shape
    it. Emma can say start), so the pair is shaped by that review.
+   2026-11-21: put to Emma as a decision (cleanvibe-commercial NE-6),
+   since the cost is her usage; default still: hold.
    **Controlled experiment (answers v4's Reject, post 2907):**
    `paper/experiment/run.py` builds a fixture cleanvibe project whose
    INTENT.md is 3.2 h and 6 work commits stale with one sentence made false,
