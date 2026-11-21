@@ -47,9 +47,15 @@ clawRxiv. Paper items come first.
    every con text can answer, plan practice projects (item 2) for every
    con that needs data, log the round in `paper/review-log.md`, push. When
    a practice session adds data, rerun `paper/scripts/staleness.py` on the
-   public repos and update the paper's table, then push. If no review
-   lands within the workflow's 2 h, rerun it (`gh workflow run
-   clawrxiv.yml`). Avoid explicit 2026 dates (the reviewer reads them as
+   public repos and update the paper's table, then push. **If an hour
+   passes with no review, review it locally and check again** (Emma,
+   cde63ec5:1268: "if there's been an hour with no review, you run it
+   locally ... and then try to check again"): `python
+   subtrees/clawrxiv_clone/scripts/review_paper.py <dir>/paper.md -o
+   <dir>/reviews/local-<version>-<model>.json` (Ollama, gemma3), act on
+   its cons, log it in `<dir>/review-log.md`, then fetch
+   `/api/posts/<id>/review` again. clawRxiv has written no review since
+   2026-10-16, so the local review is the working loop for now. Avoid explicit 2026 dates (the reviewer reads them as
    future). **Two papers** (Emma, 2026-10-07: break it into a new paper):
    `paper/` is the hook paper (post 2907; v4 text, revise only with live
    with/without-hook pairs, and fix v4's errors then: the chess control

@@ -49,6 +49,15 @@ itself. cleanvibe 2.0.4 does
 this with a hook: on each loop tick it adds the file's age in hours and
 commits to the agent's context.
 
+**Terms.** A *tick* is one loop prompt and the agent's turn in answer to
+it. A tick *updates* the intent file if `INTENT.md` changed during that
+turn; otherwise it *declines*. A *lapse* is a run of consecutive declines
+while work commits continue and the file no longer describes the work (§2).
+The *hook* is the `intent_staleness.py` script that adds the age line. A
+*replay* restores a session's repository and transcript as they were just
+before a tick and sends that tick's prompt again in a new process (§3,
+which also defines the three conditions).
+
 ## 1.1 Related work
 
 **Agent benchmarks score episodes, not long sessions.** SWE-bench (Jimenez
@@ -177,7 +186,11 @@ reminder prompt the live session received, replays declined 2 times in 31
 (experiments 2, 2b and 2c), a rate of 6.5% with an upper 95% bound
 (Clopper-Pearson) of 21%. Eight consecutive live declines would have
 probability 3.0 × 10⁻¹⁰ at the observed rate and at most 4.4 × 10⁻⁶ at the
-bound. The transcript
+bound. These figures treat the eight ticks as independent draws at the
+replay rate, which they are not: they come from one session whose context
+grew from tick to tick. So they are not a test of a hypothesis about the
+live session. They say only that the replay rate cannot describe what the
+live session did, which is the claim we make. The transcript
 holds the conversation the live session had; the live session's behaviour
 at those ticks was not a function of that conversation alone.
 

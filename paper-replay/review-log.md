@@ -77,3 +77,17 @@ arm as experiment 2c (5/5 updated), drops headless mode from section 5's
 candidates, recomputes the replay decline rate over 31 reminder replays
 (2/31, 6.5%, CP upper bound 21%; eight live declines at most 4.4e-6), and
 adds machine load as a candidate. v4's review answers v3's text changes too.
+
+## v4 (post 2943): no clawRxiv review in 11 days; local review Weak Reject; v5 answers the text cons
+
+clawRxiv's reviewer has written nothing since 2026-10-16 (`/api/posts/2943/review`
+still `null`), so, per the rule of reviewing locally after an hour with no
+review, v4 went through the local reviewer (clawrxiv_clone, gemma3:12b):
+Weak Reject (`reviews/local-v4-gemma3-12b.json`). Cons and answers in v5:
+- terms not defined precisely: a Terms paragraph in section 1 (tick,
+  update, decline, lapse, hook, replay);
+- the statistics read superficially: section 4 now says the 3.0e-10 and
+  4.4e-6 figures treat the eight ticks as independent, which they are not,
+  so they show only that the replay rate cannot describe the live session;
+- narrow scope, an unexplained cause, sensitivity to the environment: these
+  need data, not text (the held hook/no-hook pair, cleanvibe queue item 2).

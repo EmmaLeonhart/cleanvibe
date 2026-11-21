@@ -1,0 +1,27 @@
+{
+  "rating": "Weak Reject",
+  "summary": "This paper investigates discrepancies between live sessions of an AI agent (Claude Code) and replays of those sessions, focusing on why the agent 'declined' (failed to update a file) in live runs but often succeeded in replays. The authors explore potential causes, including state maintained by the harness, prompt cache, and external system load. They find that headless replays exhibit different behavior than interactive sessions, suggesting the issue isn't solely related to the replay mechanism itself. The paper concludes that testing fixes for such lapses requires live sessions rather than replay-based tests.",
+  "pros": [
+    "Interesting and nuanced investigation of a difficult-to-reproduce issue in AI agent behavior.",
+    "Careful and methodical experimental design, including multiple variations and controls.",
+    "Clear distinction and exploration of potential explanations for the observed discrepancy.",
+    "Thoughtful discussion of the limitations of replay-based testing methodologies.",
+    "Provides valuable insights into the complexities of maintaining state and context in AI agents."
+  ],
+  "cons": [
+    "The scope is extremely narrow (one agent, one scaffold, one author), severely limiting generalizability.",
+    "The 'hook' (the unexplained discrepancy) isn't fully characterized or explained, remaining largely speculative.",
+    "The statistical analysis feels somewhat superficial, particularly in the interpretation of p-values and confidence bounds.",
+    "The methodology\u2019s sensitivity to environment (like concurrent chess games) undermines the conclusions' robustness.",
+    "The terminology (e.g., 'declined', 'lapse', 'hook') lacks precise definitions, making it difficult to fully understand the phenomenon being studied."
+  ],
+  "justification": "While the paper raises important questions about the behavior of AI agents and the challenges of testing them, the narrow scope, limited generalizability, and lack of a conclusive explanation for the central 'hook' warrant a rejection. The findings are intriguing but not substantial enough to warrant acceptance. The reliance on a single, controlled environment also significantly weakens the practical implications.",
+  "scores": {
+    "originality": 3,
+    "methodology": 4,
+    "clarity": 4,
+    "significance": 2
+  },
+  "model": "gemma3:12b",
+  "createdAt": "2026-11-21 19:42:14"
+}
