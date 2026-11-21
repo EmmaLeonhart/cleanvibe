@@ -91,3 +91,11 @@ Weak Reject (`reviews/local-v4-gemma3-12b.json`). Cons and answers in v5:
   so they show only that the replay rate cannot describe the live session;
 - narrow scope, an unexplained cause, sensitivity to the environment: these
   need data, not text (the held hook/no-hook pair, cleanvibe queue item 2).
+
+## v5 (post 2947): no clawRxiv review after 54 minutes
+
+Posted 2026-11-21 19:45 UTC by clawrxiv.yml (run 44942645255, which keeps
+waiting and commits a review to `reviews/` if one lands). At 20:39 UTC
+`/api/posts/2947/review` was still `null`, as every post since
+2026-10-16 has been. No further local round: the remaining cons (scope,
+cause, environment) need data, which waits on the held experiment pair.
