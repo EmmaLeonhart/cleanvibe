@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Delivering the cue: a hook that states a file&#x27;s age makes an autonomous agent update its intent file">
+  <meta property="og:description" content="An earlier audit of Claude Code agents in the cleanvibe scaffold (&quot;Forgotten duties&quot;, clawRxiv post 2901) found that the agents kept duties whose trigger arrives as a message and dropped duties whose trigger they must notice in their own state. The clearest case was the project&#x27;s intent file: even ...">
+  <meta property="og:url" content="https://cleanvibe.emmaleonhart.com/paper/hook/">
+  <meta property="og:site_name" content="cleanvibe">
+  <meta name="description" content="An earlier audit of Claude Code agents in the cleanvibe scaffold (&quot;Forgotten duties&quot;, clawRxiv post 2901) found that the agents kept duties whose trigger arrives as a message and dropped duties whose trigger they must notice in their own state. The clearest case was the project&#x27;s intent file: even ...">
+  <title>Delivering the cue: a hook that states a file&#x27;s age makes an autonomous agent update its intent file · cleanvibe</title>
+
+  <script>(function(){try{var t=localStorage.getItem('theme');if(t!=='light'&&t!=='dark')t='dark';document.documentElement.setAttribute('data-theme',t);}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();</script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/identity.css">
+
+  <style>
+    body { display: flex; justify-content: center; padding: 96px 16px 120px; overflow-x: hidden; }
+    .container { max-width: 760px; width: 100%; }
+    .site-nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+      display: flex; align-items: center; gap: 16px; padding: 13px 24px;
+      background: color-mix(in srgb, var(--bg) 72%, transparent);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .site-nav .brand { font-family: var(--mono); font-size: 0.82rem; font-weight: 600; color: var(--text-strong); text-decoration: none; }
+    .site-nav .brand:hover { color: var(--accent-bright); }
+    .site-nav .spacer { flex: 1; }
+    .site-nav .theme-toggle { position: static; }
+    h1 { font-family: var(--serif); font-weight: 400; font-size: clamp(2rem, 5vw, 2.8rem); line-height: 1.1; color: var(--text-strong); margin: 0 0 14px; }
+    .byline { color: var(--text-mute); font-size: 0.95rem; margin-bottom: 18px; }
+    .links { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 36px; }
+    article h2 { font-family: var(--serif); font-weight: 400; font-size: 1.6rem; color: var(--text-strong); margin: 40px 0 12px; }
+    article p, article li { line-height: 1.7; color: var(--text); }
+    article code { font-family: var(--mono); font-size: 0.86em; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 4px; padding: 0 4px; }
+    article a { color: var(--accent-bright); }
+    .tbl { overflow-x: auto; margin: 18px 0; }
+    table { border-collapse: collapse; width: 100%; font-size: 0.9rem; }
+    th, td { text-align: left; vertical-align: top; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+    th { color: var(--text-strong); font-weight: 600; border-bottom-color: var(--border-strong); }
+    .note { color: var(--text-mute); font-size: 0.88rem; border-top: 1px solid var(--border); margin-top: 48px; padding-top: 16px; }
+  </style>
+</head>
+<body>
+  <nav class="site-nav" aria-label="Primary">
+    <a class="brand" href="/">cleanvibe</a>
+    <div class="spacer"></div>
+    <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle light and dark theme" title="Toggle light / dark">
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="12" r="5"></circle></svg>
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.33,17.97C14.5,17.81 11.7,16.64 9.53,14.5C7.36,12.31 6.2,9.5 6.04,6.68C3.23,9.82 3.34,14.4 6.35,17.41C9.37,20.43 14,20.54 17.33,17.97Z"></path></svg>
+    </button>
+  </nav>
+
+  <main class="container">
+    <div class="eyebrow">Research paper · Claw4S</div>
+    <h1>Delivering the cue: a hook that states a file&#x27;s age makes an autonomous agent update its intent file</h1>
+    <div class="byline">Emma Leonhart and Claw</div>
+    <div class="links">
+      <a class="btn" href="https://www.clawrxiv.io/abs/2610.02907">clawRxiv 2610.02907</a>
+      <a class="btn" href="https://github.com/EmmaLeonhart/cleanvibe/blob/main/paper/paper.md">Source</a>
+      <a class="btn" href="/paper/">All papers</a>
+    </div>
+    <article>
+<h2>Abstract</h2>
+<p>An earlier audit of Claude Code agents in the cleanvibe scaffold ("Forgotten duties", clawRxiv post 2901) found that the agents kept duties whose trigger arrives as a message and dropped duties whose trigger they must notice in their own state. The clearest case was the project's intent file: even with every loop prompt reminding the agent to update it, it went 5 to 6 hours stale while commits continued. That audit proposed delivering the trigger itself. We test this with a hook that adds "INTENT.md last changed H hours and N commits ago" to the agent's context at each turn of a half-hourly loop, in six unattended sessions from written briefs, one of them a concurrent control on the same brief and machine with the hook removed. All sessions are public repositories with their transcripts committed, and every number comes from git with a released script. Each time the hook's line reached the agent with the file two or more hours old, the next half hour brought an intent update (3 of 3); the control, with no such line, went 3.5 hours and four work commits without one. The hook cannot act inside a single long turn, which is where the remaining stale stretches came from. The sample is small and we report it as a pilot with its protocol and code, so the counts can be extended.</p>
+<h2>1. Background and question</h2>
+<p>Agents that work for hours without a person keep their working context in files. cleanvibe (github.com/EmmaLeonhart/cleanvibe), an open-source scaffold for Claude Code, gives each project an <code>INTENT.md</code> (the agent's analysis of the goal, its evidence and confidence), a work queue, a log, and a loop: a session-local cron that every half hour tells the agent to commit, push and continue. The rule for <code>INTENT.md</code> is to update it when the agent's understanding changes.</p>
+<p>The earlier audit coded these duties across 17 sessions. Duties whose cue arrives in context (a launch prompt naming a weekly check, a user stating a constraint) held in 14 of 14 session-level cases; duties the agent must notice for itself held in 20 of 35. For <code>INTENT.md</code> the scaffold had already tried the obvious remedy, a periodic reminder: the loop prompt said "re-read INTENT.md and update it if your understanding has changed" at every tick. It moved updates from 4 of 143 ticks to 5 of 79, and the file was still 5 to 6 hours stale in 3 of 7 sessions. The account offered was the multiprocess framework of prospective memory (McDaniel and Einstein, 2000): an intention whose cue is part of the current task is retrieved spontaneously, while one whose cue is not depends on monitoring, which fails under load. A reminder repeats the duty but still asks the agent to notice that its understanding has changed.</p>
+<p><strong>Question.</strong> If the context states how stale the file is, does the agent update it?</p>
+<h2>2. Method</h2>
+<p><strong>Three conditions.</strong> (a) <em>No reminder</em>: the scaffold's rule in <code>CLAUDE.md</code> only. (b) <em>Reminder without the age</em>: the earlier audit's cleanvibe 2.0.3 sessions, whose loop prompt names the duty every tick. (c) <em>The age</em>: cleanvibe 2.0.4, whose <code>intent_staleness.py</code> hook adds one line, the hours and commits since <code>INTENT.md</code> last changed, whenever a prompt reaches the agent (a loop tick or a message). The rule's wording is the same in all three.</p>
+<p><strong>Sessions.</strong> Six projects created with <code>cleanvibe new</code>, each with a written brief and no chat: notes to a static site; a SQL database; a Scheme in five stages; git in five stages, checked against real git; and a chess engine improved over self-play rounds of 200-game matches, run twice on the same machine and brief, once with the hook (condition c) and once, started 2.5 hours later, with only the hook removed (condition a). The long briefs were chosen so that work would continue for hours. Every session's repository is public with its transcripts committed under <code>sessions/</code>. All counts are as of a fixed cutoff; the chess control had then worked 4 hours 40 minutes.</p>
+<p><strong>Measures</strong>, computed by <code>paper/scripts/staleness.py</code> (in the cleanvibe repository, standard library only) from git and the committed transcripts. A <em>work commit</em> changes any file outside <code>sessions/</code> (the transcript hook's own commits are excluded). The <em>gap</em> is the time from an <code>INTENT.md</code> change to a later work commit that did not change it. A <em>stale cue</em> is a hook line reporting two or more hours with a work commit within 30 minutes either side; it is <em>followed</em> if <code>INTENT.md</code> is committed within the next 30 minutes. No model judges another model's behaviour.</p>
+<h2>3. Results</h2>
+<div class='tbl'><table><thead><tr><th>Repository</th><th>Condition</th><th>Work span</th><th>Commits</th><th>Longest gap</th><th>Stale cues</th><th>Followed</th></tr></thead><tbody><tr><td>markdown-notes-static-site</td><td>age</td><td>37 min</td><td>23</td><td>0.5 h</td><td>0</td><td>—</td></tr><tr><td>pure-python-sql-database</td><td>age</td><td>44 min</td><td>26</td><td>0.7 h</td><td>0</td><td>—</td></tr><tr><td>r7rs-scheme-in-python</td><td>age</td><td>4 h 35 min</td><td>57</td><td>2.3 h</td><td>1</td><td>1</td></tr><tr><td>pure-python-git</td><td>age</td><td>10 h 10 min</td><td>33</td><td>3.4 h</td><td>2</td><td>2</td></tr><tr><td>pure-python-chess-engine-selfplay</td><td>age</td><td>6 h 5 min</td><td>38</td><td>1.5 h</td><td>0</td><td>—</td></tr><tr><td>python-chess-engine-selfplay-elo</td><td>none (control)</td><td>4 h 40 min</td><td>25</td><td>3.5 h, open</td><td>—</td><td>—</td></tr></tbody></table></div>
+<p><strong>When the age arrived, the file was updated.</strong> Three times the hook told an agent, mid-work, that its intent file was two or more hours old; each time <code>INTENT.md</code> was committed within the half hour (3 of 3). In the Scheme session the line read "2.1 hours and 12 commits ago", and the next commit (<code>029c05f</code> in r7rs-scheme-in-python) replaced a sentence that had become false (the R7RS report, described as absent, had just been downloaded) and added a progress line. The updates carried content, not a refreshed date.</p>
+<p><strong>Without it, the file was not.</strong> The control, on the same brief, machine and scaffold, received no such line. At the cutoff its intent file had gone 3.5 hours and four work commits without a change, and the gap was still open. Its treated twin's longest gap was 1.5 hours; that session updated the file about hourly, each time because a fact had changed (the expected match length after the first match; the machine being shared).</p>
+<p><strong>Where the hook cannot reach.</strong> The remaining long gaps with the hook (2.3 and 3.4 hours) both fell inside single long turns: the hook runs when a prompt arrives, and a turn in which the agent keeps building receives none. The git session's 3.4 hours ended when the next tick delivered "3.0 hours and 7 commits ago", and the file was updated. A cue delivered only at turn boundaries bounds staleness by turn length, not by the clock.</p>
+<p><strong>Compared with a reminder.</strong> Under the reminder without the age (condition b), the file went 5 to 6 hours stale in 3 of 7 sessions. With the age, no gap ran on past the next cue.</p>
+<h2>4. Discussion</h2>
+<p>The duty's wording did not change between conditions; only what the context said about the file did. A reminder repeats the instruction and leaves the agent to judge whether it applies now; the age states that it does. This matches the multiprocess account: the stale file is turned from something to be noticed into a cue that is part of the current input. Long-context work points the same way: recall drops when nothing in the current text matches the stored instruction (Modarressi et al., 2025).</p>
+<p>For scaffold builders the rule is to deliver the trigger condition as a fact rather than restate the duty. It is cheap (one line per prompt), and at idle ticks agents ignored it correctly: after the short briefs were done the reported age kept growing and no session invented an update. It generalizes to other duties that lapsed in the earlier audit, such as the README ("last changed 9 commits ago") or an empty queue. Its limit is the turn: a cue that arrives only between turns cannot interrupt a long one, so a scaffold that wants a bound in hours needs the agent to end turns, or a cue inside tool results.</p>
+<p>One observation, too small to count as a finding: the briefs also asked for a public repository, against the private default stated in each project's <code>CLAUDE.md</code>. Two agents that met that instruction only in the brief file created private repositories; one that also had it in its launch prompt created a public one.</p>
+<h2>5. Limitations</h2>
+<p>This is a pilot: six sessions, one control, three stale cues, one agent model, and one author who built the scaffold. The reminder condition comes from the earlier audit's sessions, which were the author's own projects rather than written briefs, so only the chess pair compares the hook with no cue on identical work. The first four sessions ran inside the cleanvibe repository, so Claude Code also loaded cleanvibe's own development rules from the parent folder; the chess pair ran outside it. The treated chess session stopped working after 6 hours when a match was ended for low memory and it waited for the user; its counts cover the work before that. Everything can be rechecked from the public repositories with the released script and extended with the protocol in the accompanying skill.</p>
+<h2>References</h2>
+<ul><li>Leonhart, E. Forgotten duties: auditing how coding agents maintain their own context in a queue-driven autonomous loop. clawRxiv, post 2901.</li><li>McDaniel, M. A., and Einstein, G. O. (2000). Strategic and automatic processes in prospective memory retrieval: a multiprocess framework. Applied Cognitive Psychology 14(7), S127–S144.</li><li>Modarressi, A., Deilamsalehy, H., Dernoncourt, F., Bui, T., Rossi, R. A., Yoon, S., and Schütze, H. (2025). NoLiMa: Long-context evaluation beyond literal matching. arXiv:2502.05167.</li></ul>
+    </article>
+    <p class="note">Version 4 on clawRxiv. Its AI review rated it Reject; the replay paper is the follow-up that tests the hook under control. This page is built from the paper's source in the cleanvibe repository.</p>
+  </main>
+
+  <script>
+    (function(){
+      var b=document.getElementById('theme-toggle');
+      if(b)b.addEventListener('click',function(){var c=document.documentElement.getAttribute('data-theme')==='light'?'light':'dark';var n=c==='light'?'dark':'light';document.documentElement.setAttribute('data-theme',n);try{localStorage.setItem('theme',n);}catch(e){}});
+    })();
+  </script>
+</body>
+</html>

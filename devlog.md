@@ -2777,3 +2777,12 @@ be an update"). 327 tests.
 about (a session doing what they didn't ask, a step hung for hours); the
 needs-user skill says when to write one. From cleanvibe-commercial's
 transcript check (chat:329). Part of the unreleased v2.0.12.
+
+## 2026-11-21 - the paper pages show the current papers
+
+`/paper/` on the site still showed the October v13 note. It is now an index;
+the hook paper (2610.02907) and the replay paper (2611.02943, v4) each get
+a page built from their `paper.md` by `paper/scripts/render_pages.py`; the
+old note moved to `/paper/forgotten-duties/` (its dead PDF link removed).
+Run the script after a paper changes. From cleanvibe-commercial's
+transcript check (2eda803e:4013).
