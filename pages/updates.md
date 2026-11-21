@@ -25,7 +25,17 @@ self-exempting for replication-style bounded work.
 
 ---
 
-## Unreleased (next: v2.0.11) — "pin this"
+## Unreleased (next: v2.0.11) — "pin this"; actionable idle ticks; "is it still worth it?"
+
+**`autonomous-loop` step 3** (existing repos: `cleanvibe refresh`):
+- An idle tick's message must be actionable: what is waiting and the one
+  thing the user could do or decide. Never a bare "nothing changed".
+- Before refilling the queue, if the user hasn't written about the project for
+  7 days or more, record one needs decision: "Is <project> still worth working
+  on?" (default: keep going).
+
+Why: hours of empty ticks gave Emma nothing to act on, and work had gone on
+"well past the point that it was useful" (Sutra).
 
 **Shipped rules (`RULES.md`): "Pin this" means it matters** (existing repos: `cleanvibe refresh`).
 When the user says "pin this" or "put a pin on this", the session writes what was pinned into

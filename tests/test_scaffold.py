@@ -222,7 +222,8 @@ class TestCreateProject(unittest.TestCase):
         # Only the user stops it; idle is fine; research queues refill; no kill step.
         self.assertIn("do not turn the cron off yourself", lower)
         self.assertIn("research/summary.md", lower)
-        self.assertIn("an idle tick is normal", lower)
+        self.assertIn("never a bare \"nothing changed\"", lower)  # idle ticks stay actionable (2026-11-20)
+        self.assertIn("is it still worth it?", lower)
         self.assertNotRegex(lower, r"\bkill")  # ("skill" is fine)
 
     def test_claude_md_has_weekly_update_check_section(self):

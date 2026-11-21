@@ -54,8 +54,21 @@ That's the whole loop. Each time it fires:
 3. **When the queue is empty, refill it before idling.** In a research project,
    take the top open question in `research/SUMMARY.md` and plan it into
    `queue.md`. Otherwise take the next `todo.md` item that is bounded and
-   checkable. If there is truly nothing, the tick is **idle**: say so in one
-   line. An idle tick is normal, not a problem to solve.
+   checkable. If there is truly nothing, the tick is **idle**, which is
+   normal, but the message still has to be **actionable**: what is waiting
+   (needs-file records, open decisions, other sessions) and the one thing the
+   user could do or decide to move it. Never a bare "nothing changed" or
+   "quiet tick". Emma, 2026-11-20, of hours of such ticks: send "an actual
+   meaningful message saying what it is that needs to be done, so there's
+   something actionable."
+   **Is it still worth it?** Before refilling from `todo.md` or the research
+   questions, check when the user last wrote anything about this project
+   (the newest user message in `sessions/`). If it was 7 or more days ago and
+   no needs record already asks, record one decision with the `needs-user`
+   skill: "Is <project> still worth working on?", default "keep going". Then
+   carry on. Why: "we kept on doing Sutra development well past the point
+   that it was useful", and which bottlenecks matter to her "are not obvious
+   to the AI".
 4. **Keep the standing files current.** Re-read `INTENT.md` and update it if
    your understanding has changed (including constraints the user gave in
    chat). Fill in `README.md` once the purpose is clear.

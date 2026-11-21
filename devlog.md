@@ -2738,3 +2738,11 @@ is self updating").
 RULES.md gains a bullet: "pin this" means it matters; write it into INTENT.md
 at once in the user's words. From the cleanvibe-commercial chat review
 (an item that was not done). Unreleased (next: v2.0.11). 314 tests.
+
+## 2026-11-20 - loop: actionable idle ticks; "is it still worth it?"
+
+`autonomous-loop` step 3: an idle tick still says what is waiting and the one
+thing the user could do; before refilling, a project quiet for 7+ days gets
+one needs decision "Is <project> still worth working on?" (default keep
+going). From the cleanvibe-commercial chat review (the Sutra item) and
+Emma's objection to empty ticks. Unreleased. 314 tests.
