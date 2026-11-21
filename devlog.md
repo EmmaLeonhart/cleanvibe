@@ -2721,3 +2721,14 @@ short-question rules. 312 tests; doctor clean.
 commits: in cleanvibe-commercial it took apart an unpushed `git subtree add`
 (aborted, nothing lost). The skill now says `git pull --rebase=merges`.
 Unreleased (next: v2.0.10).
+
+## 2026-11-20 - v2.0.10: the needs file
+
+New `needs-user` skill and `.claude/scripts/needs.py` (`templates.NEEDS_PY`,
+from cleanvibe-commercial's needs_emma.py): work only the user can do goes in
+`NEEDS-USER.md`, recorded at planning time; RULES.md says so; new projects
+get both and `cleanvibe refresh` brings them to existing ones; doctor
+expects the script. Fixed refresh/migrate treating a prose mention of the
+RULES.md import as an import. Plus the `--rebase=merges` fix. 314 tests.
+Released as v2.0.10 at Emma's direction ("They will record it as the system
+is self updating").

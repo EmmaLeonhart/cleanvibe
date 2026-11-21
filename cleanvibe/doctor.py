@@ -40,6 +40,7 @@ V2_CORE_FILES = (
     ".claude/settings.json", ".claude/hooks/save_session_log.py",
     ".claude/hooks/intent_staleness.py",  # since 2.0.4
     ".claude/scripts/data_lake_intake.py",
+    ".claude/scripts/needs.py",  # since 2.0.10
 )
 
 _DONE_MARKERS = (

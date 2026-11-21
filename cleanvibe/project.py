@@ -131,6 +131,7 @@ def new_project(
             ".claude/hooks/save_session_log.py",
             ".claude/hooks/intent_staleness.py",
             ".claude/scripts/data_lake_intake.py",
+            ".claude/scripts/needs.py",
             f".claude/skills/ ({len(skills.SKILLS)} skills)",
         ):
             print(f"[dry-run] Would write: {path / rel}")
@@ -166,6 +167,7 @@ def new_project(
     scripts = path / ".claude" / "scripts"
     scripts.mkdir(parents=True, exist_ok=True)
     _write(scripts / "data_lake_intake.py", templates.V2_INTAKE_PY)
+    _write(scripts / "needs.py", templates.NEEDS_PY)
 
     if is_windows:
         _write(path / "!runClaude.bat", templates.v2_runclaude_bat(path, auto_named, session_name))
@@ -211,6 +213,15 @@ def _merge_settings(existing: str | None, shipped: str) -> str:
 
 
 MIGRATION_BACKUP = ".claude/cleanvibe/CLAUDE.pre-split.md"
+
+
+def _imports_rules(claude_md: str) -> bool:
+    """True only for a real import line (the whole line), as doctor checks it.
+    A CLAUDE.md that merely mentions the path in prose (cleanvibe's own does)
+    is not importing it."""
+    import re
+    return re.search(r"^@" + re.escape(templates.V2_RULES_PATH) + r"\s*$",
+                     claude_md, re.M) is not None
 
 
 def _split_sections(text: str) -> tuple:
@@ -313,7 +324,7 @@ def migrate_project(path: Path, dry_run: bool = False) -> dict:
         raise ValueError(f"{path} is not a cleanvibe 2 project (no {MARKER})")
     claude_path = path / "CLAUDE.md"
     text = claude_path.read_text(encoding="utf-8")
-    if ("@" + templates.V2_RULES_PATH) in text:
+    if _imports_rules(text):
         return {"already": True, "moved": [], "differing": []}
     marker = json.loads((path / MARKER).read_text(encoding="utf-8"))
     name = marker.get("name") or path.resolve().name
@@ -349,10 +360,11 @@ def refresh_project(path: Path, dry_run: bool = False) -> list:
 
     wanted = {f".claude/skills/{slug}/SKILL.md": body for slug, body in skills.SKILLS.items()}
     claude = (path / "CLAUDE.md").read_text(encoding="utf-8") if (path / "CLAUDE.md").is_file() else ""
-    if ("@" + templates.V2_RULES_PATH) in claude:
+    if _imports_rules(claude):
         wanted[templates.V2_RULES_PATH] = templates.v2_rules_md()
     wanted[".claude/hooks/intent_staleness.py"] = templates.INTENT_STALENESS_PY
     wanted[".claude/scripts/data_lake_intake.py"] = templates.V2_INTAKE_PY
+    wanted[".claude/scripts/needs.py"] = templates.NEEDS_PY
     if not opted_out:
         wanted[".claude/hooks/save_session_log.py"] = templates.CHAT_SAVE_SESSION_LOG_PY
 

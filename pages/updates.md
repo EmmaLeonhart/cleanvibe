@@ -25,7 +25,20 @@ self-exempting for replication-style bounded work.
 
 ---
 
-## Unreleased (next: v2.0.10) — pull with `--rebase=merges`
+## v2.0.10 (2026-11-20) — the needs file: work only the user can do; pull with `--rebase=merges`
+
+**New skill `needs-user` and script `.claude/scripts/needs.py`** (existing repos: run
+`cleanvibe refresh`, which writes both). A step that only the user can do (a login, a payment, a
+signature, a risky yes) is recorded in `NEEDS-USER.md` at the project root (name configurable as
+`needs_file` in `.cleanvibe.json`), one record each with what to do, what it blocks, where they have
+to be, and a status. Sessions record these when they plan the queue, not when they reach the step,
+and never just write "waiting" and stop. The shipped rules (`RULES.md`) say so too. A PC manager
+reads every project's needs file and pushes the user until each is done. Why: Emma, 2026-11-20,
+"I oftentimes don't actually know what's waiting on me"; cleanvibe "just asks and it just waits".
+
+**`cleanvibe refresh` fix:** a CLAUDE.md that only *mentions* the RULES.md import in prose is no
+longer treated as importing it (cleanvibe's own CLAUDE.md does; refresh had written a RULES.md
+there). Refresh and `--migrate` now look for the import line itself, as doctor does.
 
 **`autonomous-loop`: "Pull before you push" now says `git pull --rebase=merges`** (existing repos:
 `cleanvibe refresh`, or copy the skill from a fresh project). The 2.0.9 text said plain

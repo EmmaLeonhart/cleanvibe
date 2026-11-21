@@ -8,7 +8,7 @@ from cleanvibe import skills
 EXPECTED = {
     "emergency-stop", "cron-is-local", "autonomous-loop",
     "queue-driven-workflow", "research-practice", "writing-style",
-    "cleanvibe-update-check", "browser-persistence",
+    "cleanvibe-update-check", "browser-persistence", "needs-user",
 }
 FM = re.compile(r"^---\nname: (?P<name>[a-z-]+)\ndescription: (?P<desc>.+?)\n---\n", re.S)
 

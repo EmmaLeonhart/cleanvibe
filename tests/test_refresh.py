@@ -71,6 +71,32 @@ class TestRefresh(unittest.TestCase):
         self.assertNotIn(templates.V2_RULES_PATH, project.refresh_project(proj))
         self.assertFalse((proj / templates.V2_RULES_PATH).exists())
 
+    def test_a_mention_of_the_import_is_not_an_import(self):
+        # cleanvibe's own CLAUDE.md names the import line in prose; refresh
+        # wrote a RULES.md there until this was fixed (2026-11-20).
+        proj = _new()
+        (proj / "CLAUDE.md").write_text(
+            "# p\n\nCLAUDE.md imports it (`@.claude/cleanvibe/RULES.md`).\n", encoding="utf-8")
+        (proj / templates.V2_RULES_PATH).unlink()
+        self.assertNotIn(templates.V2_RULES_PATH, project.refresh_project(proj))
+        self.assertFalse((proj / templates.V2_RULES_PATH).exists())
+        self.assertFalse(project.migrate_project(proj)["already"])
+
+    def test_needs_script_is_shipped_and_works(self):
+        import subprocess, sys
+        proj = _new()
+        script = proj / ".claude/scripts/needs.py"
+        self.assertEqual(script.read_text(encoding="utf-8"), templates.NEEDS_PY)
+        r = subprocess.run([sys.executable, str(script), "add", "--kind", "action",
+                            "--title", "Sign it", "--do", "Sign the form.", "--blocks", "b",
+                            "--where", "in person"], capture_output=True, text=True)
+        self.assertEqual(r.returncode, 0, r.stderr)
+        text = (proj / "NEEDS-USER.md").read_text(encoding="utf-8")
+        self.assertTrue(text.startswith("# Needs you\n"))
+        self.assertIn("## NE-1: Sign it", text)
+        script.unlink()
+        self.assertIn(".claude/scripts/needs.py", project.refresh_project(proj))
+
     def test_session_log_opt_out_is_respected(self):
         proj = _new()
         marker = proj / ".cleanvibe.json"
