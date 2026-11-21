@@ -41,6 +41,7 @@ V2_CORE_FILES = (
     ".claude/hooks/intent_staleness.py",  # since 2.0.4
     ".claude/scripts/data_lake_intake.py",
     ".claude/scripts/needs.py",  # since 2.0.10
+    ".claude/scripts/cleanvibe_upgrade.py",  # since 2.0.12
 )
 
 _DONE_MARKERS = (

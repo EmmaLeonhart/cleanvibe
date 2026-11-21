@@ -19,6 +19,12 @@ from cleanvibe import project, templates
 os.environ["CLEANVIBE_CLAUDE_CONFIG"] = os.path.join(
     tempfile.mkdtemp(prefix="cleanvibe-tests-"), ".claude.json"
 )
+# The hook also checks PyPI for a newer cleanvibe; keep that offline and quiet.
+_HOME = tempfile.mkdtemp(prefix="cleanvibe-home-")
+os.environ["CLEANVIBE_HOME"] = _HOME
+os.environ["CLEANVIBE_PYPI_JSON"] = os.path.join(_HOME, "pypi.json")
+with open(os.environ["CLEANVIBE_PYPI_JSON"], "w", encoding="utf-8") as _f:
+    json.dump({"info": {"version": "0.0.1"}}, _f)
 
 
 def _new():

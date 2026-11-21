@@ -2762,3 +2762,11 @@ v2.0.11). 317 tests.
 
 Released: "pin this", actionable idle ticks, the weekly "is it still
 worth it?" decision, and private-unless-told-public repos.
+
+## 2026-11-21 - v2.0.12: new releases are picked up by themselves
+
+`.claude/scripts/cleanvibe_upgrade.py` (shipped, refreshed) upgrades the
+installed cleanvibe under a lock and refreshes the project; the loop-tick
+hook says when PyPI has a newer version (cached 6 hours). From
+cleanvibe-commercial's transcript check (chat:410, "there's always going to
+be an update"). 327 tests.

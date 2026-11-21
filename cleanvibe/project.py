@@ -132,6 +132,7 @@ def new_project(
             ".claude/hooks/intent_staleness.py",
             ".claude/scripts/data_lake_intake.py",
             ".claude/scripts/needs.py",
+            ".claude/scripts/cleanvibe_upgrade.py",
             f".claude/skills/ ({len(skills.SKILLS)} skills)",
         ):
             print(f"[dry-run] Would write: {path / rel}")
@@ -168,6 +169,7 @@ def new_project(
     scripts.mkdir(parents=True, exist_ok=True)
     _write(scripts / "data_lake_intake.py", templates.V2_INTAKE_PY)
     _write(scripts / "needs.py", templates.NEEDS_PY)
+    _write(scripts / "cleanvibe_upgrade.py", templates.CLEANVIBE_UPGRADE_PY)
 
     if is_windows:
         _write(path / "!runClaude.bat", templates.v2_runclaude_bat(path, auto_named, session_name))
@@ -405,6 +407,7 @@ def refresh_project(path: Path, dry_run: bool = False) -> list:
     wanted[".claude/hooks/intent_staleness.py"] = templates.INTENT_STALENESS_PY
     wanted[".claude/scripts/data_lake_intake.py"] = templates.V2_INTAKE_PY
     wanted[".claude/scripts/needs.py"] = templates.NEEDS_PY
+    wanted[".claude/scripts/cleanvibe_upgrade.py"] = templates.CLEANVIBE_UPGRADE_PY
     if not opted_out:
         wanted[".claude/hooks/save_session_log.py"] = templates.CHAT_SAVE_SESSION_LOG_PY
 

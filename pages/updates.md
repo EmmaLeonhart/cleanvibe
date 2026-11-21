@@ -25,6 +25,20 @@ self-exempting for replication-style bounded work.
 
 ---
 
+## v2.0.12 (2026-11-21) — new releases are picked up by themselves
+
+**New script `.claude/scripts/cleanvibe_upgrade.py`** (existing repos: `cleanvibe refresh`, which
+writes it). It checks PyPI and, when a newer cleanvibe is out, upgrades the installed one (one
+session at a time, under a lock in `~/.cleanvibe/`) and runs `cleanvibe refresh` on the project.
+`--check` only says what it would do.
+
+**The loop-tick hook says when a release is out** (`.claude/hooks/intent_staleness.py`). It asks
+PyPI at most every 6 hours per machine and prints nothing on any problem.
+`cleanvibe-update-check` says to run the script that tick, without waiting for the weekly check.
+Why: Emma, 2026-11-20, "whenever there's a new release ... there's always going to be an update";
+until now releases reached projects only at the weekly check, and her installed cleanvibe sat on an
+old version for nine hours.
+
 ## v2.0.11 (2026-11-21) — "pin this"; actionable idle ticks; "is it still worth it?"; private unless told public
 
 **`autonomous-loop` step 3** (existing repos: `cleanvibe refresh`):
