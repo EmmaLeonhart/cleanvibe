@@ -90,6 +90,7 @@ class TestNewProject(unittest.TestCase):
         for needle in ("work from low information", "The chat is the project, from the first message",
                        "INTENT.md", "AskUserQuestion only when the user is clearly here",
                        "one decision per question, a sentence or two",
+                       "means it matters.", "What only the user can do goes in the needs file",
                        "Material goes into `data_lake/`", "Thirty-minute intake",
                        "recurring: false", "data_lake_intake.py",
                        "## Chat mode, then work mode", "## Mode check",

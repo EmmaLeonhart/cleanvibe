@@ -2732,3 +2732,9 @@ expects the script. Fixed refresh/migrate treating a prose mention of the
 RULES.md import as an import. Plus the `--rebase=merges` fix. 314 tests.
 Released as v2.0.10 at Emma's direction ("They will record it as the system
 is self updating").
+
+## 2026-11-20 - rules: "pin this"
+
+RULES.md gains a bullet: "pin this" means it matters; write it into INTENT.md
+at once in the user's words. From the cleanvibe-commercial chat review
+(an item that was not done). Unreleased (next: v2.0.11). 314 tests.

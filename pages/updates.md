@@ -25,6 +25,13 @@ self-exempting for replication-style bounded work.
 
 ---
 
+## Unreleased (next: v2.0.11) — "pin this"
+
+**Shipped rules (`RULES.md`): "Pin this" means it matters** (existing repos: `cleanvibe refresh`).
+When the user says "pin this" or "put a pin on this", the session writes what was pinned into
+`INTENT.md` at once, as a constraint in their words, with the date. Why: offhand phrasing and
+important instructions look alike in chat, and Emma uses the pin to mark which is which.
+
 ## v2.0.10 (2026-11-20) — the needs file: work only the user can do; pull with `--rebase=merges`
 
 **New skill `needs-user` and script `.claude/scripts/needs.py`** (existing repos: run

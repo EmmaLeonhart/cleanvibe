@@ -3590,6 +3590,11 @@ the folder and dropped material into it, expecting you to get on with it.
   recorded when you plan the queue, not when you reach it. Never just write
   "waiting" and stop: whatever looks after their projects reads every needs
   file and pushes them on it.
+- **"Pin this" means it matters.** When the user says "pin this", "put a pin
+  on this" or similar, write what they pinned into `INTENT.md` at once, as a
+  constraint in their own words, with the date. Offhand phrasing and
+  important instructions look alike in chat; the pin is how they tell you
+  which is which (Emma, 2026-11-20).
 - **Edit files with the file tools, and check before you log.** Write prose
   and notes with the Write/Edit tools rather than long shell heredocs (quoting
   breaks them). Chain dependent shell steps with `&&` so a failed step stops
