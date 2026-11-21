@@ -25,7 +25,7 @@ self-exempting for replication-style bounded work.
 
 ---
 
-## Unreleased (next: v2.0.11) — "pin this"; actionable idle ticks; "is it still worth it?"; private unless told public
+## v2.0.11 (2026-11-21) — "pin this"; actionable idle ticks; "is it still worth it?"; private unless told public
 
 **`autonomous-loop` step 3** (existing repos: `cleanvibe refresh`):
 - An idle tick's message must be actionable: what is waiting and the one

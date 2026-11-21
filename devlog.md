@@ -2757,3 +2757,8 @@ replace the old wording, word for word, in existing projects and leave
 chosen or edited text alone. The queue's "practice repos are PUBLIC" line
 is gone. From cleanvibe-commercial's transcript check. Unreleased (next:
 v2.0.11). 317 tests.
+
+## 2026-11-21 - v2.0.11
+
+Released: "pin this", actionable idle ticks, the weekly "is it still
+worth it?" decision, and private-unless-told-public repos.
