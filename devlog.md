@@ -2746,3 +2746,14 @@ thing the user could do; before refilling, a project quiet for 7+ days gets
 one needs decision "Is <project> still worth working on?" (default keep
 going). From the cleanvibe-commercial chat review (the Sutra item) and
 Emma's objection to empty ticks. Unreleased. 314 tests.
+
+## 2026-11-21 - publishing: private unless the user says public
+
+The default Publishing rule no longer follows "any signal" for public: a
+repo is private unless the user says public (her correction of
+2026-11-18, which pc-manager recorded but which never reached a queue).
+`project.upgrade_publishing` lets `cleanvibe refresh` and `--migrate`
+replace the old wording, word for word, in existing projects and leave
+chosen or edited text alone. The queue's "practice repos are PUBLIC" line
+is gone. From cleanvibe-commercial's transcript check. Unreleased (next:
+v2.0.11). 317 tests.

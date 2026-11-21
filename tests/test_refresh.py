@@ -1,5 +1,5 @@
 """`cleanvibe refresh`: shipped files are brought up to this version, and the
-project's own files are never touched. Stdlib unittest, no network."""
+project's own files are never touched, except the old default Publishing rule. Stdlib unittest, no network."""
 
 import io
 import json
@@ -136,3 +136,45 @@ class TestRefresh(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestPublishingUpgrade(unittest.TestCase):
+    """The old "any signal for public" default is replaced by "private unless
+    the user says public" (2026-11-18); any other Publishing text is kept."""
+
+    def _with_old_rule(self):
+        proj = _new()
+        claude = proj / "CLAUDE.md"
+        text = claude.read_text(encoding="utf-8")
+        current = templates._publishing_section(None, "proj", False)
+        current = current.split("\n", 1)[1].split(" If the user's wishes change later", 1)[0]
+        old = project._old_default_publishing("proj")
+        self.assertIn(current, text)
+        claude.write_text(text.replace(current, old), encoding="utf-8")
+        return proj, text
+
+    def test_old_default_rule_is_replaced(self):
+        proj, fresh = self._with_old_rule()
+        self.assertIn("CLAUDE.md", project.refresh_project(proj))
+        self.assertEqual((proj / "CLAUDE.md").read_text(encoding="utf-8"), fresh)
+        self.assertEqual(project.refresh_project(proj), [])
+
+    def test_dry_run_reports_without_writing(self):
+        proj, _ = self._with_old_rule()
+        before = (proj / "CLAUDE.md").read_text(encoding="utf-8")
+        self.assertIn("CLAUDE.md", project.refresh_project(proj, dry_run=True))
+        self.assertEqual((proj / "CLAUDE.md").read_text(encoding="utf-8"), before)
+
+    def test_chosen_or_edited_publishing_is_left_alone(self):
+        for vis in ("public", "private", "local"):
+            with self.subTest(visibility=vis):
+                proj = Path(tempfile.mkdtemp()) / "proj"
+                with redirect_stdout(io.StringIO()):
+                    project.new_project(proj, no_claude=True, visibility=vis)
+                self.assertNotIn("CLAUDE.md", project.refresh_project(proj))
+        proj = _new()
+        claude = proj / "CLAUDE.md"
+        edited = claude.read_text(encoding="utf-8").replace(
+            "## Publishing\n", "## Publishing\nThis one is public: the user said so.\n")
+        claude.write_text(edited, encoding="utf-8")
+        self.assertNotIn("CLAUDE.md", project.refresh_project(proj))

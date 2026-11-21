@@ -258,6 +258,33 @@ def _shipped_headings() -> dict:
     return {h.strip(): b.strip() for h, b in sections if h.startswith("## ")}
 
 
+def _old_default_publishing(repo: str) -> str:
+    """The default Publishing rule shipped from 2026-10-06 to v2.0.10 ("any
+    signal for public"), for a project whose repo name is ``repo``."""
+    return ("Push to a GitHub remote unless the user says to keep the project "
+            "local. Visibility follows any signal: anything suggesting it should "
+            "be public (the user says so, the material says so, it is meant to "
+            "be shown or shared) makes it public "
+            f"(`gh repo create {repo} --public --source=. --push`); "
+            "anything suggesting it should be private makes it private "
+            "(`--private`). With no signal, or signals both ways, it is private.")
+
+
+def upgrade_publishing(text: str, project_name: str, auto_named: bool) -> str:
+    """Swap the old "any signal for public" default rule in a CLAUDE.md for the
+    current one ("private unless the user says public"; 2026-11-18). Only the
+    exact shipped wording is replaced: a Publishing section the user chose or
+    edited (public, private, local, or anything else) is left alone."""
+    repo = templates._repo_name(project_name, auto_named)
+    old = _old_default_publishing(repo)
+    unix = text.replace("\r\n", "\n")
+    if old not in unix:
+        return text
+    new = templates._publishing_section(None, project_name, auto_named)
+    new = new.split("\n", 1)[1].split(" If the user's wishes change later", 1)[0]
+    return unix.replace(old, new)
+
+
 def migrate_claude_md(text: str, project_name: str, auto_named: bool) -> tuple:
     """Turn a pre-split (cleanvibe <= 2.0.8) CLAUDE.md into the split layout.
 
@@ -291,6 +318,8 @@ def migrate_claude_md(text: str, project_name: str, auto_named: bool) -> tuple:
                     _fingerprint(body, project_name) not in _KNOWN_SHIPPED:
                 differing.append(h)
             continue
+        if h == "## Publishing":
+            body = upgrade_publishing(body, project_name, auto_named)
         kept.append(heading + body.rstrip("\n") + "\n")
     has = {s.split("\n", 1)[0].strip() for s in kept}
     out = (preamble.rstrip("\n") + "\n\n" if preamble.strip() else "") + "\n".join(kept)
@@ -345,7 +374,9 @@ def refresh_project(path: Path, dry_run: bool = False) -> list:
     Rewrites every skill, `.claude/cleanvibe/RULES.md` (only when CLAUDE.md
     imports it), the hooks and the intake script, and adds cleanvibe's hook
     entries to `.claude/settings.json` without touching anything else there.
-    Never touches CLAUDE.md, INTENT.md or any other project file. Returns the
+    Never touches INTENT.md or any other project file, and CLAUDE.md only to
+    replace the old "any signal for public" default Publishing rule, word for
+    word, with the current one (`upgrade_publishing`). Returns the
     relative paths that changed (or would change, with ``dry_run``).
     """
     import json
@@ -362,6 +393,15 @@ def refresh_project(path: Path, dry_run: bool = False) -> list:
     claude = (path / "CLAUDE.md").read_text(encoding="utf-8") if (path / "CLAUDE.md").is_file() else ""
     if _imports_rules(claude):
         wanted[templates.V2_RULES_PATH] = templates.v2_rules_md()
+    if claude:
+        try:
+            meta = json.loads(marker.read_text(encoding="utf-8"))
+        except ValueError:
+            meta = {}
+        upgraded = upgrade_publishing(claude, meta.get("name") or path.resolve().name,
+                                      bool(meta.get("auto_named", False)))
+        if upgraded != claude:
+            wanted["CLAUDE.md"] = upgraded
     wanted[".claude/hooks/intent_staleness.py"] = templates.INTENT_STALENESS_PY
     wanted[".claude/scripts/data_lake_intake.py"] = templates.V2_INTAKE_PY
     wanted[".claude/scripts/needs.py"] = templates.NEEDS_PY

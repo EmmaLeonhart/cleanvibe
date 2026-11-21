@@ -103,13 +103,13 @@ class TestNewProject(unittest.TestCase):
                        "ask one short question before acting",
                        "Stay inside this project", "mean stop now",
                        "queue-driven-workflow", "research-practice", "autonomous-loop",
-                       "scratch/", "## Publishing", "With no signal, or signals both ways, it is private.",
+                       "scratch/", "## Publishing", "private unless the user says it should be public",
                        "sessions/",
                        "Not-done taxonomy"):
             self.assertIn(needle, claude)
-        # The default rule names both commands; public only on a signal.
-        self.assertIn("--public --source=. --push", claude)
-        self.assertIn("(`--private`)", claude)
+        # The default rule creates a private repo; public only on the user's word.
+        self.assertIn("--private --source=. --push", claude)
+        self.assertIn("(`--public`)", claude)
 
     def test_gitignore_keeps_scratch_out(self):
         self.assertIn("\nscratch/\n", (_new() / ".gitignore").read_text(encoding="utf-8"))
@@ -338,7 +338,7 @@ class TestResearchFixes203(unittest.TestCase):
         self.assertIn("named `astronism`", step(chosen))
         self.assertIn("descriptive", step(generated))
         self.assertNotEqual(step(chosen), step(generated))
-        self.assertIn("gh repo create astronism --public", chosen)
+        self.assertIn("gh repo create astronism --private", chosen)
         self.assertNotIn("<descriptive-name>", chosen)
         self.assertIn("<descriptive-name>", generated)
         self.assertNotIn("descriptive name,", templates.v2_first_prompt("/x/astronism", False))

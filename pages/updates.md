@@ -25,7 +25,7 @@ self-exempting for replication-style bounded work.
 
 ---
 
-## Unreleased (next: v2.0.11) — "pin this"; actionable idle ticks; "is it still worth it?"
+## Unreleased (next: v2.0.11) — "pin this"; actionable idle ticks; "is it still worth it?"; private unless told public
 
 **`autonomous-loop` step 3** (existing repos: `cleanvibe refresh`):
 - An idle tick's message must be actionable: what is waiting and the one
@@ -41,6 +41,14 @@ Why: hours of empty ticks gave Emma nothing to act on, and work had gone on
 When the user says "pin this" or "put a pin on this", the session writes what was pinned into
 `INTENT.md` at once, as a constraint in their words, with the date. Why: offhand phrasing and
 important instructions look alike in chat, and Emma uses the pin to mark which is which.
+
+**Publishing: a repo is private unless the user says public** (existing repos: `cleanvibe refresh`).
+The default rule in a new CLAUDE.md now creates a private repo and goes public only on the user's own
+word; a guess from the material, the name or the project's purpose no longer counts. `cleanvibe
+refresh` (and `--migrate`) replace the old "Visibility follows any signal" wording, word for word,
+and leave a Publishing section the user chose or edited alone. Why: the old rule made repos public
+that should not have been (2026-11-18), and the user's correction was "a repo is private unless
+she says it is public".
 
 ## v2.0.10 (2026-11-20) — the needs file: work only the user can do; pull with `--rebase=merges`
 

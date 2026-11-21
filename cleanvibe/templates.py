@@ -3421,12 +3421,10 @@ def _publishing_section(visibility, project_name: str = "", auto_named: bool = T
                f"--{visibility} --source=. --push`.")
     else:
         how = ("Push to a GitHub remote unless the user says to keep the project "
-               "local. Visibility follows any signal: anything suggesting it should "
-               "be public (the user says so, the material says so, it is meant to "
-               "be shown or shared) makes it public "
-               f"(`gh repo create {repo} --public --source=. --push`); "
-               "anything suggesting it should be private makes it private "
-               "(`--private`). With no signal, or signals both ways, it is private.")
+               "local. The repository is private unless the user says it should "
+               f"be public: `gh repo create {repo} --private --source=. --push`. "
+               "Only the user's own word makes it public (`--public`); a guess from "
+               "the material, the name or what the project is for does not.")
     return "## Publishing\n" + how + (
         " If the user's wishes change later, change the repository to match "
         "(`gh repo edit --visibility ...`).")

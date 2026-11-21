@@ -1,8 +1,8 @@
 """Repos default to private when nothing says otherwise.
 
 The 1.x modes create a private repo (v1.18.0). A cleanvibe 2 project goes to
-GitHub unless the user says local; any signal for public makes it public, any
-for private makes it private, and private breaks ties (Emma, 2026-10-06). The
+GitHub unless the user says local, and it is private unless the user says it
+should be public (2026-11-18, replacing the 2026-10-06 "any signal" rule). The
 Pages workflows must not fail on a private repo: they skip the Pages deploy
 there and upload the report as a plain workflow artifact.
 """
@@ -32,10 +32,13 @@ class TestPrivateByDefault(unittest.TestCase):
         self.assertNotIn("PUBLIC GitHub repo", text)
         self.assertIn("gh repo create --private", text)
 
-    def test_v2_default_rule_is_remote_with_private_tiebreak(self):
+    def test_v2_default_rule_is_remote_and_private_unless_told(self):
         md = templates.v2_claude_md("p")
         self.assertIn("Push to a GitHub remote unless the user says to keep the project", md)
-        self.assertIn("With no signal, or signals both ways, it is private.", md)
+        self.assertIn("private unless the user says it should be public", md)
+        self.assertIn("--private --source=. --push", md)
+        self.assertNotIn("any signal", md)
+        self.assertNotIn("--public --source=. --push", md)
 
     def test_v2_explicit_visibility(self):
         self.assertIn("--public --source=. --push", templates.v2_claude_md("p", visibility="public"))
