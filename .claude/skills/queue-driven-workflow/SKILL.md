@@ -23,9 +23,9 @@ and `devlog.md` if they don't exist yet, and work this way from then on.
 - **`devlog.md`** — where **"done" lives**. Every finished queue item is deleted from `queue.md` and appended as a dated entry here, in the same commit as the work. Releases (tag + one-line note) and notable milestones also go here.
 - **Flow:** `todo.md` (abstract horizons) → `queue.md` (concrete steps) → task tool (in-flight work) → `devlog.md` + `git log` (history). Items only ever flow forward.
 - **A long queue is healthy.** It is never a reason to rush, cut corners, or close items early: each item gets the same care whether there are three or eighty, and the queue drains over as many ticks as it takes.
-- **When to stop and hand back:** `queue.md` is empty, what is left in `todo.md` is still too abstract to break down, and tests (and CI, if the project has a remote) pass.
+- **When to stop and hand back:** `queue.md` is empty, what is left in `todo.md` is still too abstract to break down, and tests pass (and CI, if the project runs it).
 
 ## Testing
 - **Write unit tests early.** As soon as there is testable logic, create a test file. Use `pytest` for Python projects or the appropriate test framework for the language in use.
-- **Set up CI once the project has a GitHub remote.** A `.github/workflows/ci.yml` that runs the test suite on push and pull request. Keep it simple — install dependencies and run tests.
+- **CI only where it costs nothing, or where this machine allows it.** A public repo gets a simple `.github/workflows/ci.yml` that runs the tests on push and pull request. A **private** repo gets no CI workflow unless `cleanvibe config actions_on_private` prints `true`: private repos spend GitHub Actions minutes, and on 2026-11-21 Emma's ran out ("no private repos should burn actions minutes unless configured to do so"). Check the visibility with `gh repo view --json visibility`. Without CI, run the full test suite locally before every push. If a private repo already has a workflow that runs tests on push or pull request and the setting is off, delete it and say so in `devlog.md`; ask before touching any other workflow (Pages, publishing).
 - **Keep tests passing.** Do not commit code that breaks existing tests. If a change requires updating tests, update them in the same commit.
