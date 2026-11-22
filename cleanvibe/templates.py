@@ -4387,6 +4387,26 @@ def run(cmd, dry):
     return subprocess.run(cmd).returncode
 
 
+def install(latest, dry, attempts=5, wait=None):
+    """pip-install cleanvibe==latest, retrying: PyPI's JSON API can list a new
+    release a minute or more before pip's index does ("No matching
+    distribution"; 2026-11-22). Returns pip's last exit code (0 = installed)."""
+    if wait is None:
+        wait = float(os.environ.get("CLEANVIBE_UPGRADE_RETRY_WAIT", "30"))
+    cmd = [sys.executable, "-m", "pip", "install", "-q", "-U", "--no-cache-dir",
+           f"cleanvibe=={latest}"]
+    code = 1
+    for attempt in range(1, attempts + 1):
+        code = run(cmd, dry)
+        if code == 0:
+            return 0
+        if attempt < attempts:
+            print(f"pip could not install {latest} yet (try {attempt} of {attempts}); "
+                  f"PyPI's index may still be catching up. Trying again in {wait:g}s.")
+            time.sleep(wait)
+    return code
+
+
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
     check_only = "--check" in argv
@@ -4415,7 +4435,7 @@ def main(argv=None):
     try:
         have = installed_version() or have
         if _version_tuple(latest) > _version_tuple(have):
-            if run([sys.executable, "-m", "pip", "install", "-q", "-U", f"cleanvibe=={latest}"], dry):
+            if install(latest, dry):
                 print("The upgrade failed; the output above says why.")
                 return 1
         else:

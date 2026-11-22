@@ -6,6 +6,7 @@ lock and cache live in a temp CLEANVIBE_HOME, and CLEANVIBE_UPGRADE_DRY makes
 the script print its pip and refresh commands instead of running them.
 """
 
+import contextlib
 import io
 import json
 import os
@@ -83,7 +84,7 @@ class TestUpgradeScript(unittest.TestCase):
         env = _env(latest)
         result = _script(proj, env)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertIn(f"pip install -q -U cleanvibe=={latest}", result.stdout)
+        self.assertIn(f"pip install -q -U --no-cache-dir cleanvibe=={latest}", result.stdout)
         self.assertIn(f"cleanvibe.cli refresh {proj.resolve()}", result.stdout)
         self.assertFalse((Path(env["CLEANVIBE_HOME"]) / "upgrade.lock").exists())
 
@@ -134,6 +135,22 @@ class TestHookNotice(unittest.TestCase):
     def test_user_prompts_get_no_notice(self):
         result = _hook(_new(), _env(_bump(INSTALLED)), prompt="hello")
         self.assertEqual(result.stdout, "")
+
+    def test_install_retries_while_the_index_catches_up(self):
+        ns = {"__name__": "upgrade_under_test"}
+        exec(compile(templates.CLEANVIBE_UPGRADE_PY, "cleanvibe_upgrade.py", "exec"), ns)
+        calls = []
+        codes = iter([1, 1, 0])
+        ns["run"] = lambda cmd, dry: (calls.append(cmd), next(codes))[1]
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            self.assertEqual(ns["install"]("9.9.9", False, attempts=5, wait=0), 0)
+        self.assertEqual(len(calls), 3)
+        self.assertIn("cleanvibe==9.9.9", calls[0])
+        self.assertIn("try 2 of 5", out.getvalue())
+        ns["run"] = lambda cmd, dry: 1
+        with contextlib.redirect_stdout(io.StringIO()):
+            self.assertEqual(ns["install"]("9.9.9", False, attempts=2, wait=0), 1)
 
     def test_template_constant_matches_scaffold(self):
         proj = _new()

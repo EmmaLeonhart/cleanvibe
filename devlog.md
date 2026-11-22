@@ -2797,3 +2797,10 @@ replication Pages build job skips private pushes unless `CLEANVIBE_PAGES`.
 From Emma, 2026-11-21, after her Actions minutes ran out: "no private repos
 should burn actions minutes unless configured to do so. Imo this should be a
 machine level setting for the pypi library". 334 tests.
+
+## 2026-11-22 - cleanvibe_upgrade.py retries the install
+
+The first real upgrade to 2.0.13 failed: PyPI's JSON API listed the release
+before pip's index did ("No matching distribution"). `install()` now tries
+up to 5 times, 30 s apart (`CLEANVIBE_UPGRADE_RETRY_WAIT`), with
+`--no-cache-dir`. Unreleased. 335 tests.
