@@ -2786,3 +2786,14 @@ a page built from their `paper.md` by `paper/scripts/render_pages.py`; the
 old note moved to `/paper/forgotten-duties/` (its dead PDF link removed).
 Run the script after a paper changes. From cleanvibe-commercial's
 transcript check (2eda803e:4013).
+
+## 2026-11-22 - v2.0.13: private repos spend no Actions minutes
+
+`cleanvibe config` (new, `cleanvibe/settings.py`): machine-level settings in
+`~/.cleanvibe/config.json`. `actions_on_private` (default off) gates CI on
+private repos: the queue-driven-workflow skill adds CI only to public repos
+or when it is on, and removes test-on-push workflows from private ones. The
+replication Pages build job skips private pushes unless `CLEANVIBE_PAGES`.
+From Emma, 2026-11-21, after her Actions minutes ran out: "no private repos
+should burn actions minutes unless configured to do so. Imo this should be a
+machine level setting for the pypi library". 334 tests.

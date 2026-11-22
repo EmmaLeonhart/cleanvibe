@@ -25,6 +25,26 @@ self-exempting for replication-style bounded work.
 
 ---
 
+## v2.0.13 (2026-11-22) — private repos spend no GitHub Actions minutes
+
+**New command `cleanvibe config`** holds settings for every project on the
+machine, in `~/.cleanvibe/config.json`. The first is `actions_on_private`,
+off by default.
+
+**Skill `queue-driven-workflow` revised (Testing):** a public repo gets a
+simple CI workflow; a **private** repo gets none unless
+`cleanvibe config actions_on_private` prints `true`, and runs its full test
+suite locally before every push. If a private repo already has a workflow
+that runs tests on push or pull request and the setting is off, delete it
+and log it; ask before touching any other workflow. Why: Emma's Actions
+minutes ran out on 2026-11-21 ("no private repos should burn actions
+minutes unless configured to do so").
+
+**Replication `pages.yml`:** the build job now skips pushes to a private
+repo unless `CLEANVIBE_PAGES` is `true`; a run started by hand still builds.
+
+---
+
 ## v2.0.12 (2026-11-21) — new releases are picked up by themselves
 
 **New script `.claude/scripts/cleanvibe_upgrade.py`** (existing repos: `cleanvibe refresh`, which

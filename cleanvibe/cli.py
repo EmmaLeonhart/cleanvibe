@@ -609,6 +609,15 @@ def build_parser() -> argparse.ArgumentParser:
         help="Files or directories to scan (defaults to the current directory)",
     )
 
+    config_parser = subparsers.add_parser(
+        "config",
+        help="Show or change this machine's cleanvibe settings "
+        "(~/.cleanvibe/config.json), e.g. whether private repos run GitHub "
+        "Actions CI",
+    )
+    config_parser.add_argument("name", nargs="?", help="Setting to show or change")
+    config_parser.add_argument("value", nargs="?", help="New value")
+
     legacy_parser = subparsers.add_parser(
         "legacy",
         help="DEPRECATED: the cleanvibe 1.x modes (new, research, original, "
@@ -639,6 +648,9 @@ def main(argv: list[str] | None = None) -> None:
         sys.exit(doctor(args.path))
     elif args.command == "refresh":
         sys.exit(_do_refresh(args))
+    elif args.command == "config":
+        from .settings import config_cli
+        sys.exit(config_cli(args.name, args.value))
     elif args.command == "scan":
         sys.exit(scan_cli(args.paths))
     elif args.command == "legacy":

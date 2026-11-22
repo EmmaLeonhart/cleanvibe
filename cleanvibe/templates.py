@@ -1227,6 +1227,9 @@ concurrency:
 
 jobs:
   build:
+    # A private repo builds only when Pages is turned on for it or the run is
+    # started by hand, so pushes don't spend Actions minutes.
+    if: ${{ !github.event.repository.private || vars.CLEANVIBE_PAGES == 'true' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
