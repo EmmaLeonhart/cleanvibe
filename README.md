@@ -30,6 +30,20 @@ pip install .         # or use !dev-install.bat on Windows
 
 **Use `pip install .`, not `pip install -e .`.** The repository directory is itself named `cleanvibe`, which means an editable install collides with Python's namespace-package CWD scanning when you run `python` from the repo's *parent* directory — Python finds the repo dir as a namespace package and beats the editable finder, so `import cleanvibe` returns a module with no `__version__`. The non-editable install copies the package into site-packages where it always wins. After any source edit, run `pip install .` again (or `!dev-install.bat`). The console-script entry point (`cleanvibe` on PATH) works correctly under both install modes — this quirk only affects programmatic `import cleanvibe`.
 
+## The organizer ($10 a month)
+
+cleanvibe is free and MIT-licensed. The optional paid organizer runs all your
+cleanvibe projects on your own Windows PC and keeps them working while you're
+away:
+- it starts them at boot (before you sign in) or at logon;
+- it brings them back after crashes;
+- a supervisor session closes idle sessions;
+- it keeps one ranked list of what your agents need from you.
+
+You sign in to Claude Code with your own account, and the organizer never
+touches your credentials. Details and subscribing:
+<https://cleanvibe.emmaleonhart.com/#organizer>.
+
 ## Usage
 
 ### Start a project
