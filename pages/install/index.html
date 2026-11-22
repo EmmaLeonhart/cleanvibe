@@ -73,7 +73,7 @@
     <p>The installer checks your licence and installs cleanvibe. It creates your supervisor in <code>Documents\GitHub\pc-manager</code> and has it start when you sign in. To have your projects also start at boot, before anyone signs in, run it from an admin PowerShell with <code>--boot</code>. Add <code>--dry-run</code> to see the steps without changing anything.</p>
     <h2>3. Your first project</h2>
     <pre><code>cleanvibe new my-project</code></pre>
-    <p>Add it to <code>pc-manager\config\logon-projects.txt</code>, then run <code>pc-manager	ools\Add-StartupProject.ps1 my-project</code>. From then on it starts at sign-in (and at boot, if you chose that), works through its queue, and reports what it needs from you to the supervisor.</p>
+    <p>Add it to <code>pc-manager\config\logon-projects.txt</code>, then run <code>pc-manager\tools\Add-StartupProject.ps1 my-project</code>. From then on it starts at sign-in (and at boot, if you chose that), works through its queue, and reports what it needs from you to the supervisor.</p>
     <h2>Your account stays yours</h2>
     <p>The organizer never reads, stores or sends your Claude credentials. Usage is billed by Anthropic to your own plan or API key. cleanvibe is an independent tool, not made or endorsed by Anthropic.</p>
     <p><a href="/">Back to cleanvibe</a></p>
