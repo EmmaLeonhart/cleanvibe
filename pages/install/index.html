@@ -1,82 +1,11 @@
-<!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<!doctype html>
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta property="og:type" content="article">
-  <meta property="og:title" content="Install the cleanvibe organizer">
-  <meta property="og:description" content="How to install the cleanvibe organizer on Windows after subscribing.">
-  <meta property="og:url" content="https://cleanvibe.emmaleonhart.com/install/">
-  <meta property="og:site_name" content="cleanvibe">
-  <meta name="description" content="How to install the cleanvibe organizer on Windows after subscribing.">
-  <title>Install the organizer · cleanvibe</title>
-
-  <script>(function(){try{var t=localStorage.getItem('theme');if(t!=='light'&&t!=='dark')t='dark';document.documentElement.setAttribute('data-theme',t);}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();</script>
-
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/identity.css">
-
-  <style>
-    body { display: flex; justify-content: center; padding: 96px 16px 120px; overflow-x: hidden; }
-    .container { max-width: 760px; width: 100%; }
-    .site-nav {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 50;
-      display: flex; align-items: center; gap: 16px; padding: 13px 24px;
-      background: color-mix(in srgb, var(--bg) 72%, transparent);
-      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
-    }
-    .site-nav .brand { font-family: var(--mono); font-size: 0.82rem; font-weight: 600; color: var(--text-strong); text-decoration: none; }
-    .site-nav .brand:hover { color: var(--accent-bright); }
-    .site-nav .spacer { flex: 1; }
-    .site-nav .theme-toggle { position: static; }
-    h1 { font-family: var(--serif); font-weight: 400; font-size: clamp(2rem, 5vw, 2.8rem); line-height: 1.1; color: var(--text-strong); margin: 0 0 14px; }
-    .byline { color: var(--text-mute); font-size: 0.95rem; margin-bottom: 18px; }
-    .links { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 36px; }
-    article h2 { font-family: var(--serif); font-weight: 400; font-size: 1.6rem; color: var(--text-strong); margin: 40px 0 12px; }
-    article p, article li { line-height: 1.7; color: var(--text); }
-    article code { font-family: var(--mono); font-size: 0.86em; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 4px; padding: 0 4px; }
-    article a { color: var(--accent-bright); }
-    .tbl { overflow-x: auto; margin: 18px 0; }
-    table { border-collapse: collapse; width: 100%; font-size: 0.9rem; }
-    th, td { text-align: left; vertical-align: top; padding: 8px 10px; border-bottom: 1px solid var(--border); }
-    th { color: var(--text-strong); font-weight: 600; border-bottom-color: var(--border-strong); }
-    .note { color: var(--text-mute); font-size: 0.88rem; border-top: 1px solid var(--border); margin-top: 48px; padding-top: 16px; }
-  </style>
+<meta charset="utf-8">
+<title>CleanVibe</title>
+<meta http-equiv="refresh" content="0; url=https://cleanvibe.topazcomputing.com/install">
+<link rel="canonical" href="https://cleanvibe.topazcomputing.com/install">
+<script>location.replace("https://cleanvibe.topazcomputing.com/install" + location.search);</script>
 </head>
-<body>
-  <nav class="site-nav" aria-label="Primary">
-    <a class="brand" href="/">cleanvibe</a>
-    <div class="spacer"></div>
-    <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle light and dark theme" title="Toggle light / dark">
-      <svg class="icon-sun" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="12" cy="12" r="5"></circle></svg>
-      <svg class="icon-moon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.33,17.97C14.5,17.81 11.7,16.64 9.53,14.5C7.36,12.31 6.2,9.5 6.04,6.68C3.23,9.82 3.34,14.4 6.35,17.41C9.37,20.43 14,20.54 17.33,17.97Z"></path></svg>
-    </button>
-  </nav>
-
-  <main class="container">
-    <h1>Install the organizer</h1>
-    <p>For subscribers. You need the licence key and the download from your welcome page. Lost the key? Write to support@topazcomputing.com.</p>
-    <h2>1. Before you start</h2>
-    <p>Windows 10 or 11, with these installed:</p>
-    <ul>
-      <li><a href="https://www.python.org/downloads/">Python</a> 3.10 or newer;</li>
-      <li><a href="https://git-scm.com/download/win">Git for Windows</a>;</li>
-      <li>the <a href="https://cli.github.com">GitHub CLI</a>, signed in with <code>gh auth login</code>;</li>
-      <li><a href="https://claude.com/claude-code">Claude Code</a>, signed in with your own account. Run <code>claude</code> once to sign in.</li>
-    </ul>
-    <h2>2. Install</h2>
-    <p>Unzip <code>cleanvibe-organizer.zip</code>, open PowerShell in the unzipped folder, and run:</p>
-    <pre><code>python installer\install.py --key YOUR-LICENCE-KEY</code></pre>
-    <p>The installer checks your licence and installs cleanvibe. It creates your supervisor in <code>Documents\GitHub\pc-manager</code> and has it start when you sign in. To have your projects also start at boot, before anyone signs in, run it from an admin PowerShell with <code>--boot</code>. Add <code>--dry-run</code> to see the steps without changing anything.</p>
-    <h2>3. Your first project</h2>
-    <pre><code>cleanvibe new my-project</code></pre>
-    <p>Add it to <code>pc-manager\config\logon-projects.txt</code>, then run <code>pc-manager\tools\Add-StartupProject.ps1 my-project</code>. From then on it starts at sign-in (and at boot, if you chose that), works through its queue, and reports what it needs from you to the supervisor.</p>
-    <h2>Your account stays yours</h2>
-    <p>The organizer never reads, stores or sends your Claude credentials. Usage is billed by Anthropic to your own plan or API key. cleanvibe is an independent tool, not made or endorsed by Anthropic.</p>
-    <p><a href="/">Back to cleanvibe</a></p>
-  </main>
-</body>
+<body><p>CleanVibe is at <a href="https://cleanvibe.topazcomputing.com/install">https://cleanvibe.topazcomputing.com/install</a>.</p></body>
 </html>
