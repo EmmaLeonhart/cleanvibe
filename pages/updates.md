@@ -25,6 +25,25 @@ self-exempting for replication-style bounded work.
 
 ---
 
+## v2.0.14 (2026-11-23) — private repos have GitHub Actions turned off in code
+
+**Hook `.claude/hooks/intent_staleness.py` revised:** on every prompt (at most
+once an hour per project) it checks the project's GitHub remote; if the repo
+is private and Actions is on, it turns Actions off for that repo and tells the
+agent to delete the workflow and log it. Allowed only by `cleanvibe config
+actions_on_private true` or `"actions_on_private": true` in `.cleanvibe.json`.
+Why: on 2026-11-23 a research project that never loaded
+`queue-driven-workflow` added CI to its private repo and spent Emma's minutes.
+
+**RULES.md revised:** the practices line now says "CI only on a public repo",
+and a new rule, **No GitHub Actions on private repos**, holds whatever skill
+is loaded.
+
+**`cleanvibe_upgrade.py` revised:** retries the install while pip's index
+catches up with PyPI.
+
+---
+
 ## v2.0.13 (2026-11-22) — private repos spend no GitHub Actions minutes
 
 **New command `cleanvibe config`** holds settings for every project on the

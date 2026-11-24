@@ -2804,3 +2804,22 @@ The first real upgrade to 2.0.13 failed: PyPI's JSON API listed the release
 before pip's index did ("No matching distribution"). `install()` now tries
 up to 5 times, 30 s apart (`CLEANVIBE_UPGRADE_RETRY_WAIT`), with
 `--no-cache-dir`. Unreleased. 335 tests.
+
+## 2026-11-23 - v2.0.14: private repos have Actions turned off in code
+
+On 2026-11-23 a research project (wikibase-s-clear-ordering, created on
+2.0.13) added a test workflow to its private repo and spent Emma's Actions
+minutes. The 2.0.13 rule was only in the `queue-driven-workflow` skill, which
+that session never loaded; the shipped rules' "(queue.md, todo.md, devlog.md,
+tests, CI)" read to it as an instruction to add CI. Now:
+- The UserPromptSubmit hook (`intent_staleness.py`) runs `private_ci_guard`
+  on every prompt, at most once an hour per project: if the GitHub remote is
+  private and Actions is on, it turns Actions off for the repo
+  (`PUT repos/O/R/actions/permissions enabled=false`) and tells the agent to
+  delete the workflow and log it. Allowed only by `cleanvibe config
+  actions_on_private true` or `"actions_on_private": true` in the project's
+  `.cleanvibe.json`. Any error (no gh, offline, no GitHub remote) is silent.
+- RULES.md: the practices line says "CI only on a public repo", and a new
+  rule "No GitHub Actions on private repos" holds whatever skill is loaded.
+- Also ships the upgrade-install retry (unreleased since 2.0.13).
+`tests/test_private_ci_guard.py`; 344 tests.
