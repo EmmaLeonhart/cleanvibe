@@ -3538,18 +3538,38 @@ the folder and dropped material into it, expecting you to get on with it.
   plan.
 - **A graceful stop stops this window, not the work.** When you are asked to
   end gracefully (often by a session that manages the machine, sometimes
-  because two sessions share this repo), finish the current step, commit,
-  delete your crons and go quiet so that window can be closed. Before going
-  quiet, every process or detached job you started that is still running
-  gets one of two things: wait for it and do its follow-up (score, clean
-  up, commit), or leave one armed one-shot check, timed for its expected
-  finish, that does the follow-up. A devlog note does not count. The stop
-  reply lists those jobs next to the deleted cron ids. Send that reply
-  once and then stay quiet: a stopped window is closed once it has been
-  idle, and every message to or from it restarts that clock. It never means
-  "no more work today" or "wait for the user to say resume": the next session
-  picks the work up as usual. Never write it into `INTENT.md`, the queue or
-  any other note as a rule.
+  because two sessions share this repo), do this, in order:
+  1. Delete all your crons.
+  2. Finish the current task to completion.
+  3. If a long-running script or process you started is still going, keep
+     ONE cron, every 30 minutes, that only checks whether it has finished.
+     Be there when it ends: look at what happened, save its data, commit
+     and push. Only then carry on with the stop.
+  4. Write `handoff.md` at the repo root: what this session was doing,
+     where each piece of work stands, what is running or half done, and
+     what the next session should do first. Replace the previous one.
+  5. Commit and push. Then stop: send the stop reply once (it lists any
+     job from step 3 and the deleted cron ids) and stay quiet. A stopped
+     window is closed once it has been idle, and every message to or from
+     it restarts that clock.
+  Claude Code's idle compaction (about 55 minutes into a quiet spell it
+  spends usage and writes a transcript entry that looks like activity) is
+  turned off in this project's `.claude/settings.json`
+  (`"idleCompaction": false`), so a stopped window stays idle. An agent
+  cannot run `/compact` itself (it is a user command); `handoff.md`
+  carries the state instead.
+  A graceful stop never means "no more work today" or "wait for the user to
+  say resume": the next session picks the work up as usual.
+  Never write it into `INTENT.md`, the queue or any other note as a rule.
+- **Read `handoff.md` when earlier work comes up.** If the repo has a
+  `handoff.md`, read it at the start of a session and whenever earlier
+  sessions' work comes up: it is the last session's own account of where
+  things stood when it stopped.
+- **Work runs with the work loop on.** A session that starts work (on a
+  message from the user or another session, or on its own) first checks
+  with `CronList` that its work loop is there, and starts it if it is not.
+  The same after answering any message. The loop is also what keeps this
+  session's transcript saved properly.
 - **Don't message stopped sessions, and never message every session.**
   A session that has stopped gracefully gets no further messages (no
   thanks, no check-ins, no relays) unless the user asks for one. Never
@@ -3971,13 +3991,18 @@ _STALENESS_SCRIPT = '"$CLAUDE_PROJECT_DIR/.claude/hooks/intent_staleness.py"'
 
 def v2_settings_json() -> str:
     """`.claude/settings.json` for cleanvibe 2: the session-log hook on Stop +
-    SessionEnd, plus the INTENT.md staleness cue on UserPromptSubmit."""
+    SessionEnd, the INTENT.md staleness cue on UserPromptSubmit, and Claude
+    Code's idle compaction turned off (since 2.0.16: it compacts a session
+    about 55 minutes into a quiet spell, spends usage and writes a transcript
+    entry that looks like activity, which defeats the loop and graceful
+    stop)."""
     def hook(command):
         return [{"hooks": [{"type": "command", "command": command}]}]
 
     staleness = f"python3 {_STALENESS_SCRIPT} || python {_STALENESS_SCRIPT}"
     return json.dumps(
-        {"hooks": {
+        {"idleCompaction": False,
+         "hooks": {
             "UserPromptSubmit": hook(staleness),
             "Stop": hook(_hook_command()),
             "SessionEnd": hook(_hook_command(" --push")),

@@ -10,5 +10,6 @@
         ]
       }
     ]
-  }
+  },
+  "idleCompaction": false
 }

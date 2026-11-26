@@ -2844,3 +2844,15 @@ check-in sent to every session kept restarting their idle clocks. RULES.md
 gets a rule against messaging stopped sessions or every session at once, and
 the graceful stop (RULES.md and `autonomous-loop`) says to reply once and
 stay quiet. pc-manager now keeps an explicit stop list on its side.
+
+## 2026-11-25 - v2.0.16 (cont.): Emma's graceful stop, handoff.md, loops survive messages
+
+From pc-manager at Emma's instruction (its transcript is in
+cleanvibe-commercial's data lake). The root cause of stopped sessions never
+closing is Claude Code's idle compaction (since about 2026-10-30), not only
+the messages. The graceful stop in RULES.md and `autonomous-loop` is now her
+six steps (crons off, finish the task, one 30-minute check per running
+script, `handoff.md`, commit and push, reply once and stay quiet). New
+rules: read `handoff.md` when earlier work comes up, and answering a
+message never ends the work loop. Self-compaction checked: an agent cannot
+run `/compact` (a user command, no tool), so `handoff.md` carries the state.

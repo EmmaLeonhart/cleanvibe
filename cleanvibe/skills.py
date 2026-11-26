@@ -150,20 +150,25 @@ These are how the work is done, not reasons to stop the loop.
   because a tick failed, not because something looks risky, and not at the
   end of a burst of work. Only the user stops it (directly, or through the
   `emergency-stop` skill).
-- **A graceful stop ends this window only.** Asked to end gracefully, delete
-  the cron and go quiet so the window can be closed. The next session starts
-  the loop again as usual: a graceful stop is not a standing order, and it
-  never goes into `INTENT.md` or the queue as one.
-  **Running jobs are not left alone.** Every process or detached job this
-  session started that is still running (a training or GPU run, a long
-  script, a background build) gets one of two things before you go quiet:
-  either wait for it to finish and do its follow-up (score it, clean up,
-  commit), or leave one armed one-shot `CronCreate` check, timed for when
-  the job should finish, whose prompt does that follow-up. A note in
-  `devlog.md` is not enough. The stop reply lists the running jobs (what,
-  PID, and which of the two each got) next to the deleted cron ids. Send
-  it once, then stay quiet; don't answer acknowledgements of it. Stopped
-  windows are closed once idle, and any message restarts that clock.
+- **A graceful stop ends this window only.** Asked to end gracefully: delete
+  all crons; finish the current task to completion; if a long-running script
+  or process you started is still going, keep ONE cron every 30 minutes that
+  only checks whether it has finished, and be there when it ends to look at
+  the result, save its data, commit and push; write `handoff.md` at the repo
+  root (what you were doing, where each piece stands, what is running or half
+  done, what the next session should do first); commit and push. Then send
+  the stop reply once (listing any running job and the deleted cron ids) and
+  stay quiet; don't answer acknowledgements of it. Stopped windows are closed
+  once idle, and any message restarts that clock. Idle compaction is off
+  in the project's settings (`"idleCompaction": false`) so a stopped window
+  stays idle; an agent cannot run `/compact` itself, so `handoff.md` carries
+  the state. The next session
+  starts the loop again as usual: a graceful stop is not a standing order,
+  and it never goes into `INTENT.md` or the queue as one.
+- **Work runs with the loop on.** A session that starts work, whether on a
+  message from the user or another session or on its own, first checks with
+  `CronList` that the loop cron is there and starts it if not; the same after
+  answering any message. The loop is also what keeps the transcript saved.
 - If something goes wrong, say so plainly in your next message and carry on
   with whatever is still safe to do.
 - In a cleanvibe project, the switch to work mode in CLAUDE.md decides when

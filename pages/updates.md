@@ -25,7 +25,38 @@ self-exempting for replication-style bounded work.
 
 ---
 
-## v2.0.16 (2026-11-25) — stopped sessions stay quiet; no messages to every session
+## v2.0.16 (2026-11-25) — Emma's graceful stop; handoff.md; loops survive messages; stopped sessions stay quiet
+
+**RULES.md and `autonomous-loop` revised: the graceful stop, as Emma
+defined it on 2026-11-25.** In order: delete all crons; finish the current
+task; if a long-running script is still going, keep one 30-minute cron that
+only checks whether it is done, and be there when it ends to save its data,
+commit and push; write `handoff.md` at the repo root; commit and push; then
+reply once and stay quiet. The stop also wants the session compacted, so
+that Claude Code's idle compaction has nothing left to do, but an agent
+cannot run `/compact` itself, so idle compaction is turned off instead
+and `handoff.md` carries the state.
+
+**New rule: read `handoff.md` when earlier work comes up.**
+
+**New rule: work runs with the work loop on.** A session that starts work
+(on any message, or on its own) first checks `CronList` and starts the loop
+if it is missing; the same after answering a message. On 2026-11-25 many
+sessions started work without their loops, and the loop is what keeps a
+transcript saved properly.
+
+**`.claude/settings.json` revised: idle compaction is off**
+(`"idleCompaction": false`). `cleanvibe refresh` adds it unless the project
+already sets the key itself.
+
+Why: since about 2026-10-30 Claude Code compacts idle sessions about 55
+minutes into a quiet spell ("Compacted while idle, before the prompt cache
+expired"; off with `"idleCompaction": false` in settings.json). It spends
+usage, replaces the history with a summary, and writes a transcript entry
+that looks like activity. CleanVibe's work loop, graceful stop and
+idle-close all assumed an idle session does nothing, so on 2026-11-25 none
+of 14 gracefully stopped sessions ever read as idle or closed.
+
 
 **RULES.md revised:** after a graceful stop the session sends its stop reply
 once and then stays quiet. A new rule, **Don't message stopped sessions, and
