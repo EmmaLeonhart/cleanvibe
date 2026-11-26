@@ -37,6 +37,16 @@ that Claude Code's idle compaction has nothing left to do, but an agent
 cannot run `/compact` itself, so idle compaction is turned off instead
 and `handoff.md` carries the state.
 
+**Graceful stop, last step:** if a PC manager asked for the stop, the last
+act is one message to it, `stop finished: <project folder name>`, so it can
+close the window before idle compaction fires (Emma approved, 2026-11-25).
+
+**New rule: search before you say you don't know something about the
+user.** Check the places their global instructions name, their other
+projects, then open browser accounts, before telling them a fact is missing
+or recording it as a need. On 2026-11-25 a session said it didn't have
+Emma's phone number, which sat in another of her projects about 300 times.
+
 **New rule: read `handoff.md` when earlier work comes up.**
 
 **New rule: work runs with the work loop on.** A session that starts work

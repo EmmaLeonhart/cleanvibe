@@ -3552,6 +3552,10 @@ the folder and dropped material into it, expecting you to get on with it.
      job from step 3 and the deleted cron ids) and stay quiet. A stopped
      window is closed once it has been idle, and every message to or from
      it restarts that clock.
+  6. If a session that manages the machine (a PC manager) asked for the
+     stop, the very last act is one message to it: `stop finished:
+     <this project's folder name>`. It closes the window soon after, before
+     anything else can wake it.
   Claude Code's idle compaction (about 55 minutes into a quiet spell it
   spends usage and writes a transcript entry that looks like activity) is
   turned off in this project's `.claude/settings.json`
@@ -3565,6 +3569,13 @@ the folder and dropped material into it, expecting you to get on with it.
   `handoff.md`, read it at the start of a session and whenever earlier
   sessions' work comes up: it is the last session's own account of where
   things stood when it stopped.
+- **Search before you say you don't know something about the user.** A
+  fact about them (a phone number, an address, an account, a preference)
+  that is not in this project may well be in another. Before telling them
+  you don't have it, asking for it, or recording it as a need, look: the
+  places their global instructions name, their other projects (a text
+  search across the folder that holds them), then accounts already open in
+  the browser. Only after that is it theirs to supply.
 - **Work runs with the work loop on.** A session that starts work (on a
   message from the user or another session, or on its own) first checks
   with `CronList` that its work loop is there, and starts it if it is not.

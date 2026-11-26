@@ -2856,3 +2856,9 @@ script, `handoff.md`, commit and push, reply once and stay quiet). New
 rules: read `handoff.md` when earlier work comes up, and answering a
 message never ends the work loop. Self-compaction checked: an agent cannot
 run `/compact` (a user command, no tool), so `handoff.md` carries the state.
+
+- 2026-11-25 19:2x: v2.0.16 also gets the graceful stop's last step (one
+  `stop finished: <folder>` message to the PC manager that asked, approved
+  by Emma via pc-manager) and the rule "search before you say you don't
+  know something about the user" (cleanvibe-commercial
+  `docs/study-why-sessions-dont-know-emmas-phone-number.md`).

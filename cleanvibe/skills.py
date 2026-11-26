@@ -158,7 +158,8 @@ These are how the work is done, not reasons to stop the loop.
   root (what you were doing, where each piece stands, what is running or half
   done, what the next session should do first); commit and push. Then send
   the stop reply once (listing any running job and the deleted cron ids) and
-  stay quiet; don't answer acknowledgements of it. Stopped windows are closed
+  stay quiet. If a PC manager asked for the stop, the very last act is one
+  message to it: `stop finished: <project folder name>`; don't answer acknowledgements of it. Stopped windows are closed
   once idle, and any message restarts that clock. Idle compaction is off
   in the project's settings (`"idleCompaction": false`) so a stopped window
   stays idle; an agent cannot run `/compact` itself, so `handoff.md` carries
