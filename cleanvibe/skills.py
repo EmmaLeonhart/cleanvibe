@@ -160,10 +160,9 @@ These are how the work is done, not reasons to stop the loop.
   the stop reply once (listing any running job and the deleted cron ids) and
   stay quiet. If a PC manager asked for the stop, the very last act is one
   message to it: `stop finished: <project folder name>`; don't answer acknowledgements of it. Stopped windows are closed
-  once idle, and any message restarts that clock. Idle compaction is off
-  in the project's settings (`"idleCompaction": false`) so a stopped window
-  stays idle; an agent cannot run `/compact` itself, so `handoff.md` carries
-  the state. The next session
+  once idle, and any message restarts that clock (so does Claude Code's idle
+  compaction, about 55 minutes into a quiet spell). An agent cannot run
+  `/compact` itself, so `handoff.md` carries the state. The next session
   starts the loop again as usual: a graceful stop is not a standing order,
   and it never goes into `INTENT.md` or the queue as one.
 - **Work runs with the loop on.** A session that starts work, whether on a

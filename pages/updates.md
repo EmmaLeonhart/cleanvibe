@@ -34,8 +34,8 @@ only checks whether it is done, and be there when it ends to save its data,
 commit and push; write `handoff.md` at the repo root; commit and push; then
 reply once and stay quiet. The stop also wants the session compacted, so
 that Claude Code's idle compaction has nothing left to do, but an agent
-cannot run `/compact` itself, so idle compaction is turned off instead
-and `handoff.md` carries the state.
+cannot run `/compact` itself, so `handoff.md` carries the state, and the
+PC manager closes a stopped window before idle compaction fires.
 
 **Graceful stop, last step:** if a PC manager asked for the stop, the last
 act is one message to it, `stop finished: <project folder name>`, so it can
@@ -54,10 +54,6 @@ Emma's phone number, which sat in another of her projects about 300 times.
 if it is missing; the same after answering a message. On 2026-11-25 many
 sessions started work without their loops, and the loop is what keeps a
 transcript saved properly.
-
-**`.claude/settings.json` revised: idle compaction is off**
-(`"idleCompaction": false`). `cleanvibe refresh` adds it unless the project
-already sets the key itself.
 
 Why: since about 2026-10-30 Claude Code compacts idle sessions about 55
 minutes into a quiet spell ("Compacted while idle, before the prompt cache

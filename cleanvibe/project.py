@@ -204,12 +204,8 @@ def _merge_settings(existing: str | None, shipped: str) -> str:
     command isn't already there. Every other key and entry is left as it was."""
     import json
     data = json.loads(existing) if existing and existing.strip() else {}
-    shipped_data = json.loads(shipped)
-    for key, value in shipped_data.items():
-        if key != "hooks":
-            data.setdefault(key, value)  # a project's own choice is kept
     hooks = data.setdefault("hooks", {})
-    for event, entries in shipped_data["hooks"].items():
+    for event, entries in json.loads(shipped)["hooks"].items():
         have = hooks.setdefault(event, [])
         commands = {h.get("command") for e in have for h in e.get("hooks", [])}
         for entry in entries:

@@ -3556,12 +3556,11 @@ the folder and dropped material into it, expecting you to get on with it.
      stop, the very last act is one message to it: `stop finished:
      <this project's folder name>`. It closes the window soon after, before
      anything else can wake it.
-  Claude Code's idle compaction (about 55 minutes into a quiet spell it
-  spends usage and writes a transcript entry that looks like activity) is
-  turned off in this project's `.claude/settings.json`
-  (`"idleCompaction": false`), so a stopped window stays idle. An agent
-  cannot run `/compact` itself (it is a user command); `handoff.md`
-  carries the state instead.
+  Claude Code's idle compaction fires about 55 minutes into a quiet spell,
+  spends usage and writes a transcript entry that looks like activity, so
+  a stopped window has to be closed before then; step 6 is what lets the
+  PC manager do that. An agent cannot run `/compact` itself (it is a user
+  command); `handoff.md` carries the state instead.
   A graceful stop never means "no more work today" or "wait for the user to
   say resume": the next session picks the work up as usual.
   Never write it into `INTENT.md`, the queue or any other note as a rule.
@@ -4002,18 +4001,13 @@ _STALENESS_SCRIPT = '"$CLAUDE_PROJECT_DIR/.claude/hooks/intent_staleness.py"'
 
 def v2_settings_json() -> str:
     """`.claude/settings.json` for cleanvibe 2: the session-log hook on Stop +
-    SessionEnd, the INTENT.md staleness cue on UserPromptSubmit, and Claude
-    Code's idle compaction turned off (since 2.0.16: it compacts a session
-    about 55 minutes into a quiet spell, spends usage and writes a transcript
-    entry that looks like activity, which defeats the loop and graceful
-    stop)."""
+    SessionEnd, plus the INTENT.md staleness cue on UserPromptSubmit."""
     def hook(command):
         return [{"hooks": [{"type": "command", "command": command}]}]
 
     staleness = f"python3 {_STALENESS_SCRIPT} || python {_STALENESS_SCRIPT}"
     return json.dumps(
-        {"idleCompaction": False,
-         "hooks": {
+        {"hooks": {
             "UserPromptSubmit": hook(staleness),
             "Stop": hook(_hook_command()),
             "SessionEnd": hook(_hook_command(" --push")),

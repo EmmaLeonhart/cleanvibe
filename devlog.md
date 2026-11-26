@@ -2862,3 +2862,9 @@ run `/compact` (a user command, no tool), so `handoff.md` carries the state.
   by Emma via pc-manager) and the rule "search before you say you don't
   know something about the user" (cleanvibe-commercial
   `docs/study-why-sessions-dont-know-emmas-phone-number.md`).
+- 2026-11-25 19:3x: took `"idleCompaction": false` back out of v2.0.16
+  before release. Emma has not decided about idle compaction (pc-manager's
+  summary of her transcript: she will work out what to do herself), and she
+  objected to fixes made before the problem was agreed. The graceful stop
+  relies instead on the `stop finished` message and the PC manager closing
+  the window before compaction (about 55 minutes).
