@@ -2868,3 +2868,4 @@ run `/compact` (a user command, no tool), so `handoff.md` carries the state.
   objected to fixes made before the problem was agreed. The graceful stop
   relies instead on the `stop finished` message and the PC manager closing
   the window before compaction (about 55 minutes).
+- 2026-11-25 19:5x: `cleanvibe new` warns about any CLAUDE.md above the new folder (`project.parent_claude_mds`, `tests/test_nested_project.py`); queue item 0a done; live practice sessions move to `~/Documents/cleanvibe-experiments/`.

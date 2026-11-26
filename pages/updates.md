@@ -49,6 +49,11 @@ Emma's phone number, which sat in another of her projects about 300 times.
 
 **New rule: read `handoff.md` when earlier work comes up.**
 
+**`cleanvibe new` warns about a CLAUDE.md above the new folder.** Claude
+Code loads it into every session there, and a parent's import from outside
+the folder held two unattended first sessions at "Allow external CLAUDE.md
+file imports?" for 90 minutes on 2026-11-25.
+
 **New rule: work runs with the work loop on.** A session that starts work
 (on any message, or on its own) first checks `CronList` and starts the loop
 if it is missing; the same after answering a message. On 2026-11-25 many

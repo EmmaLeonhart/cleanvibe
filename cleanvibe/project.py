@@ -101,6 +101,22 @@ def auto_project_path(base: Path | None = None, rng=None) -> Path:
     return candidate
 
 
+def parent_claude_mds(path: Path) -> list:
+    """CLAUDE.md files in the folders above ``path``. Claude Code loads every
+    one of them into a session started at ``path``. A parent's import from
+    outside the new folder (a cleanvibe project's `@.claude/cleanvibe/RULES.md`)
+    makes Claude Code stop at "Allow external CLAUDE.md file imports?" before
+    the first prompt runs, so an unattended session waits there for good
+    (2026-11-25). The user's own ~/.claude/CLAUDE.md is a different file and
+    is not counted."""
+    found = []
+    for parent in Path(path).resolve().parents:
+        candidate = parent / "CLAUDE.md"
+        if candidate.is_file():
+            found.append(candidate)
+    return found
+
+
 def new_project(
     path: Path,
     auto_named: bool = False,
@@ -121,6 +137,11 @@ def new_project(
     # An auto-named project's folder is a passphrase (auto_project_path); the
     # session title is the same name. Chosen names are used as is.
     session_name = path.name if auto_named else None
+
+    for parent_md in parent_claude_mds(path):
+        print(f"Warning: {parent_md} is above this project. Claude Code loads it into "
+              f"every session here, and an import in it can hold the first session at "
+              f"a permission prompt. Prefer a folder with no CLAUDE.md above it.")
 
     if dry_run:
         print(f"[dry-run] New cleanvibe project: {path}" + (" (auto-named)" if auto_named else ""))

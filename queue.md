@@ -32,17 +32,6 @@ clawRxiv. Paper items come first.
    they re-arm at their next start, and pc-manager owns them and leaves
    them be. Not killed. `scratch/idle_sessions.py` is gitignored and was
    lost once; rebuild it from `~/.claude/sessions/*.json` if missing.
-0a. **Nested projects hang at startup (found 2026-11-25).** A project made
-   with `cleanvibe new` inside another cleanvibe project (here
-   `tests/scratch/` while cleanvibe is a submodule of cleanvibe-commercial)
-   loads every parent CLAUDE.md. The parent's `@.claude/cleanvibe/RULES.md`
-   is an import from outside the new folder, so Claude Code stops at "Allow
-   external CLAUDE.md file imports?" before the first prompt runs, and an
-   unattended session waits there for good (the kv-store pair waited 90
-   minutes). Even answered, the parent's rules would mix into the project.
-   Fix: `cleanvibe new` warns (or refuses without a flag) when any parent
-   folder has a CLAUDE.md, and the practice sandbox moves out of the repo
-   (this pair runs in `~/Documents/cleanvibe-experiments/`). Add a test.
 1. **Standing: iterate the replay paper (`paper-replay/`) from Weak Accept
    to Accept/Strong Accept with more methodological experiments** (Emma,
    2026-10-07: focus on that one). The hook paper waits. Background: (Emma,
