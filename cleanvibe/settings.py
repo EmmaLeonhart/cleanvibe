@@ -21,8 +21,7 @@ SETTINGS = {
         False,
         "Let private repos run GitHub Actions CI on push and pull request. "
         "Off: a private repo gets no CI workflow, and its tests run locally "
-        "before each push (Emma, 2026-11-21: no private repo should spend "
-        "Actions minutes unless configured to).",
+        "before each push.",
     ),
 }
 

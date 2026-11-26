@@ -89,14 +89,12 @@ That's the whole loop. Each time it fires:
    question, make the call yourself, do it, and record the decision.
    **Why it keeps going (v2.0.6):** with "only that item", a tick did one item
    and sat idle for the rest of the half hour. On 2026-10-17 a queue of 81
-   one-minute checks was going to take about 40 hours. Emma: "why does it do it
-   once an hour lol" and "Change the loop rule".
+   one-minute checks was going to take about 40 hours.
    **Why:** told to take "the top item you can do", agents read the whole
    queue, sorted it into what they could and could not do, and raced through
    it. On 2026-10-15 one session closed about forty items overnight, most by
    parking the hard part at the end, and six in twelve minutes that afternoon,
-   shipping work it knew was wrong. Emma: "You have to tell it to only do the
-   first item and then remove it."
+   shipping work it knew was wrong.
 3. **When the queue is empty, refill it before idling.** In a research project,
    take the top open question in `research/SUMMARY.md` and plan it into
    `queue.md`. Otherwise take the next `todo.md` item that is bounded and
@@ -104,9 +102,7 @@ That's the whole loop. Each time it fires:
    normal, but the message still has to be **actionable**: what is waiting
    (needs-file records, open decisions, other sessions) and the one thing the
    user could do or decide to move it. Never a bare "nothing changed" or
-   "quiet tick". Emma, 2026-11-20, of hours of such ticks: send "an actual
-   meaningful message saying what it is that needs to be done, so there's
-   something actionable."
+   "quiet tick".
    **Is it still worth it?** Before refilling from `todo.md` or the research
    questions, check when the user last wrote anything about this project
    (the newest user message in `sessions/`). If it was 7 or more days ago and
@@ -138,8 +134,7 @@ work.
 - **A long queue is healthy, never a reason to rush.** Do each item to the
   same standard whether the queue holds three items or eighty: the loop gets
   through it over many ticks. Never shortcut, skip or batch-close items to
-  make the queue shorter. (Emma, 2026-11-20, after a session rushed a long
-  queue in inochi-no-michikyo.)
+  make the queue shorter.
 - **Settle permissions before the loop, not inside it.** Before arming the
   cron, try once each kind of action the queue will need (a push, the tools
   and scripts it calls), so a permission prompt comes up while the user is
@@ -159,6 +154,14 @@ These are how the work is done, not reasons to stop the loop.
   the cron and go quiet so the window can be closed. The next session starts
   the loop again as usual: a graceful stop is not a standing order, and it
   never goes into `INTENT.md` or the queue as one.
+  **Running jobs are not left alone.** Every process or detached job this
+  session started that is still running (a training or GPU run, a long
+  script, a background build) gets one of two things before you go quiet:
+  either wait for it to finish and do its follow-up (score it, clean up,
+  commit), or leave one armed one-shot `CronCreate` check, timed for when
+  the job should finish, whose prompt does that follow-up. A note in
+  `devlog.md` is not enough. The stop reply lists the running jobs (what,
+  PID, and which of the two each got) next to the deleted cron ids.
 - If something goes wrong, say so plainly in your next message and carry on
   with whatever is still safe to do.
 - In a cleanvibe project, the switch to work mode in CLAUDE.md decides when
@@ -204,7 +207,7 @@ and `devlog.md` if they don't exist yet, and work this way from then on.
 
 ## Testing
 - **Write unit tests early.** As soon as there is testable logic, create a test file. Use `pytest` for Python projects or the appropriate test framework for the language in use.
-- **CI only where it costs nothing, or where this machine allows it.** A public repo gets a simple `.github/workflows/ci.yml` that runs the tests on push and pull request. A **private** repo gets no CI workflow unless `cleanvibe config actions_on_private` prints `true`: private repos spend GitHub Actions minutes, and on 2026-11-21 Emma's ran out ("no private repos should burn actions minutes unless configured to do so"). Check the visibility with `gh repo view --json visibility`. Without CI, run the full test suite locally before every push. If a private repo already has a workflow that runs tests on push or pull request and the setting is off, delete it and say so in `devlog.md`; ask before touching any other workflow (Pages, publishing).
+- **CI only where it costs nothing, or where this machine allows it.** A public repo gets a simple `.github/workflows/ci.yml` that runs the tests on push and pull request. A **private** repo gets no CI workflow unless `cleanvibe config actions_on_private` prints `true`: private repos spend the user's GitHub Actions minutes. Check the visibility with `gh repo view --json visibility`. Without CI, run the full test suite locally before every push. If a private repo already has a workflow that runs tests on push or pull request and the setting is off, delete it and say so in `devlog.md`; ask before touching any other workflow (Pages, publishing).
 - **Keep tests passing.** Do not commit code that breaks existing tests. If a change requires updating tests, update them in the same commit.
 """
 
@@ -319,8 +322,8 @@ description: Use when work cannot go on without the user doing something themsel
 
 A session that hits a step only the user can do used to write "waiting" and
 stop. The question sat in a reply or a queue item they never read, and the
-work behind it went nowhere. Emma (2026-11-20): cleanvibe "just asks and it
-just waits", and "I oftentimes don't actually know what's waiting on me."
+work behind it went nowhere, and the user often didn't know what was
+waiting on them.
 Instead, write one record per need into the project's needs file
 (`NEEDS-USER.md` at the root, or the name in `.cleanvibe.json`'s
 `needs_file`). A PC manager, or whatever looks after the user's projects,
@@ -342,9 +345,7 @@ reads every project's file and keeps pushing them until each item is done.
     up for something, made a repo public, deleted work), a step hung or kept
     failing for hours, or a session gave up on a task. `do` says what happened
     and what they might want to do about it; `blocks` says "nothing" if
-    nothing does. Emma (2026-11-20): it is better for the PC manager "to be
-    given like reports", after a job search signed her up for work needing a
-    first-aid certificate and sign-ups hung for hours unnoticed.
+    nothing does.
 
 ## Record them up front, when you plan
 

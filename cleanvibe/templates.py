@@ -3539,7 +3539,12 @@ the folder and dropped material into it, expecting you to get on with it.
 - **A graceful stop stops this window, not the work.** When you are asked to
   end gracefully (often by a session that manages the machine, sometimes
   because two sessions share this repo), finish the current step, commit,
-  delete your crons and go quiet so that window can be closed. It never means
+  delete your crons and go quiet so that window can be closed. Before going
+  quiet, every process or detached job you started that is still running
+  gets one of two things: wait for it and do its follow-up (score, clean
+  up, commit), or leave one armed one-shot check, timed for its expected
+  finish, that does the follow-up. A devlog note does not count. The stop
+  reply lists those jobs next to the deleted cron ids. It never means
   "no more work today" or "wait for the user to say resume": the next session
   picks the work up as usual. Never write it into `INTENT.md`, the queue or
   any other note as a rule.
@@ -3578,8 +3583,7 @@ the folder and dropped material into it, expecting you to get on with it.
   user can allow it (`cleanvibe config actions_on_private true`, or
   `"actions_on_private": true` in `.cleanvibe.json`); never set either
   yourself. A hook turns Actions off on a private repo and says so; when it
-  does, delete the workflow and log it. (Emma, 2026-11-23: a research project
-  added CI to a private repo and spent her minutes.)
+  does, delete the workflow and log it.
 - **No crud.** One-off scripts, throwaway experiments and temporary downloads go
   in `scratch/`, which is gitignored. Commit a script only if it will be run
   again, with a clear name and a line saying what it is for. Delete what is no
@@ -3604,7 +3608,7 @@ the folder and dropped material into it, expecting you to get on with it.
   on this" or similar, write what they pinned into `INTENT.md` at once, as a
   constraint in their own words, with the date. Offhand phrasing and
   important instructions look alike in chat; the pin is how they tell you
-  which is which (Emma, 2026-11-20).
+  which is which.
 - **Edit files with the file tools, and check before you log.** Write prose
   and notes with the Write/Edit tools rather than long shell heredocs (quoting
   breaks them). Chain dependent shell steps with `&&` so a failed step stops
@@ -4021,7 +4025,7 @@ def private_ci_guard(root):
     """Turn GitHub Actions off on this project's repo when it is private
     (since 2.0.14). A written rule was not enough: on 2026-11-23 a project that
     never loaded the queue-driven-workflow skill added CI to a private repo and
-    spent Emma's Actions minutes. So this runs in code, on every prompt, at
+    spent the user's Actions minutes. So this runs in code, on every prompt, at
     most once an hour per project. Allowed only when `cleanvibe config
     actions_on_private` is true, or the project's .cleanvibe.json has
     "actions_on_private": true. Any problem (no gh, no GitHub remote, offline)

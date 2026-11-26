@@ -2823,3 +2823,15 @@ tests, CI)" read to it as an instruction to add CI. Now:
   rule "No GitHub Actions on private repos" holds whatever skill is loaded.
 - Also ships the upgrade-install retry (unreleased since 2.0.13).
 `tests/test_private_ci_guard.py`; 344 tests.
+
+## 2026-11-25 - v2.0.15: graceful stops handle running jobs; no quotes in shipped text
+
+- Graceful stop (RULES.md and `autonomous-loop`): every still-running process
+  or detached job gets either a wait-and-follow-up or one armed one-shot check
+  timed for its finish; the stop reply lists them. Asked by pc-manager for
+  Emma after j-space-steering-for-psychosis left a GPU run unwatched at
+  127/480 rows on 2026-11-25; pc-manager's `stop-session-crons` skill matches.
+- Emma's dated quotes taken out of the shipped rules, skills, hook docstring
+  and the `actions_on_private` setting text (her decision, 2026-11-25, NE-7
+  in cleanvibe-commercial). The quotes are kept in `pages/updates.md` under
+  v2.0.15. 344 tests pass.

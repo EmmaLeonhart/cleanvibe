@@ -7,8 +7,8 @@ description: Use when work cannot go on without the user doing something themsel
 
 A session that hits a step only the user can do used to write "waiting" and
 stop. The question sat in a reply or a queue item they never read, and the
-work behind it went nowhere. Emma (2026-11-20): cleanvibe "just asks and it
-just waits", and "I oftentimes don't actually know what's waiting on me."
+work behind it went nowhere, and the user often didn't know what was
+waiting on them.
 Instead, write one record per need into the project's needs file
 (`NEEDS-USER.md` at the root, or the name in `.cleanvibe.json`'s
 `needs_file`). A PC manager, or whatever looks after the user's projects,
@@ -30,9 +30,7 @@ reads every project's file and keeps pushing them until each item is done.
     up for something, made a repo public, deleted work), a step hung or kept
     failing for hours, or a session gave up on a task. `do` says what happened
     and what they might want to do about it; `blocks` says "nothing" if
-    nothing does. Emma (2026-11-20): it is better for the PC manager "to be
-    given like reports", after a job search signed her up for work needing a
-    first-aid certificate and sign-ups hung for hours unnoticed.
+    nothing does.
 
 ## Record them up front, when you plan
 

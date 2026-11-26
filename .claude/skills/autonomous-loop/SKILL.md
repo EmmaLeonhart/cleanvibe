@@ -43,14 +43,12 @@ That's the whole loop. Each time it fires:
    question, make the call yourself, do it, and record the decision.
    **Why it keeps going (v2.0.6):** with "only that item", a tick did one item
    and sat idle for the rest of the half hour. On 2026-10-17 a queue of 81
-   one-minute checks was going to take about 40 hours. Emma: "why does it do it
-   once an hour lol" and "Change the loop rule".
+   one-minute checks was going to take about 40 hours.
    **Why:** told to take "the top item you can do", agents read the whole
    queue, sorted it into what they could and could not do, and raced through
    it. On 2026-10-15 one session closed about forty items overnight, most by
    parking the hard part at the end, and six in twelve minutes that afternoon,
-   shipping work it knew was wrong. Emma: "You have to tell it to only do the
-   first item and then remove it."
+   shipping work it knew was wrong.
 3. **When the queue is empty, refill it before idling.** In a research project,
    take the top open question in `research/SUMMARY.md` and plan it into
    `queue.md`. Otherwise take the next `todo.md` item that is bounded and
@@ -58,9 +56,7 @@ That's the whole loop. Each time it fires:
    normal, but the message still has to be **actionable**: what is waiting
    (needs-file records, open decisions, other sessions) and the one thing the
    user could do or decide to move it. Never a bare "nothing changed" or
-   "quiet tick". Emma, 2026-11-20, of hours of such ticks: send "an actual
-   meaningful message saying what it is that needs to be done, so there's
-   something actionable."
+   "quiet tick".
    **Is it still worth it?** Before refilling from `todo.md` or the research
    questions, check when the user last wrote anything about this project
    (the newest user message in `sessions/`). If it was 7 or more days ago and
@@ -92,8 +88,7 @@ work.
 - **A long queue is healthy, never a reason to rush.** Do each item to the
   same standard whether the queue holds three items or eighty: the loop gets
   through it over many ticks. Never shortcut, skip or batch-close items to
-  make the queue shorter. (Emma, 2026-11-20, after a session rushed a long
-  queue in inochi-no-michikyo.)
+  make the queue shorter.
 - **Settle permissions before the loop, not inside it.** Before arming the
   cron, try once each kind of action the queue will need (a push, the tools
   and scripts it calls), so a permission prompt comes up while the user is
@@ -113,6 +108,14 @@ These are how the work is done, not reasons to stop the loop.
   the cron and go quiet so the window can be closed. The next session starts
   the loop again as usual: a graceful stop is not a standing order, and it
   never goes into `INTENT.md` or the queue as one.
+  **Running jobs are not left alone.** Every process or detached job this
+  session started that is still running (a training or GPU run, a long
+  script, a background build) gets one of two things before you go quiet:
+  either wait for it to finish and do its follow-up (score it, clean up,
+  commit), or leave one armed one-shot `CronCreate` check, timed for when
+  the job should finish, whose prompt does that follow-up. A note in
+  `devlog.md` is not enough. The stop reply lists the running jobs (what,
+  PID, and which of the two each got) next to the deleted cron ids.
 - If something goes wrong, say so plainly in your next message and carry on
   with whatever is still safe to do.
 - In a cleanvibe project, the switch to work mode in CLAUDE.md decides when

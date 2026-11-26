@@ -25,6 +25,42 @@ self-exempting for replication-style bounded work.
 
 ---
 
+## v2.0.15 (2026-11-25) — graceful stops handle running jobs; the shipped text quotes no one
+
+**RULES.md and `autonomous-loop` revised: a graceful stop deals with jobs
+still running.** Before going quiet, every process or detached job the
+session started that is still running gets one of two things: wait for it
+and do its follow-up (score, clean up, commit), or leave one armed one-shot
+`CronCreate` check, timed for its expected finish, that does the follow-up.
+A devlog note does not count. The stop reply lists those jobs next to the
+deleted cron ids. Why: on 2026-11-25 a project stopped gracefully while a
+detached GPU run was at 127 of 480 rows, and nothing watched, restarted or
+scored it until Emma noticed at 17:00.
+
+**RULES.md, `autonomous-loop`, `queue-driven-workflow`, `needs-user` and the
+hook revised: the dated quotes are gone from the shipped text.** The rules
+are stated in general terms; the history behind them stays on this page and
+in the devlog. Emma decided this on 2026-11-25. The quotes, for the record:
+- The loop keeps going after one item (v2.0.6, 2026-10-17): "why does it do
+  it once an hour lol" and "Change the loop rule".
+- Only the first item (2026-10-15): "You have to tell it to only do the
+  first item and then remove it."
+- Actionable idle ticks (2026-11-20): send "an actual meaningful message
+  saying what it is that needs to be done, so there's something actionable."
+- A long queue is healthy (2026-11-20), after a session rushed a long queue
+  in inochi-no-michikyo.
+- Private repos and Actions minutes (2026-11-21): "no private repos should
+  burn actions minutes unless configured to do so"; on 2026-11-23 a research
+  project added CI to a private repo and spent her minutes.
+- Needs records (2026-11-20): cleanvibe "just asks and it just waits", and
+  "I oftentimes don't actually know what's waiting on me."
+- Reports (2026-11-20): it is better for the PC manager "to be given like
+  reports", after a job search signed her up for work needing a first-aid
+  certificate and sign-ups hung for hours unnoticed.
+- "Pin this" (2026-11-20).
+
+---
+
 ## v2.0.14 (2026-11-23) — private repos have GitHub Actions turned off in code
 
 **Hook `.claude/hooks/intent_staleness.py` revised:** on every prompt (at most
