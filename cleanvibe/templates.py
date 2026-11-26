@@ -3636,6 +3636,15 @@ the folder and dropped material into it, expecting you to get on with it.
   waiting on the user and they have not answered by the next tick, make it
   yourself, write down why in `INTENT.md`, and carry on. Stop only when the
   user says to.
+- **A refused command is not a finished step.** When a permission check
+  refuses a step the user has approved (a release, a deploy, a publish), it
+  is not theirs yet. Try it again later, and when the user is here, as one
+  plain command on its own: no `cd`, no `&&` or `;` chains, no pipes, no
+  quoted wildcards, absolute paths as arguments. That is the only form a
+  permission prompt can "always allow". Never route around the check by
+  another tool or another session. Only if it is refused again, give the
+  user that exact command to run, and keep the step in the queue until it
+  has run.
 - **What only the user can do goes in the needs file.** A step that waits on
   them (a login, a payment, a signature, a risky yes) is recorded with
   `python .claude/scripts/needs.py add` following the `needs-user` skill, and

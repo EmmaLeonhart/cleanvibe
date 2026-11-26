@@ -2869,3 +2869,5 @@ run `/compact` (a user command, no tool), so `handoff.md` carries the state.
   relies instead on the `stop finished` message and the PC manager closing
   the window before compaction (about 55 minutes).
 - 2026-11-25 19:5x: `cleanvibe new` warns about any CLAUDE.md above the new folder (`project.parent_claude_mds`, `tests/test_nested_project.py`); queue item 0a done; live practice sessions move to `~/Documents/cleanvibe-experiments/`.
+- 2026-11-26 12:5x: **v2.0.16 released** (GitHub release, PyPI run 45886781937). It had sat a day: a session took one permission-check refusal of `gh release create` as final and handed it to Emma. Retried as one plain command, it went through.
+- 2026-11-26 14:25: new shipped rule "A refused command is not a finished step" (`v2_rules_md`): retry an approved step later as one plain command (no `cd`, chains, pipes or quoted wildcards), never route around the check, and only after a second refusal give the user that exact command. 349 tests pass. Unreleased (next release).
