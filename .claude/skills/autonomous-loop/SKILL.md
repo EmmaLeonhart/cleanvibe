@@ -115,7 +115,9 @@ These are how the work is done, not reasons to stop the loop.
   commit), or leave one armed one-shot `CronCreate` check, timed for when
   the job should finish, whose prompt does that follow-up. A note in
   `devlog.md` is not enough. The stop reply lists the running jobs (what,
-  PID, and which of the two each got) next to the deleted cron ids.
+  PID, and which of the two each got) next to the deleted cron ids. Send
+  it once, then stay quiet; don't answer acknowledgements of it. Stopped
+  windows are closed once idle, and any message restarts that clock.
 - If something goes wrong, say so plainly in your next message and carry on
   with whatever is still safe to do.
 - In a cleanvibe project, the switch to work mode in CLAUDE.md decides when

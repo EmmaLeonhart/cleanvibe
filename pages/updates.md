@@ -25,6 +25,23 @@ self-exempting for replication-style bounded work.
 
 ---
 
+## v2.0.16 (2026-11-25) — stopped sessions stay quiet; no messages to every session
+
+**RULES.md revised:** after a graceful stop the session sends its stop reply
+once and then stays quiet. A new rule, **Don't message stopped sessions, and
+never message every session**: a stopped session gets no further messages
+unless the user asks, and no session sends one message to every session.
+
+**`autonomous-loop` revised:** the same, in its graceful-stop paragraph.
+
+Why: on 2026-11-25 pc-manager stopped 14 sessions gracefully, to close each
+once idle (an hour with no message). Their stop replies, relays and one
+check-in sent to every session kept restarting their idle clocks, so none
+closed and the machine stayed crowded. Where "done" is detected by idleness,
+messages keep finished sessions alive, and a broadcast is the worst case.
+
+---
+
 ## v2.0.15 (2026-11-25) — graceful stops handle running jobs; the shipped text quotes no one
 
 **RULES.md and `autonomous-loop` revised: a graceful stop deals with jobs

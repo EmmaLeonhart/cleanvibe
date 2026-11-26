@@ -3544,10 +3544,18 @@ the folder and dropped material into it, expecting you to get on with it.
   gets one of two things: wait for it and do its follow-up (score, clean
   up, commit), or leave one armed one-shot check, timed for its expected
   finish, that does the follow-up. A devlog note does not count. The stop
-  reply lists those jobs next to the deleted cron ids. It never means
+  reply lists those jobs next to the deleted cron ids. Send that reply
+  once and then stay quiet: a stopped window is closed once it has been
+  idle, and every message to or from it restarts that clock. It never means
   "no more work today" or "wait for the user to say resume": the next session
   picks the work up as usual. Never write it into `INTENT.md`, the queue or
   any other note as a rule.
+- **Don't message stopped sessions, and never message every session.**
+  A session that has stopped gracefully gets no further messages (no
+  thanks, no check-ins, no relays) unless the user asks for one. Never
+  send one message to every session on the machine: write to the sessions
+  it concerns, by name. Where sessions are closed once idle, each message
+  restarts the idle clock, so stray messages keep finished sessions open.
 - **Keep `INTENT.md` current.** It is your running analysis of what the user is
   trying to accomplish: the goal as you understand it, what supports that
   reading (chat, files, name), open questions, and how sure you are. Update it

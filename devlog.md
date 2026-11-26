@@ -2835,3 +2835,12 @@ tests, CI)" read to it as an instruction to add CI. Now:
   and the `actions_on_private` setting text (her decision, 2026-11-25, NE-7
   in cleanvibe-commercial). The quotes are kept in `pages/updates.md` under
   v2.0.15. 344 tests pass.
+
+## 2026-11-25 - v2.0.16: stopped sessions stay quiet; no messages to every session
+
+Reported by pc-manager at Emma's request: 14 gracefully stopped sessions
+never went idle long enough to be closed, because stop replies, relays and a
+check-in sent to every session kept restarting their idle clocks. RULES.md
+gets a rule against messaging stopped sessions or every session at once, and
+the graceful stop (RULES.md and `autonomous-loop`) says to reply once and
+stay quiet. pc-manager now keeps an explicit stop list on its side.
