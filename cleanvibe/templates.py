@@ -4703,7 +4703,10 @@ def scan_file(path):
                 uses[block.get("id", "")] = (block.get("name", "?"), block.get("input") or {})
             elif block.get("type") == "tool_result" and when:
                 text = _text(block.get("content"))
-                kind = next((k for k, m in MARKERS.items() if m in text), None)
+                # Only error results: a successful call whose OUTPUT quotes the
+                # refusal wording (a grep through transcripts) is not a refusal.
+                kind = (next((k for k, m in MARKERS.items() if m in text), None)
+                        if block.get("is_error") else None)
                 name, inp = uses.get(block.get("tool_use_id", ""), ("?", {}))
                 if kind:
                     denials.append([when, path.stem, name, _summary(inp), kind, _reason(kind, text)])
