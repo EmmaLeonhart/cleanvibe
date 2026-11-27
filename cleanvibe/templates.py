@@ -3636,15 +3636,19 @@ the folder and dropped material into it, expecting you to get on with it.
   waiting on the user and they have not answered by the next tick, make it
   yourself, write down why in `INTENT.md`, and carry on. Stop only when the
   user says to.
-- **A refused command is not a finished step.** When a permission check
-  refuses a step the user has approved (a release, a deploy, a publish), it
-  is not theirs yet. Try it again later, and when the user is here, as one
-  plain command on its own: no `cd`, no `&&` or `;` chains, no pipes, no
-  quoted wildcards, absolute paths as arguments. That is the only form a
-  permission prompt can "always allow". Never route around the check by
-  another tool or another session. Only if it is refused again, give the
-  user that exact command to run, and keep the step in the queue until it
-  has run.
+- **A refused command is not a finished step.** A refused step did not
+  happen, and the goal it served is still open. Every refusal (the auto-mode
+  check, or a permission prompt answered no) is listed by the hooks in
+  `PERMISSION-DENIALS.md`; read it each loop tick. A refusal never closes,
+  removes or narrows a queue item: the item stays, with the refusal noted,
+  until its goal is reached or the user drops it. When a step the user has
+  approved (a release, a deploy, a publish) is refused, try it again later,
+  and when the user is here, as one plain command on its own: no `cd`, no
+  `&&` or `;` chains, no pipes, no quoted wildcards, absolute paths as
+  arguments. That is the only form a permission prompt can "always allow".
+  Never route around the check by another tool or another session. If it
+  is refused again, record it in the needs file with that exact command, and
+  never report the step, or the goal, as done.
 - **What only the user can do goes in the needs file.** A step that waits on
   them (a login, a payment, a signature, a risky yes) is recorded with
   `python .claude/scripts/needs.py add` following the `needs-user` skill, and
@@ -4392,13 +4396,26 @@ def _due():
     return time.time() - int(last) >= _commit_interval()
 
 
+def log_refusals():
+    """Refresh PERMISSION-DENIALS.md (since 2.0.17): every refused tool call,
+    so a refused step is never mistaken for a done one."""
+    script = ROOT / ".claude" / "scripts" / "permission_denials.py"
+    if script.is_file():
+        done = subprocess.run([sys.executable, str(script)], cwd=ROOT,
+                              capture_output=True, text=True, timeout=120)
+        if done.returncode != 0:
+            print(f"save_session_log: refusal log failed: {done.stderr.strip()}", file=sys.stderr)
+
+
 def commit(stem, final):
-    """Commit sessions/ if it changed: hourly during a session, always at its end."""
+    """Commit sessions/ (and the refusal log) if it changed: hourly during a
+    session, always at its end."""
     if not final and not _due():
         return
-    _git("add", "--", "sessions")
-    if _git("diff", "--cached", "--quiet", "--", "sessions").returncode != 0:
-        done = _git("commit", "-q", "-m", f"session log {stem}", "--", "sessions")
+    paths = ["sessions"] + (["PERMISSION-DENIALS.md"] if (ROOT / "PERMISSION-DENIALS.md").is_file() else [])
+    _git("add", "--", *paths)
+    if _git("diff", "--cached", "--quiet", "--", *paths).returncode != 0:
+        done = _git("commit", "-q", "-m", f"session log {stem}", "--", *paths)
         if done.returncode != 0:
             print(f"save_session_log: commit failed: {done.stderr.strip()}", file=sys.stderr)
     if final and _git("rev-parse", "--abbrev-ref", "@{u}").returncode == 0:
@@ -4413,6 +4430,7 @@ def main(argv):
         if not hook.get("transcript_path"):
             return 0
         stem = save(hook)
+        log_refusals()
         # --push is what SessionEnd passes (the name predates the hourly throttle).
         commit(stem, final="--push" in argv)
     except Exception as exc:  # never break the session over a log
@@ -4587,6 +4605,179 @@ def main(argv=None):
 
 if __name__ == "__main__":
     sys.exit(main())
+'''
+
+
+# .claude/scripts/permission_denials.py in cleanvibe 2 projects (since 2.0.17):
+# the refusal log. Emma, 2026-11-26: "when a permission check fails, you just go
+# into this epistemic black hole" and "every single permission check that fails
+# should be logged somewhere"; a refused step was taken for a done one (v2.0.16
+# sat unreleased a day; inochi-no-michikyo dropped a goal for 12 days). The Stop
+# hook runs it after every response. Built from cleanvibe-commercial's
+# scripts/permission_denials.py. Plain raw string.
+PERMISSION_DENIALS_PY = r'''"""Log every refused tool call to PERMISSION-DENIALS.md.
+
+Shipped by cleanvibe. A refused step did not happen; this log keeps it from
+being mistaken for a done one. It reads this project's session transcripts
+(sessions/*.jsonl) and lists each tool call that was refused:
+
+  classifier  denied by Claude Code's auto-mode permission check
+  declined    turned down at a permission prompt ("doesn't want to proceed")
+
+newest first, with whether a later call doing the same thing succeeded
+(`retried OK`, a guess from the first words of the command) or not
+(`NOT retried`). The Stop hook runs it after every response; only transcripts
+that changed are read again (the cache lives in .git/, never committed).
+
+    python .claude/scripts/permission_denials.py           # refresh the log
+    python .claude/scripts/permission_denials.py --open    # print the NOT retried ones
+"""
+import datetime as dt
+import json
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+OUT = ROOT / "PERMISSION-DENIALS.md"
+# Inside .git/ so it is never committed; a temp file when .git is not a folder.
+CACHE = ((ROOT / ".git") if (ROOT / ".git").is_dir() else Path(__import__("tempfile").gettempdir())
+         ) / ("cleanvibe-permission-denials-"
+              + __import__("hashlib").md5(str(ROOT).encode()).hexdigest()[:10] + ".json")
+MARKERS = {
+    "classifier": "Permission for this action was denied by the Claude Code auto mode classifier",
+    "declined": "doesn't want to proceed with this tool use",
+}
+
+
+def _text(content):
+    if isinstance(content, str):
+        return content
+    if isinstance(content, list):
+        return " ".join(c.get("text", "") for c in content if isinstance(c, dict))
+    return ""
+
+
+def _summary(inp):
+    for key in ("command", "url", "file_path", "query", "to", "action", "cron", "id"):
+        if inp.get(key):
+            value = str(inp[key])
+            break
+    else:
+        value = json.dumps(inp, ensure_ascii=False)
+    value = " ".join(value.split())
+    return value[:200] + ("..." if len(value) > 200 else "")
+
+
+def _key(summary):
+    s = summary
+    if s.startswith("cd ") and "&&" in s:
+        s = s.split("&&", 1)[1]
+    return " ".join(s.split()[:4])
+
+
+def _reason(kind, text):
+    if kind == "classifier" and "Reason:" in text:
+        return text.split("Reason:", 1)[1].split("]", 1)[0].strip(" [")
+    if kind == "declined" and "the user said:" in text:
+        said = text.split("the user said:", 1)[1].strip().splitlines()
+        return ("user said: " + said[0][:120]) if said else ""
+    return ""
+
+
+def scan_file(path):
+    """(denials, successes) in one transcript, as plain lists for the cache."""
+    uses, denials, ok = {}, [], []
+    for line in path.read_text(encoding="utf-8", errors="replace").splitlines():
+        try:
+            d = json.loads(line)
+        except ValueError:
+            continue
+        content = (d.get("message") or {}).get("content")
+        if not isinstance(content, list):
+            continue
+        when = d.get("timestamp", "")
+        for block in content:
+            if not isinstance(block, dict):
+                continue
+            if block.get("type") == "tool_use":
+                uses[block.get("id", "")] = (block.get("name", "?"), block.get("input") or {})
+            elif block.get("type") == "tool_result" and when:
+                text = _text(block.get("content"))
+                kind = next((k for k, m in MARKERS.items() if m in text), None)
+                name, inp = uses.get(block.get("tool_use_id", ""), ("?", {}))
+                if kind:
+                    denials.append([when, path.stem, name, _summary(inp), kind, _reason(kind, text)])
+                elif not block.get("is_error"):
+                    ok.append([when, name, _key(_summary(inp))])
+    return denials, ok
+
+
+def collect(root=ROOT, cache_path=CACHE):
+    try:
+        cache = json.loads(cache_path.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        cache = {}
+    fresh = {}
+    for f in sorted((root / "sessions").glob("*.jsonl")):
+        st = f.stat()
+        sig = [st.st_size, int(st.st_mtime)]
+        hit = cache.get(f.name)
+        if hit and hit.get("sig") == sig:
+            fresh[f.name] = hit
+        else:
+            denials, ok = scan_file(f)
+            fresh[f.name] = {"sig": sig, "denials": denials, "ok": ok}
+    try:
+        cache_path.parent.mkdir(parents=True, exist_ok=True)
+        cache_path.write_text(json.dumps(fresh), encoding="utf-8")
+    except OSError:
+        pass
+    denials = [d for v in fresh.values() for d in v["denials"]]
+    ok = [o for v in fresh.values() for o in v["ok"]]
+    out = []
+    for when, session, tool, what, kind, reason in denials:
+        key = _key(what)
+        later = sorted(t for t, n, k in ok if n == tool and k == key and t > when)
+        out.append({"when": when, "session": session, "tool": tool, "what": what,
+                    "kind": kind, "reason": reason, "retried": later[0] if later else ""})
+    return sorted(out, key=lambda d: d["when"], reverse=True)
+
+
+def _local(ts):
+    try:
+        return dt.datetime.fromisoformat(ts.replace("Z", "+00:00")).astimezone().strftime("%Y-%m-%d %H:%M")
+    except ValueError:
+        return ts
+
+
+def render(name, denials):
+    lines = [f"# Refused tool calls: {name}", "",
+             "Written by `.claude/scripts/permission_denials.py` after every response.",
+             "A refused step did NOT happen. `retried OK` means a later call doing the",
+             "same thing (by its first words) succeeded; check it. Newest first.", ""]
+    if not denials:
+        lines.append("None found.")
+    for d in denials:
+        tail = f"retried OK {_local(d['retried'])}" if d["retried"] else "NOT retried"
+        lines.append(f"- **{_local(d['when'])}** {d['kind']} ({d['tool']}); {tail}: `{d['what']}`"
+                     + (f" ({d['reason']})" if d["reason"] else ""))
+    return "\n".join(lines) + "\n"
+
+
+def main(argv):
+    denials = collect()
+    if not denials and not OUT.exists():
+        return 0  # nothing refused yet: don't add an empty file
+    OUT.write_text(render(ROOT.name, denials), encoding="utf-8", newline="\n")
+    if "--open" in argv:
+        for d in denials:
+            if not d["retried"]:
+                print(f"{_local(d['when'])} {d['kind']} {d['tool']}: {d['what']}")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))
 '''
 
 

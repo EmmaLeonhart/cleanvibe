@@ -42,6 +42,7 @@ V2_CORE_FILES = (
     ".claude/scripts/data_lake_intake.py",
     ".claude/scripts/needs.py",  # since 2.0.10
     ".claude/scripts/cleanvibe_upgrade.py",  # since 2.0.12
+    ".claude/scripts/permission_denials.py",  # since 2.0.17
 )
 
 _DONE_MARKERS = (
