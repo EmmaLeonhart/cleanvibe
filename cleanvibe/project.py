@@ -271,6 +271,14 @@ _KNOWN_SHIPPED = {
 }
 
 
+# Rule sections cleanvibe shipped that RULES.md no longer has as headings: the
+# 2026-11-27 shrink moved them into the session-procedures skill or merged them.
+_RETIRED_SHIPPED = frozenset({
+    "## Thirty-minute intake (first session only)", "## Mode check",
+    "## Transcripts", "## Files",
+})
+
+
 def _fingerprint(body: str, project_name: str) -> str:
     import hashlib
     norm = body.strip().replace(project_name, "<PROJECT>") if project_name else body.strip()
@@ -337,6 +345,12 @@ def migrate_claude_md(text: str, project_name: str, auto_named: bool) -> tuple:
             moved.append(h)
             continue
         name = old_names.get(h, h)
+        if h in _RETIRED_SHIPPED:
+            # shipped once, now in the session-procedures skill (2026-11-27)
+            moved.append(h)
+            if _fingerprint(body, project_name) not in _KNOWN_SHIPPED:
+                differing.append(h)
+            continue
         if name in shipped:
             moved.append(h)
             if body.strip() != shipped[name] and \

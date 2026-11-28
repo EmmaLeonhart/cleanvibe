@@ -8,10 +8,15 @@ from cleanvibe.skills import SKILLS
 
 class GracefulStopDefinitionTests(unittest.TestCase):
     def test_rules_give_the_steps_and_handoff(self):
-        md = templates.v2_rules_md()
+        # The steps live in the session-procedures skill since 2026-11-27
+        # (RULES.md shrink); the rules keep a pointer and the key words.
+        steps = SKILLS["session-procedures"]
         for text in ("Delete all your crons", "Finish the current task to completion",
                      "every 30 minutes", "Write `handoff.md`", "Commit and push",
-                     "stop finished:",
+                     "stop finished:"):
+            self.assertIn(text, steps)
+        md = templates.v2_rules_md()
+        for text in ("Delete all", "stop finished:", "session-procedures",
                      "Read `handoff.md` when earlier work comes up",
                      "Work runs with the work loop on",
                      "Search before you say you don't know something about the user"):

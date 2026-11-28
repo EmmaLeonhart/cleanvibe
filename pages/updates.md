@@ -25,6 +25,22 @@ self-exempting for replication-style bounded work.
 
 ---
 
+## Unreleased (next: v2.0.17) — RULES.md cut to the everyday rules; new `session-procedures` skill
+
+**RULES.md shrunk from 19,826 to about 7,400 bytes.** Emma, 2026-11-27: she hits
+her usage limit early, and RULES.md is imported by every project's CLAUDE.md, so
+it is sent on every call of every session. Every rule stays, in short form. The
+step-by-step procedures used only at set moments (starting work mode, the
+Thirty-minute intake, the Mode check, the graceful stop) moved into a new skill,
+**`session-procedures`**, read only when one of them comes up. The intake and
+Mode check cron prompts now name that skill. `cleanvibe refresh --migrate` still
+recognizes the retired headings in a pre-split CLAUDE.md.
+
+Also in this release: the refusal log (`PERMISSION-DENIALS.md`, refreshed by the
+Stop hook) and the rule that a refused command is not a finished step.
+
+---
+
 ## v2.0.16 (2026-11-25) — Emma's graceful stop; handoff.md; loops survive messages; stopped sessions stay quiet
 
 **RULES.md and `autonomous-loop` revised: the graceful stop, as Emma

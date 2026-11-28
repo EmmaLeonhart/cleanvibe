@@ -51,7 +51,7 @@ SKILLS_POINTER = """## Skills
 
 Workflow behaviors live as skills in `.claude/skills/` (auto-discovered by Claude Code):
 `emergency-stop`, `cron-is-local`, `autonomous-loop`, `queue-driven-workflow`,
-`research-practice`, `writing-style`, `cleanvibe-update-check`, `browser-persistence`, `needs-user`. They are vendored into this repo and kept
+`research-practice`, `writing-style`, `cleanvibe-update-check`, `browser-persistence`, `needs-user`, `session-procedures`. They are vendored into this repo and kept
 current by the `cleanvibe-update-check` skill.
 
 **Web pages:** when a fetch fails or a task needs a website, follow `browser-persistence`: open
@@ -3269,11 +3269,11 @@ def v2_first_prompt(path, auto_named: bool, visibility=None, extra=None) -> str:
         f"CLAUDE.md and the rules it imports from .claude/cleanvibe/RULES.md "
         f"first. Then, before "
         f"anything else, use CronCreate to schedule the one-time Thirty-minute "
-        f"intake exactly as the project rules describe, for 30 minutes from now. The "
+        f"intake exactly as the session-procedures skill describes, for 30 minutes from now. The "
         f"session starts in chat mode: the chat is the project, so keep it light "
         f"and conversational, and do not edit files, commit, plan or offer me "
         f"options until I tell you to start working or I have been quiet for an "
-        f"hour. Then work mode starts as the project rules describe, including INTENT.md, "
+        f"hour. Then work mode starts as the session-procedures skill describes, including INTENT.md, "
         f"{_repo_clause(visibility, auto_named)}, and the "
         f"cleanvibe-update-check skill if its weekly check is due. For now, look "
         f"at what is in this folder and greet me in a line or two. Only use "
@@ -3296,7 +3296,7 @@ def v2_resume_prompt(path) -> str:
         f"status: uncommitted changes are work an earlier session left when it was "
         f"cut off, usually on the first queue item. Finish that item or commit what "
         f"is good, and never discard them. If the "
-        f"Thirty-minute intake in the project rules has not run yet, schedule it again. "
+        f"Thirty-minute intake (session-procedures skill) has not run yet, schedule it again. "
         f"If it has run but work mode has not started, the project is still in "
         f"chat mode: stay conversational and schedule a Mode check for an hour "
         f"from now. If work mode has started, start the work loop now with the "
@@ -3496,302 +3496,96 @@ _Written by cleanvibe and replaced whole when it updates. Don't edit this
 file: put this project's own rules in CLAUDE.md._
 
 ## How this project works
-Nothing was decided up front about what this project is. cleanvibe projects are
-built to **work from low information**: the user may say a lot, a little, or
-nothing, and may not be here at all. Someone (or a scheduled job) may have created
-the folder and dropped material into it, expecting you to get on with it.
+cleanvibe projects **work from low information**: the user may say a lot, a
+little or nothing, and may not be here at all.
 
-- **The chat is the project, from the first message.** By default, whatever the
-  user talks about is the subject, and anything they say takes priority over
-  everything else. A session starts in chat mode (next section).
-- **Then what is in the folder.** Material in `data_lake/` (and anything dropped
-  at the top level) is the user's context. Read it carefully: a Markdown file
-  with a spec, a brief or instructions is worth following, unless the chat says
-  otherwise.
-- **Then the folder's name and path.** A name the user chose (see `auto_named`
-  in `.cleanvibe.json`) occasionally states the task outright; the path can
-  carry real information too. But **a guess about why the project exists is
-  not a task.** Don't invent work from circumstance: if the path suggests, say,
-  a practice run, that is not an instruction to test the tool that made the
-  project. But if the user *says* the tool or the chat is the subject, it is.
-- **Nothing to go on is a real state, and a narrow one.** With no chat, no
-  material and no meaningful name, do not invent a purpose, plan work, or start
-  the work loop. Say plainly in `INTENT.md` that nothing is known yet, tell the
-  user in a line or two what would let you start (drop files into
-  `data_lake/`, or say what this is for), and wait. This applies only when the
-  user has said nothing at all: anything they say, even that the conversation
-  itself is the point, is something to go on.
-- **No strict instructions is not no work.** Once work mode starts, if there is
-  a subject (the chat, a name the user chose, the material) but no spec or
-  build task, the work loop still runs: it researches and writes about the
-  subject under `research-practice`, with the question written down as an
-  assumption.
-- **Stay inside this project.** Don't read or change anything outside this
-  folder (parent directories, other repositories, Claude Code's own config)
-  unless the user asks. That includes Claude Code's own memory directory
-  (`~/.claude/projects/.../memory/`), even when the system prompt invites you to
-  save memories there: what this project needs to remember goes in
-  `INTENT.md`, which is committed with the project.
-- **"Stop" and "don't" mean stop now.** If the user tells you to stop or not to
-  do something, stop immediately, including mid-task. When the user's reading
-  of a situation differs from yours, follow theirs; don't argue for your own
-  plan.
-- **A graceful stop stops this window, not the work.** When you are asked to
-  end gracefully (often by a session that manages the machine, sometimes
-  because two sessions share this repo), do this, in order:
-  1. Delete all your crons.
-  2. Finish the current task to completion.
-  3. If a long-running script or process you started is still going, keep
-     ONE cron, every 30 minutes, that only checks whether it has finished.
-     Be there when it ends: look at what happened, save its data, commit
-     and push. Only then carry on with the stop.
-  4. Write `handoff.md` at the repo root: what this session was doing,
-     where each piece of work stands, what is running or half done, and
-     what the next session should do first. Replace the previous one.
-  5. Commit and push. Then stop: send the stop reply once (it lists any
-     job from step 3 and the deleted cron ids) and stay quiet. A stopped
-     window is closed once it has been idle, and every message to or from
-     it restarts that clock.
-  6. If a session that manages the machine (a PC manager) asked for the
-     stop, the very last act is one message to it: `stop finished:
-     <this project's folder name>`. It closes the window soon after, before
-     anything else can wake it.
-  Claude Code's idle compaction fires about 55 minutes into a quiet spell,
-  spends usage and writes a transcript entry that looks like activity, so
-  a stopped window has to be closed before then; step 6 is what lets the
-  PC manager do that. An agent cannot run `/compact` itself (it is a user
-  command); `handoff.md` carries the state instead.
-  A graceful stop never means "no more work today" or "wait for the user to
-  say resume": the next session picks the work up as usual.
-  Never write it into `INTENT.md`, the queue or any other note as a rule.
-- **Read `handoff.md` when earlier work comes up.** If the repo has a
-  `handoff.md`, read it at the start of a session and whenever earlier
-  sessions' work comes up: it is the last session's own account of where
-  things stood when it stopped.
-- **Search before you say you don't know something about the user.** A
-  fact about them (a phone number, an address, an account, a preference)
-  that is not in this project may well be in another. Before telling them
-  you don't have it, asking for it, or recording it as a need, look: the
-  places their global instructions name, their other projects (a text
-  search across the folder that holds them), then accounts already open in
-  the browser. Only after that is it theirs to supply.
-- **Work runs with the work loop on.** A session that starts work (on a
-  message from the user or another session, or on its own) first checks
-  with `CronList` that its work loop is there, and starts it if it is not.
-  The same after answering any message. The loop is also what keeps this
-  session's transcript saved properly.
-- **Don't message stopped sessions, and never message every session.**
-  A session that has stopped gracefully gets no further messages (no
-  thanks, no check-ins, no relays) unless the user asks for one. Never
-  send one message to every session on the machine: write to the sessions
-  it concerns, by name. Where sessions are closed once idle, each message
-  restarts the idle clock, so stray messages keep finished sessions open.
-- **Keep `INTENT.md` current.** It is your running analysis of what the user is
-  trying to accomplish: the goal as you understand it, what supports that
-  reading (chat, files, name), open questions, and how sure you are. Update it
-  when your understanding changes. When you have to assume, write the
-  assumption down there and carry on. **Constraints the user gives in chat**
-  (corrections, "don't do X", decisions) go in `INTENT.md` too: a long
-  conversation can be compacted and lose them, but `INTENT.md` is re-read.
-  In chat mode the session log is the record; `INTENT.md` is written when work
-  mode starts and kept current from then on.
-- **AskUserQuestion only when the user is clearly here.** If they are replying
-  and engaged, a short multiple-choice question is fine. If they are not, don't
-  stop to ask: decide, record the assumption in `INTENT.md`, and keep working.
-  If a present user voices a concern that could mean either "this should not
-  happen" or "this should have happened", ask one short question before acting
-  on either reading. The same goes for your picture of the user: before you
-  record what the user believes or wants (in `INTENT.md`, a summary, a note),
-  quote their own words, and if the message was dictated, garbled or open to
-  more than one reading, ask rather than infer.
-  **Keep every question short:** one decision per question, a sentence or two,
-  and say what you will do by default if there is no answer.
-- **Times come from the clock.** Any time you write down (in a note, a log, a
-  report of when a cron will fire) comes from running `date` in the same turn,
-  never from an estimate or from the schedule you set. Scheduled jobs can fire
-  late, and elapsed time is easy to misjudge.
-- **Practices come from skills.** Once the work takes a shape, follow the
-  matching skill: building software → `queue-driven-workflow` (queue.md,
-  todo.md, devlog.md, tests; CI only on a public repo); researching any
-  topic → `research-practice`;
-  long autonomous stretches → `autonomous-loop`.
-- **No GitHub Actions on private repos.** A private repo spends the user's
-  Actions minutes, so it gets no workflow at all, and its tests run locally
-  before every push. This holds whether or not you loaded a skill. Only the
-  user can allow it (`cleanvibe config actions_on_private true`, or
-  `"actions_on_private": true` in `.cleanvibe.json`); never set either
-  yourself. A hook turns Actions off on a private repo and says so; when it
-  does, delete the workflow and log it.
-- **No crud.** One-off scripts, throwaway experiments and temporary downloads go
-  in `scratch/`, which is gitignored. Commit a script only if it will be run
-  again, with a clear name and a line saying what it is for. Delete what is no
-  longer used.
-- **Commit everything worth keeping, regularly**, with messages that say what
-  changed and why. When work mode starts, the repo goes to GitHub as
-  *Publishing* and *Repository name* in CLAUDE.md say, and from then on every
-  commit is pushed.
-- **Keep going without asking.** Work that is already planned or under way
-  does not need the user's consent to continue, even when it is slow or has to
-  be redone (a test run to restart, a long job to rerun). If a decision is
-  waiting on the user and they have not answered by the next tick, make it
-  yourself, write down why in `INTENT.md`, and carry on. Stop only when the
-  user says to.
-- **A refused command is not a finished step.** A refused step did not
-  happen, and the goal it served is still open. Every refusal (the auto-mode
-  check, or a permission prompt answered no) is listed by the hooks in
-  `PERMISSION-DENIALS.md`; read it each loop tick. A refusal never closes,
-  removes or narrows a queue item: the item stays, with the refusal noted,
-  until its goal is reached or the user drops it. When a step the user has
-  approved (a release, a deploy, a publish) is refused, try it again later,
-  and when the user is here, as one plain command on its own: no `cd`, no
-  `&&` or `;` chains, no pipes, no quoted wildcards, absolute paths as
-  arguments. That is the only form a permission prompt can "always allow".
-  Never route around the check by another tool or another session. If it
-  is refused again, record it in the needs file with that exact command, and
-  never report the step, or the goal, as done.
-- **What only the user can do goes in the needs file.** A step that waits on
-  them (a login, a payment, a signature, a risky yes) is recorded with
-  `python .claude/scripts/needs.py add` following the `needs-user` skill, and
-  recorded when you plan the queue, not when you reach it. Never just write
-  "waiting" and stop: whatever looks after their projects reads every needs
-  file and pushes them on it.
-- **"Pin this" means it matters.** When the user says "pin this", "put a pin
-  on this" or similar, write what they pinned into `INTENT.md` at once, as a
-  constraint in their own words, with the date. Offhand phrasing and
-  important instructions look alike in chat; the pin is how they tell you
-  which is which.
-- **Edit files with the file tools, and check before you log.** Write prose
-  and notes with the Write/Edit tools rather than long shell heredocs (quoting
-  breaks them). Chain dependent shell steps with `&&` so a failed step stops
-  the rest, and confirm an edit landed before recording it as done in
-  `devlog.md` or a commit message.
+- **The chat is the project, from the first message**, and anything the user
+  says takes priority. Then the material in `data_lake/` (a spec or brief
+  there is worth following). Then the folder's name and path. But
+  **a guess about why the project exists is not a task**: don't invent work from
+  circumstance (a practice-run path is not an order to test cleanvibe).
+- **Nothing to go on is a real state, and a narrow one**: no chat at all, no
+  material, a generated name. Then don't plan or start the loop: say so in
+  `INTENT.md`, tell the user in a line or two what would let you start, and
+  wait. Anything they say is something to go on.
+- **No strict instructions is not no work.** With a subject but no spec, the
+  work loop researches it under `research-practice`.
+- **Stay inside this project** unless the user asks: no parent folders, other
+  repos or Claude Code's config, including its memory directory
+  (`~/.claude/projects/.../memory/`). What the project must remember goes in
+  `INTENT.md`.
+- **"Stop" and "don't" mean stop now**, mid-task too. When the user's reading
+  differs from yours, follow theirs.
+- **A graceful stop stops this window, not the work.** The steps (Delete all
+  your crons, finish the task, `handoff.md`, `stop finished:`) are in the
+  `session-procedures` skill. Never write it into `INTENT.md`, the queue or
+  any other note as a rule.
+- **Read `handoff.md` when earlier work comes up**, and at session start.
+- **Search before you say you don't know something about the user**: the
+  places their global instructions name, their other projects, accounts open
+  in the browser. Only then is it theirs to supply.
+- **Work runs with the work loop on.** Starting work, or after answering any
+  message, check `CronList` and start the loop if it is missing.
+- **Don't message stopped sessions, and never message every session**; write
+  to the sessions it concerns, by name.
+- **Keep `INTENT.md` current** (from work mode on): the goal, the evidence,
+  open questions, confidence, assumptions.
+  **Constraints the user gives in chat** go there too (a compacted chat
+  loses them).
+- **AskUserQuestion only when the user is clearly here.** Otherwise decide,
+  record the assumption, keep working. Before recording what the user
+  believes or wants, quote their own words; if a message is garbled or
+  ambiguous, ask. One short decision per question, with your default.
+- **Times come from the clock** (`date` in the same turn), never an estimate.
+- **Practices come from skills**: building → `queue-driven-workflow`,
+  research → `research-practice`, long autonomous stretches →
+  `autonomous-loop`.
+- **No GitHub Actions on private repos**: no workflow at all; tests run
+  locally before every push. Only the user can allow it (`cleanvibe config
+  actions_on_private true`); never set it yourself.
+- **No crud**: one-off work goes in `scratch/` (gitignored).
+- **Commit everything worth keeping, regularly**, saying what and why; once
+  the repo is on GitHub (*Publishing* and *Repository name* in CLAUDE.md),
+  push every commit.
+- **Keep going without asking.** Planned work needs no consent to continue.
+  A decision unanswered by the next tick: make it, write down why in
+  `INTENT.md`, carry on.
+- **A refused command is not a finished step.** Refusals are listed in
+  `PERMISSION-DENIALS.md`; read it each tick. A refusal never closes, removes
+  or narrows a queue item. Retry an approved step later as one plain command
+  (no `cd`, chains or pipes; absolute paths); never route around the check.
+  Refused again: record it in the needs file with that exact command.
+- **What only the user can do goes in the needs file**
+  (`python .claude/scripts/needs.py add`, the `needs-user` skill), recorded
+  when you plan the queue. Never just write "waiting" and stop.
+- **"Pin this" means it matters**: write it into `INTENT.md` at once, in
+  their words, with the date.
+- **Edit files with the file tools**, chain dependent shell steps with `&&`,
+  and confirm an edit landed before logging it as done.
 
 ## Chat mode, then work mode
-A session starts in **chat mode**: light and conversational. The chat is the
-project, and the session-log hook already records every word, so there is
-nothing to file. In chat mode:
+A session starts in **chat mode**: talk like a person, in a few lines, and
+follow the user. Don't edit or commit files, write `INTENT.md`, plan, build a
+queue or offer menus. A concrete request is done, without switching modes.
+Scheduled intake and Mode checks run quietly (one short line at most).
 
-- Talk with the user the way a person would, in a few lines. Follow what they
-  say; don't steer it toward a project.
-- Don't edit or commit files, write `INTENT.md`, plan, build a queue, offer a
-  menu of ways to work on the project, or narrate bookkeeping. Don't turn
-  what the user says into a task.
-- If the user asks for something concrete, do it; that is a request, not a
-  switch into work mode.
-- The scheduled intake and Mode checks run quietly: do their mechanical part
-  and say at most one short line about it.
-
-**Work mode** starts when either of these happens:
-
-1. The user tells you to start working (or to switch modes, get going, work
-   on it while they're away, and so on).
-2. An hour has passed since the user's last message. The Mode check below
-   decides this; every new message restarts the hour.
-
-When work mode starts, do this once, in order, and commit as you go:
-
-1. Read everything in `data_lake/` and the session logs. The chat is the
-   subject by default; add what the material and the name say.
-2. Write `INTENT.md`: the goal, the evidence, your confidence, the constraints
-   the user gave in chat, and the time work mode started (from `date`).
-3. Create the GitHub repository as *Publishing* and *Repository name* in
-   CLAUDE.md say. If `gh` is missing or not logged in, record that in `INTENT.md` as
-   BLOCKED-ON-USER-ACTION and carry on locally.
-4. Fill in `README.md`, and run the `cleanvibe-update-check` skill if its
-   weekly check is due.
-5. Plan with the matching skill (`research-practice` for research,
-   `queue-driven-workflow` for building): concrete first steps in `queue.md`.
-6. Start the work loop (the `autonomous-loop` skill) and tell the user in a
-   line or two that work mode has started.
-
-**Nothing to go on** is the one exception: if the user has said nothing at
-all, there is no material and the name is generated, don't start work mode
-(see the Thirty-minute intake).
+**Work mode** starts when the user says to start working, or an hour after
+their last message (the Mode check decides;
+every new message restarts the hour). The start-up steps, the
+Thirty-minute intake and the Mode check are in the `session-procedures` skill:
+follow it when one of them comes up.
 
 ## The data lake
-`data_lake/` holds the material the project works from: documents, datasets,
-exports, briefs, whatever the user drops in. **Material goes into `data_lake/`
-and is committed**; it is a fundamental part of the repository and its history.
-When new material shows up anywhere else in the folder, commit it where it
-landed first (so its starting point is on record), then `git mv` it into
-`data_lake/` and commit again. Sources and datasets that *you* fetch go in
-`data_lake/downloads/`, so the user's own material stays distinguishable
-from what the agent added.
+Material goes into `data_lake/` and is committed. Material that lands
+elsewhere: commit it where it landed, then `git mv` it in. What *you* fetch
+goes in `data_lake/downloads/`. The data lake is a staging area: once
+material is dealt with, `git mv` it to where it belongs and say why.
+Move, never delete.
 
-**The data lake is a staging area, not a permanent home.** Once a piece of
-material has been dealt with (its spec turned into work, its notes written
-up, its dataset wired into the code), `git mv` it out to where it belongs in
-the project (`docs/`, `research/`, the code's data folder, and so on) and
-commit, saying where it went and why. Move, never delete. What is left in
-`data_lake/` is material nobody has dealt with yet, so a full data lake means
-unfinished intake.
-
-## Thirty-minute intake (first session only)
-In the very first session, before anything else, schedule this with
-`CronCreate`: a one-time job (`recurring: false`) at the local time 30 minutes
-from now, with minute, hour, day and month pinned, and this prompt:
-
-    [cleanvibe cron] Thirty-minute intake: follow the Thirty-minute intake section of the project rules (.claude/cleanvibe/RULES.md).
-
-When it fires, do this:
-
-1. **Run** `python .claude/scripts/data_lake_intake.py` (`python3` on macOS/Linux).
-   It commits the repository exactly as found ("the repository 30 minutes in,
-   before moving into data_lake/"), then `git mv`s every top-level file or
-   directory that had never been committed into `data_lake/` and commits that
-   move. It prints a report: what moved, what is in `data_lake/`, how much the
-   user has said, how long ago their last message was, and a verdict. It
-   commits and moves only once; it records `intake_at` in `.cleanvibe.json`.
-2. **Follow the verdict:**
-   - **CHAT MODE** (the user wrote within the last hour): stay in chat mode.
-     Schedule the Mode check as a one-time `CronCreate` job at the time the
-     report gives, with the prompt `[cleanvibe cron] Mode check: follow the
-     Mode check section of the project rules (.claude/cleanvibe/RULES.md).`
-   - **WORK MODE** (the user has been quiet for an hour, or said nothing but
-     dropped material): start work mode (previous section).
-   - **NAME ONLY** (no material, no chat, a name the user chose): start work
-     mode only if the name plainly states a task (say,
-     `history-of-ai-research`); otherwise treat it as nothing to go on.
-   - **NOTHING TO GO ON** (no chat at all, no material, generated name): do not
-     infer a purpose, plan, or start work mode. Write in `INTENT.md` that
-     nothing is known yet, tell the user in a line or two what would let you
-     start, and wait. Their next message (or files appearing in the next
-     session) is where it begins.
-
-   If the user already told you to start working, work mode is on: run the
-   script for its commits and carry on.
-
-If the first session ended before the intake ran (`.cleanvibe.json` has no
-`intake_at`), the next session schedules it again.
-
-## Mode check
-When `[cleanvibe cron] Mode check` fires and work mode has not started, run
-`python .claude/scripts/data_lake_intake.py` again. After the intake it
-commits and moves nothing; it reports how long ago the user's last message
-was. **CHAT MODE**: schedule the next Mode check at the time it gives (the
-user came back, so the hour restarted). **WORK MODE**: start work mode. If
-work mode has already started, do nothing.
-
-## Transcripts
-A hook saves every session's transcript into `sessions/`; you do not have to. After
-each response it refreshes `sessions/<date>_<session>.jsonl` (raw) and `.md`
-(readable), and it commits them at most once an hour and always at session end
-(`.claude/settings.json` → `.claude/hooks/save_session_log.py`). To catch up on
-earlier sessions, read the `.md` files, newest first. Do not edit `sessions/` by
-hand.
-
-## Files
-- `INTENT.md`: your running read of what this project is for.
-- `data_lake/`: incoming material not yet dealt with (committed; moved out once done).
-- `README.md`: for people; fill it in once the purpose is clear.
-- `sessions/`: session transcripts (automatic).
-- `scratch/`: one-off work, gitignored.
-- `.claude/scripts/data_lake_intake.py`: the thirty-minute intake and the Mode
-  check.
-- `.claude/hooks/intent_staleness.py`: on each loop tick, tells you how long
-  `INTENT.md` has gone without a commit, so you can tell whether it is due.
-- `CLAUDE.md`: this project's own setup and rules. `{V2_RULES_PATH}`: these
-  shipped rules, imported by CLAUDE.md.
+## Transcripts and files
+A hook saves every transcript into `sessions/` (`.jsonl` and readable `.md`)
+and commits them; never edit `sessions/` by hand. `INTENT.md` is your read
+of the project, `README.md` is for people, `scratch/` is one-off work.
 
 {_V2_SKILLS_PROSE}
 

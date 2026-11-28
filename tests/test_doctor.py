@@ -94,7 +94,7 @@ class TestChecks(unittest.TestCase):
 
     def test_section_refs_see_the_imported_rules(self):
         proj = _scaffold(new_project)
-        (proj / "README.md").write_text('See CLAUDE.md § "Mode check".\n', encoding="utf-8")
+        (proj / "README.md").write_text('See CLAUDE.md § "Chat mode, then work mode".\n', encoding="utf-8")
         self.assertEqual(doc.check_section_refs(proj), [])  # the heading is in RULES.md
 
     def test_missing_and_edited_skills(self):

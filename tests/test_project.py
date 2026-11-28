@@ -86,21 +86,23 @@ class TestNewProject(unittest.TestCase):
         # The rules live in RULES.md, which CLAUDE.md imports; together they are
         # what the session sees.
         claude = ((proj / "CLAUDE.md").read_text(encoding="utf-8")
-                  + (proj / templates.V2_RULES_PATH).read_text(encoding="utf-8"))
+                  + (proj / templates.V2_RULES_PATH).read_text(encoding="utf-8")
+                  # the procedures RULES.md points to (2026-11-27 shrink)
+                  + (proj / ".claude/skills/session-procedures/SKILL.md").read_text(encoding="utf-8"))
         for needle in ("work from low information", "The chat is the project, from the first message",
                        "INTENT.md", "AskUserQuestion only when the user is clearly here",
-                       "one decision per question, a sentence or two",
-                       "means it matters.", "What only the user can do goes in the needs file",
+                       "One short decision per question",
+                       "means it matters", "What only the user can do goes in the needs file",
                        "Material goes into `data_lake/`", "Thirty-minute intake",
                        "recurring: false", "data_lake_intake.py",
                        "## Chat mode, then work mode", "## Mode check",
-                       "An hour has passed since the user's last message",
+                       "or an hour after",
                        "every new message restarts the hour",
                        "Nothing to go on", "a guess about why the project exists",
                        "No strict instructions is not no work",
-                       "the tool or the chat is the subject, it is",
-                       "applies only when the\n  user has said nothing at all",
-                       "ask one short question before acting",
+                       "a practice-run path is not an order",
+                       "Anything they say is something to go on",
+                       "ambiguous, ask",
                        "Stay inside this project", "mean stop now",
                        "queue-driven-workflow", "research-practice", "autonomous-loop",
                        "scratch/", "## Publishing", "private unless the user says it should be public",

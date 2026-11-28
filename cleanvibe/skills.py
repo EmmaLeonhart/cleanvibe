@@ -399,6 +399,114 @@ python .claude/scripts/needs.py add --kind action --title "Renew the domain" \\
 """
 
 
+_SESSION_PROCEDURES = """---
+name: session-procedures
+description: Use when a cleanvibe procedure comes up: work mode starting, the Thirty-minute intake or Mode check cron firing, or being asked to end gracefully. Gives the exact steps for each.
+---
+
+# Session procedures
+
+The step-by-step procedures the project rules (`.claude/cleanvibe/RULES.md`) point to. They are kept here, not in the rules, so they are read only when needed.
+
+## Starting work mode
+When work mode starts, do this once, in order, and commit as you go:
+
+1. Read everything in `data_lake/` and the session logs. The chat is the
+   subject by default; add what the material and the name say.
+2. Write `INTENT.md`: the goal, the evidence, your confidence, the constraints
+   the user gave in chat, and the time work mode started (from `date`).
+3. Create the GitHub repository as *Publishing* and *Repository name* in
+   CLAUDE.md say. If `gh` is missing or not logged in, record that in `INTENT.md` as
+   BLOCKED-ON-USER-ACTION and carry on locally.
+4. Fill in `README.md`, and run the `cleanvibe-update-check` skill if its
+   weekly check is due.
+5. Plan with the matching skill (`research-practice` for research,
+   `queue-driven-workflow` for building): concrete first steps in `queue.md`.
+6. Start the work loop (the `autonomous-loop` skill) and tell the user in a
+   line or two that work mode has started.
+
+**Nothing to go on** is the one exception: if the user has said nothing at
+all, there is no material and the name is generated, don't start work mode
+(see the Thirty-minute intake below).
+
+## Thirty-minute intake (first session only)
+In the very first session, before anything else, schedule this with
+`CronCreate`: a one-time job (`recurring: false`) at the local time 30 minutes
+from now, with minute, hour, day and month pinned, and this prompt:
+
+    [cleanvibe cron] Thirty-minute intake: follow the Thirty-minute intake section of the session-procedures skill.
+
+When it fires, do this:
+
+1. **Run** `python .claude/scripts/data_lake_intake.py` (`python3` on macOS/Linux).
+   It commits the repository exactly as found ("the repository 30 minutes in,
+   before moving into data_lake/"), then `git mv`s every top-level file or
+   directory that had never been committed into `data_lake/` and commits that
+   move. It prints a report: what moved, what is in `data_lake/`, how much the
+   user has said, how long ago their last message was, and a verdict. It
+   commits and moves only once; it records `intake_at` in `.cleanvibe.json`.
+2. **Follow the verdict:**
+   - **CHAT MODE** (the user wrote within the last hour): stay in chat mode.
+     Schedule the Mode check as a one-time `CronCreate` job at the time the
+     report gives, with the prompt `[cleanvibe cron] Mode check: follow the
+     Mode check section of the session-procedures skill.`
+   - **WORK MODE** (the user has been quiet for an hour, or said nothing but
+     dropped material): start work mode (above).
+   - **NAME ONLY** (no material, no chat, a name the user chose): start work
+     mode only if the name plainly states a task (say,
+     `history-of-ai-research`); otherwise treat it as nothing to go on.
+   - **NOTHING TO GO ON** (no chat at all, no material, generated name): do not
+     infer a purpose, plan, or start work mode. Write in `INTENT.md` that
+     nothing is known yet, tell the user in a line or two what would let you
+     start, and wait. Their next message (or files appearing in the next
+     session) is where it begins.
+
+   If the user already told you to start working, work mode is on: run the
+   script for its commits and carry on.
+
+If the first session ended before the intake ran (`.cleanvibe.json` has no
+`intake_at`), the next session schedules it again.
+
+## Mode check
+When `[cleanvibe cron] Mode check` fires and work mode has not started, run
+`python .claude/scripts/data_lake_intake.py` again. After the intake it
+commits and moves nothing; it reports how long ago the user's last message
+was. **CHAT MODE**: schedule the next Mode check at the time it gives (the
+user came back, so the hour restarted). **WORK MODE**: start work mode. If
+work mode has already started, do nothing.
+
+## Graceful stop
+When you are asked to
+end gracefully (often by a session that manages the machine, sometimes
+because two sessions share this repo), do this, in order:
+1. Delete all your crons.
+2. Finish the current task to completion.
+3. If a long-running script or process you started is still going, keep
+   ONE cron, every 30 minutes, that only checks whether it has finished.
+   Be there when it ends: look at what happened, save its data, commit
+   and push. Only then carry on with the stop.
+4. Write `handoff.md` at the repo root: what this session was doing,
+   where each piece of work stands, what is running or half done, and
+   what the next session should do first. Replace the previous one.
+5. Commit and push. Then stop: send the stop reply once (it lists any
+   job from step 3 and the deleted cron ids) and stay quiet. A stopped
+   window is closed once it has been idle, and every message to or from
+   it restarts that clock.
+6. If a session that manages the machine (a PC manager) asked for the
+   stop, the very last act is one message to it: `stop finished:
+   <this project's folder name>`. It closes the window soon after, before
+   anything else can wake it.
+Claude Code's idle compaction fires about 55 minutes into a quiet spell,
+spends usage and writes a transcript entry that looks like activity, so
+a stopped window has to be closed before then; step 6 is what lets the
+PC manager do that. An agent cannot run `/compact` itself (it is a user
+command); `handoff.md` carries the state instead.
+A graceful stop never means "no more work today" or "wait for the user to
+say resume": the next session picks the work up as usual.
+Never write it into `INTENT.md`, the queue or any other note as a rule.
+"""
+
+
 SKILLS = {
     "emergency-stop": _EMERGENCY_STOP,
     "cron-is-local": _CRON_IS_LOCAL,
@@ -409,6 +517,7 @@ SKILLS = {
     "cleanvibe-update-check": _CLEANVIBE_UPDATE_CHECK,
     "browser-persistence": _BROWSER_PERSISTENCE,
     "needs-user": _NEEDS_USER,
+    "session-procedures": _SESSION_PROCEDURES,
 }
 
 

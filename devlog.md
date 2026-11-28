@@ -2872,3 +2872,15 @@ run `/compact` (a user command, no tool), so `handoff.md` carries the state.
 - 2026-11-26 12:5x: **v2.0.16 released** (GitHub release, PyPI run 45886781937). It had sat a day: a session took one permission-check refusal of `gh release create` as final and handed it to Emma. Retried as one plain command, it went through.
 - 2026-11-26 14:25: new shipped rule "A refused command is not a finished step" (`v2_rules_md`): retry an approved step later as one plain command (no `cd`, chains, pipes or quoted wildcards), never route around the check, and only after a second refusal give the user that exact command. 349 tests pass. Unreleased (next release).
 - 2026-11-26 19:0x: **the refusal log, for every project** (Emma via inochi-no-michikyo: "when a permission check fails, you just go into this epistemic black hole"; "every single permission check that fails should be logged somewhere"). New shipped `.claude/scripts/permission_denials.py` (`templates.PERMISSION_DENIALS_PY`): reads `sessions/*.jsonl`, lists every auto-mode denial and declined prompt in `PERMISSION-DENIALS.md` with whether it was later retried; cache in `.git/`. The Stop hook runs it after every response and commits the log with the session log. The "refused command" rule now says a refusal never closes, removes or narrows a queue item, and a twice-refused step goes in the needs file. Written by `new` and `refresh`; in doctor's core files. `tests/test_permission_denials.py`; 352 tests pass. Unreleased (2.0.17).
+
+## 2026-11-27
+
+- RULES.md shrink (Emma, through pc-manager: she hits her usage limit early;
+  RULES.md goes out on every call of every session). `v2_rules_md()` cut from
+  19,826 to about 7,400 bytes, every rule kept in short form. The procedures
+  used only at set moments (starting work mode, the Thirty-minute intake, the
+  Mode check, the graceful stop) moved word for word into a new skill,
+  `session-procedures`; the first and resume prompts name it. `migrate_claude_md`
+  treats the four retired headings as shipped (`_RETIRED_SHIPPED`). Tests
+  updated to look for moved text in the skill; 352 pass. Unreleased (next:
+  v2.0.17, which waits on Emma's yes).
